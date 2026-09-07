@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:hesba/core/theme/app_theme.dart';
 
 class AppDialogs {
@@ -20,9 +21,11 @@ class AppDialogs {
     BuildContext context, {
     required String title,
     required String message,
-    String confirmText = 'تأكيد',
-    String cancelText = 'إلغاء',
+    String confirmText = '',
+    String cancelText = '',
   }) {
+    final confirm = confirmText.isEmpty ? 'dialogConfirm'.tr() : confirmText;
+    final cancel = cancelText.isEmpty ? 'dialogCancel'.tr() : cancelText;
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -31,11 +34,11 @@ class AppDialogs {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(cancelText, style: const TextStyle(color: Colors.grey, fontFamily: AppTheme.fontFamily)),
+            child: Text(cancel, style: const TextStyle(color: Colors.grey, fontFamily: AppTheme.fontFamily)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text(confirmText, style: const TextStyle(color: AppTheme.errorColor, fontFamily: AppTheme.fontFamily)),
+            child: Text(confirm, style: const TextStyle(color: AppTheme.errorColor, fontFamily: AppTheme.fontFamily)),
           ),
         ],
       ),

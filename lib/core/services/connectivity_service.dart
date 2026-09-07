@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:hesba/core/utils/toast.dart';
 
 class ConnectivityService {
@@ -25,9 +26,9 @@ class ConnectivityService {
       if (_context == null || !_context!.mounted) return;
 
       if (wasConnected && !_isConnected) {
-        AppToast.error(_context!, 'لا يوجد اتصال بالإنترنت');
+        AppToast.error(_context!, 'connectivityLost'.tr());
       } else if (!wasConnected && _isConnected) {
-        AppToast.success(_context!, 'تم الاتصال بالإنترنت');
+        AppToast.success(_context!, 'connectivityRestored'.tr());
       }
     });
   }

@@ -14,13 +14,8 @@ class SettingsCubit extends Cubit<SettingsState> {
   /// Load persisted preferences once at startup.
   Future<void> load() async {
     final savedTheme = await _repo.getThemeMode();
-    final savedLocale = await _repo.getLocale();
-
     emit(
-      SettingsState(
-        themeMode: _themeModeFromString(savedTheme),
-        locale: _localeFromString(savedLocale),
-      ),
+      SettingsState(themeMode: _themeModeFromString(savedTheme)),
     );
   }
 
@@ -36,12 +31,6 @@ class SettingsCubit extends Cubit<SettingsState> {
     );
   }
 
-  Future<void> setLocale(Locale locale) async {
-    if (locale == state.locale) return;
-    emit(state.copyWith(locale: locale));
-    await _repo.setLocale(locale.languageCode);
-  }
-
   ThemeMode _themeModeFromString(String? value) {
     switch (value) {
       case 'dark':
@@ -50,15 +39,6 @@ class SettingsCubit extends Cubit<SettingsState> {
         return ThemeMode.light;
       default:
         return ThemeMode.light;
-    }
-  }
-
-  Locale _localeFromString(String? value) {
-    switch (value) {
-      case 'en':
-        return const Locale('en');
-      default:
-        return const Locale('ar');
     }
   }
 }

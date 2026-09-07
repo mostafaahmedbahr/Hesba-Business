@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import 'governorate_centers.dart';
 import 'register_constants.dart';
@@ -68,9 +69,9 @@ class _RegisterShopStepState extends State<RegisterShopStep> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const RegisterSectionTitle(
-          title: 'بيانات المحل',
-          subtitle: 'أخبرنا ببعض التفاصيل عن نشاطك',
+        RegisterSectionTitle(
+          title: 'shopTitle'.tr(),
+          subtitle: 'shopSubtitle'.tr(),
         ),
         SizedBox(height: 22.h),
         _buildShopNameField(),
@@ -91,29 +92,29 @@ class _RegisterShopStepState extends State<RegisterShopStep> {
   Widget _buildShopNameField() {
     return RegisterTextField(
       controller: widget.shopNameController,
-      label: 'اسم المحل',
-      hint: 'مثال: حسبة ماركت',
+      label: 'shopName'.tr(),
+      hint: 'shopNameHint'.tr(),
       icon: Icons.storefront_outlined,
-      validator: _required('اكتب اسم المحل'),
+      validator: _required('shopNameEmpty'.tr()),
     );
   }
 
   Widget _buildBusinessTypeDropdown() {
     return RegisterDropdown(
-      label: 'نوع النشاط',
-      hint: 'اختر نوع النشاط',
+      label: 'shopBusinessType'.tr(),
+      hint: 'shopBusinessHint'.tr(),
       icon: Icons.category_outlined,
       controller: widget.businessTypeController,
       items: RegisterConstants.businessTypes,
-      validator: _required('اختر نوع النشاط'),
+      validator: _required('shopBusinessEmpty'.tr()),
     );
   }
 
   Widget _buildShopPhoneField() {
     return RegisterTextField(
       controller: widget.shopPhoneController,
-      label: 'هاتف المحل',
-      hint: '01xxxxxxxxx',
+      label: 'shopPhone'.tr(),
+      hint: 'shopPhoneHint'.tr(),
       icon: Icons.phone_outlined,
       keyboardType: TextInputType.phone,
       validator: RegisterConstants.validateEgyptianPhone,
@@ -123,34 +124,34 @@ class _RegisterShopStepState extends State<RegisterShopStep> {
   Widget _buildAddressField() {
     return RegisterTextField(
       controller: widget.addressController,
-      label: 'العنوان',
-      hint: 'عنوان المحل',
+      label: 'shopAddress'.tr(),
+      hint: 'shopAddressHint'.tr(),
       icon: Icons.location_on_outlined,
-      validator: _required('اكتب العنوان'),
+      validator: _required('shopAddressEmpty'.tr()),
     );
   }
 
   Widget _buildGovernorateDropdown() {
     return RegisterDropdown(
-      label: 'المحافظة',
-      hint: 'اختر المحافظة',
+      label: 'shopGovernorate'.tr(),
+      hint: 'shopGovernorateHint'.tr(),
       icon: Icons.map_outlined,
       controller: widget.stateController,
       items: RegisterConstants.governorates,
-      validator: _required('اختر المحافظة'),
+      validator: _required('shopGovernorateEmpty'.tr()),
     );
   }
 
   Widget _buildCityDropdown() {
     return RegisterDropdown(
-      label: 'المدينة / المركز',
+      label: 'shopCity'.tr(),
       hint: _availableCenters.isEmpty
-          ? 'اختر المحافظة أولاً'
-          : 'اختر',
+          ? 'shopCityHintEmpty'.tr()
+          : 'shopCityHint'.tr(),
       icon: Icons.location_city_outlined,
       controller: widget.cityController,
       items: _availableCenters,
-      validator: _required('اختر المدينة'),
+      validator: _required('shopCityEmpty'.tr()),
     );
   }
 

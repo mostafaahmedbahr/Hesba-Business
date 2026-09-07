@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../../core/theme/app_theme.dart';
 
@@ -30,7 +31,7 @@ class LoginHeader extends StatelessWidget {
         ),
         SizedBox(height: 20.h),
         Text(
-          'تسجيل الدخول',
+          'loginTitle'.tr(),
           style: TextStyle(
             fontSize: 25.sp,
             fontWeight: FontWeight.w900,
@@ -39,7 +40,7 @@ class LoginHeader extends StatelessWidget {
         ),
         SizedBox(height: 6.h),
         Text(
-          'أدخل بياناتك للمتابعة',
+          'loginSubtitle'.tr(),
           style: TextStyle(
             fontSize: 13.sp,
             color: Colors.grey.shade600,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class ContactHeader extends StatelessWidget {
   const ContactHeader({super.key});
@@ -45,7 +46,7 @@ class ContactHeader extends StatelessWidget {
           ),
           SizedBox(height: 14.h),
           Text(
-            'فريق دعم حسبة',
+            'contactTeamTitle'.tr(),
             style: TextStyle(
               fontSize: 18.sp,
               fontWeight: FontWeight.w800,
@@ -54,7 +55,7 @@ class ContactHeader extends StatelessWidget {
           ),
           SizedBox(height: 6.h),
           Text(
-            'نحن هنا لمساعدتك في أي وقت',
+            'contactTeamSubtitle'.tr(),
             style: TextStyle(
               fontSize: 13.sp,
               color: Colors.white.withValues(alpha: 0.9),

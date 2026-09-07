@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/utils/toast.dart';
@@ -36,7 +37,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      title: 'تغيير كلمة المرور',
+      title: 'changePasswordTitle'.tr(),
       body: BlocProvider(
         create: (_) => ProfileCubit(repo: sl<AccountRepo>()),
         child: Form(
@@ -45,17 +46,17 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
             padding: EdgeInsets.all(20.w),
             children: [
               _buildPasswordField(
-                label: 'كلمة المرور الحالية',
+                label: 'changePasswordCurrent'.tr(),
                 icon: Icons.lock_outline_rounded,
                 controller: _currentController,
                 obscure: _obscureCurrent,
                 onToggle: () => setState(() => _obscureCurrent = !_obscureCurrent),
                 validator: (v) =>
-                    (v == null || v.isEmpty) ? 'اكتب كلمة المرور الحالية' : null,
+                    (v == null || v.isEmpty) ? 'changePasswordCurrentEmpty'.tr() : null,
               ),
               SizedBox(height: 14.h),
               _buildPasswordField(
-                label: 'كلمة المرور الجديدة',
+                label: 'changePasswordNew'.tr(),
                 icon: Icons.lock_reset_rounded,
                 controller: _newController,
                 obscure: _obscureNew,
@@ -64,16 +65,16 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
               ),
               SizedBox(height: 14.h),
               _buildPasswordField(
-                label: 'تأكيد كلمة المرور الجديدة',
+                label: 'changePasswordConfirm'.tr(),
                 icon: Icons.verified_user_outlined,
                 controller: _confirmController,
                 obscure: _obscureConfirm,
                 onToggle: () =>
                     setState(() => _obscureConfirm = !_obscureConfirm),
                 validator: (v) {
-                  if (v == null || v.isEmpty) return 'أكد كلمة المرور الجديدة';
+                  if (v == null || v.isEmpty) return 'changePasswordConfirmEmpty'.tr();
                   if (v != _newController.text) {
-                    return 'كلمتا المرور غير متطابقتين';
+                    return 'changePasswordMismatch'.tr();
                   }
                   return null;
                 },
@@ -88,11 +89,11 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
   }
 
   String? _validateNewPassword(String? v) {
-    if (v == null || v.isEmpty) return 'اكتب كلمة المرور الجديدة';
-    if (v.length < 8) return '8 أحرف على الأقل';
-    if (!RegExp(r'[A-Z]').hasMatch(v)) return 'حرف كبير على الأقل';
-    if (!RegExp(r'[a-z]').hasMatch(v)) return 'حرف صغير على الأقل';
-    if (!RegExp(r'[0-9]').hasMatch(v)) return 'رقم واحد على الأقل';
+    if (v == null || v.isEmpty) return 'changePasswordNewEmpty'.tr();
+    if (v.length < 8) return 'changePasswordNewShort'.tr();
+    if (!RegExp(r'[A-Z]').hasMatch(v)) return 'changePasswordNewUpper'.tr();
+    if (!RegExp(r'[a-z]').hasMatch(v)) return 'changePasswordNewLower'.tr();
+    if (!RegExp(r'[0-9]').hasMatch(v)) return 'changePasswordNewDigit'.tr();
     return null;
   }
 
@@ -140,8 +141,8 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                   color: Colors.white,
                 ),
               )
-            : const Text(
-                'تغيير كلمة المرور',
+            : Text(
+                'changePasswordButton'.tr(),
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
       ),
@@ -161,7 +162,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
     setState(() => _loading = false);
 
     if (error == null) {
-      AppToast.success(context, 'تم تغيير كلمة المرور بنجاح');
+      AppToast.success(context, 'changePasswordSuccess'.tr());
       Navigator.pop(context);
     } else {
       AppToast.error(context, error);

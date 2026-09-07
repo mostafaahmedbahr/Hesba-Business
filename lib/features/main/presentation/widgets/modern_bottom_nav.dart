@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// A modern, chic floating bottom navigation bar.
 class ModernBottomNav extends StatelessWidget {
@@ -37,7 +38,7 @@ class ModernBottomNav extends StatelessWidget {
                 child: _NavItem(
                   icon: _items[i].icon,
                   selectedIcon: _items[i].selectedIcon,
-                  label: _items[i].label,
+                  label: _items[i].labelKey.tr(),
                   isSelected: i == currentIndex,
                   onTap: () => onTap(i),
                 ),
@@ -52,21 +53,21 @@ class ModernBottomNav extends StatelessWidget {
 class _NavItemData {
   final IconData icon;
   final IconData selectedIcon;
-  final String label;
+  final String labelKey;
 
-  const _NavItemData(this.icon, this.selectedIcon, this.label);
+  const _NavItemData(this.icon, this.selectedIcon, this.labelKey);
 }
 
 const List<_NavItemData> _items = [
-  _NavItemData(Icons.home_outlined, Icons.home_rounded, 'الرئيسية'),
-  _NavItemData(Icons.category_outlined, Icons.category_rounded, 'المنتجات'),
-  _NavItemData(Icons.receipt_long_outlined, Icons.receipt_long_rounded, 'المبيعات'),
+  _NavItemData(Icons.home_outlined, Icons.home_rounded, 'navHome'),
+  _NavItemData(Icons.category_outlined, Icons.category_rounded, 'navProducts'),
+  _NavItemData(Icons.receipt_long_outlined, Icons.receipt_long_rounded, 'navSales'),
   _NavItemData(
     Icons.bar_chart_outlined,
     Icons.bar_chart_rounded,
-    'التقارير',
+    'navReports',
   ),
-  _NavItemData(Icons.grid_view_outlined, Icons.grid_view_rounded, 'المزيد'),
+  _NavItemData(Icons.grid_view_outlined, Icons.grid_view_rounded, 'navMore'),
 ];
 
 class _NavItem extends StatelessWidget {

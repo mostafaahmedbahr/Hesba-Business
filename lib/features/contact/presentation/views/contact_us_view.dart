@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/di/service_locator.dart';
@@ -28,18 +29,18 @@ class _ContactUsViewState extends State<ContactUsView> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return AppScaffold(
-      title: 'تواصل معنا',
+      title: 'contactTitle'.tr(),
       body: ListView(
         padding: EdgeInsets.all(20.w),
         children: [
           const ContactHeader(),
           SizedBox(height: 24.h),
-          _sectionTitle(theme, 'طرق التواصل'),
+          _sectionTitle(theme, 'contactMethods'.tr()),
           SizedBox(height: 10.h),
           ContactTile(
             icon: Icons.email_rounded,
             color: const Color(0xFF1A4FD6),
-            label: 'البريد الإلكتروني',
+            label: 'contactEmail'.tr(),
             value: _email,
             onTap: _openEmail,
           ),
@@ -47,7 +48,7 @@ class _ContactUsViewState extends State<ContactUsView> {
           ContactTile(
             icon: Icons.chat_rounded,
             color: const Color(0xFF25D366),
-            label: 'واتساب',
+            label: 'contactWhatsApp'.tr(),
             value: '01093312802',
             onTap: _openWhatsApp,
           ),
@@ -55,12 +56,12 @@ class _ContactUsViewState extends State<ContactUsView> {
           ContactTile(
             icon: Icons.phone_rounded,
             color: const Color(0xFFFF9800),
-            label: 'الاتصال المباشر',
+            label: 'contactCall'.tr(),
             value: _phone,
             onTap: _openDialer,
           ),
           SizedBox(height: 28.h),
-          _sectionTitle(theme, 'أرسل رسالتك'),
+          _sectionTitle(theme, 'contactFormSection'.tr()),
           SizedBox(height: 10.h),
           FeedbackForm(
             submitting: _submitting,
@@ -88,11 +89,11 @@ class _ContactUsViewState extends State<ContactUsView> {
       final uri = Uri(
         scheme: 'mailto',
         path: _email,
-        queryParameters: {'subject': 'دعم حسبة'},
+        queryParameters: {'subject': 'contactEmailSubject'.tr()},
       );
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (_) {
-      if (mounted) AppToast.error(context, 'لا يوجد تطبيق بريد إلكتروني');
+      if (mounted) AppToast.error(context, 'contactEmailError'.tr());
     }
   }
 
@@ -101,7 +102,7 @@ class _ContactUsViewState extends State<ContactUsView> {
       final uri = Uri.parse('https://wa.me/$_whatsapp');
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (_) {
-      if (mounted) AppToast.error(context, 'واتساب غير مثبت على الجهاز');
+      if (mounted) AppToast.error(context, 'contactWhatsAppError'.tr());
     }
   }
 
@@ -110,7 +111,7 @@ class _ContactUsViewState extends State<ContactUsView> {
       final uri = Uri(scheme: 'tel', path: _phone);
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (_) {
-      if (mounted) AppToast.error(context, 'لا يمكن فتح قائمة الاتصال');
+      if (mounted) AppToast.error(context, 'contactCallError'.tr());
     }
   }
 
@@ -128,11 +129,11 @@ class _ContactUsViewState extends State<ContactUsView> {
         description: description,
       );
       if (!mounted) return;
-      AppToast.success(context, 'تم إرسال رسالتك بنجاح');
+      AppToast.success(context, 'contactFormSuccess'.tr());
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
-      AppToast.error(context, 'حدث خطأ، حاول مرة أخرى');
+      AppToast.error(context, 'contactFormError'.tr());
     }
 
     if (mounted) setState(() => _submitting = false);

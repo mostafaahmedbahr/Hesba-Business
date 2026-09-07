@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../cubit/register_cubit.dart';
 import '../../states/register_state.dart';
@@ -16,19 +17,19 @@ class RegisterSteps extends StatelessWidget {
           children: [
             _step(
               number: 1,
-              title: 'حسابك',
+              title: 'registerStep1'.tr(),
               active: state.step >= 0,
             ),
             _line(state.step >= 1),
             _step(
               number: 2,
-              title: 'المحل',
+              title: 'registerStep2'.tr(),
               active: state.step >= 1,
             ),
             _line(state.step >= 2),
             _step(
               number: 3,
-              title: 'إضافي',
+              title: 'registerStep3'.tr(),
               active: state.step >= 2,
             ),
           ],

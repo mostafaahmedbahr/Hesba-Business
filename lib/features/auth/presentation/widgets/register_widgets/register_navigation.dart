@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../cubit/register_cubit.dart';
 import '../../states/register_state.dart';
@@ -57,7 +58,7 @@ class RegisterNavigation extends StatelessWidget {
             if (!isFirstStep)
               Expanded(
                 child: _buildButton(
-                  label: 'رجوع',
+                  label: 'registerBack'.tr(),
                   isLoading: false,
                   isOutlined: true,
                   onPressed: cubit.previousStep,
@@ -66,7 +67,7 @@ class RegisterNavigation extends StatelessWidget {
             if (!isFirstStep) SizedBox(width: 12.w),
             Expanded(
               child: _buildButton(
-                label: isLastStep ? 'إنشاء حساب' : 'التالي',
+                label: isLastStep ? 'registerSubmit'.tr() : 'registerNext'.tr(),
                 isLoading: isLoading,
                 isOutlined: false,
                 onPressed: isLoading

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../core/di/service_locator.dart';
 import '../../data/repos/account_repo.dart';
@@ -13,7 +14,7 @@ class ProfileView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('البروفايل')),
+      appBar: AppBar(title: Text('profileTitle'.tr())),
       body: _buildBody(),
     );
   }
@@ -28,7 +29,7 @@ class ProfileView extends StatelessWidget {
           }
           final profile = state.profile;
           if (profile == null) {
-            return const Center(child: Text('لا توجد بيانات'));
+            return Center(child: Text('profileNoData'.tr()));
           }
           return ListView(
             padding: EdgeInsets.all(20.w),
@@ -37,37 +38,37 @@ class ProfileView extends StatelessWidget {
               SizedBox(height: 20.h),
               _ProfileTile(
                 icon: Icons.person_rounded,
-                label: 'الاسم',
+                label: 'profileName'.tr(),
                 value: profile.ownerName,
               ),
               _ProfileTile(
                 icon: Icons.email_rounded,
-                label: 'البريد الإلكتروني',
+                label: 'profileEmail'.tr(),
                 value: profile.email,
               ),
               _ProfileTile(
                 icon: Icons.storefront_rounded,
-                label: 'اسم المحل',
+                label: 'profileShopName'.tr(),
                 value: profile.shopName,
               ),
               _ProfileTile(
                 icon: Icons.category_rounded,
-                label: 'نوع النشاط',
+                label: 'profileBusinessType'.tr(),
                 value: profile.businessType,
               ),
               _ProfileTile(
                 icon: Icons.phone_rounded,
-                label: 'رقم الهاتف',
+                label: 'profilePhone'.tr(),
                 value: profile.phone,
               ),
               _ProfileTile(
                 icon: Icons.phone_iphone_rounded,
-                label: 'هاتف المحل',
+                label: 'profileShopPhone'.tr(),
                 value: profile.shopPhone,
               ),
               _ProfileTile(
                 icon: Icons.location_on_rounded,
-                label: 'العنوان',
+                label: 'profileAddress'.tr(),
                 value: '${profile.address}، ${profile.city}، ${profile.state}',
               ),
             ],

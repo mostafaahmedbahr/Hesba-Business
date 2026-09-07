@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../core/theme/app_theme.dart';
 
@@ -11,7 +12,7 @@ class SplashBrand extends StatelessWidget {
     return Column(
       children: [
         Text(
-          'حسبة',
+          'appName'.tr(),
           textAlign: TextAlign.center,
           style: TextStyle(
             color: Colors.white,
@@ -26,7 +27,7 @@ class SplashBrand extends StatelessWidget {
         SizedBox(height: 12.h),
 
         Text(
-          'إدارة محلك أصبحت أبسط',
+          'splashTagline'.tr(),
           textAlign: TextAlign.center,
           style: TextStyle(
             color: Colors.white.withValues(alpha: .70),

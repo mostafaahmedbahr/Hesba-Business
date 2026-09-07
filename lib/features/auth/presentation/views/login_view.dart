@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/router/app_routes.dart';
@@ -70,7 +71,7 @@ class _LoginBodyState extends State<_LoginBody> {
     print('[LoginView] _handleState() called. Status: ${state.status}');
     if (state.status == LoginStatus.success) {
       print('[LoginView] Login SUCCESS — showing toast & navigating to dashboard');
-      AppToast.success(context, 'تم تسجيل الدخول بنجاح');
+      AppToast.success(context, 'loginSuccess'.tr());
       Navigator.pushNamedAndRemoveUntil(
         context,
         AppRoutes.dashboard,
@@ -78,7 +79,7 @@ class _LoginBodyState extends State<_LoginBody> {
       );
     } else if (state.status == LoginStatus.failure) {
       print('[LoginView] Login FAILURE — showing error toast: ${state.errorMessage}');
-      AppToast.error(context, state.errorMessage ?? 'حدث خطأ');
+      AppToast.error(context, state.errorMessage ?? 'loginError'.tr());
     }
   }
 }

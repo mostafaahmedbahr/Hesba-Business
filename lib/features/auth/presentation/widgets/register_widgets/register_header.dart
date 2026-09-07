@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class RegisterHeader extends StatelessWidget {
   const RegisterHeader({super.key});
@@ -35,7 +36,7 @@ class RegisterHeader extends StatelessWidget {
             CrossAxisAlignment.start,
             children: [
               Text(
-                'إنشاء حساب',
+                'registerTitle'.tr(),
                 style: TextStyle(
                   fontSize: 25.sp,
                   fontWeight: FontWeight.w900,
@@ -44,7 +45,7 @@ class RegisterHeader extends StatelessWidget {
               ),
               SizedBox(height: 4.h),
               Text(
-                'ابدأ بإدارة محلك بطريقة أذكى',
+                'registerSubtitle'.tr(),
                 style: TextStyle(
                   fontSize: 12.sp,
                   color: Colors.grey.shade600,

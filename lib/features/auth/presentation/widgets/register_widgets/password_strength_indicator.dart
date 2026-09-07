@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class PasswordStrengthIndicator extends StatelessWidget {
   final String password;
@@ -12,16 +13,16 @@ class PasswordStrengthIndicator extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(height: 8.h),
-        _buildRule('٨ أحرف على الأقل', password.length >= 8),
+        _buildRule('strength8Chars'.tr(), password.length >= 8),
         SizedBox(height: 4.h),
-        _buildRule('حرف كبير (A-Z)', RegExp(r'[A-Z]').hasMatch(password)),
+        _buildRule('strengthUpper'.tr(), RegExp(r'[A-Z]').hasMatch(password)),
         SizedBox(height: 4.h),
-        _buildRule('حرف صغير (a-z)', RegExp(r'[a-z]').hasMatch(password)),
+        _buildRule('strengthLower'.tr(), RegExp(r'[a-z]').hasMatch(password)),
         SizedBox(height: 4.h),
-        _buildRule('رقم (0-9)', RegExp(r'[0-9]').hasMatch(password)),
+        _buildRule('strengthDigit'.tr(), RegExp(r'[0-9]').hasMatch(password)),
         SizedBox(height: 4.h),
         _buildRule(
-          'رمز خاص (!@#\$%^&*)',
+          'strengthSpecial'.tr(),
           RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password),
         ),
       ],

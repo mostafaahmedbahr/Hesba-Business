@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/utils/toast.dart';
@@ -32,7 +33,7 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      title: 'تعديل البيانات',
+      title: 'updateProfileTitle'.tr(),
       body: BlocProvider(
         create: (_) => ProfileCubit(repo: sl<AccountRepo>())..loadProfile(),
         child: BlocListener<ProfileCubit, ProfileState>(
@@ -61,23 +62,23 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
                     _buildField(
                       context,
                       controller: _nameController,
-                      label: 'الاسم بالكامل',
+                      label: 'updateProfileName'.tr(),
                       icon: Icons.person_outline_rounded,
                       validator: (v) =>
-                          (v == null || v.trim().isEmpty) ? 'اكتب الاسم' : null,
+                          (v == null || v.trim().isEmpty) ? 'updateProfileNameEmpty'.tr() : null,
                     ),
                     SizedBox(height: 14.h),
                     _buildField(
                       context,
                       controller: _phoneController,
-                      label: 'رقم الهاتف',
+                      label: 'updateProfilePhone'.tr(),
                       icon: Icons.phone_outlined,
                       keyboardType: TextInputType.phone,
                       validator: (v) {
-                        if (v == null || v.trim().isEmpty) return 'اكتب الهاتف';
+                        if (v == null || v.trim().isEmpty) return 'updateProfilePhoneEmpty'.tr();
                         final re = RegExp(r'^01[0125][0-9]{8}$');
                         if (!re.hasMatch(v.trim())) {
-                          return 'رقم هاتف مصري غير صحيح';
+                          return 'updateProfilePhoneInvalid'.tr();
                         }
                         return null;
                       },
@@ -132,8 +133,8 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
                   color: Colors.white,
                 ),
               )
-            : const Text(
-                'حفظ التعديلات',
+            : Text(
+                'updateProfileSave'.tr(),
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
       ),
@@ -153,7 +154,7 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
     setState(() => _loading = false);
 
     if (error == null) {
-      AppToast.success(context, 'تم حفظ التعديلات بنجاح');
+      AppToast.success(context, 'updateProfileSuccess'.tr());
       Navigator.pop(context);
     } else {
       AppToast.error(context, error);

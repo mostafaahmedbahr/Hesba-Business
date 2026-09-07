@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../../core/utils/toast.dart';
 import '../../cubit/login_cubit.dart';
@@ -65,16 +66,16 @@ class _LoginFormState extends State<LoginForm> {
   Widget _buildEmailField() {
     return LoginTextField(
       controller: widget.emailController,
-      label: 'البريد الإلكتروني',
-      hint: 'example@email.com',
+      label: 'loginEmail'.tr(),
+      hint: 'loginEmailHint'.tr(),
       icon: Icons.email_outlined,
       keyboardType: TextInputType.emailAddress,
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
-          return 'اكتب البريد الإلكتروني';
+          return 'loginEmailEmpty'.tr();
         }
         if (!value.contains('@')) {
-          return 'البريد الإلكتروني غير صحيح';
+          return 'loginEmailInvalid'.tr();
         }
         return null;
       },
@@ -87,8 +88,8 @@ class _LoginFormState extends State<LoginForm> {
       builder: (context, state) {
         return LoginTextField(
           controller: widget.passwordController,
-          label: 'كلمة المرور',
-          hint: '••••••••',
+          label: 'loginPassword'.tr(),
+          hint: 'loginPasswordHint'.tr(),
           icon: Icons.lock_outline_rounded,
           obscureText: state.obscurePassword,
           suffixIcon: IconButton(
@@ -101,10 +102,10 @@ class _LoginFormState extends State<LoginForm> {
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'اكتب كلمة المرور';
+              return 'loginPasswordEmpty'.tr();
             }
             if (value.length < 6) {
-              return '6 أحرف على الأقل';
+              return 'loginPasswordShort'.tr();
             }
             return null;
           },
@@ -118,10 +119,10 @@ class _LoginFormState extends State<LoginForm> {
       alignment: Alignment.centerLeft,
       child: TextButton(
         onPressed: () {
-          AppToast.info(context, 'ستتوفر هذه الميزة قريباً');
+          AppToast.info(context, 'loginComingSoon'.tr());
         },
         child: Text(
-          'نسيت كلمة المرور؟',
+          'loginForgotPassword'.tr(),
           style: TextStyle(
             fontSize: 12.sp,
             color: const Color(0xFF0B4D9C),
@@ -161,7 +162,7 @@ class _LoginFormState extends State<LoginForm> {
                     ),
                   )
                 : Text(
-                    'تسجيل الدخول',
+                    'loginButton'.tr(),
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
@@ -178,7 +179,7 @@ class _LoginFormState extends State<LoginForm> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          'ليس لديك حساب؟ ',
+          'loginNoAccount'.tr(),
           style: TextStyle(
             fontSize: 13.sp,
             color: Colors.grey.shade600,
@@ -187,7 +188,7 @@ class _LoginFormState extends State<LoginForm> {
         GestureDetector(
           onTap: () => Navigator.pushReplacementNamed(context, '/register'),
           child: Text(
-            'سجّل الآن',
+            'loginRegisterNow'.tr(),
             style: TextStyle(
               fontSize: 13.sp,
               fontWeight: FontWeight.w700,

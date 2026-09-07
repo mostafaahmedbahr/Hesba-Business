@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class FeedbackForm extends StatefulWidget {
   final bool submitting;
@@ -23,9 +24,15 @@ class _FeedbackFormState extends State<FeedbackForm> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
-  String _selectedType = 'شكوى';
+  String _selectedType = 'feedbackComplaint';
 
-  static const _types = ['شكوى', 'اقتراح', 'ملاحظة', 'استفسار', 'أخرى'];
+  static const _types = [
+    'feedbackComplaint',
+    'feedbackSuggestion',
+    'feedbackNote',
+    'feedbackInquiry',
+    'feedbackOther',
+  ];
 
   @override
   void dispose() {
@@ -56,7 +63,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Type
-            _label(theme, 'نوع الرسالة'),
+            _label(theme, 'contactFormType'.tr()),
             SizedBox(height: 8.h),
             DropdownButtonFormField<String>(
               value: _selectedType,
@@ -78,23 +85,23 @@ class _FeedbackFormState extends State<FeedbackForm> {
                 focusedBorder: _border(theme, focused: true),
               ),
               items: _types
-                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                  .map((e) => DropdownMenuItem(value: e, child: Text(e.tr())))
                   .toList(),
-              onChanged: (v) => setState(() => _selectedType = v ?? 'شكوى'),
+              onChanged: (v) => setState(() => _selectedType = v ?? _selectedType),
             ),
             SizedBox(height: 16.h),
 
             // Title
-            _label(theme, 'العنوان'),
+            _label(theme, 'contactFormTitle'.tr()),
             SizedBox(height: 8.h),
             TextFormField(
               controller: _titleController,
               autovalidateMode: AutovalidateMode.onUserInteraction,
               textInputAction: TextInputAction.next,
               validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'اكتب عنوان الرسالة' : null,
+                  (v == null || v.trim().isEmpty) ? 'contactFormTitleEmpty'.tr() : null,
               decoration: InputDecoration(
-                hintText: 'مثال: مشكلة في الفاتورة',
+                hintText: 'contactFormTitleHint'.tr(),
                 prefixIcon: const Icon(Icons.title_rounded),
                 filled: true,
                 fillColor: theme.colorScheme.surface,
@@ -111,7 +118,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
             SizedBox(height: 16.h),
 
             // Description
-            _label(theme, 'الوصف'),
+            _label(theme, 'contactFormDesc'.tr()),
             SizedBox(height: 8.h),
             TextFormField(
               controller: _descController,
@@ -119,9 +126,9 @@ class _FeedbackFormState extends State<FeedbackForm> {
               maxLines: 4,
               textInputAction: TextInputAction.done,
               validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'اكتب وصف الرسالة' : null,
+                  (v == null || v.trim().isEmpty) ? 'contactFormDescEmpty'.tr() : null,
               decoration: InputDecoration(
-                hintText: 'اشرح المشكلة أو الرأي بالتفصيل...',
+                hintText: 'contactFormDescHint'.tr(),
                 alignLabelWithHint: true,
                 filled: true,
                 fillColor: theme.colorScheme.surface,
@@ -163,7 +170,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                         ),
                       )
                     : Text(
-                        'إرسال الرسالة',
+                        'contactFormSubmit'.tr(),
                         style: TextStyle(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w700,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../widgets/main_app_bar.dart';
 
@@ -9,7 +10,7 @@ class HomeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MainAppBar(title: 'حسبة'),
+      appBar: MainAppBar(title: 'appName'.tr()),
       body: ListView(
         padding: EdgeInsets.all(16.w),
         children: [
@@ -17,7 +18,7 @@ class HomeView extends StatelessWidget {
           SizedBox(height: 16.h),
           _buildStatsRow(),
           SizedBox(height: 20.h),
-          _buildSectionTitle('إجراءات سريعة'),
+          _buildSectionTitle('homeQuickActions'.tr()),
           SizedBox(height: 12.h),
           _buildQuickActions(),
         ],
@@ -27,7 +28,7 @@ class HomeView extends StatelessWidget {
 
   Widget _buildGreeting() {
     return Text(
-      'أهلاً بك 👋',
+      'homeGreeting'.tr(),
       style: TextStyle(
         fontSize: 22.sp,
         fontWeight: FontWeight.w800,
@@ -43,8 +44,8 @@ class HomeView extends StatelessWidget {
           child: _StatCard(
             color: const Color(0xFF1A4FD6),
             icon: Icons.payments_rounded,
-            label: 'مبيعات اليوم',
-            value: '0 ج.م',
+            label: 'homeSalesToday'.tr(),
+            value: 'homeStatZeroEGP'.tr(),
           ),
         ),
         SizedBox(width: 12.w),
@@ -52,8 +53,8 @@ class HomeView extends StatelessWidget {
           child: _StatCard(
             color: const Color(0xFF4CAF50),
             icon: Icons.inventory_2_rounded,
-            label: 'منتجات',
-            value: '0',
+            label: 'homeProducts'.tr(),
+            value: 'homeStatZero'.tr(),
           ),
         ),
       ],
@@ -77,7 +78,7 @@ class HomeView extends StatelessWidget {
         Expanded(
           child: _QuickAction(
             icon: Icons.add_shopping_cart_rounded,
-            label: 'أضف منتج',
+            label: 'homeAddProduct'.tr(),
             color: const Color(0xFFF5A623),
             onTap: () {},
           ),
@@ -86,7 +87,7 @@ class HomeView extends StatelessWidget {
         Expanded(
           child: _QuickAction(
             icon: Icons.point_of_sale_rounded,
-            label: 'بيع جديد',
+            label: 'homeNewSale'.tr(),
             color: const Color(0xFF1A4FD6),
             onTap: () {},
           ),

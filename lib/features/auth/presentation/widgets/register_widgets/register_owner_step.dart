@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../cubit/register_cubit.dart';
 import 'password_strength_indicator.dart';
@@ -30,9 +31,9 @@ class RegisterOwnerStep extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const RegisterSectionTitle(
-          title: 'بياناتك الشخصية',
-          subtitle: 'هذه البيانات تستخدم للدخول وإدارة حسابك',
+        RegisterSectionTitle(
+          title: 'ownerTitle'.tr(),
+          subtitle: 'ownerSubtitle'.tr(),
         ),
         SizedBox(height: 22.h),
         _buildNameField(),
@@ -53,27 +54,27 @@ class RegisterOwnerStep extends StatelessWidget {
   Widget _buildNameField() {
     return RegisterTextField(
       controller: ownerNameController,
-      label: 'الاسم بالكامل',
-      hint: 'أحمد محمد',
+      label: 'ownerName'.tr(),
+      hint: 'ownerNameHint'.tr(),
       icon: Icons.person_outline_rounded,
-      validator: _required('اكتب الاسم'),
+      validator: _required('ownerNameEmpty'.tr()),
     );
   }
 
   Widget _buildEmailField() {
     return RegisterTextField(
       controller: emailController,
-      label: 'البريد الإلكتروني',
-      hint: 'example@email.com',
+      label: 'ownerEmail'.tr(),
+      hint: 'loginEmailHint'.tr(),
       icon: Icons.email_outlined,
       keyboardType: TextInputType.emailAddress,
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
-          return 'اكتب البريد الإلكتروني';
+          return 'ownerEmailEmpty'.tr();
         }
         final emailRegex = RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$');
         if (!emailRegex.hasMatch(value.trim())) {
-          return 'البريد الإلكتروني غير صحيح';
+          return 'ownerEmailInvalid'.tr();
         }
         return null;
       },
@@ -83,8 +84,8 @@ class RegisterOwnerStep extends StatelessWidget {
   Widget _buildPhoneField() {
     return RegisterTextField(
       controller: phoneController,
-      label: 'رقم الهاتف',
-      hint: '01xxxxxxxxx',
+      label: 'ownerPhone'.tr(),
+      hint: 'ownerPhoneHint'.tr(),
       icon: Icons.phone_outlined,
       keyboardType: TextInputType.phone,
       validator: RegisterConstants.validateEgyptianPhone,
@@ -94,15 +95,15 @@ class RegisterOwnerStep extends StatelessWidget {
   Widget _buildPasswordField(BuildContext context) {
     return RegisterPasswordField(
       controller: passwordController,
-      label: 'كلمة المرور',
+      label: 'ownerPassword'.tr(),
       obscure: context.select(
         (RegisterCubit cubit) => cubit.state.obscurePassword,
       ),
       onToggle: context.read<RegisterCubit>().togglePassword,
       validator: (value) {
-        if (value == null || value.isEmpty) return 'اكتب كلمة المرور';
+        if (value == null || value.isEmpty) return 'ownerPasswordEmpty'.tr();
         if (!PasswordStrengthIndicator.isStrong(value)) {
-          return 'كلمة المرور غير كافية';
+          return 'ownerPasswordWeak'.tr();
         }
         return null;
       },
@@ -124,15 +125,15 @@ class RegisterOwnerStep extends StatelessWidget {
   Widget _buildConfirmPasswordField(BuildContext context) {
     return RegisterPasswordField(
       controller: confirmPasswordController,
-      label: 'تأكيد كلمة المرور',
+      label: 'ownerConfirmPassword'.tr(),
       obscure: context.select(
         (RegisterCubit cubit) => cubit.state.obscureConfirmPassword,
       ),
       onToggle: context.read<RegisterCubit>().toggleConfirmPassword,
       validator: (value) {
-        if (value == null || value.isEmpty) return 'أكد كلمة المرور';
+        if (value == null || value.isEmpty) return 'ownerConfirmEmpty'.tr();
         if (value != passwordController.text) {
-          return 'كلمتا المرور غير متطابقتين';
+          return 'ownerPasswordMismatch'.tr();
         }
         return null;
       },

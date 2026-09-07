@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/router/app_routes.dart';
@@ -22,29 +23,29 @@ class MoreView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const MainAppBar(title: 'المزيد'),
+      appBar: MainAppBar(title: 'moreTitle'.tr()),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.w),
         child: Column(
           children: [
             const _ProfileCard(),
             SizedBox(height: 20.h),
-            _SectionCard('الحساب', [
+            _SectionCard('moreAccount'.tr(), [
               MoreItem(
                 icon: Icons.person_rounded,
-                label: 'البروفايل',
+                label: 'moreProfile'.tr(),
                 color: const Color(0xFF1A4FD6),
                 onTap: () => _navigateTo(context, const ProfileView()),
               ),
               MoreItem(
                 icon: Icons.edit_rounded,
-                label: 'تعديل البيانات',
+                label: 'moreEditProfile'.tr(),
                 color: const Color(0xFFF5A623),
                 onTap: () => _navigateTo(context, const UpdateProfileView()),
               ),
               MoreItem(
                 icon: Icons.lock_reset_rounded,
-                label: 'تغيير كلمة المرور',
+                label: 'moreChangePassword'.tr(),
                 color: const Color(0xFF7C4DFF),
                 onTap: () => _navigateTo(context, const ChangePasswordView()),
               ),
@@ -52,10 +53,10 @@ class MoreView extends StatelessWidget {
             SizedBox(height: 20.h),
             const _ThemeLanguageCard(),
             SizedBox(height: 20.h),
-            _SectionCard('الدعم', [
+            _SectionCard('moreSupport'.tr(), [
               MoreItem(
                 icon: Icons.headset_mic_rounded,
-                label: 'تواصل معنا',
+                label: 'moreContactUs'.tr(),
                 color: const Color(0xFF00ACC1),
                 onTap: () => _navigateTo(context, const ContactUsView()),
               ),
@@ -199,7 +200,7 @@ class _ThemeLanguageCard extends StatelessWidget {
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 4.w),
           child: Text(
-            'التفضيلات',
+            'morePreferences'.tr(),
             style: TextStyle(
               fontSize: 13.sp,
               fontWeight: FontWeight.w700,
@@ -238,7 +239,7 @@ class _ThemeItem extends StatelessWidget {
         final isDark = state.themeMode == ThemeMode.dark;
         return MoreItem(
           icon: isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
-          label: 'الوضع الليلي',
+          label: 'moreDarkMode'.tr(),
           color: const Color(0xFF2E7D32),
           trailing: Switch(
             value: isDark,
@@ -256,36 +257,32 @@ class _LanguageItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SettingsCubit, SettingsState>(
-      builder: (context, state) {
-        final isEnglish = state.locale.languageCode == 'en';
-        return MoreItem(
-          icon: Icons.language_rounded,
-          label: 'اللغة',
-          color: const Color(0xFF00ACC1),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                isEnglish ? 'English' : 'العربية',
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-              Switch(
-                value: isEnglish,
-                activeColor: const Color(0xFF1A4FD6),
-                onChanged: (_) {
-                  context.read<SettingsCubit>().setLocale(
-                        Locale(isEnglish ? 'ar' : 'en'),
-                      );
-                },
-              ),
-            ],
+    final isEnglish = context.locale.languageCode == 'en';
+    return MoreItem(
+      icon: Icons.language_rounded,
+      label: 'moreLanguage'.tr(),
+      color: const Color(0xFF00ACC1),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            isEnglish ? 'English' : 'العربية',
+            style: TextStyle(
+              fontSize: 13.sp,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
-        );
-      },
+          Switch(
+            value: isEnglish,
+            activeColor: const Color(0xFF1A4FD6),
+            onChanged: (_) {
+              context.setLocale(
+                Locale(isEnglish ? 'ar' : 'en'),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }
@@ -313,8 +310,8 @@ class _LogoutButton extends StatelessWidget {
                 ),
               ),
               icon: const Icon(Icons.logout_rounded),
-              label: const Text(
-                'تسجيل الخروج',
+              label: Text(
+                'moreLogout'.tr(),
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
             ),
@@ -342,7 +339,7 @@ class _LogoutButton extends StatelessWidget {
         (_) => false,
       );
     } else {
-      AppToast.error(context, 'فشل تسجيل الخروج');
+      AppToast.error(context, 'moreLogoutFailed'.tr());
     }
   }
 }
@@ -404,7 +401,7 @@ class _LogoutDialog extends StatelessWidget {
             ),
             SizedBox(height: 18.h),
             Text(
-              'تسجيل الخروج',
+              'moreLogoutTitle'.tr(),
               style: TextStyle(
                 fontSize: 20.sp,
                 fontWeight: FontWeight.w800,
@@ -413,7 +410,7 @@ class _LogoutDialog extends StatelessWidget {
             ),
             SizedBox(height: 8.h),
             Text(
-              'هل أنت متأكد أنك تريد تسجيل الخروج من حسابك؟',
+              'moreLogoutMessage'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13.sp,
@@ -438,7 +435,7 @@ class _LogoutDialog extends StatelessWidget {
                         ),
                       ),
                       child: Text(
-                        'إلغاء',
+                        'dialogCancel'.tr(),
                         style: TextStyle(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w700,
@@ -463,7 +460,7 @@ class _LogoutDialog extends StatelessWidget {
                         ),
                       ),
                       child: Text(
-                        'تسجيل الخروج',
+                        'moreLogout'.tr(),
                         style: TextStyle(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w700,

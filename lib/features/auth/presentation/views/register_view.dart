@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/router/app_routes.dart';
@@ -114,7 +115,7 @@ class _RegisterBodyState extends State<_RegisterBody> {
     print('[RegisterView] _handleState() called. Status: ${state.status}');
     if (state.status == RegisterStatus.success) {
       print('[RegisterView] Register SUCCESS — showing toast & navigating to login');
-      AppToast.success(context, 'تم إنشاء الحساب بنجاح');
+      AppToast.success(context, 'registerSuccess'.tr());
       Navigator.pushNamedAndRemoveUntil(
         context,
         AppRoutes.login,
@@ -122,7 +123,7 @@ class _RegisterBodyState extends State<_RegisterBody> {
       );
     } else if (state.status == RegisterStatus.failure) {
       print('[RegisterView] Register FAILURE — showing error toast: ${state.errorMessage}');
-      AppToast.error(context, state.errorMessage ?? 'حدث خطأ');
+      AppToast.error(context, state.errorMessage ?? 'registerError'.tr());
     }
   }
 }

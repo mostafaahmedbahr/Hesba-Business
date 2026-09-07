@@ -1,15 +1,17 @@
 /// Represents the main bottom navigation tabs (data layer).
 enum MainTab {
-  home(0, 'الرئيسية'),
-  products(1, 'المنتجات'),
-  sales(2, 'المبيعات'),
-  reports(3, 'التقارير'),
-  more(4, 'المزيد');
+  home(0, 'navHome'),
+  products(1, 'navProducts'),
+  sales(2, 'navSales'),
+  reports(3, 'navReports'),
+  more(4, 'navMore');
 
-  const MainTab(this.tabIndex, this.label);
+  const MainTab(this.tabIndex, this.labelKey);
 
   final int tabIndex;
-  final String label;
+
+  /// Translation key for the tab label.
+  final String labelKey;
 
   static MainTab fromIndex(int index) {
     return MainTab.values.firstWhere(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import 'register_section_title.dart';
 import 'register_text_field.dart';
@@ -19,9 +20,9 @@ class RegisterExtraStep extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const RegisterSectionTitle(
-          title: 'بيانات إضافية',
-          subtitle: 'أضف رابط موقع المحل وصورته',
+        RegisterSectionTitle(
+          title: 'extraTitle'.tr(),
+          subtitle: 'extraSubtitle'.tr(),
         ),
         SizedBox(height: 24.h),
         _buildInfoCard(),
@@ -51,7 +52,7 @@ class RegisterExtraStep extends StatelessWidget {
           ),
           SizedBox(height: 10.h),
           Text(
-            'صورة المحل وموقعه',
+            'extraCardTitle'.tr(),
             style: TextStyle(
               fontSize: 15.sp,
               fontWeight: FontWeight.w800,
@@ -59,7 +60,7 @@ class RegisterExtraStep extends StatelessWidget {
           ),
           SizedBox(height: 4.h),
           Text(
-            'أضف رابط صورة المحل ورابط الموقع على خرائط جوجل',
+            'extraCardDesc'.tr(),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 11.sp,
@@ -74,7 +75,7 @@ class RegisterExtraStep extends StatelessWidget {
   Widget _buildLocationField() {
     return RegisterTextField(
       controller: locationUrlController,
-      label: 'رابط موقع المحل *',
+      label: 'extraLocation'.tr(),
       hint: 'https://maps.app.goo.gl/...',
       icon: Icons.location_on_outlined,
       keyboardType: TextInputType.url,
@@ -85,7 +86,7 @@ class RegisterExtraStep extends StatelessWidget {
   Widget _buildImageField() {
     return RegisterTextField(
       controller: shopImageUrlController,
-      label: 'رابط صورة المحل *',
+      label: 'extraImage'.tr(),
       hint: 'https://...',
       icon: Icons.image_outlined,
       keyboardType: TextInputType.url,
@@ -95,20 +96,20 @@ class RegisterExtraStep extends StatelessWidget {
 
   static String? _validateUrl(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'هذا الحقل مطلوب';
+      return 'extraFieldEmpty'.tr();
     }
     final url = value.trim();
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      return 'أدخل رابط صحيح يبدأ بـ http:// أو https://';
+      return 'extraUrlInvalid'.tr();
     }
     try {
       final uri = Uri.parse(url);
       if (!uri.hasScheme || !uri.hasAuthority) {
-        return 'رابط غير صالح';
+        return 'extraUrlBad'.tr();
       }
       return null;
     } catch (_) {
-      return 'رابط غير صالح';
+      return 'extraUrlBad'.tr();
     }
   }
 }

@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hesba/core/di/service_locator.dart';
 import 'package:hesba/core/router/app_router.dart';
 import 'package:hesba/core/router/app_routes.dart';
 import 'package:hesba/core/theme/app_theme.dart';
-import 'package:hesba/core/utils/translations.dart';
 import 'package:hesba/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:hesba/features/settings/presentation/states/settings_state.dart';
 
@@ -20,7 +19,26 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  runApp(const HesbaApp());
+  runApp(TranslationProvider(child: const HesbaApp()));
+}
+
+class TranslationProvider extends StatelessWidget {
+  final Widget child;
+
+  const TranslationProvider({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return EasyLocalization(
+      supportedLocales: const [Locale('ar'), Locale('en')],
+      fallbackLocale: const Locale('ar'),
+      path: 'assets/translations',
+      startLocale: const Locale('ar'),
+      saveLocale: true,
+      useOnlyLangCode: true,
+      child: child,
+    );
+  }
 }
 
 class HesbaApp extends StatelessWidget {
@@ -53,21 +71,9 @@ class _AppRoot extends StatelessWidget {
               theme: AppTheme.lightTheme,
               darkTheme: AppTheme.darkTheme,
               themeMode: state.themeMode,
-              locale: state.locale,
-              supportedLocales: Translations.supportedLocales,
-              localizationsDelegates: const [
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-              ],
-              builder: (context, child) {
-                return Directionality(
-                  textDirection: state.locale.languageCode == 'ar'
-                      ? TextDirection.rtl
-                      : TextDirection.ltr,
-                  child: child!,
-                );
-              },
+              localizationsDelegates: context.localizationDelegates,
+              supportedLocales: context.supportedLocales,
+              locale: context.locale,
               initialRoute: AppRoutes.splash,
               onGenerateRoute: AppRouter.onGenerateRoute,
             );
@@ -77,4 +83,3 @@ class _AppRoot extends StatelessWidget {
     );
   }
 }
-
