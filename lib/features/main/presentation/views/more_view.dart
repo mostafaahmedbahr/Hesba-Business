@@ -9,7 +9,7 @@ import '../../../profile/data/repos/account_repo.dart';
 import '../../../profile/presentation/cubit/profile_cubit.dart';
 import '../../../profile/presentation/states/profile_state.dart';
 import '../../../profile/presentation/views/change_password_view.dart';
-import '../../../profile/presentation/views/contact_us_view.dart';
+import '../../../contact/presentation/views/contact_us_view.dart';
 import '../../../profile/presentation/views/profile_view.dart';
 import '../../../profile/presentation/views/update_profile_view.dart';
 import '../../../settings/presentation/cubit/settings_cubit.dart';
