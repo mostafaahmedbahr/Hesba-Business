@@ -26,6 +26,7 @@ class AuthCubit extends Cubit<AuthState> {
     emit(const AuthLoading());
     try {
       await _authRepo.signIn(email: email, password: password);
+      emit(const AuthSuccess('تم تسجيل الدخول بنجاح'));
     } catch (e) {
       emit(AuthError(_mapFirebaseError(e.toString())));
     }
@@ -45,6 +46,7 @@ class AuthCubit extends Cubit<AuthState> {
         name: name,
         shopName: shopName,
       );
+      emit(const AuthSuccess('تم إنشاء الحساب بنجاح'));
     } catch (e) {
       emit(AuthError(_mapFirebaseError(e.toString())));
     }
@@ -54,7 +56,7 @@ class AuthCubit extends Cubit<AuthState> {
     emit(const AuthLoading());
     try {
       await _authRepo.resetPassword(email);
-      emit(const AuthPasswordResetSent());
+      emit(const AuthSuccess('تم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني'));
     } catch (e) {
       emit(AuthError(_mapFirebaseError(e.toString())));
     }

@@ -15,6 +15,15 @@ class AuthLoading extends AuthState {
   const AuthLoading();
 }
 
+class AuthSuccess extends AuthState {
+  final String message;
+
+  const AuthSuccess(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+
 class AuthAuthenticated extends AuthState {
   const AuthAuthenticated();
 
@@ -33,11 +42,4 @@ class AuthError extends AuthState {
 
   @override
   List<Object?> get props => [message];
-}
-
-class AuthPasswordResetSent extends AuthState {
-  const AuthPasswordResetSent();
-
-  @override
-  List<Object?> get props => [];
 }

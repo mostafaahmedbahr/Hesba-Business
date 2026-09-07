@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hesba/core/theme/app_theme.dart';
+import 'package:hesba/core/utils/toast.dart';
 import 'package:hesba/core/widgets/custom_button.dart';
 import 'package:hesba/core/widgets/custom_text_field.dart';
 import 'package:hesba/core/utils/validators.dart';
-import 'package:hesba/core/widgets/dialogs.dart';
 import 'package:hesba/features/auth/presentation/view_model/auth_cubit.dart';
 import 'package:hesba/features/auth/presentation/view_model/auth_states.dart';
+import 'package:hesba/features/auth/presentation/widgets/auth_footer.dart';
+import 'package:hesba/features/auth/presentation/widgets/email_field.dart';
+import 'package:hesba/features/auth/presentation/widgets/password_field.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -35,20 +38,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
+  void _onRegister() {
+    if (_formKey.currentState!.validate()) {
+      context.read<AuthCubit>().signUp(
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+            name: _nameController.text.trim(),
+            shopName: _shopNameController.text.trim(),
+          );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('إنشاء حساب'),
-      ),
+      appBar: AppBar(title: const Text('إنشاء حساب')),
       body: BlocListener<AuthCubit, AuthState>(
-        listener: (context, state) {
-          if (state is AuthError) {
-            AppDialogs.showSnackBar(context, state.message, isError: true);
-          } else if (state is AuthAuthenticated) {
-            Navigator.of(context).popUntil((route) => route.isFirst);
-          }
-        },
+        listener: _handleAuthState,
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
@@ -70,10 +76,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 8),
                     Text(
                       'أنشئ حسابك وابدأ إدارة محلك',
-                      style: GoogleFonts.cairo(
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
+                      style: GoogleFonts.cairo(fontSize: 14, color: Colors.grey),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 32),
@@ -91,42 +94,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       validator: (v) => Validators.required(v, 'أدخل اسم المحل'),
                     ),
                     const SizedBox(height: 16),
-                    CustomTextField(
-                      controller: _emailController,
-                      labelText: 'البريد الإلكتروني',
-                      prefixIcon: Icons.email_outlined,
-                      keyboardType: TextInputType.emailAddress,
-                      textDirection: TextDirection.ltr,
-                      validator: Validators.email,
-                    ),
+                    EmailField(controller: _emailController),
                     const SizedBox(height: 16),
-                    CustomTextField(
+                    PasswordField(
                       controller: _passwordController,
-                      labelText: 'كلمة المرور',
-                      prefixIcon: Icons.lock_outlined,
                       obscureText: _obscurePassword,
-                      textDirection: TextDirection.ltr,
-                      validator: Validators.password,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                      ),
+                      onToggleVisibility: () {
+                        setState(() => _obscurePassword = !_obscurePassword);
+                      },
                     ),
                     const SizedBox(height: 16),
-                    CustomTextField(
+                    PasswordField(
                       controller: _confirmPasswordController,
                       labelText: 'تأكيد كلمة المرور',
-                      prefixIcon: Icons.lock_outlined,
                       obscureText: true,
-                      textDirection: TextDirection.ltr,
+                      onToggleVisibility: () {},
                       validator: (v) => Validators.confirmPassword(
                         v,
                         _passwordController.text,
@@ -138,38 +120,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         return CustomButton(
                           text: 'إنشاء حساب',
                           isLoading: state is AuthLoading,
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              context.read<AuthCubit>().signUp(
-                                    email: _emailController.text.trim(),
-                                    password: _passwordController.text,
-                                    name: _nameController.text.trim(),
-                                    shopName: _shopNameController.text.trim(),
-                                  );
-                            }
-                          },
+                          onPressed: _onRegister,
                         );
                       },
                     ),
                     const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'لديك حساب بالفعل؟ ',
-                          style: GoogleFonts.cairo(color: Colors.grey),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: Text(
-                            'تسجيل الدخول',
-                            style: GoogleFonts.cairo(
-                              color: AppTheme.primaryColor,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
+                    AuthFooter(
+                      questionText: 'لديك حساب بالفعل؟ ',
+                      actionText: 'تسجيل الدخول',
+                      onAction: () => Navigator.pop(context),
                     ),
                   ],
                 ),
@@ -179,5 +138,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
       ),
     );
+  }
+
+  void _handleAuthState(BuildContext context, AuthState state) {
+    if (state is AuthSuccess) {
+      AppToast.success(context, state.message);
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    } else if (state is AuthError) {
+      AppToast.error(context, state.message);
+    }
   }
 }
