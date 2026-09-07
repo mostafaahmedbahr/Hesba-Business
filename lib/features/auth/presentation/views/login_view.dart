@@ -69,12 +69,11 @@ class _LoginBodyState extends State<_LoginBody> {
   void _handleState(BuildContext context, LoginState state) {
     print('[LoginView] _handleState() called. Status: ${state.status}');
     if (state.status == LoginStatus.success) {
-      print('[LoginView] Login SUCCESS — showing toast & navigating to login (placeholder)');
+      print('[LoginView] Login SUCCESS — showing toast & navigating to dashboard');
       AppToast.success(context, 'تم تسجيل الدخول بنجاح');
-      // TODO: navigate to dashboard when ready
       Navigator.pushNamedAndRemoveUntil(
         context,
-        AppRoutes.login,
+        AppRoutes.dashboard,
         (_) => false,
       );
     } else if (state.status == LoginStatus.failure) {

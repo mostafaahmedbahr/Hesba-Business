@@ -4,6 +4,7 @@ import 'package:hesba/core/router/app_routes.dart';
 import 'package:hesba/features/splash/presentation/screens/splash_screen.dart';
 import 'package:hesba/features/auth/presentation/views/login_view.dart';
 import 'package:hesba/features/auth/presentation/views/register_view.dart';
+import 'package:hesba/features/main/presentation/views/main_layout.dart';
 
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -16,6 +17,9 @@ class AppRouter {
 
       case AppRoutes.register:
         return _buildRoute(const RegisterView(), settings);
+
+      case AppRoutes.dashboard:
+        return _buildRoute(const MainLayout(), settings);
 
       // case AppRoutes.resetPassword:
       //   return _buildRoute(const ResetPasswordScreen(), settings);
