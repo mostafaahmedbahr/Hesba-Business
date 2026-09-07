@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:hesba/core/theme/app_theme.dart';
 
 class EmptyState extends StatelessWidget {
   final IconData icon;
@@ -29,10 +29,11 @@ class EmptyState extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               title,
-              style: GoogleFonts.cairo(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Colors.grey[600],
+                fontFamily: AppTheme.fontFamily,
               ),
               textAlign: TextAlign.center,
             ),
@@ -40,10 +41,7 @@ class EmptyState extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 subtitle!,
-                style: GoogleFonts.cairo(
-                  fontSize: 14,
-                  color: Colors.grey[400],
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey[400], fontFamily: AppTheme.fontFamily),
                 textAlign: TextAlign.center,
               ),
             ],

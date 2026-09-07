@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hesba/core/utils/toast.dart';
 import 'package:hesba/core/widgets/custom_button.dart';
+import 'package:hesba/core/theme/app_theme.dart';
 import 'package:hesba/features/auth/presentation/view_model/auth_cubit.dart';
 import 'package:hesba/features/auth/presentation/view_model/auth_states.dart';
 import 'package:hesba/features/auth/presentation/widgets/auth_header.dart';
@@ -88,7 +89,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       alignment: Alignment.centerLeft,
                       child: TextButton(
                         onPressed: _navigateToResetPassword,
-                        child: const Text('نسيت كلمة المرور؟'),
+                        child: const Text(
+                          'نسيت كلمة المرور؟',
+                          style: TextStyle(
+                            color: AppTheme.primaryColor,
+                            fontFamily: AppTheme.fontFamily,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 24),

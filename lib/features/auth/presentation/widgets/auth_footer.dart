@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hesba/core/theme/app_theme.dart';
 
 class AuthFooter extends StatelessWidget {
@@ -21,15 +20,16 @@ class AuthFooter extends StatelessWidget {
       children: [
         Text(
           questionText,
-          style: GoogleFonts.cairo(color: Colors.grey),
+          style: TextStyle(color: Colors.grey, fontFamily: AppTheme.fontFamily),
         ),
         TextButton(
           onPressed: onAction,
           child: Text(
             actionText,
-            style: GoogleFonts.cairo(
+            style: const TextStyle(
               color: AppTheme.primaryColor,
               fontWeight: FontWeight.bold,
+              fontFamily: AppTheme.fontFamily,
             ),
           ),
         ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   static const Color primaryColor = Color(0xFF6C63FF);
@@ -8,21 +7,24 @@ class AppTheme {
   static const Color errorColor = Color(0xFFFF6B6B);
   static const Color successColor = Color(0xFF4CAF50);
 
+  static const String fontFamily = 'Cairo';
+
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
+      fontFamily: fontFamily,
       colorScheme: ColorScheme.fromSeed(
         seedColor: primaryColor,
         brightness: Brightness.light,
       ),
       scaffoldBackgroundColor: backgroundColor,
-      textTheme: GoogleFonts.cairoTextTheme(),
       appBarTheme: AppBarTheme(
         backgroundColor: primaryColor,
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: GoogleFonts.cairo(
+        titleTextStyle: const TextStyle(
+          fontFamily: fontFamily,
           fontSize: 20,
           fontWeight: FontWeight.bold,
           color: Colors.white,
@@ -36,7 +38,8 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: GoogleFonts.cairo(
+          textStyle: const TextStyle(
+            fontFamily: fontFamily,
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -62,7 +65,7 @@ class AppTheme {
           borderSide: const BorderSide(color: errorColor),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        hintStyle: GoogleFonts.cairo(color: Colors.grey),
+        hintStyle: TextStyle(color: Colors.grey, fontFamily: fontFamily),
       ),
     );
   }

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:hesba/core/theme/app_theme.dart';
 import 'package:hesba/core/utils/toast.dart';
 import 'package:hesba/core/widgets/custom_button.dart';
 import 'package:hesba/core/widgets/custom_text_field.dart';
 import 'package:hesba/core/utils/validators.dart';
+import 'package:hesba/core/theme/app_theme.dart';
 import 'package:hesba/features/auth/presentation/view_model/auth_cubit.dart';
 import 'package:hesba/features/auth/presentation/view_model/auth_states.dart';
 import 'package:hesba/features/auth/presentation/widgets/auth_footer.dart';
@@ -66,17 +65,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   children: [
                     Text(
                       'مرحباً بك في حسبة',
-                      style: GoogleFonts.cairo(
+                      style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: AppTheme.primaryColor,
+                        fontFamily: AppTheme.fontFamily,
                       ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'أنشئ حسابك وابدأ إدارة محلك',
-                      style: GoogleFonts.cairo(fontSize: 14, color: Colors.grey),
+                      style: TextStyle(fontSize: 14, color: Colors.grey, fontFamily: AppTheme.fontFamily),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 32),

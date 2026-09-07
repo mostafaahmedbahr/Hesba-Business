@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hesba/core/theme/app_theme.dart';
 
 class AppDialogs {
@@ -8,7 +7,7 @@ class AppDialogs {
       SnackBar(
         content: Text(
           message,
-          style: GoogleFonts.cairo(color: Colors.white),
+          style: const TextStyle(color: Colors.white, fontFamily: AppTheme.fontFamily),
         ),
         backgroundColor: isError ? AppTheme.errorColor : AppTheme.successColor,
         behavior: SnackBarBehavior.floating,
@@ -27,16 +26,16 @@ class AppDialogs {
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(title, style: GoogleFonts.cairo(fontWeight: FontWeight.bold)),
-        content: Text(message, style: GoogleFonts.cairo()),
+        title: Text(title, style: const TextStyle(fontFamily: AppTheme.fontFamily, fontWeight: FontWeight.bold)),
+        content: Text(message, style: const TextStyle(fontFamily: AppTheme.fontFamily)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(cancelText, style: GoogleFonts.cairo(color: Colors.grey)),
+            child: Text(cancelText, style: const TextStyle(color: Colors.grey, fontFamily: AppTheme.fontFamily)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text(confirmText, style: GoogleFonts.cairo(color: AppTheme.errorColor)),
+            child: Text(confirmText, style: const TextStyle(color: AppTheme.errorColor, fontFamily: AppTheme.fontFamily)),
           ),
         ],
       ),

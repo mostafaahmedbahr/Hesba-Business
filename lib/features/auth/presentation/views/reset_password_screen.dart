@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:hesba/core/theme/app_theme.dart';
 import 'package:hesba/core/utils/toast.dart';
 import 'package:hesba/core/widgets/custom_button.dart';
+import 'package:hesba/core/theme/app_theme.dart';
 import 'package:hesba/features/auth/presentation/view_model/auth_cubit.dart';
 import 'package:hesba/features/auth/presentation/view_model/auth_states.dart';
 import 'package:hesba/features/auth/presentation/widgets/email_field.dart';
@@ -54,19 +53,20 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       color: AppTheme.primaryColor,
                     ),
                     const SizedBox(height: 24),
-                    Text(
+                    const Text(
                       'نسيت كلمة المرور؟',
-                      style: GoogleFonts.cairo(
+                      style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: AppTheme.primaryColor,
+                        fontFamily: AppTheme.fontFamily,
                       ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة المرور',
-                      style: GoogleFonts.cairo(fontSize: 14, color: Colors.grey),
+                      style: TextStyle(fontSize: 14, color: Colors.grey, fontFamily: AppTheme.fontFamily),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 32),
@@ -84,9 +84,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     const SizedBox(height: 16),
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: Text(
+                      child: const Text(
                         'العودة لتسجيل الدخول',
-                        style: GoogleFonts.cairo(color: AppTheme.primaryColor),
+                        style: TextStyle(color: AppTheme.primaryColor, fontFamily: AppTheme.fontFamily),
                       ),
                     ),
                   ],

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hesba/core/theme/app_theme.dart';
 
 enum ToastType { success, error, warning, info }
@@ -141,10 +140,11 @@ class _ToastWidgetState extends State<_ToastWidget>
                   Expanded(
                     child: Text(
                       widget.message,
-                      style: GoogleFonts.cairo(
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
+                        fontFamily: AppTheme.fontFamily,
                       ),
                     ),
                   ),

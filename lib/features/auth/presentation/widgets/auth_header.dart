@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hesba/core/theme/app_theme.dart';
 
 class AuthHeader extends StatelessWidget {
@@ -29,17 +28,18 @@ class AuthHeader extends StatelessWidget {
         const SizedBox(height: 24),
         Text(
           title,
-          style: GoogleFonts.cairo(
+          style: const TextStyle(
             fontSize: 32,
             fontWeight: FontWeight.bold,
             color: AppTheme.primaryColor,
+            fontFamily: AppTheme.fontFamily,
           ),
         ),
         if (subtitle != null) ...[
           const SizedBox(height: 8),
           Text(
             subtitle!,
-            style: GoogleFonts.cairo(fontSize: 16, color: Colors.grey),
+            style: TextStyle(fontSize: 16, color: Colors.grey, fontFamily: AppTheme.fontFamily),
           ),
         ],
       ],
