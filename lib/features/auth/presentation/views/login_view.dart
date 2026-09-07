@@ -69,7 +69,12 @@ class _LoginBodyState extends State<_LoginBody> {
   void _handleState(BuildContext context, LoginState state) {
     if (state.status == LoginStatus.success) {
       AppToast.success(context, 'تم تسجيل الدخول بنجاح');
-      Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+      // TODO: navigate to dashboard when ready
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.login,
+        (_) => false,
+      );
     } else if (state.status == LoginStatus.failure) {
       AppToast.error(context, state.errorMessage ?? 'حدث خطأ');
     }

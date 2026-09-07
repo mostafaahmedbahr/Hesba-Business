@@ -113,7 +113,11 @@ class _RegisterBodyState extends State<_RegisterBody> {
   void _handleState(BuildContext context, RegisterState state) {
     if (state.status == RegisterStatus.success) {
       AppToast.success(context, 'تم إنشاء الحساب بنجاح');
-      Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.login,
+        (_) => false,
+      );
     } else if (state.status == RegisterStatus.failure) {
       AppToast.error(context, state.errorMessage ?? 'حدث خطأ');
     }

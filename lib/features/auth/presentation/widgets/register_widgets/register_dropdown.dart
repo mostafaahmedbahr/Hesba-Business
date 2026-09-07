@@ -1,41 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class LoginTextField extends StatelessWidget {
-  final TextEditingController controller;
+class RegisterDropdown extends StatelessWidget {
   final String label;
   final String hint;
   final IconData icon;
-  final bool obscureText;
-  final Widget? suffixIcon;
-  final TextInputType? keyboardType;
+  final TextEditingController controller;
+  final List<String> items;
   final String? Function(String?)? validator;
 
-  const LoginTextField({
+  const RegisterDropdown({
     super.key,
-    required this.controller,
     required this.label,
     required this.hint,
     required this.icon,
-    this.obscureText = false,
-    this.suffixIcon,
-    this.keyboardType,
+    required this.controller,
+    required this.items,
     this.validator,
   });
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      obscureText: obscureText,
+    final currentValue = controller.text;
+    final hasValue = currentValue.isNotEmpty && items.contains(currentValue);
+
+    return DropdownButtonFormField<String>(
+      initialValue: hasValue ? currentValue : null,
       validator: validator,
       autovalidateMode: AutovalidateMode.onUserInteraction,
+      icon: const Icon(Icons.keyboard_arrow_down_rounded),
+      borderRadius: BorderRadius.circular(14.r),
+      dropdownColor: Colors.white,
+      elevation: 4,
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
         prefixIcon: Icon(icon),
-        suffixIcon: suffixIcon,
         filled: true,
         fillColor: const Color(0xFFF8FAFD),
         contentPadding: EdgeInsets.symmetric(
@@ -48,6 +48,14 @@ class LoginTextField extends StatelessWidget {
         errorBorder: _border(color: Colors.redAccent),
         focusedErrorBorder: _border(color: Colors.redAccent),
       ),
+      items: items
+          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+          .toList(),
+      onChanged: items.isEmpty
+          ? null
+          : (value) {
+              controller.text = value ?? '';
+            },
     );
   }
 

@@ -69,7 +69,9 @@ class RegisterNavigation extends StatelessWidget {
                 label: isLastStep ? 'إنشاء حساب' : 'التالي',
                 isLoading: isLoading,
                 isOutlined: false,
-                onPressed: isLoading ? null : () => _onPressed(context, isLastStep),
+                onPressed: isLoading
+                    ? null
+                    : () => _onPressed(context, isLastStep),
               ),
             ),
           ],
@@ -134,18 +136,13 @@ class RegisterNavigation extends StatelessWidget {
     if (isLastStep) {
       _submit(context);
     } else {
-      _nextOrValidate(context);
+      _nextStep(context);
     }
   }
 
-  void _nextOrValidate(BuildContext context) {
-    final step = context.read<RegisterCubit>().state.step;
-
-    if (step == 0 && _validateOwnerStep()) {
-      context.read<RegisterCubit>().nextStep();
-    } else if (step == 1 && _validateShopStep()) {
-      context.read<RegisterCubit>().nextStep();
-    }
+  void _nextStep(BuildContext context) {
+    if (!formKey.currentState!.validate()) return;
+    context.read<RegisterCubit>().nextStep();
   }
 
   void _submit(BuildContext context) {
@@ -175,48 +172,5 @@ class RegisterNavigation extends StatelessWidget {
           model: model,
           password: passwordController.text,
         );
-  }
-
-  bool _validateOwnerStep() {
-    return [
-      _required(ownerNameController.text, 'اكتب الاسم'),
-      _validateEmail(emailController.text),
-      _required(phoneController.text, 'اكتب رقم الهاتف'),
-      _validatePassword(passwordController.text),
-      _validateConfirmPassword(confirmPasswordController.text),
-    ].every((e) => e == null);
-  }
-
-  bool _validateShopStep() {
-    return [
-      _required(shopNameController.text, 'اكتب اسم المحل'),
-      _required(businessTypeController.text, 'اكتب نوع النشاط'),
-      _required(shopPhoneController.text, 'اكتب هاتف المحل'),
-      _required(addressController.text, 'اكتب العنوان'),
-      _required(cityController.text, 'اكتب المدينة'),
-      _required(stateController.text, 'اكتب المحافظة'),
-    ].every((e) => e == null);
-  }
-
-  String? _required(String value, String message) {
-    return value.trim().isEmpty ? message : null;
-  }
-
-  String? _validateEmail(String value) {
-    if (value.trim().isEmpty) return 'اكتب البريد الإلكتروني';
-    if (!value.contains('@')) return 'البريد الإلكتروني غير صحيح';
-    return null;
-  }
-
-  String? _validatePassword(String value) {
-    if (value.isEmpty) return 'اكتب كلمة المرور';
-    if (value.length < 6) return '6 أحرف على الأقل';
-    return null;
-  }
-
-  String? _validateConfirmPassword(String value) {
-    if (value.isEmpty) return 'أكد كلمة المرور';
-    if (value != passwordController.text) return 'كلمتا المرور غير متطابقتين';
-    return null;
   }
 }

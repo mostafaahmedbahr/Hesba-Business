@@ -24,6 +24,7 @@ class RegisterPasswordField extends StatelessWidget {
       controller: controller,
       obscureText: obscure,
       validator: validator,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: const Icon(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../../core/utils/toast.dart';
 import '../../cubit/login_cubit.dart';
 import '../../states/login_state.dart';
 import 'login_header.dart';
@@ -116,7 +117,9 @@ class _LoginFormState extends State<LoginForm> {
     return Align(
       alignment: Alignment.centerLeft,
       child: TextButton(
-        onPressed: () {},
+        onPressed: () {
+          AppToast.info(context, 'ستتوفر هذه الميزة قريباً');
+        },
         child: Text(
           'نسيت كلمة المرور؟',
           style: TextStyle(
