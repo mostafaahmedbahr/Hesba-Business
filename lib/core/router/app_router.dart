@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:hesba/core/router/app_routes.dart';
 import 'package:hesba/features/splash/presentation/screens/splash_screen.dart';
-
+import 'package:hesba/features/auth/presentation/views/login_view.dart';
+import 'package:hesba/features/auth/presentation/views/register_view.dart';
 
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -10,17 +11,14 @@ class AppRouter {
       case AppRoutes.splash:
         return _buildRoute(const SplashScreen(), settings);
 
-      // case AppRoutes.login:
-      //   return _buildRoute(const LoginView(), settings);
-      //
-      // case AppRoutes.register:
-      //   return _buildRoute(const RegisterScreen(), settings);
-      //
+      case AppRoutes.login:
+        return _buildRoute(const LoginView(), settings);
+
+      case AppRoutes.register:
+        return _buildRoute(const RegisterView(), settings);
+
       // case AppRoutes.resetPassword:
       //   return _buildRoute(const ResetPasswordScreen(), settings);
-      //
-      // case AppRoutes.shopRegistration:
-      //   return _buildRoute(const ShopRegistrationScreen(), settings);
 
       default:
         return _buildRoute(const SplashScreen(), settings);

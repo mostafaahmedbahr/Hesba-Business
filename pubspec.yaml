@@ -20,6 +20,7 @@ dependencies:
   # State Management
   flutter_bloc: ^9.1.1
   equatable: ^2.0.7
+  get_it: ^8.0.3
 
   # UI & Responsive
   flutter_screenutil: ^5.9.3
