@@ -1,149 +1,158 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:hesba/core/theme/app_theme.dart';
+
+import '../../../../core/theme/app_theme.dart';
 
 class SplashBackground extends StatelessWidget {
-  final Animation<double> animation;
-
-  const SplashBackground({
-    super.key,
-    required this.animation,
-  });
+  const SplashBackground({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Stack(
+      fit: StackFit.expand,
       children: [
-        /// Ripple circles
-        Positioned.fill(
-          child: AnimatedBuilder(
-            animation: animation,
-            builder: (context, child) {
-              return Stack(
-                alignment: Alignment.center,
-                children: List.generate(
-                  3,
-                      (index) {
-                    return _RippleCircle(
-                      animationValue: animation.value,
-                      index: index,
-                    );
-                  },
-                ),
-              );
-            },
-          ),
-        ),
-
-        /// Top right decoration
-        Positioned(
-          top: 90.h,
-          right: -45.w,
-          child: _DecorativeCircle(
-            size: 150.w,
-            color: AppTheme.secondaryColor.withValues(
-              alpha: 0.18,
+        const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+              colors: [
+                Color(0xff092D63),
+                Color(0xff061B3A),
+                Color(0xff04152D),
+              ],
             ),
           ),
         ),
 
-        /// Bottom left decoration
         Positioned(
-          bottom: 180.h,
-          left: -35.w,
-          child: _DecorativeCircle(
-            size: 110.w,
-            color: Colors.white.withValues(
-              alpha: 0.08,
-            ),
+          top: -150,
+          right: -100,
+          child: _GlowCircle(
+            size: 330,
+            color: AppTheme.primaryColor,
+          )
+              .animate(
+            onPlay: (controller) => controller.repeat(reverse: true),
+          )
+              .scale(
+            begin: const Offset(.9, .9),
+            end: const Offset(1.08, 1.08),
+            duration: 4.seconds,
           ),
         ),
 
-        /// Small decorative glow
         Positioned(
-          top: 180.h,
-          left: 30.w,
-          child: _DecorativeCircle(
-            size: 35.w,
-            color: AppTheme.secondaryColor.withValues(
-              alpha: 0.12,
-            ),
+          bottom: -180,
+          left: -120,
+          child: _GlowCircle(
+            size: 380,
+            color: AppTheme.secondaryColor,
+          )
+              .animate(
+            onPlay: (controller) => controller.repeat(reverse: true),
+          )
+              .scale(
+            begin: const Offset(1, 1),
+            end: const Offset(1.1, 1.1),
+            duration: 5.seconds,
           ),
         ),
+
+        Positioned(
+          top: MediaQuery.of(context).size.height * .28,
+          left: -100,
+          child: _GlowCircle(
+            size: 180,
+            color: AppTheme.primaryColor,
+            opacity: .08,
+          ),
+        ),
+
+        const _GridPattern(),
       ],
     );
   }
 }
 
-class _RippleCircle extends StatelessWidget {
-  final double animationValue;
-  final int index;
+class _GlowCircle extends StatelessWidget {
+  final double size;
+  final Color color;
+  final double opacity;
 
-  const _RippleCircle({
-    required this.animationValue,
-    required this.index,
+  const _GlowCircle({
+    required this.size,
+    required this.color,
+    this.opacity = .13,
   });
 
   @override
   Widget build(BuildContext context) {
-    final progress = (animationValue + (index * 0.25)) % 1.0;
-
-    final scale = 0.65 + (progress * 0.55);
-
-    final opacity = (1 - progress) * 0.10;
-
-    final size = 180.w + (index * 80.w);
-
-    return Transform.scale(
-      scale: scale,
+    return IgnorePointer(
       child: Container(
         width: size,
         height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(
-            color: Colors.white.withValues(
-              alpha: math.max(opacity, 0.01),
+          color: color.withValues(alpha: opacity),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: opacity),
+              blurRadius: 100,
+              spreadRadius: 30,
             ),
-            width: 1.2,
-          ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _DecorativeCircle extends StatelessWidget {
-  final double size;
-  final Color color;
-
-  const _DecorativeCircle({
-    required this.size,
-    required this.color,
-  });
+class _GridPattern extends StatelessWidget {
+  const _GridPattern();
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color,
+    return IgnorePointer(
+      child: Opacity(
+        opacity: .035,
+        child: CustomPaint(
+          painter: _GridPainter(),
+          size: Size.infinite,
+        ),
       ),
-    )
-        .animate()
-        .fadeIn(
-      duration: 500.ms,
-    )
-        .scale(
-      begin: const Offset(0.4, 0.4),
-      end: const Offset(1, 1),
-      duration: 800.ms,
-      curve: Curves.elasticOut,
     );
+  }
+}
+
+class _GridPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white
+      ..strokeWidth = .5;
+
+    const spacing = 45.0;
+
+    for (double x = 0; x < size.width; x += spacing) {
+      canvas.drawLine(
+        Offset(x, 0),
+        Offset(x, size.height),
+        paint,
+      );
+    }
+
+    for (double y = 0; y < size.height; y += spacing) {
+      canvas.drawLine(
+        Offset(0, y),
+        Offset(size.width, y),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
   }
 }
