@@ -47,15 +47,20 @@ class _RegisterShopStepState extends State<RegisterShopStep> {
 
   void _onGovernorateChanged() {
     final selected = widget.stateController.text;
+    print('[RegisterShopStep] _onGovernorateChanged() called. Selected: "$selected"');
     setState(() => _updateCenters(selected));
+    print('[RegisterShopStep] Available centers: $_availableCenters');
     if (widget.cityController.text.isNotEmpty &&
         !_availableCenters.contains(widget.cityController.text)) {
+      print('[RegisterShopStep] City "${widget.cityController.text}" not in new centers — clearing');
       widget.cityController.clear();
     }
   }
 
   void _updateCenters(String governorate) {
+    print('[RegisterShopStep] _updateCenters() called for: "$governorate"');
     _availableCenters = GovernorateData.getCenters(governorate);
+    print('[RegisterShopStep] _updateCenters() result: ${_availableCenters.length} centers');
   }
 
   @override

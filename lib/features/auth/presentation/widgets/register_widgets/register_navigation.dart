@@ -133,6 +133,7 @@ class RegisterNavigation extends StatelessWidget {
   }
 
   void _onPressed(BuildContext context, bool isLastStep) {
+    print('[RegisterNavigation] _onPressed() called. isLastStep: $isLastStep');
     if (isLastStep) {
       _submit(context);
     } else {
@@ -141,12 +142,22 @@ class RegisterNavigation extends StatelessWidget {
   }
 
   void _nextStep(BuildContext context) {
-    if (!formKey.currentState!.validate()) return;
+    print('[RegisterNavigation] _nextStep() called');
+    if (!formKey.currentState!.validate()) {
+      print('[RegisterNavigation] Form validation FAILED — stopping');
+      return;
+    }
+    print('[RegisterNavigation] Form validation PASSED — calling cubit.nextStep()');
     context.read<RegisterCubit>().nextStep();
   }
 
   void _submit(BuildContext context) {
-    if (!formKey.currentState!.validate()) return;
+    print('[RegisterNavigation] _submit() called');
+    if (!formKey.currentState!.validate()) {
+      print('[RegisterNavigation] Form validation FAILED — stopping');
+      return;
+    }
+    print('[RegisterNavigation] Form validation PASSED');
 
     final now = DateTime.now();
     final model = RegisterModel(
@@ -168,6 +179,20 @@ class RegisterNavigation extends StatelessWidget {
       isActive: true,
     );
 
+    print('[RegisterNavigation] RegisterModel created:');
+    print('  ownerName: ${model.ownerName}');
+    print('  email: ${model.email}');
+    print('  phone: ${model.phone}');
+    print('  shopName: ${model.shopName}');
+    print('  businessType: ${model.businessType}');
+    print('  shopPhone: ${model.shopPhone}');
+    print('  locationUrl: ${model.locationUrl}');
+    print('  shopImageUrl: ${model.shopImageUrl}');
+    print('  address: ${model.address}');
+    print('  city: ${model.city}');
+    print('  state: ${model.state}');
+
+    print('[RegisterNavigation] calling cubit.register()...');
     context.read<RegisterCubit>().register(
           model: model,
           password: passwordController.text,

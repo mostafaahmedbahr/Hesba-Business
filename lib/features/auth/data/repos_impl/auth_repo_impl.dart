@@ -21,10 +21,18 @@ class AuthRepoImpl implements AuthRepo {
     required String email,
     required String password,
   }) async {
-    await firebaseAuth.signInWithEmailAndPassword(
-      email: email.trim(),
-      password: password,
-    );
+    print('[AuthRepoImpl] login() called with email: ${email.trim()}');
+    try {
+      print('[AuthRepoImpl] calling firebaseAuth.signInWithEmailAndPassword...');
+      await firebaseAuth.signInWithEmailAndPassword(
+        email: email.trim(),
+        password: password,
+      );
+      print('[AuthRepoImpl] login success! User: ${firebaseAuth.currentUser?.uid}');
+    } catch (e) {
+      print('[AuthRepoImpl] login FAILED: $e');
+      rethrow;
+    }
   }
 
   @override
@@ -32,7 +40,9 @@ class AuthRepoImpl implements AuthRepo {
     required RegisterModel model,
     required String password,
   }) async {
+    print('[AuthRepoImpl] register() called with email: ${model.email}');
     // 1. Create Firebase Authentication account
+    print('[AuthRepoImpl] creating Firebase Auth account...');
     final credential =
     await firebaseAuth.createUserWithEmailAndPassword(
       email: model.email.trim(),
@@ -42,12 +52,15 @@ class AuthRepoImpl implements AuthRepo {
     final user = credential.user;
 
     if (user == null) {
+      print('[AuthRepoImpl] register FAILED: user is null after creation');
       throw Exception('فشل إنشاء الحساب');
     }
+    print('[AuthRepoImpl] Firebase Auth account created. UID: ${user.uid}');
 
     // 2. Generate shop ID
     final shopRef =
     firestore.collection('shops').doc();
+    print('[AuthRepoImpl] generated shopId: ${shopRef.id}');
 
     final now = DateTime.now();
 
@@ -72,12 +85,15 @@ class AuthRepoImpl implements AuthRepo {
     );
 
     // 4. Save owner data
+    print('[AuthRepoImpl] saving owner data to users/${user.uid}...');
     await firestore
         .collection('users')
         .doc(user.uid)
         .set(registerModel.toJson());
+    print('[AuthRepoImpl] owner data saved successfully');
 
     // 5. Save shop data
+    print('[AuthRepoImpl] saving shop data to shops/${shopRef.id}...');
     await shopRef.set({
       'shopId': shopRef.id,
       'ownerId': user.uid,
@@ -93,7 +109,9 @@ class AuthRepoImpl implements AuthRepo {
       'updatedAt': Timestamp.fromDate(now),
       'isActive': true,
     });
+    print('[AuthRepoImpl] shop data saved successfully');
 
+    print('[AuthRepoImpl] register() completed successfully');
     return registerModel;
   }
 }
