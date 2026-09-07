@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:hesba/core/utils/toast.dart';
 
@@ -8,8 +8,8 @@ class ConnectivityService {
   factory ConnectivityService() => _instance;
   ConnectivityService._internal();
 
-  final Connectivity _connectivity = Connectivity();
-  StreamSubscription<List<ConnectivityResult>>? _subscription;
+  final InternetConnection _connection = InternetConnection();
+  StreamSubscription<InternetStatus>? _subscription;
   bool _isConnected = true;
   BuildContext? _context;
 
@@ -17,10 +17,10 @@ class ConnectivityService {
 
   void initialize(BuildContext context) {
     _context = context;
-    _subscription = _connectivity.onConnectivityChanged.listen((results) {
-      final result = results.isNotEmpty ? results.first : ConnectivityResult.none;
+
+    _connection.onStatusChange.listen((status) {
       final wasConnected = _isConnected;
-      _isConnected = result != ConnectivityResult.none;
+      _isConnected = status == InternetStatus.connected;
 
       if (_context == null || !_context!.mounted) return;
 
@@ -30,6 +30,11 @@ class ConnectivityService {
         AppToast.success(_context!, 'تم الاتصال بالإنترنت');
       }
     });
+  }
+
+  Future<bool> checkConnection() async {
+    _isConnected = await _connection.hasInternetAccess;
+    return _isConnected;
   }
 
   void dispose() {
