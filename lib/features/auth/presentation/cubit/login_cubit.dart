@@ -46,7 +46,8 @@ class LoginCubit extends Cubit<LoginState> {
     if (msg.contains('user-disabled')) return 'هذا الحساب معطل';
     if (msg.contains('too-many-requests')) return 'محاولات كثيرة، حاول مرة أخرى لاحقاً';
     if (msg.contains('invalid-credential')) return 'بيانات الدخول غير صحيحة';
-    print('[LoginCubit] _mapError() returning default error');
-    return 'حدث خطأ، يرجى المحاولة مرة أخرى';
+    if (msg.contains('network-request-failed')) return 'تحقق من اتصال الإنترنت';
+    print('[LoginCubit] _mapError() returning UNMATCHED error: $msg');
+    return 'حدث خطأ: $msg';
   }
 }

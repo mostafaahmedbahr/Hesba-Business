@@ -71,7 +71,9 @@ class RegisterCubit extends Cubit<RegisterState> {
     if (msg.contains('email-already-in-use')) return 'البريد الإلكتروني مستخدم بالفعل';
     if (msg.contains('invalid-email')) return 'البريد الإلكتروني غير صالح';
     if (msg.contains('weak-password')) return 'كلمة المرور ضعيفة جداً';
-    print('[RegisterCubit] _mapError() returning default error');
-    return 'حدث خطأ، يرجى المحاولة مرة أخرى';
+    if (msg.contains('permission-denied')) return 'حدث خطأ في قاعدة البيانات — راجع قواعد الأمان في Firebase';
+    if (msg.contains('network-request-failed')) return 'تحقق من اتصال الإنترنت';
+    print('[RegisterCubit] _mapError() returning UNMATCHED error: $msg');
+    return 'حدث خطأ: $msg';
   }
 }
