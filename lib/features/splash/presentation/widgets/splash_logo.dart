@@ -58,7 +58,7 @@ class SplashLogo extends StatelessWidget {
           child: Image.asset(
             'assets/images/playstore.png',
             fit: BoxFit.contain,
-            errorBuilder: (_, _, __) {
+            errorBuilder: (context, error, stackTrace) {
               return Icon(
                 Icons.calculate_rounded,
                 size: 65.sp,
