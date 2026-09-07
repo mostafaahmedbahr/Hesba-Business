@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hesba/core/utils/toast.dart';
 import 'package:hesba/core/widgets/custom_button.dart';
 import 'package:hesba/core/widgets/custom_text_field.dart';
@@ -7,6 +8,7 @@ import 'package:hesba/core/utils/validators.dart';
 import 'package:hesba/core/theme/app_theme.dart';
 import 'package:hesba/features/auth/presentation/view_model/auth_cubit.dart';
 import 'package:hesba/features/auth/presentation/view_model/auth_states.dart';
+import 'package:hesba/features/auth/presentation/widgets/auth_header.dart';
 import 'package:hesba/features/auth/presentation/widgets/auth_footer.dart';
 import 'package:hesba/features/auth/presentation/widgets/email_field.dart';
 import 'package:hesba/features/auth/presentation/widgets/password_field.dart';
@@ -51,91 +53,141 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('إنشاء حساب')),
+      appBar: AppBar(
+        title: const Text('إنشاء حساب'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      extendBodyBehindAppBar: true,
       body: BlocListener<AuthCubit, AuthState>(
         listener: _handleAuthState,
-        child: SafeArea(
-          child: Center(
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                AppTheme.primaryColor,
+                AppTheme.backgroundColor,
+              ],
+              stops: [0.2, 0.2],
+            ),
+          ),
+          child: SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
+              padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Form(
                 key: _formKey,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(
-                      'مرحباً بك في حسبة',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.primaryColor,
-                        fontFamily: AppTheme.fontFamily,
-                      ),
-                      textAlign: TextAlign.center,
+                    SizedBox(height: 20.h),
+                    const AuthHeader(
+                      showLogo: true,
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'أنشئ حسابك وابدأ إدارة محلك',
-                      style: TextStyle(fontSize: 14, color: Colors.grey, fontFamily: AppTheme.fontFamily),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 32),
-                    CustomTextField(
-                      controller: _nameController,
-                      labelText: 'اسمك',
-                      prefixIcon: Icons.person_outlined,
-                      validator: (v) => Validators.required(v, 'أدخل اسمك'),
-                    ),
-                    const SizedBox(height: 16),
-                    CustomTextField(
-                      controller: _shopNameController,
-                      labelText: 'اسم المحل',
-                      prefixIcon: Icons.store_outlined,
-                      validator: (v) => Validators.required(v, 'أدخل اسم المحل'),
-                    ),
-                    const SizedBox(height: 16),
-                    EmailField(controller: _emailController),
-                    const SizedBox(height: 16),
-                    PasswordField(
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      onToggleVisibility: () {
-                        setState(() => _obscurePassword = !_obscurePassword);
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    PasswordField(
-                      controller: _confirmPasswordController,
-                      labelText: 'تأكيد كلمة المرور',
-                      obscureText: true,
-                      onToggleVisibility: () {},
-                      validator: (v) => Validators.confirmPassword(
-                        v,
-                        _passwordController.text,
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    BlocBuilder<AuthCubit, AuthState>(
-                      builder: (context, state) {
-                        return CustomButton(
-                          text: 'إنشاء حساب',
-                          isLoading: state is AuthLoading,
-                          onPressed: _onRegister,
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 24.h),
+                    _buildFormCard(),
+                    SizedBox(height: 24.h),
                     AuthFooter(
                       questionText: 'لديك حساب بالفعل؟ ',
                       actionText: 'تسجيل الدخول',
                       onAction: () => Navigator.pop(context),
                     ),
+                    SizedBox(height: 24.h),
                   ],
                 ),
               ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildFormCard() {
+    return Container(
+      padding: EdgeInsets.all(24.w),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceColor,
+        borderRadius: BorderRadius.circular(20.r),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryColor.withValues(alpha: 0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'إنشاء حساب جديد',
+            style: TextStyle(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.textPrimary,
+              fontFamily: AppTheme.fontFamily,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            'أدخل بياناتك لإنشاء حساب',
+            style: TextStyle(
+              fontSize: 13.sp,
+              color: AppTheme.textSecondary,
+              fontFamily: AppTheme.fontFamily,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 24.h),
+          CustomTextField(
+            controller: _nameController,
+            labelText: 'الاسم الكامل',
+            prefixIcon: Icons.person_outlined,
+            validator: (v) => Validators.required(v, 'أدخل اسمك'),
+          ),
+          SizedBox(height: 16.h),
+          CustomTextField(
+            controller: _shopNameController,
+            labelText: 'اسم المحل',
+            prefixIcon: Icons.store_outlined,
+            validator: (v) => Validators.required(v, 'أدخل اسم المحل'),
+          ),
+          SizedBox(height: 16.h),
+          EmailField(controller: _emailController),
+          SizedBox(height: 16.h),
+          PasswordField(
+            controller: _passwordController,
+            obscureText: _obscurePassword,
+            onToggleVisibility: () {
+              setState(() => _obscurePassword = !_obscurePassword);
+            },
+          ),
+          SizedBox(height: 16.h),
+          PasswordField(
+            controller: _confirmPasswordController,
+            labelText: 'تأكيد كلمة المرور',
+            obscureText: true,
+            onToggleVisibility: () {},
+            validator: (v) => Validators.confirmPassword(
+              v,
+              _passwordController.text,
+            ),
+          ),
+          SizedBox(height: 24.h),
+          BlocBuilder<AuthCubit, AuthState>(
+            builder: (context, state) {
+              return CustomButton(
+                text: 'إنشاء حساب',
+                isLoading: state is AuthLoading,
+                onPressed: _onRegister,
+              );
+            },
+          ),
+        ],
       ),
     );
   }

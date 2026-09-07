@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hesba/core/utils/toast.dart';
 import 'package:hesba/core/widgets/custom_button.dart';
 import 'package:hesba/core/theme/app_theme.dart';
@@ -60,66 +61,114 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: BlocListener<AuthCubit, AuthState>(
         listener: _handleAuthState,
-        child: SafeArea(
-          child: Center(
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                AppTheme.primaryColor,
+                AppTheme.backgroundColor,
+              ],
+              stops: [0.3, 0.3],
+            ),
+          ),
+          child: SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
+              padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Form(
                 key: _formKey,
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    SizedBox(height: 40.h),
                     const AuthHeader(
-                      icon: Icons.store,
                       title: 'حسبة',
                       subtitle: 'نظام إدارة المحلات',
                     ),
-                    const SizedBox(height: 48),
-                    EmailField(controller: _emailController),
-                    const SizedBox(height: 16),
-                    PasswordField(
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      onToggleVisibility: () {
-                        setState(() => _obscurePassword = !_obscurePassword);
-                      },
-                    ),
-                    const SizedBox(height: 8),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: TextButton(
-                        onPressed: _navigateToResetPassword,
-                        child: const Text(
-                          'نسيت كلمة المرور؟',
-                          style: TextStyle(
-                            color: AppTheme.primaryColor,
-                            fontFamily: AppTheme.fontFamily,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    BlocBuilder<AuthCubit, AuthState>(
-                      builder: (context, state) {
-                        return CustomButton(
-                          text: 'تسجيل الدخول',
-                          isLoading: state is AuthLoading,
-                          onPressed: _onLogin,
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 40.h),
+                    _buildFormCard(),
+                    SizedBox(height: 24.h),
                     AuthFooter(
                       questionText: 'ليس لديك حساب؟ ',
                       actionText: 'إنشاء حساب',
                       onAction: _navigateToRegister,
                     ),
+                    SizedBox(height: 24.h),
                   ],
                 ),
               ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildFormCard() {
+    return Container(
+      padding: EdgeInsets.all(24.w),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceColor,
+        borderRadius: BorderRadius.circular(20.r),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryColor.withValues(alpha: 0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'تسجيل الدخول',
+            style: TextStyle(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.textPrimary,
+              fontFamily: AppTheme.fontFamily,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 24.h),
+          EmailField(controller: _emailController),
+          SizedBox(height: 16.h),
+          PasswordField(
+            controller: _passwordController,
+            obscureText: _obscurePassword,
+            onToggleVisibility: () {
+              setState(() => _obscurePassword = !_obscurePassword);
+            },
+          ),
+          SizedBox(height: 8.h),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              onPressed: _navigateToResetPassword,
+              child: Text(
+                'نسيت كلمة المرور؟',
+                style: TextStyle(
+                  color: AppTheme.secondaryColor,
+                  fontFamily: AppTheme.fontFamily,
+                  fontSize: 13.sp,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(height: 16.h),
+          BlocBuilder<AuthCubit, AuthState>(
+            builder: (context, state) {
+              return CustomButton(
+                text: 'تسجيل الدخول',
+                isLoading: state is AuthLoading,
+                onPressed: _onLogin,
+              );
+            },
+          ),
+        ],
       ),
     );
   }

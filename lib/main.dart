@@ -9,6 +9,7 @@ import 'package:hesba/features/auth/data/repos_impl/auth_repo_impl.dart';
 import 'package:hesba/features/auth/presentation/view_model/auth_cubit.dart';
 import 'package:hesba/features/auth/presentation/view_model/auth_states.dart';
 import 'package:hesba/features/auth/presentation/views/login_screen.dart';
+import 'package:hesba/features/splash/splash_screen.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -41,7 +42,9 @@ class HesbaApp extends StatelessWidget {
               title: 'حسبة',
               debugShowCheckedModeBanner: false,
               theme: AppTheme.lightTheme,
-              home: const AuthWrapper(),
+              home: SplashScreen(
+                nextScreen: const AuthWrapper(),
+              ),
             ),
           ),
         );

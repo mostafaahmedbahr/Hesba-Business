@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static const Color primaryColor = Color(0xFF6C63FF);
-  static const Color secondaryColor = Color(0xFF2D2D2D);
-  static const Color backgroundColor = Color(0xFFF5F5F8);
-  static const Color errorColor = Color(0xFFFF6B6B);
-  static const Color successColor = Color(0xFF4CAF50);
+  // Colors extracted from Hesba logo
+  static const Color primaryColor = Color(0xFF1A4FD6);      // Main Blue
+  static const Color primaryDark = Color(0xFF0F2D8A);       // Dark Blue
+  static const Color primaryLight = Color(0xFF3B6FF5);      // Light Blue
+  static const Color secondaryColor = Color(0xFFF5A623);    // Yellow/Gold
+  static const Color secondaryDark = Color(0xFFD4901A);     // Dark Gold
+  static const Color backgroundColor = Color(0xFFF5F7FA);   // Light Background
+  static const Color surfaceColor = Color(0xFFFFFFFF);      // White
+  static const Color errorColor = Color(0xFFFF6B6B);        // Red
+  static const Color successColor = Color(0xFF4CAF50);      // Green
+  static const Color textPrimary = Color(0xFF1A1A2E);       // Dark Text
+  static const Color textSecondary = Color(0xFF6B7280);     // Gray Text
+  static const Color textLight = Color(0xFFFFFFFF);         // White Text
 
   static const String fontFamily = 'Cairo';
 
@@ -16,24 +24,27 @@ class AppTheme {
       colorScheme: ColorScheme.fromSeed(
         seedColor: primaryColor,
         brightness: Brightness.light,
+        primary: primaryColor,
+        secondary: secondaryColor,
+        surface: surfaceColor,
       ),
       scaffoldBackgroundColor: backgroundColor,
       appBarTheme: AppBarTheme(
         backgroundColor: primaryColor,
-        foregroundColor: Colors.white,
+        foregroundColor: textLight,
         elevation: 0,
         centerTitle: true,
         titleTextStyle: const TextStyle(
           fontFamily: fontFamily,
           fontSize: 20,
           fontWeight: FontWeight.bold,
-          color: Colors.white,
+          color: textLight,
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
-          foregroundColor: Colors.white,
+          foregroundColor: textLight,
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -47,7 +58,7 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.white,
+        fillColor: surfaceColor,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
@@ -65,7 +76,7 @@ class AppTheme {
           borderSide: const BorderSide(color: errorColor),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        hintStyle: TextStyle(color: Colors.grey, fontFamily: fontFamily),
+        hintStyle: TextStyle(color: textSecondary, fontFamily: fontFamily),
       ),
     );
   }

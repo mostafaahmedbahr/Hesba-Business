@@ -24,6 +24,7 @@ dependencies:
   # UI & Responsive
   flutter_screenutil: ^5.9.3
   cached_network_image: ^3.4.1
+  flutter_animate: ^4.5.2
 
   # Connectivity
   internet_connection_checker_plus: ^2.7.3
@@ -39,3 +40,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/images/
