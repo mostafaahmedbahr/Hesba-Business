@@ -8,7 +8,7 @@ import 'package:hesba/core/services/connectivity_service.dart';
 import 'package:hesba/features/auth/data/repos_impl/auth_repo_impl.dart';
 import 'package:hesba/features/auth/presentation/view_model/auth_cubit.dart';
 import 'package:hesba/features/auth/presentation/view_model/auth_states.dart';
-import 'package:hesba/features/auth/presentation/views/login_screen.dart';
+import 'package:hesba/features/auth/presentation/views/login_view.dart';
 import 'package:hesba/features/splash/presentation/views/splash_view.dart';
 import 'firebase_options.dart';
 
@@ -84,7 +84,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
             ),
           );
         }
-        return const LoginScreen();
+        return const LoginView();
       },
     );
   }
