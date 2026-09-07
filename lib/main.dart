@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:ui' as ui;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -66,6 +67,7 @@ class _AppRoot extends StatelessWidget {
           splitScreenMode: true,
           builder: (context, child) {
             return MaterialApp(
+              key: ValueKey(context.locale),
               title: 'حسبة',
               debugShowCheckedModeBanner: false,
               theme: AppTheme.lightTheme,
@@ -76,6 +78,14 @@ class _AppRoot extends StatelessWidget {
               locale: context.locale,
               initialRoute: AppRoutes.splash,
               onGenerateRoute: AppRouter.onGenerateRoute,
+              builder: (context, child) {
+                return Directionality(
+                  textDirection: context.locale.languageCode == 'ar'
+                      ? ui.TextDirection.rtl
+                      : ui.TextDirection.ltr,
+                  child: child!,
+                );
+              },
             );
           },
         );
