@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "877017690588",
+    "project_id": "hesba-business",
+    "storage_bucket": "hesba-business.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:877017690588:android:60325e8186b7900a545f19",
+        "android_client_info": {
+          "package_name": "com.zerobugs.hesba"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB-i2ZUVDajVTsAZuctQRIRYDf7GF0aVqs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
