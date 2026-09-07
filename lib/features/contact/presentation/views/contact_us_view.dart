@@ -84,33 +84,33 @@ class _ContactUsViewState extends State<ContactUsView> {
   }
 
   Future<void> _openEmail() async {
-    final uri = Uri(
-      scheme: 'mailto',
-      path: _email,
-      queryParameters: {'subject': 'دعم حسبة'},
-    );
-    if (await canLaunchUrl(uri)) {
+    try {
+      final uri = Uri(
+        scheme: 'mailto',
+        path: _email,
+        queryParameters: {'subject': 'دعم حسبة'},
+      );
       await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else if (mounted) {
-      AppToast.error(context, 'لا يوجد تطبيق بريد إلكتروني');
+    } catch (_) {
+      if (mounted) AppToast.error(context, 'لا يوجد تطبيق بريد إلكتروني');
     }
   }
 
   Future<void> _openWhatsApp() async {
-    final uri = Uri.parse('https://wa.me/$_whatsapp');
-    if (await canLaunchUrl(uri)) {
+    try {
+      final uri = Uri.parse('https://wa.me/$_whatsapp');
       await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else if (mounted) {
-      AppToast.error(context, 'واتساب غير مثبت على الجهاز');
+    } catch (_) {
+      if (mounted) AppToast.error(context, 'واتساب غير مثبت على الجهاز');
     }
   }
 
   Future<void> _openDialer() async {
-    final uri = Uri(scheme: 'tel', path: _phone);
-    if (await canLaunchUrl(uri)) {
+    try {
+      final uri = Uri(scheme: 'tel', path: _phone);
       await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else if (mounted) {
-      AppToast.error(context, 'لا يمكن فتح قائمة الاتصال');
+    } catch (_) {
+      if (mounted) AppToast.error(context, 'لا يمكن فتح قائمة الاتصال');
     }
   }
 
