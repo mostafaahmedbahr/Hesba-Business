@@ -1,8 +1,12 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/service_locator.dart';
+import '../../../../core/services/notification_service.dart';
 import '../../../dashboard/presentation/cubit/dashboard_cubit.dart';
+import '../../../notifications/data/repos/notification_repo.dart';
+import '../../../notifications/presentation/cubit/notification_cubit.dart';
 import 'home_view.dart';
 import 'more_view.dart';
 import 'products_view.dart';
@@ -33,9 +37,31 @@ class _MainLayoutState extends State<MainLayout> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<NotificationCubit>().ensureReminderScheduled(
+            title: 'notifReminderPushTitle'.tr(),
+            body: 'notifReminderPushBody'.tr(),
+          );
+      // Register/refresh the device FCM token at every launch so push
+      // messages actually arrive (requesting permission is a no-op once granted).
+      NotificationService().setupFcm();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => DashboardCubit(repo: sl())..init(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => DashboardCubit(repo: sl())..init(),
+        ),
+        BlocProvider(
+          create: (_) => NotificationCubit(repo: sl<NotificationRepo>()),
+        ),
+      ],
       child: Scaffold(
         body: IndexedStack(
           index: _currentIndex,

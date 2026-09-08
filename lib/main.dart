@@ -8,6 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hesba/core/di/service_locator.dart';
 import 'package:hesba/core/router/app_router.dart';
 import 'package:hesba/core/router/app_routes.dart';
+import 'package:hesba/core/services/notification_service.dart';
 import 'package:hesba/core/theme/app_theme.dart';
 import 'package:hesba/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:hesba/features/settings/presentation/states/settings_state.dart';
@@ -15,6 +16,7 @@ import 'package:hesba/features/settings/presentation/states/settings_state.dart'
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await NotificationService().initialize();
   await initDependencies();
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,

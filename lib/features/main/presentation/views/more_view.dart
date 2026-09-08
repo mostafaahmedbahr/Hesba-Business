@@ -15,6 +15,7 @@ import '../../../profile/presentation/views/profile_view.dart';
 import '../../../profile/presentation/views/update_profile_view.dart';
 import '../../../settings/presentation/cubit/settings_cubit.dart';
 import '../../../settings/presentation/states/settings_state.dart';
+import '../../../notifications/presentation/views/notifications_view.dart';
 import '../widgets/main_app_bar.dart';
 
 class MoreView extends StatelessWidget {
@@ -48,6 +49,15 @@ class MoreView extends StatelessWidget {
                 label: 'moreChangePassword'.tr(),
                 color: const Color(0xFF7C4DFF),
                 onTap: () => _navigateTo(context, const ChangePasswordView()),
+              ),
+            ]),
+            SizedBox(height: 20.h),
+            _SectionCard('moreNotifications'.tr(), [
+              MoreItem(
+                icon: Icons.notifications_active_rounded,
+                label: 'moreNotificationsTitle'.tr(),
+                color: const Color(0xFF00ACC1),
+                onTap: () => _navigateTo(context, const NotificationsView()),
               ),
             ]),
             SizedBox(height: 20.h),

@@ -3,12 +3,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../core/services/notification_service.dart';
 import '../../features/auth/data/repos/auth_repo.dart';
 import '../../features/auth/data/repos_impl/auth_repo_impl.dart';
 import '../../features/contact/data/repos/contact_repo.dart';
 import '../../features/contact/data/repos_impl/contact_repo_impl.dart';
 import '../../features/dashboard/data/repos/dashboard_repo.dart';
 import '../../features/dashboard/data/repos_impl/dashboard_repo_impl.dart';
+import '../../features/notifications/data/repos/notification_repo.dart';
+import '../../features/notifications/data/repos_impl/notification_repo_impl.dart';
 import '../../features/profile/data/repos/account_repo.dart';
 import '../../features/profile/data/repos_impl/account_repo_impl.dart';
 import '../../features/settings/data/repos/preferences_repo.dart';
@@ -25,6 +28,7 @@ Future<void> initDependencies() async {
   _initProfile();
   _initContact();
   _initDashboard();
+  _initNotifications();
 }
 
 void _initAuth() {
@@ -68,6 +72,15 @@ void _initDashboard() {
     () => DashboardRepoImpl(
       auth: sl<FirebaseAuth>(),
       firestore: sl<FirebaseFirestore>(),
+    ),
+  );
+}
+
+void _initNotifications() {
+  sl.registerLazySingleton<NotificationRepo>(
+    () => NotificationRepoImpl(
+      sl<SharedPreferences>(),
+      NotificationService(),
     ),
   );
 }
