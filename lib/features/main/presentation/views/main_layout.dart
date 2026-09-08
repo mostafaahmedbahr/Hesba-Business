@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/di/service_locator.dart';
+import '../../../dashboard/presentation/cubit/dashboard_cubit.dart';
 import 'home_view.dart';
 import 'more_view.dart';
 import 'products_view.dart';
@@ -31,14 +34,17 @@ class _MainLayoutState extends State<MainLayout> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
-      ),
-      bottomNavigationBar: ModernBottomNav(
-        currentIndex: _currentIndex,
-        onTap: _onTabSelected,
+    return BlocProvider(
+      create: (_) => DashboardCubit(repo: sl())..init(),
+      child: Scaffold(
+        body: IndexedStack(
+          index: _currentIndex,
+          children: _pages,
+        ),
+        bottomNavigationBar: ModernBottomNav(
+          currentIndex: _currentIndex,
+          onTap: _onTabSelected,
+        ),
       ),
     );
   }
