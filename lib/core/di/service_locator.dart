@@ -14,6 +14,8 @@ import '../../features/notifications/data/repos/notification_repo.dart';
 import '../../features/notifications/data/repos_impl/notification_repo_impl.dart';
 import '../../features/profile/data/repos/account_repo.dart';
 import '../../features/profile/data/repos_impl/account_repo_impl.dart';
+import '../../features/products/data/repos/products_repo.dart';
+import '../../features/products/data/repos_impl/products_repo_impl.dart';
 import '../../features/settings/data/repos/preferences_repo.dart';
 import '../../features/settings/data/repos_impl/preferences_repo_impl.dart';
 
@@ -29,6 +31,7 @@ Future<void> initDependencies() async {
   _initContact();
   _initDashboard();
   _initNotifications();
+  _initProducts();
 }
 
 void _initAuth() {
@@ -81,6 +84,15 @@ void _initNotifications() {
     () => NotificationRepoImpl(
       sl<SharedPreferences>(),
       NotificationService(),
+    ),
+  );
+}
+
+void _initProducts() {
+  sl.registerLazySingleton<ProductsRepo>(
+    () => ProductsRepoImpl(
+      auth: sl<FirebaseAuth>(),
+      firestore: sl<FirebaseFirestore>(),
     ),
   );
 }

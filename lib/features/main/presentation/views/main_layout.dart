@@ -8,10 +8,10 @@ import '../../../notifications/data/repos/notification_repo.dart';
 import '../../../notifications/presentation/cubit/notification_cubit.dart';
 import 'home_view.dart';
 import 'more_view.dart';
-import 'products_view.dart';
 import 'reports_view.dart';
 import 'sales_view.dart';
 import '../widgets/modern_bottom_nav.dart';
+import '../../../products/presentation/views/products_view.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
@@ -23,6 +23,42 @@ class MainLayout extends StatefulWidget {
 class _MainLayoutState extends State<MainLayout> {
   int _currentIndex = 0;
 
+  void _onTabSelected(int index) {
+    setState(() => _currentIndex = index);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => DashboardCubit(repo: sl())..init(),
+        ),
+        BlocProvider(
+          create: (_) => NotificationCubit(repo: sl<NotificationRepo>()),
+        ),
+      ],
+      // _MainShell sits BELOW the providers, so its own context can safely
+      // read them during initState's postFrameCallback.
+      child: _MainShell(currentIndex: _currentIndex, onTabSelected: _onTabSelected),
+    );
+  }
+}
+
+class _MainShell extends StatefulWidget {
+  final int currentIndex;
+  final ValueChanged<int> onTabSelected;
+
+  const _MainShell({
+    required this.currentIndex,
+    required this.onTabSelected,
+  });
+
+  @override
+  State<_MainShell> createState() => _MainShellState();
+}
+
+class _MainShellState extends State<_MainShell> {
   static const List<Widget> _pages = [
     HomeView(),
     ProductsView(),
@@ -30,10 +66,6 @@ class _MainLayoutState extends State<MainLayout> {
     ReportsView(),
     MoreView(),
   ];
-
-  void _onTabSelected(int index) {
-    setState(() => _currentIndex = index);
-  }
 
   @override
   void initState() {
@@ -49,24 +81,14 @@ class _MainLayoutState extends State<MainLayout> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (_) => DashboardCubit(repo: sl())..init(),
-        ),
-        BlocProvider(
-          create: (_) => NotificationCubit(repo: sl<NotificationRepo>()),
-        ),
-      ],
-      child: Scaffold(
-        body: IndexedStack(
-          index: _currentIndex,
-          children: _pages,
-        ),
-        bottomNavigationBar: ModernBottomNav(
-          currentIndex: _currentIndex,
-          onTap: _onTabSelected,
-        ),
+    return Scaffold(
+      body: IndexedStack(
+        index: widget.currentIndex,
+        children: _pages,
+      ),
+      bottomNavigationBar: ModernBottomNav(
+        currentIndex: widget.currentIndex,
+        onTap: widget.onTabSelected,
       ),
     );
   }
