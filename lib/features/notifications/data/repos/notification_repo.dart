@@ -1,11 +1,7 @@
+import '../../../../core/models/local_reminder.dart';
+
 /// Operations for the notifications feature.
 abstract class NotificationRepo {
-  /// Whether the hourly reminder is enabled.
-  Future<bool> getRemindersEnabled();
-
-  /// Persists the hourly reminder toggle.
-  Future<void> setRemindersEnabled(bool enabled);
-
   /// Requests notification permission from the OS.
   Future<bool> requestPermissions();
 
@@ -15,18 +11,19 @@ abstract class NotificationRepo {
   /// Returns the current FCM registration token for this device.
   Future<String?> getFcmToken();
 
-  /// Schedules the repeating hourly reminder.
-  Future<void> scheduleReminder({
-    required String title,
-    required String body,
-  });
-
-  /// Cancels the scheduled hourly reminder.
-  Future<void> cancelReminder();
-
   /// Shows one immediate local notification.
   Future<void> sendTestNotification({
     required String title,
     required String body,
   });
+
+  /// Loads the local reminders list from storage. On first run it seeds the
+  /// provided [defaults] (the built-in reminders for everyone) and schedules
+  /// them. Always re-syncs schedules so they stay correct after reboots.
+  Future<List<LocalReminder>> loadReminders({
+    required List<LocalReminder> defaults,
+  });
+
+  /// Persists the whole reminders list and re-schedules the enabled ones.
+  Future<void> persistReminders(List<LocalReminder> reminders);
 }

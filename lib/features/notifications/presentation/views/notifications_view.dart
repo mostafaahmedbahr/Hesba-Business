@@ -8,6 +8,7 @@ import '../../../../core/di/service_locator.dart';
 import '../../../../core/utils/toast.dart';
 import '../cubit/notification_cubit.dart';
 import '../states/notification_state.dart';
+import 'reminders_view.dart';
 import '../../data/repos/notification_repo.dart';
 
 class NotificationsView extends StatelessWidget {
@@ -33,9 +34,9 @@ class NotificationsView extends StatelessWidget {
               children: [
                 _buildHeroCard(context, state),
                 SizedBox(height: 24.h),
-                _sectionTitle('notifRemindersSection'.tr()),
+                _sectionTitle('notifDailySection'.tr()),
                 SizedBox(height: 12.h),
-                _reminderCard(context, state: state),
+                _buildManageCard(context),
                 SizedBox(height: 24.h),
                 _sectionTitle('notifAppSection'.tr()),
                 SizedBox(height: 12.h),
@@ -153,48 +154,34 @@ class NotificationsView extends StatelessWidget {
     );
   }
 
-  Widget _reminderCard(BuildContext context, {required NotificationState state}) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(18.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.12),
-            blurRadius: 14.r,
-            offset: const Offset(0, 6),
-          ),
-        ],
+  Widget _buildManageCard(BuildContext context) {
+    return InkWell(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => const RemindersView()),
       ),
-      child: Column(
-        children: [
-          MoreTile(
-            icon: Icons.timer_rounded,
-            iconGradient: const [Color(0xFFF5A623), Color(0xFFFFC24B)],
-            title: 'notifReminder'.tr(),
-            subtitle: 'notifReminderDesc'.tr(),
-            trailing: Switch(
-              value: state.remindersEnabled,
-              onChanged: state.busy
-                  ? null
-                  : (value) => context
-                      .read<NotificationCubit>()
-                      .toggleReminder(
-                        enable: value,
-                        title: 'notifReminderPushTitle'.tr(),
-                        body: 'notifReminderPushBody'.tr(),
-                      ),
+      borderRadius: BorderRadius.circular(18.r),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(18.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withValues(alpha: 0.12),
+              blurRadius: 14.r,
+              offset: const Offset(0, 6),
             ),
+          ],
+        ),
+        child: MoreTile(
+          icon: Icons.event_note_rounded,
+          iconGradient: const [Color(0xFF4CAF50), Color(0xFF8BC34A)],
+          title: 'notifManageReminders'.tr(),
+          subtitle: 'notifManageRemindersDesc'.tr(),
+          trailing: Icon(
+            Icons.chevron_right_rounded,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
-          const Divider(height: 1, indent: 16, endIndent: 16),
-          MoreTile(
-            icon: Icons.schedule_rounded,
-            iconGradient: const [Color(0xFF00ACC1), Color(0xFF4DD0E1)],
-            title: 'notifFrequency'.tr(),
-            subtitle: 'notifFrequencyDesc'.tr(),
-            trailing: null,
-          ),
-        ],
+        ),
       ),
     );
   }

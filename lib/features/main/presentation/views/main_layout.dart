@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -41,10 +40,7 @@ class _MainLayoutState extends State<MainLayout> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      context.read<NotificationCubit>().ensureReminderScheduled(
-            title: 'notifReminderPushTitle'.tr(),
-            body: 'notifReminderPushBody'.tr(),
-          );
+      context.read<NotificationCubit>().ensureAllRemindersScheduled();
       // Register/refresh the device FCM token at every launch so push
       // messages actually arrive (requesting permission is a no-op once granted).
       NotificationService().setupFcm();

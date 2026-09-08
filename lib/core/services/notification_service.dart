@@ -2,6 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/data/latest_all.dart' as tzdata;
+import 'package:timezone/timezone.dart' as tz;
+
+import '../models/local_reminder.dart';
 
 /// Remote (FCM) + local notification service.
 ///
@@ -77,6 +81,8 @@ final channel = AndroidNotificationChannel(
 
   /// Initializes FCM and local notifications.
   Future<void> initialize({void Function(String? payload)? onTap}) async {
+    tzdata.initializeTimeZones();
+
     const androidInit =
         AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosInit = DarwinInitializationSettings(
@@ -262,23 +268,55 @@ final channel = AndroidNotificationChannel(
     );
   }
 
-  /// Schedules a repeating minute reminder.
-  Future<void> scheduleHourlyReminder({
+  /// Schedules one daily reminder at a fixed local clock time.
+  Future<void> scheduleDailyReminder({
+    required int id,
     required String title,
     required String body,
+    required int hour,
+    required int minute,
   }) async {
-    await _local.periodicallyShow(
-      _reminderNotificationId,
+    await _local.zonedSchedule(
+      id,
       title,
       body,
-      RepeatInterval.everyMinute,
+      _nextDailyTime(hour, minute),
       _reminderDetails(),
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.time,
     );
   }
 
-  /// Cancels the scheduled hourly reminder.
-  Future<void> cancelReminders() async {
-    await _local.cancel(_reminderNotificationId);
+  /// Cancels one notification by id (no-op if it was never scheduled).
+  Future<void> cancelNotification(int id) => _local.cancel(id);
+
+  /// Reconciles the whole local reminders list: cancels the schedule of every
+  /// reminder then re-schedules the enabled ones. Idempotent and safe to call
+  /// on every app launch / after any change.
+  Future<void> syncReminders(List<LocalReminder> reminders) async {
+    for (final r in reminders) {
+      await _local.cancel(r.id);
+    }
+    for (final r in reminders) {
+      if (!r.enabled) continue;
+      await scheduleDailyReminder(
+        id: r.id,
+        title: r.title,
+        body: r.body,
+        hour: r.hour,
+        minute: r.minute,
+      );
+    }
+  }
+
+  /// Returns the next occurrence of [hour]:[minute] in the device's local
+  /// clock, expressed in UTC so `matchDateTimeComponents: time` keeps firing at
+  /// the local wall-clock time every day (no hardcoded region needed).
+  tz.TZDateTime _nextDailyTime(int hour, int minute) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day, hour, minute);
+    final target =
+        today.isAfter(now) ? today : today.add(const Duration(days: 1));
+    return tz.TZDateTime.from(target.toUtc(), tz.UTC);
   }
 }

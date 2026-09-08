@@ -1,27 +1,29 @@
+import '../../../../core/models/local_reminder.dart';
+
 class NotificationState {
-  final bool remindersEnabled;
   final bool permissionGranted;
   final bool busy;
   final String? fcmToken;
+  final List<LocalReminder> reminders;
 
   const NotificationState({
-    this.remindersEnabled = true,
     this.permissionGranted = false,
     this.busy = false,
     this.fcmToken,
+    this.reminders = const [],
   });
 
   NotificationState copyWith({
-    bool? remindersEnabled,
     bool? permissionGranted,
     bool? busy,
     String? fcmToken,
+    List<LocalReminder>? reminders,
   }) {
     return NotificationState(
-      remindersEnabled: remindersEnabled ?? this.remindersEnabled,
       permissionGranted: permissionGranted ?? this.permissionGranted,
       busy: busy ?? this.busy,
       fcmToken: fcmToken ?? this.fcmToken,
+      reminders: reminders ?? this.reminders,
     );
   }
 }
