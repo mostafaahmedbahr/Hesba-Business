@@ -76,6 +76,7 @@ final channel = AndroidNotificationChannel(
         ),
         iOS: const DarwinNotificationDetails(),
       ),
+      payload: 'fcm',
     );
   }
 
@@ -95,7 +96,23 @@ final channel = AndroidNotificationChannel(
       iOS: iosInit,
     );
 
-    await _local.initialize(settings);
+    await _local.initialize(
+      settings,
+      onDidReceiveNotificationResponse: (response) {
+        // Fired when the user taps a notification that was already shown on
+        // screen (scheduled reminder, foreground FCM, test ...) and also when
+        // the app cold-starts from one of those taps.
+        onTap?.call(response.payload);
+      },
+    );
+
+    // Cold start via an FCM push (app terminated): handled explicitly because
+    // the OS launches us directly, not through a plugin notification.
+    await _local.getNotificationAppLaunchDetails().then((details) {
+      if (details?.didNotificationLaunchApp == true) {
+        onTap?.call(details?.notificationResponse?.payload);
+      }
+    });
 
     await Future.wait([
       _createRemindersChannel(),
@@ -224,6 +241,7 @@ final channel = AndroidNotificationChannel(
       title,
       body,
       _fcmDetails(),
+      payload: 'fcm',
     );
   }
 
@@ -265,6 +283,7 @@ final channel = AndroidNotificationChannel(
       title,
       body,
       _reminderDetails(),
+      payload: 'test',
     );
   }
 
@@ -284,28 +303,63 @@ final channel = AndroidNotificationChannel(
       _reminderDetails(),
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
+      payload: 'reminder',
+    );
+  }
+
+  /// Schedules one weekly reminder on [weekday] (1 = Monday .. 7 = Sunday)
+  /// at a fixed local clock time.
+  Future<void> scheduleWeeklyReminder({
+    required int id,
+    required String title,
+    required String body,
+    required int hour,
+    required int minute,
+    required int weekday,
+  }) async {
+    await _local.zonedSchedule(
+      id,
+      title,
+      body,
+      _nextWeeklyTime(weekday, hour, minute),
+      _reminderDetails(),
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+      payload: 'reminder',
     );
   }
 
   /// Cancels one notification by id (no-op if it was never scheduled).
   Future<void> cancelNotification(int id) => _local.cancel(id);
 
-  /// Reconciles the whole local reminders list: cancels the schedule of every
-  /// reminder then re-schedules the enabled ones. Idempotent and safe to call
-  /// on every app launch / after any change.
+  /// Reconciles one reminders list: cancels the schedule of every reminder in
+  /// that list, then re-schedules the enabled ones according to their repeat
+  /// type. Each list (public, personal, ...) is reconciled independently and
+  /// only touches its own namespace, so kinds never interfere.
   Future<void> syncReminders(List<LocalReminder> reminders) async {
     for (final r in reminders) {
       await _local.cancel(r.id);
     }
     for (final r in reminders) {
       if (!r.enabled) continue;
-      await scheduleDailyReminder(
-        id: r.id,
-        title: r.title,
-        body: r.body,
-        hour: r.hour,
-        minute: r.minute,
-      );
+      if (r.repeat == ReminderRepeat.weekly && r.weekday != null) {
+        await scheduleWeeklyReminder(
+          id: r.id,
+          title: r.title,
+          body: r.body,
+          hour: r.hour,
+          minute: r.minute,
+          weekday: r.weekday!,
+        );
+      } else {
+        await scheduleDailyReminder(
+          id: r.id,
+          title: r.title,
+          body: r.body,
+          hour: r.hour,
+          minute: r.minute,
+        );
+      }
     }
   }
 
@@ -317,6 +371,22 @@ final channel = AndroidNotificationChannel(
     final today = DateTime(now.year, now.month, now.day, hour, minute);
     final target =
         today.isAfter(now) ? today : today.add(const Duration(days: 1));
+    return tz.TZDateTime.from(target.toUtc(), tz.UTC);
+  }
+
+  /// Returns the next occurrence of ([weekday], [hour]:[minute]) in the
+  /// device's local clock, expressed in UTC for `dayOfWeekAndTime` matching.
+  /// [weekday] follows [DateTime.weekday] (1 = Monday .. 7 = Sunday).
+  tz.TZDateTime _nextWeeklyTime(int weekday, int hour, int minute) {
+    var day = DateTime.now();
+    while (day.weekday != weekday) {
+      day = day.add(const Duration(days: 1));
+    }
+    final candidate =
+        DateTime(day.year, day.month, day.day, hour, minute);
+    final target = candidate.isAfter(DateTime.now())
+        ? candidate
+        : candidate.add(const Duration(days: 7));
     return tz.TZDateTime.from(target.toUtc(), tz.UTC);
   }
 }

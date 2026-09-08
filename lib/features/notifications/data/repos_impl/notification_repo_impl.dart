@@ -12,9 +12,13 @@ class NotificationRepoImpl implements NotificationRepo {
 
   NotificationRepoImpl(this._prefs, this._service);
 
-  static const _kRemindersKey = 'local_reminders';
-  static const _kSeededKey = 'local_reminders_seeded';
+  /// Public daily reminders are stored and seeded separately from personal
+  /// ones so the two kinds can never corrupt each other.
+  static const _kPublicKey = 'public_reminders';
+  static const _kPublicSeededKey = 'public_reminders_seeded';
+  static const _kPersonalKey = 'personal_reminders';
 
+  // ── Firebase ──────────────────────────────────────────────────────────────
   @override
   Future<bool> requestPermissions() {
     return _service.requestPermissions();
@@ -34,17 +38,50 @@ class NotificationRepoImpl implements NotificationRepo {
   Future<String?> getFcmToken() => _service.getToken();
 
   @override
-  Future<List<LocalReminder>> loadReminders({
+  Future<void> sendTestNotification({
+    required String title,
+    required String body,
+  }) {
+    return _service.showReminder(title: title, body: body);
+  }
+
+  // ── Public daily reminders ────────────────────────────────────────────────
+  @override
+  Future<List<LocalReminder>> loadPublicReminders({
     required List<LocalReminder> defaults,
   }) async {
-    final seeded = _prefs.getBool(_kSeededKey) ?? false;
+    final seeded = _prefs.getBool(_kPublicSeededKey) ?? false;
+    final List<LocalReminder> list;
+
     if (!seeded) {
-      await persistReminders(defaults);
-      await _prefs.setBool(_kSeededKey, true);
-      return List.of(defaults);
+      list = List.of(defaults);
+      await _prefs.setString(
+        _kPublicKey,
+        jsonEncode(list.map((r) => r.toJson()).toList()),
+      );
+      await _prefs.setBool(_kPublicSeededKey, true);
+    } else {
+      final raw = _prefs.getString(_kPublicKey);
+      list = <LocalReminder>[];
+      if (raw != null && raw.isNotEmpty) {
+        final decoded = jsonDecode(raw) as List<dynamic>;
+        list.addAll(
+          decoded.map(
+            (e) => LocalReminder.fromJson(e as Map<String, dynamic>),
+          ),
+        );
+      }
     }
 
-    final raw = _prefs.getString(_kRemindersKey);
+    // Public list is always fully re-synced on launch, independent of personal.
+    await _service.syncReminders(list);
+    return list;
+  }
+
+  // ── Personal reminders ────────────────────────────────────────────────────
+  @override
+  Future<List<LocalReminder>> loadPersonalReminders() async {
+    final raw = _prefs.getString(_kPersonalKey);
     final list = <LocalReminder>[];
     if (raw != null && raw.isNotEmpty) {
       final decoded = jsonDecode(raw) as List<dynamic>;
@@ -55,23 +92,20 @@ class NotificationRepoImpl implements NotificationRepo {
       );
     }
 
-    // Re-sync schedules at startup so they survive reboots/restores.
+    // Cancel personal schedules that are no longer in the list (e.g. a
+    // reminder removed while the app was closed) then re-schedule the rest.
     await _service.syncReminders(list);
     return list;
   }
 
   @override
-  Future<void> persistReminders(List<LocalReminder> reminders) async {
-    final json = jsonEncode(reminders.map((r) => r.toJson()).toList());
-    await _prefs.setString(_kRemindersKey, json);
+  Future<void> persistPersonalReminders(
+    List<LocalReminder> reminders,
+  ) async {
+    await _prefs.setString(
+      _kPersonalKey,
+      jsonEncode(reminders.map((r) => r.toJson()).toList()),
+    );
     await _service.syncReminders(reminders);
-  }
-
-  @override
-  Future<void> sendTestNotification({
-    required String title,
-    required String body,
-  }) {
-    return _service.showReminder(title: title, body: body);
   }
 }

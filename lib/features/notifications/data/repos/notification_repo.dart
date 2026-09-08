@@ -1,7 +1,14 @@
 import '../../../../core/models/local_reminder.dart';
 
 /// Operations for the notifications feature.
+///
+/// The three kinds of notifications are completely independent:
+/// - Firebase (FCM): handled by [NotificationService] itself.
+/// - Public daily reminders: read-only, seeded once, always re-synced at
+///   startup, never touched by personal CRUD.
+/// - Personal reminders: full CRUD, __only__ touching the personal namespace.
 abstract class NotificationRepo {
+  // ── Firebase ──────────────────────────────────────────────────────────────
   /// Requests notification permission from the OS.
   Future<bool> requestPermissions();
 
@@ -17,13 +24,18 @@ abstract class NotificationRepo {
     required String body,
   });
 
-  /// Loads the local reminders list from storage. On first run it seeds the
-  /// provided [defaults] (the built-in reminders for everyone) and schedules
-  /// them. Always re-syncs schedules so they stay correct after reboots.
-  Future<List<LocalReminder>> loadReminders({
+  // ── Public daily reminders (read-only, for everyone) ──────────────────────
+  /// Loads the public daily list. Seeds the provided [defaults] on first run
+  /// and always re-syncs public schedules. The client cannot modify these.
+  Future<List<LocalReminder>> loadPublicReminders({
     required List<LocalReminder> defaults,
   });
 
-  /// Persists the whole reminders list and re-schedules the enabled ones.
-  Future<void> persistReminders(List<LocalReminder> reminders);
+  // ── Personal reminders (full user CRUD) ───────────────────────────────────
+  /// Loads the user's personal reminders and re-syncs their schedules.
+  Future<List<LocalReminder>> loadPersonalReminders();
+
+  /// Persists the whole personal list and re-syncs schedules. Only personal
+  /// notification ids are touched; public/Firebase are never affected.
+  Future<void> persistPersonalReminders(List<LocalReminder> reminders);
 }

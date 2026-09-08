@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui' as ui;
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -16,13 +17,34 @@ import 'package:hesba/features/settings/presentation/states/settings_state.dart'
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  await NotificationService().initialize();
+  await NotificationService().initialize(onTap: _handleNotificationTap);
   await initDependencies();
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
   runApp(TranslationProvider(child: const HesbaApp()));
+}
+
+/// Fired when the user taps any notification (FCM push, scheduled reminder or
+/// the test notification). If a user is signed in, opens the dashboard; the
+/// splash/login flow handles the not-signed-in case.
+Future<void> _handleNotificationTap(String? payload) async {
+  if (FirebaseAuth.instance.currentUser == null) return;
+
+  // The handler can fire before MaterialApp exists (cold start). Retry until
+  // the navigator is ready (bounded) so the tap is never dropped.
+  for (var attempt = 0; attempt < 30; attempt++) {
+    final navigator = appNavigatorKey.currentState;
+    if (navigator != null && navigator.mounted) {
+      navigator.pushNamedAndRemoveUntil(
+        AppRoutes.dashboard,
+        (route) => false,
+      );
+      return;
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+  }
 }
 
 class TranslationProvider extends StatelessWidget {
@@ -70,6 +92,7 @@ class _AppRoot extends StatelessWidget {
           builder: (context, child) {
             return MaterialApp(
               key: ValueKey(context.locale),
+              navigatorKey: appNavigatorKey,
               title: 'حسبة',
               debugShowCheckedModeBanner: false,
               theme: AppTheme.lightTheme,

@@ -4,26 +4,34 @@ class NotificationState {
   final bool permissionGranted;
   final bool busy;
   final String? fcmToken;
-  final List<LocalReminder> reminders;
+
+  /// Read-only public daily reminders (always shown, never editable).
+  final List<LocalReminder> publicReminders;
+
+  /// User-created personal reminders (full CRUD).
+  final List<LocalReminder> personalReminders;
 
   const NotificationState({
     this.permissionGranted = false,
     this.busy = false,
     this.fcmToken,
-    this.reminders = const [],
+    this.publicReminders = const [],
+    this.personalReminders = const [],
   });
 
   NotificationState copyWith({
     bool? permissionGranted,
     bool? busy,
     String? fcmToken,
-    List<LocalReminder>? reminders,
+    List<LocalReminder>? publicReminders,
+    List<LocalReminder>? personalReminders,
   }) {
     return NotificationState(
       permissionGranted: permissionGranted ?? this.permissionGranted,
       busy: busy ?? this.busy,
       fcmToken: fcmToken ?? this.fcmToken,
-      reminders: reminders ?? this.reminders,
+      publicReminders: publicReminders ?? this.publicReminders,
+      personalReminders: personalReminders ?? this.personalReminders,
     );
   }
 }

@@ -8,10 +8,10 @@ import '../utils/default_reminders.dart';
 class NotificationCubit extends Cubit<NotificationState> {
   final NotificationRepo _repo;
 
-  NotificationCubit({required NotificationRepo repo})
-      : _repo = repo,
-        super(const NotificationState());
+  NotificationCubit({required this._repo}) : super(const NotificationState());
 
+  /// Initializes FCM (permission + token). Personal/public reminders are
+  /// loaded separately via [loadReminders].
   Future<void> init() async {
     final granted = await _repo.requestPermissions();
     emit(state.copyWith(permissionGranted: granted));
@@ -25,60 +25,77 @@ class NotificationCubit extends Cubit<NotificationState> {
     }
   }
 
-  /// Called at app startup: seeds (first run) and schedules all local
-  /// reminders. Idempotent.
-  Future<void> ensureAllRemindersScheduled() async {
-    await loadReminders();
-  }
+  /// Called at app startup: seeds + schedules the public daily reminders
+  /// (idempotent) and re-syncs personal ones. That's it.
+  Future<void> ensureAllRemindersScheduled() => loadReminders();
 
+  /// Loads BOTH lists: public (read-only) and personal. Each list is synced
+  /// to the OS scheduler independently.
   Future<void> loadReminders() async {
-    final list = await _repo.loadReminders(defaults: buildDefaultReminders());
-    emit(state.copyWith(reminders: list));
+    final public = await _repo.loadPublicReminders(
+      defaults: buildDefaultReminders(),
+    );
+    final personal = await _repo.loadPersonalReminders();
+    emit(
+      state.copyWith(
+        publicReminders: public,
+        personalReminders: personal,
+      ),
+    );
   }
 
+  // ── Public (client has no control here) ──────────────────────────────────
+  // Intentionally no mutating methods: public reminders are fixed for
+  // everyone and never affected by personal CRUD.
+
+  // ── Personal reminders (independent per-reminder) ─────────────────────────
   Future<void> addReminder({
     required String title,
     required String body,
     required int hour,
     required int minute,
+    ReminderRepeat repeat = ReminderRepeat.daily,
+    int? weekday,
   }) async {
-    final list = [...state.reminders];
-    final maxId =
-        list.fold<int>(1007, (max, r) => r.id > max ? r.id : max) + 1;
+    final list = [...state.personalReminders];
+    final id = _nextId(list);
     final reminder = LocalReminder(
-      id: maxId,
+      id: id,
       title: title.trim(),
       body: body.trim(),
       hour: hour,
       minute: minute,
+      repeat: repeat,
+      weekday: weekday,
     );
     final updated = [...list, reminder];
-    emit(state.copyWith(reminders: updated));
-    await _repo.persistReminders(updated);
+    emit(state.copyWith(personalReminders: updated));
+    await _repo.persistPersonalReminders(updated);
   }
 
   Future<void> updateReminder(LocalReminder reminder) async {
     final updated = [
-      for (final r in state.reminders)
+      for (final r in state.personalReminders)
         if (r.id == reminder.id) reminder else r,
     ];
-    emit(state.copyWith(reminders: updated));
-    await _repo.persistReminders(updated);
+    emit(state.copyWith(personalReminders: updated));
+    await _repo.persistPersonalReminders(updated);
   }
 
   Future<void> deleteReminder(int id) async {
-    final updated = state.reminders.where((r) => r.id != id).toList();
-    emit(state.copyWith(reminders: updated));
-    await _repo.persistReminders(updated);
+    final updated =
+        state.personalReminders.where((r) => r.id != id).toList();
+    emit(state.copyWith(personalReminders: updated));
+    await _repo.persistPersonalReminders(updated);
   }
 
   Future<void> toggleReminderEnabled(LocalReminder reminder) async {
     final updated = [
-      for (final r in state.reminders)
+      for (final r in state.personalReminders)
         if (r.id == reminder.id) r.copyWith(enabled: !r.enabled) else r,
     ];
-    emit(state.copyWith(reminders: updated));
-    await _repo.persistReminders(updated);
+    emit(state.copyWith(personalReminders: updated));
+    await _repo.persistPersonalReminders(updated);
   }
 
   Future<void> enablePermissions() async {
@@ -101,5 +118,13 @@ class NotificationCubit extends Cubit<NotificationState> {
     } catch (_) {
       return false;
     }
+  }
+
+  int _nextId(List<LocalReminder> current) {
+    var max = 1999;
+    for (final r in current) {
+      if (r.id > max) max = r.id;
+    }
+    return max + 1;
   }
 }

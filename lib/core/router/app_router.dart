@@ -6,6 +6,10 @@ import 'package:hesba/features/auth/presentation/views/login_view.dart';
 import 'package:hesba/features/auth/presentation/views/register_view.dart';
 import 'package:hesba/features/main/presentation/views/main_layout.dart';
 
+/// Root navigator used to route the user when they tap a notification while
+/// the app is in the background or was terminated.
+final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
+
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
