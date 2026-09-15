@@ -174,8 +174,31 @@ class _SaleCard extends StatelessWidget {
                     ],
                   ),
                 )),
+            if (sale.discount > 0) ...[
+              SizedBox(height: 8.h),
+              Container(
+                padding: EdgeInsets.all(10.w),
+                decoration: BoxDecoration(color: Colors.grey.shade50, borderRadius: BorderRadius.circular(10.r), border: Border.all(color: Colors.grey.shade200)),
+                child: Column(children: [
+                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                    Text('قبل الخصم', style: TextStyle(fontSize: 11.sp, color: Colors.grey.shade700)),
+                    Text('${sale.subtotal.toStringAsFixed(2)} ج.م', style: TextStyle(fontSize: 11.sp, decoration: TextDecoration.lineThrough)),
+                  ]),
+                  SizedBox(height: 4.h),
+                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                    Text('الخصم', style: TextStyle(fontSize: 11.sp, color: Colors.red.shade600)),
+                    Text('-${sale.discount.toStringAsFixed(2)} ج.م', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w700, color: Colors.red.shade600)),
+                  ]),
+                  Divider(height: 12.h),
+                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                    Text('المدفوع (دخل حسابك)', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700)),
+                    Text('${sale.total.toStringAsFixed(2)} ج.م', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: AppTheme.successColor)),
+                  ]),
+                ]),
+              ),
+            ],
           ],
-          SizedBox(height: 6.h),
+          SizedBox(height: 10.h),
           Row(
             children: [
               _paymentChip(sale.paymentMethod),
@@ -188,7 +211,28 @@ class _SaleCard extends StatelessWidget {
           if (sale.note.isNotEmpty) ...[
             SizedBox(height: 6.h),
             Text('ملاحظة: ${sale.note}', style: TextStyle(fontSize: 11.sp, color: Colors.grey.shade700)),
-          ]
+          ],
+          SizedBox(height: 10.h),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.addReturnView,
+                  arguments: {'originalSaleId': sale.saleId},
+                );
+              },
+              icon: Icon(Icons.assignment_return_rounded, size: 16.sp, color: Colors.orange.shade700),
+              label: Text('إرجاع من هذه الفاتورة', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: Colors.orange.shade700)),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: Colors.orange.shade300),
+                backgroundColor: Colors.orange.withValues(alpha: 0.06),
+                padding: EdgeInsets.symmetric(vertical: 10.h),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+              ),
+            ),
+          )
         ],
       ),
     );

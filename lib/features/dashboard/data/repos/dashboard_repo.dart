@@ -5,6 +5,9 @@ abstract class DashboardRepo {
   /// Returns total returns amount for today.
   Future<double> getTodayReturnsTotal();
 
+  /// Returns number of returns for today.
+  Future<int> getTodayReturnsCount();
+
   /// Returns total expenses for today.
   Future<double> getTodayExpensesTotal();
 

@@ -6,6 +6,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/toast.dart';
 import '../../../dashboard/presentation/cubit/dashboard_cubit.dart';
 import '../../../dashboard/presentation/states/dashboard_state.dart';
 
@@ -43,6 +44,8 @@ class HomeView extends StatelessWidget {
                       _OverviewGrid(state: state, onRetry: _retry),
                       if (state.status == DashboardStatus.failure)
                         _buildErrorHint(context, state),
+                      SizedBox(height: 20.h),
+                      _ReturnsSummaryCard(state: state),
                       if (state.lowStockCount > 0) ...[
                         SizedBox(height: 20.h),
                         _LowStockBanner(count: state.lowStockCount),
@@ -677,12 +680,7 @@ class _LowStockBanner extends StatelessWidget {
 
     return InkWell(
       onTap: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('homeTapSeeProducts'.tr()),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        AppToast.info(context, 'homeTapSeeProducts'.tr());
       },
       borderRadius: BorderRadius.circular(18.r),
       child: Container(
@@ -751,6 +749,95 @@ class _LowStockBanner extends StatelessWidget {
 }
 
 /* -------------------------------------------------------------------------- */
+/*                              Returns summary                                  */
+/* -------------------------------------------------------------------------- */
+
+class _ReturnsSummaryCard extends StatelessWidget {
+  final DashboardState state;
+  const _ReturnsSummaryCard({required this.state});
+
+  @override
+  Widget build(BuildContext context) {
+    final hasReturns = state.todayReturnsCount > 0 || state.todayReturnsTotal > 0;
+    final sales = state.todaySalesTotal;
+    final returns = state.todayReturnsTotal;
+    final net = state.todayNetSales;
+
+    return Container(
+      padding: EdgeInsets.all(14.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18.r),
+        border: Border.all(color: hasReturns ? Colors.orange.withValues(alpha: 0.3) : Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 12, offset: const Offset(0, 6)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8.w),
+                decoration: BoxDecoration(color: Colors.orange.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10.r)),
+                child: Icon(Icons.assignment_return_rounded, size: 18.sp, color: Colors.orange.shade700),
+              ),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('المرتجعات اليوم', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800)),
+                    Text(hasReturns ? '${state.todayReturnsCount} عملية • خرج من حسابك' : 'لا توجد مرتجعات اليوم', style: TextStyle(fontSize: 11.sp, color: Colors.grey.shade600)),
+                  ],
+                ),
+              ),
+              if (hasReturns)
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                  decoration: BoxDecoration(color: Colors.red.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(20.r)),
+                  child: Text('-${_format(returns)} ${'currencyEGP'.tr()}', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: Colors.red.shade700)),
+                ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          // Sales vs Returns breakdown
+          Container(
+            padding: EdgeInsets.all(12.w),
+            decoration: BoxDecoration(color: Colors.grey.shade50, borderRadius: BorderRadius.circular(12.r)),
+            child: Column(children: [
+              _row('المبيعات', '${_format(sales)} ${'currencyEGP'.tr()}', Colors.green.shade700),
+              SizedBox(height: 6.h),
+              _row('المرتجعات', '-${_format(returns)} ${'currencyEGP'.tr()}', Colors.red.shade600, isNegative: true),
+              Divider(height: 16.h),
+              _row('صافي المبيعات (دخل حسابك)', '${_format(net)} ${'currencyEGP'.tr()}', AppTheme.primaryColor, isBold: true, isNet: true),
+              if (hasReturns) ...[
+                SizedBox(height: 6.h),
+                Text('بعد المرتجع المبيعات قلت من ${_format(sales)} إلى ${_format(net)}', style: TextStyle(fontSize: 10.sp, color: Colors.grey.shade600)),
+              ],
+            ]),
+          ),
+          if (!hasReturns) ...[
+            SizedBox(height: 8.h),
+            Text('عند إضافة مرتجع سيتم خصمه تلقائياً من إجمالي المبيعات', style: TextStyle(fontSize: 11.sp, color: Colors.grey.shade600)),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _row(String label, String value, Color color, {bool isBold = false, bool isNet = false, bool isNegative = false}) {
+    return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+      Text(label, style: TextStyle(fontSize: isNet ? 12.sp : 11.sp, fontWeight: isBold ? FontWeight.w800 : FontWeight.w600, color: isNet ? Colors.black87 : Colors.grey.shade700)),
+      Text(value, style: TextStyle(fontSize: isNet ? 13.sp : 11.sp, fontWeight: FontWeight.w800, color: color)),
+    ]);
+  }
+
+  String _format(double v) => v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(2);
+}
+
+/* -------------------------------------------------------------------------- */
 /*                              Quick actions                                  */
 /* -------------------------------------------------------------------------- */
 
@@ -815,7 +902,14 @@ class _QuickActionsGrid extends StatelessWidget {
             Expanded(
               child: _QuickAction(
                 data: actions[2],
-                onTap: () => _comingSoon(context),
+                onTap: () async {
+                  // Returns now has its own tab; quick action still goes to Returns list
+                  // Only refresh dashboard if an actual return was created
+                  final result = await Navigator.pushNamed(context, AppRoutes.returnsView);
+                  if (result == true && context.mounted) {
+                    try { context.read<DashboardCubit>().refresh(); } catch (_) {}
+                  }
+                },
               ),
             ),
             SizedBox(width: 14.w),
@@ -832,12 +926,7 @@ class _QuickActionsGrid extends StatelessWidget {
   }
 
   void _comingSoon(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('loginComingSoon'.tr()),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    AppToast.info(context, 'loginComingSoon'.tr());
   }
 }
 

@@ -117,6 +117,9 @@
   "homeAddProduct": "Add Product",
   "homeNewSale": "New Sale",
   "homeReturn": "Return",
+  "homeReturnsToday": "Today's Returns",
+  "homeReturnsCount": "returns",
+  "homeReturnsTotal": "Returns total",
   "homeExpense": "Expense",
   "homeStatZero": "0",
   "homeStatZeroEGP": "0 EGP",
@@ -130,6 +133,7 @@
   "navHome": "Home",
   "navProducts": "Products",
   "navSales": "Sales",
+  "navReturns": "Returns",
   "navReports": "Reports",
   "navMore": "More",
 

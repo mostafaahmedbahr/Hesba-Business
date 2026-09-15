@@ -12,6 +12,9 @@ class DashboardCubit extends Cubit<DashboardState> {
   StreamSubscription<String?>? _shopNameSub;
   StreamSubscription<AppEvent>? _appEventSub;
   Timer? _debounce;
+  DateTime? _lastLoadTime;
+  bool _isFirstWatchEvent = true;
+  bool _isLoading = false;
 
   DashboardCubit({required DashboardRepo repo})
       : _repo = repo,
@@ -35,7 +38,18 @@ class DashboardCubit extends Cubit<DashboardState> {
 
   void _startAutoRefresh() {
     _dashboardSub?.cancel();
+    _isFirstWatchEvent = true;
     _dashboardSub = _repo.watchDashboardChanges().listen((_) {
+      // Skip first snapshot emission (already loaded in init)
+      if (_isFirstWatchEvent) {
+        _isFirstWatchEvent = false;
+        return;
+      }
+      // If we just did an AppEvent-driven refresh (<1.5s ago), ignore Firestore duplicate
+      if (_lastLoadTime != null &&
+          DateTime.now().difference(_lastLoadTime!) < const Duration(milliseconds: 1500)) {
+        return;
+      }
       // Debounce to avoid spamming Firestore with rapid consecutive loads
       _debounce?.cancel();
       _debounce = Timer(const Duration(milliseconds: 800), () {
@@ -51,23 +65,36 @@ class DashboardCubit extends Cubit<DashboardState> {
           event.type == AppEventType.returnCreated ||
           event.type == AppEventType.expenseCreated ||
           event.type == AppEventType.productChanged) {
-        // Immediate refresh without debounce for user-triggered events
+        // Cancel pending debounced Firestore refresh to avoid duplicate
+        _debounce?.cancel();
         if (!isClosed) loadDashboardData();
       }
     });
   }
 
   /// Public method to allow manual refresh after sale/return/expense actions
-  Future<void> refresh() => loadDashboardData();
+  /// Only triggers load if not already loading and not recently loaded
+  Future<void> refresh() {
+    if (_isLoading) return Future.value();
+    if (_lastLoadTime != null &&
+        DateTime.now().difference(_lastLoadTime!) < const Duration(milliseconds: 500)) {
+      return Future.value();
+    }
+    return loadDashboardData();
+  }
 
   Future<void> loadDashboardData() async {
     if (isClosed) return;
+    if (_isLoading) return;
+    _isLoading = true;
+    _lastLoadTime = DateTime.now();
     emit(state.copyWith(status: DashboardStatus.loading));
 
     try {
       final results = await Future.wait([
         _repo.getTodaySalesTotal(),
         _repo.getTodayReturnsTotal(),
+        _repo.getTodayReturnsCount(),
         _repo.getTodayExpensesTotal(),
         _repo.getProductsCount(),
         _repo.getLowStockProductsCount(),
@@ -75,14 +102,17 @@ class DashboardCubit extends Cubit<DashboardState> {
 
       final salesTotal = results[0] as double;
       final returnsTotal = results[1] as double;
-      final expensesTotal = results[2] as double;
-      final productsCount = results[3] as int;
-      final lowStockCount = results[4] as int;
+      final returnsCount = results[2] as int;
+      final expensesTotal = results[3] as double;
+      final productsCount = results[4] as int;
+      final lowStockCount = results[5] as int;
 
       if (isClosed) return;
       emit(state.copyWith(
         status: DashboardStatus.success,
         todaySalesTotal: salesTotal,
+        todayReturnsTotal: returnsTotal,
+        todayReturnsCount: returnsCount,
         todayNetSales: salesTotal - returnsTotal,
         todayExpensesTotal: expensesTotal,
         productsCount: productsCount,
@@ -95,6 +125,8 @@ class DashboardCubit extends Cubit<DashboardState> {
         status: DashboardStatus.failure,
         errorMessage: e.toString(),
       ));
+    } finally {
+      _isLoading = false;
     }
   }
 

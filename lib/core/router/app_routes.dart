@@ -6,4 +6,6 @@ abstract class AppRoutes {
   static const shopRegistration = '/shop-registration';
   static const dashboard = '/dashboard';
   static const addSaleView = '/addSaleView';
+  static const returnsView = '/returnsView';
+  static const addReturnView = '/addReturnView';
 }

@@ -62,6 +62,7 @@ const List<_NavItemData> _items = [
   _NavItemData(Icons.home_outlined, Icons.home_rounded, 'navHome'),
   _NavItemData(Icons.category_outlined, Icons.category_rounded, 'navProducts'),
   _NavItemData(Icons.receipt_long_outlined, Icons.receipt_long_rounded, 'navSales'),
+  _NavItemData(Icons.assignment_return_outlined, Icons.assignment_return_rounded, 'navReturns'),
   _NavItemData(
     Icons.bar_chart_outlined,
     Icons.bar_chart_rounded,

@@ -82,6 +82,20 @@ class DashboardRepoImpl implements DashboardRepo {
   }
 
   @override
+  Future<int> getTodayReturnsCount() async {
+    final shopId = await _getShopIdInternal();
+    if (shopId == null) return 0;
+    final snapshot = await _firestore
+        .collection('returns')
+        .where('shopId', isEqualTo: shopId)
+        .where('createdAt', isGreaterThanOrEqualTo: _todayStart)
+        .where('createdAt', isLessThanOrEqualTo: _todayEnd)
+        .count()
+        .get();
+    return snapshot.count ?? 0;
+  }
+
+  @override
   Future<double> getTodayExpensesTotal() async {
     final shopId = await _getShopIdInternal();
     if (shopId == null) return 0;

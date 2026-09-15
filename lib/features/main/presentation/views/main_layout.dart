@@ -12,6 +12,7 @@ import 'reports_view.dart';
 import 'sales_view.dart';
 import '../widgets/modern_bottom_nav.dart';
 import '../../../products/presentation/views/products_view.dart';
+import '../../../returns/presentation/views/returns_view.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
@@ -63,6 +64,7 @@ class _MainShellState extends State<_MainShell> {
     HomeView(),
     ProductsView(),
     SalesView(),
+    ReturnsView(),
     ReportsView(),
     MoreView(),
   ];

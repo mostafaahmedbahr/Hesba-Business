@@ -7,6 +7,8 @@ import 'package:hesba/features/auth/presentation/views/register_view.dart';
 import 'package:hesba/features/main/presentation/views/main_layout.dart';
 
 import '../../features/sales/presentation/views/add_sale_view.dart';
+import '../../features/returns/presentation/views/add_return_view.dart';
+import '../../features/returns/presentation/views/returns_view.dart';
 
 /// Root navigator used to route the user when they tap a notification while
 /// the app is in the background or was terminated.
@@ -32,6 +34,18 @@ class AppRouter {
           AddSaleView(
             ownerId: args?['ownerId'] as String?,
             shopId: args?['shopId'] as String?,
+          ),
+          settings,
+        );
+      case AppRoutes.returnsView:
+        return _buildRoute(const ReturnsView(), settings);
+      case AppRoutes.addReturnView:
+        final rArgs = settings.arguments as Map<String, dynamic>?;
+        return _buildRoute(
+          AddReturnView(
+            ownerId: rArgs?['ownerId'] as String?,
+            shopId: rArgs?['shopId'] as String?,
+            originalSaleId: rArgs?['originalSaleId'] as String?,
           ),
           settings,
         );

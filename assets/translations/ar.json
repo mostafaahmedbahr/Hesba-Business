@@ -117,6 +117,9 @@
   "homeAddProduct": "أضف منتج",
   "homeNewSale": "بيع جديد",
   "homeReturn": "مرتجع",
+  "homeReturnsToday": "مرتجعات اليوم",
+  "homeReturnsCount": "عملية مرتجع",
+  "homeReturnsTotal": "قيمة المرتجعات",
   "homeExpense": "مصروف",
   "homeStatZero": "0",
   "homeStatZeroEGP": "0 ج.م",
@@ -130,6 +133,7 @@
   "navHome": "الرئيسية",
   "navProducts": "المنتجات",
   "navSales": "المبيعات",
+  "navReturns": "المرتجع",
   "navReports": "التقارير",
   "navMore": "المزيد",
 

@@ -9,6 +9,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/models/product.dart';
+import '../../../../core/utils/toast.dart';
 import '../../../products/data/repos/products_repo.dart';
 import '../../data/models/sale_model.dart';
 import '../cubit/sales_cubit.dart';
@@ -154,9 +155,7 @@ class _AddSaleViewState extends State<AddSaleView> {
 
   void _submit(BuildContext innerContext) {
     if (!_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(innerContext).showSnackBar(
-        const SnackBar(content: Text('راجع بيانات المنتجات')),
-      );
+      AppToast.warning(innerContext, 'راجع بيانات المنتجات');
       return;
     }
 
@@ -164,39 +163,27 @@ class _AddSaleViewState extends State<AddSaleView> {
     for (int i = 0; i < _items.length; i++) {
       final e = _items[i];
       if (e.name.text.trim().isEmpty) {
-        ScaffoldMessenger.of(innerContext).showSnackBar(
-          SnackBar(content: Text('اسم المنتج مطلوب في السطر ${i + 1}')),
-        );
+        AppToast.warning(innerContext, 'اسم المنتج مطلوب في السطر ${i + 1}');
         return;
       }
       final q = double.tryParse(e.quantity.text.trim());
       final p = double.tryParse(e.price.text.trim());
       if (q == null || q <= 0) {
-        ScaffoldMessenger.of(innerContext).showSnackBar(
-          SnackBar(content: Text('الكمية غير صحيحة في السطر ${i + 1}')),
-        );
+        AppToast.warning(innerContext, 'الكمية غير صحيحة في السطر ${i + 1}');
         return;
       }
       if (p == null || p <= 0) {
-        ScaffoldMessenger.of(innerContext).showSnackBar(
-          SnackBar(content: Text('السعر غير صحيح في السطر ${i + 1}')),
-        );
+        AppToast.warning(innerContext, 'السعر غير صحيح في السطر ${i + 1}');
         return;
       }
       if (e.selectedProduct != null && q > e.selectedProduct!.stock) {
-        ScaffoldMessenger.of(innerContext).showSnackBar(
-          SnackBar(
-              content: Text(
-                  'الكمية أكبر من المتاح (${e.selectedProduct!.stock}) في ${e.name.text}')),
-        );
+        AppToast.warning(innerContext, 'الكمية أكبر من المتاح (${e.selectedProduct!.stock}) في ${e.name.text}');
         return;
       }
     }
 
     if (_resolvedShopId == null || _resolvedShopId!.isEmpty) {
-      ScaffoldMessenger.of(innerContext).showSnackBar(
-        const SnackBar(content: Text('لم يتم العثور على بيانات المتجر')),
-      );
+      AppToast.error(innerContext, 'لم يتم العثور على بيانات المتجر');
       return;
     }
 
@@ -233,15 +220,11 @@ class _AddSaleViewState extends State<AddSaleView> {
           return BlocListener<SalesCubit, SalesState>(
             listener: (ctx, state) {
               if (state.status == SalesStatus.success) {
-                ScaffoldMessenger.of(ctx).showSnackBar(
-                  const SnackBar(content: Text('تم حفظ عملية البيع بنجاح')),
-                );
+                AppToast.success(ctx, 'تم حفظ عملية البيع بنجاح');
                 Navigator.pop(ctx, true);
               }
               if (state.status == SalesStatus.error) {
-                ScaffoldMessenger.of(ctx).showSnackBar(
-                  SnackBar(content: Text(state.errorMessage ?? 'حدث خطأ')),
-                );
+                AppToast.error(ctx, state.errorMessage ?? 'حدث خطأ');
               }
             },
             child: Scaffold(
@@ -295,10 +278,7 @@ class _AddSaleViewState extends State<AddSaleView> {
                               onChanged: _onRecalc,
                               onDelete: () {
                                 if (_items.length == 1) {
-                                  ScaffoldMessenger.of(innerContext).showSnackBar(
-                                    const SnackBar(
-                                        content: Text('يجب أن يبقى منتج واحد على الأقل')),
-                                  );
+                                  AppToast.warning(innerContext, 'يجب أن يبقى منتج واحد على الأقل');
                                   return;
                                 }
                                 _removeItem(index);
