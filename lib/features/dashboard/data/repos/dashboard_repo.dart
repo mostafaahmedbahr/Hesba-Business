@@ -16,4 +16,11 @@ abstract class DashboardRepo {
 
   /// Streams the shop name from the current user's profile.
   Stream<String?> watchShopName();
+
+  /// Returns the current user's shopId.
+  Future<String?> getShopId();
+
+  /// Watches any change in sales/products/returns/expenses for the current shop.
+  /// Emits whenever any of those collections changes - used for auto-refresh.
+  Stream<void> watchDashboardChanges();
 }

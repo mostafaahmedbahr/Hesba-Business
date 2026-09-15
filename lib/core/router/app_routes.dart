@@ -5,4 +5,5 @@ abstract class AppRoutes {
   static const resetPassword = '/reset-password';
   static const shopRegistration = '/shop-registration';
   static const dashboard = '/dashboard';
+  static const addSaleView = '/addSaleView';
 }

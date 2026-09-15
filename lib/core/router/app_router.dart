@@ -6,6 +6,8 @@ import 'package:hesba/features/auth/presentation/views/login_view.dart';
 import 'package:hesba/features/auth/presentation/views/register_view.dart';
 import 'package:hesba/features/main/presentation/views/main_layout.dart';
 
+import '../../features/sales/presentation/views/add_sale_view.dart';
+
 /// Root navigator used to route the user when they tap a notification while
 /// the app is in the background or was terminated.
 final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
@@ -24,7 +26,15 @@ class AppRouter {
 
       case AppRoutes.dashboard:
         return _buildRoute(const MainLayout(), settings);
-
+      case AppRoutes.addSaleView:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return _buildRoute(
+          AddSaleView(
+            ownerId: args?['ownerId'] as String?,
+            shopId: args?['shopId'] as String?,
+          ),
+          settings,
+        );
       // case AppRoutes.resetPassword:
       //   return _buildRoute(const ResetPasswordScreen(), settings);
 

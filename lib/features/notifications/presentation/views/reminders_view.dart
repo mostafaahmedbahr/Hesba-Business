@@ -27,6 +27,7 @@ class RemindersView extends StatelessWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'reminders_fab',
         onPressed: () => _openForm(context),
         elevation: 6,
         backgroundColor: _brandTop,

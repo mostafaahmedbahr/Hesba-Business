@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/models/product.dart';
+import '../../../../core/services/app_events.dart';
 import '../../data/repos/products_repo.dart';
 import '../states/products_state.dart';
 
@@ -38,6 +39,7 @@ class ProductsCubit extends Cubit<ProductsState> {
   Future<bool> addProduct(Product product) async {
     try {
       await _repo.addProduct(product);
+      AppEvents.instance.productChanged();
       return true;
     } catch (_) {
       return false;
@@ -47,6 +49,7 @@ class ProductsCubit extends Cubit<ProductsState> {
   Future<bool> updateProduct(Product product) async {
     try {
       await _repo.updateProduct(product);
+      AppEvents.instance.productChanged();
       return true;
     } catch (_) {
       return false;
@@ -56,6 +59,7 @@ class ProductsCubit extends Cubit<ProductsState> {
   Future<bool> deleteProduct(String productId) async {
     try {
       await _repo.deleteProduct(productId);
+      AppEvents.instance.productChanged();
       return true;
     } catch (_) {
       return false;

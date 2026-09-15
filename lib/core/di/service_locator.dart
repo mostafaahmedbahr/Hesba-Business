@@ -16,6 +16,8 @@ import '../../features/profile/data/repos/account_repo.dart';
 import '../../features/profile/data/repos_impl/account_repo_impl.dart';
 import '../../features/products/data/repos/products_repo.dart';
 import '../../features/products/data/repos_impl/products_repo_impl.dart';
+import '../../features/sales/data/repos/sales_repo.dart';
+import '../../features/sales/data/repos_impl/sales_repo_impl.dart';
 import '../../features/settings/data/repos/preferences_repo.dart';
 import '../../features/settings/data/repos_impl/preferences_repo_impl.dart';
 
@@ -32,6 +34,7 @@ Future<void> initDependencies() async {
   _initDashboard();
   _initNotifications();
   _initProducts();
+  _initSales();
 }
 
 void _initAuth() {
@@ -93,6 +96,15 @@ void _initProducts() {
     () => ProductsRepoImpl(
       auth: sl<FirebaseAuth>(),
       firestore: sl<FirebaseFirestore>(),
+    ),
+  );
+}
+
+void _initSales() {
+  sl.registerLazySingleton<SalesRepo>(
+    () => SalesRepoImpl(
+      firestore: sl<FirebaseFirestore>(),
+      auth: sl<FirebaseAuth>(),
     ),
   );
 }

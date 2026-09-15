@@ -47,6 +47,7 @@ class _ProductsViewState extends State<ProductsView> {
           return Scaffold(
             backgroundColor: Theme.of(context).colorScheme.surface,
             floatingActionButton: FloatingActionButton.extended(
+              heroTag: 'products_fab',
               onPressed: () => _openForm(context),
               elevation: 6,
               backgroundColor: AppTheme.primaryColor,

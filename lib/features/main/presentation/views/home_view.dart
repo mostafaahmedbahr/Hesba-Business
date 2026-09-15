@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../dashboard/presentation/cubit/dashboard_cubit.dart';
 import '../../../dashboard/presentation/states/dashboard_state.dart';
@@ -786,7 +787,17 @@ class _QuickActionsGrid extends StatelessWidget {
             Expanded(
               child: _QuickAction(
                 data: actions[0],
-                onTap: () => _comingSoon(context),
+                onTap: () async {
+                  final result =
+                      await Navigator.pushNamed(context, AppRoutes.addSaleView);
+                  // SalesCubit already emits AppEvents.saleCreated, but force
+                  // immediate dashboard refresh for instant UI feedback.
+                  if (result == true && context.mounted) {
+                    try {
+                      context.read<DashboardCubit>().refresh();
+                    } catch (_) {}
+                  }
+                },
               ),
             ),
             SizedBox(width: 14.w),
