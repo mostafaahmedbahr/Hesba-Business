@@ -13,9 +13,12 @@ import 'sales_view.dart';
 import '../widgets/modern_bottom_nav.dart';
 import '../../../products/presentation/views/products_view.dart';
 import '../../../returns/presentation/views/returns_view.dart';
+import '../../../expenses/presentation/views/expenses_view.dart';
 
 class MainLayout extends StatefulWidget {
-  const MainLayout({super.key});
+  final int? initialTab;
+
+  const MainLayout({super.key, this.initialTab});
 
   @override
   State<MainLayout> createState() => _MainLayoutState();
@@ -23,6 +26,12 @@ class MainLayout extends StatefulWidget {
 
 class _MainLayoutState extends State<MainLayout> {
   int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialTab != null) _currentIndex = widget.initialTab!;
+  }
 
   void _onTabSelected(int index) {
     setState(() => _currentIndex = index);
@@ -39,8 +48,6 @@ class _MainLayoutState extends State<MainLayout> {
           create: (_) => NotificationCubit(repo: sl<NotificationRepo>()),
         ),
       ],
-      // _MainShell sits BELOW the providers, so its own context can safely
-      // read them during initState's postFrameCallback.
       child: _MainShell(currentIndex: _currentIndex, onTabSelected: _onTabSelected),
     );
   }
@@ -66,6 +73,7 @@ class _MainShellState extends State<_MainShell> {
     SalesView(),
     ReturnsView(),
     ReportsView(),
+    ExpensesView(),
     MoreView(),
   ];
 
@@ -75,8 +83,6 @@ class _MainShellState extends State<_MainShell> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       context.read<NotificationCubit>().ensureAllRemindersScheduled();
-      // Register/refresh the device FCM token at every launch so push
-      // messages actually arrive (requesting permission is a no-op once granted).
       NotificationService().setupFcm();
     });
   }

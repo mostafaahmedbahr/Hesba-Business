@@ -9,6 +9,10 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/toast.dart';
 import '../../../dashboard/presentation/cubit/dashboard_cubit.dart';
 import '../../../dashboard/presentation/states/dashboard_state.dart';
+import '../../../expenses/presentation/views/expenses_view.dart';
+import '../../../products/presentation/cubit/products_cubit.dart';
+import '../../../products/presentation/views/product_form_view.dart';
+import '../../../products/presentation/views/products_view.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
@@ -891,7 +895,11 @@ class _QuickActionsGrid extends StatelessWidget {
             Expanded(
               child: _QuickAction(
                 data: actions[1],
-                onTap: () => _comingSoon(context),
+                onTap: () => Navigator.pushNamed(
+                  context,
+                  AppRoutes.dashboard,
+                  arguments: {'initialTab': 1},
+                ),
               ),
             ),
           ],
@@ -916,17 +924,18 @@ class _QuickActionsGrid extends StatelessWidget {
             Expanded(
               child: _QuickAction(
                 data: actions[3],
-                onTap: () => _comingSoon(context),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ExpensesView(shopId: ''),
+                  ),
+                ),
               ),
             ),
           ],
         ),
       ],
     );
-  }
-
-  void _comingSoon(BuildContext context) {
-    AppToast.info(context, 'loginComingSoon'.tr());
   }
 }
 

@@ -9,6 +9,8 @@ import 'package:hesba/features/main/presentation/views/main_layout.dart';
 import '../../features/sales/presentation/views/add_sale_view.dart';
 import '../../features/returns/presentation/views/add_return_view.dart';
 import '../../features/returns/presentation/views/returns_view.dart';
+import '../../features/expenses/presentation/views/expenses_view.dart';
+import '../../features/expenses/presentation/views/add_expense_view.dart';
 
 /// Root navigator used to route the user when they tap a notification while
 /// the app is in the background or was terminated.
@@ -27,7 +29,13 @@ class AppRouter {
         return _buildRoute(const RegisterView(), settings);
 
       case AppRoutes.dashboard:
-        return _buildRoute(const MainLayout(), settings);
+        final dArgs = settings.arguments as Map<String, dynamic>?;
+        return _buildRoute(
+          MainLayout(
+            initialTab: dArgs?['initialTab'] as int?,
+          ),
+          settings,
+        );
       case AppRoutes.addSaleView:
         final args = settings.arguments as Map<String, dynamic>?;
         return _buildRoute(
@@ -46,6 +54,23 @@ class AppRouter {
             ownerId: rArgs?['ownerId'] as String?,
             shopId: rArgs?['shopId'] as String?,
             originalSaleId: rArgs?['originalSaleId'] as String?,
+          ),
+          settings,
+        );
+      case AppRoutes.expensesView:
+        final eArgs = settings.arguments as Map<String, dynamic>?;
+        return _buildRoute(
+          ExpensesView(
+            shopId: eArgs?['shopId'] as String? ?? '',
+          ),
+          settings,
+        );
+      case AppRoutes.addExpenseView:
+        final aeArgs = settings.arguments as Map<String, dynamic>?;
+        return _buildRoute(
+          AddExpenseView(
+            ownerId: aeArgs?['ownerId'] as String?,
+            shopId: aeArgs?['shopId'] as String?,
           ),
           settings,
         );
