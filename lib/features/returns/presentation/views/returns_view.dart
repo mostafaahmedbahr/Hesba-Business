@@ -56,7 +56,7 @@ class _ReturnsViewState extends State<ReturnsView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('المرتجعات'.tr() ?? 'المرتجعات'),
+        title: Text('navReturns'.tr()),
         centerTitle: true,
       ),
       floatingActionButton: FloatingActionButton.extended(
