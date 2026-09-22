@@ -26,6 +26,8 @@ import '../../features/settings/data/repos/preferences_repo.dart';
 import '../../features/settings/data/repos_impl/preferences_repo_impl.dart';
 import '../../features/notifications/data/repos/activity_repo.dart';
 import '../../features/notifications/data/repos_impl/activity_repo_impl.dart';
+import '../../features/categories/data/repos/category_repo.dart';
+import '../../features/categories/data/repos_impl/category_repo_impl.dart';
 
 final sl = GetIt.instance;
 
@@ -44,6 +46,7 @@ Future<void> initDependencies() async {
   _initReturns();
   _initExpenses();
   _initActivity();
+  _initCategories();
 }
 
 void _initAuth() {
@@ -139,5 +142,11 @@ void _initExpenses() {
 void _initActivity() {
   sl.registerLazySingleton<ActivityRepo>(
     () => ActivityRepoImpl(sl<SharedPreferences>()),
+  );
+}
+
+void _initCategories() {
+  sl.registerLazySingleton<CategoryRepo>(
+    () => CategoryRepoImpl(firestore: sl<FirebaseFirestore>(), auth: sl<FirebaseAuth>()),
   );
 }

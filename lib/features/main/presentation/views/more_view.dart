@@ -16,6 +16,7 @@ import '../../../profile/presentation/views/update_profile_view.dart';
 import '../../../settings/presentation/cubit/settings_cubit.dart';
 import '../../../settings/presentation/states/settings_state.dart';
 import '../../../notifications/presentation/views/notifications_view.dart';
+import '../../../categories/presentation/views/category_management_view.dart';
 import '../widgets/main_app_bar.dart';
 
 class MoreView extends StatelessWidget {
@@ -58,6 +59,15 @@ class MoreView extends StatelessWidget {
                 label: 'moreNotificationsTitle'.tr(),
                 color: const Color(0xFF00ACC1),
                 onTap: () => _navigateTo(context, const NotificationsView()),
+              ),
+            ]),
+            SizedBox(height: 20.h),
+            _SectionCard('إدارة المتجر', [
+              MoreItem(
+                icon: Icons.category_rounded,
+                label: 'إدارة الأقسام',
+                color: const Color(0xFF059669),
+                onTap: () => _navigateTo(context, const CategoryManagementView()),
               ),
             ]),
             SizedBox(height: 20.h),

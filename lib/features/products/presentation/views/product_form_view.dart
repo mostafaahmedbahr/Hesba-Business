@@ -1,12 +1,20 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/di/service_locator.dart';
 import '../../../../core/models/product.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/toast.dart';
+import '../../../categories/data/repos/category_repo.dart';
+import '../../../categories/presentation/views/category_management_view.dart';
 import '../cubit/products_cubit.dart';
 
 class ProductFormView extends StatefulWidget {
@@ -36,10 +44,29 @@ class _ProductFormViewState extends State<ProductFormView> {
   bool _customCategory = false;
   bool _customSize = false;
   late List<String> _categories = _categoriesFor(widget.cubit.state.shopType);
+  List<String> _customCategories = [];
+  String? _shopId;
+  StreamSubscription<List<String>>? _catSub;
 
   bool _saving = false;
   bool _deleting = false;
   bool get _isEdit => widget.product != null;
+
+  List<String> get _allCategories {
+    final base = List<String>.from(_categories);
+    // ادمج المخصصة قبل "أخرى" مع منع التكرار
+    final other = base.isNotEmpty ? base.removeLast() : null;
+    final lowerBase = base.map((e) => e.trim().toLowerCase()).toSet();
+    for (final c in _customCategories) {
+      final trimmed = c.trim();
+      if (trimmed.isEmpty) continue;
+      if (lowerBase.contains(trimmed.toLowerCase())) continue;
+      if (base.map((e) => e.toLowerCase()).contains(trimmed.toLowerCase())) continue;
+      base.add(trimmed);
+    }
+    if (other != null) base.add(other);
+    return base;
+  }
 
   List<String> _categoriesFor(String? shopType) =>
       AppConstants.productCategoriesByBusinessType[shopType] ?? AppConstants.defaultProductCategories;
@@ -74,12 +101,35 @@ class _ProductFormViewState extends State<ProductFormView> {
       if (AppConstants.productSizes.contains(savedSize)) _size = savedSize;
       else { _size = _otherOption; _customSize = true; _customSizeController.text = savedSize; }
     }
+    _loadCustomCategories();
   }
 
-  String get _otherOption => _categories.last;
+  Future<void> _loadCustomCategories() async {
+    try {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid == null) return;
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      _shopId = userDoc.data()?['shopId'] as String?;
+      if (_shopId == null || _shopId!.isEmpty) return;
+      final repo = sl<CategoryRepo>();
+      _catSub?.cancel();
+      _catSub = repo.watchCustomCategories(_shopId!).listen((list) {
+        if (!mounted) return;
+        setState(() => _customCategories = list);
+        // لو القسم المحفوظ كان مخصص وتأكدنا أنه الآن في القائمة، حدّث _category
+        final saved = widget.product?.category ?? '';
+        if (saved.isNotEmpty && list.map((e) => e.toLowerCase()).contains(saved.toLowerCase())) {
+          setState(() { _category = saved; _customCategory = false; });
+        }
+      });
+    } catch (_) {}
+  }
+
+  String get _otherOption => _allCategories.isNotEmpty ? _allCategories.last : _categories.last;
 
   @override
   void dispose() {
+    _catSub?.cancel();
     _nameController.dispose(); _codeController.dispose(); _costPriceController.dispose(); _priceController.dispose();
     _stockController.dispose(); _lowStockController.dispose(); _colorController.dispose(); _notesController.dispose();
     _imageUrlController.dispose(); _customCategoryController.dispose(); _customSizeController.dispose();
@@ -179,7 +229,18 @@ class _ProductFormViewState extends State<ProductFormView> {
             _SectionCard(icon: Icons.info_outline_rounded, title: 'المعلومات الأساسية', gradient: const [Color(0xFF1A4FD6), Color(0xFF4A7BFF)], child: Column(children: [
               _field(controller: _nameController, label: 'productFormName'.tr(), hint: 'productFormNameHint'.tr(), icon: Icons.inventory_2_rounded, required: true, validator: (v) => (v == null || v.trim().isEmpty) ? 'validatorRequired'.tr() : null),
               SizedBox(height: 12.h),
-              _dropdownField<String>(label: 'productFormCategory'.tr(), icon: Icons.category_rounded, value: _category, items: [for (final c in _categories) DropdownMenuItem(value: c, child: Text(c, style: TextStyle(fontSize: 13.sp)))], onChanged: (v) => setState(() { _category = v; _customCategory = v == _otherOption; })),
+              _dropdownField<String>(label: 'productFormCategory'.tr(), icon: Icons.category_rounded, value: _category, items: [for (final c in _allCategories) DropdownMenuItem(value: c, child: Text(c, style: TextStyle(fontSize: 13.sp)))], onChanged: (v) => setState(() { _category = v; _customCategory = v == _otherOption; })),
+              Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: TextButton.icon(
+                  onPressed: () async {
+                    await Navigator.push(context, MaterialPageRoute(builder: (_) => const CategoryManagementView()));
+                  },
+                  icon: Icon(Icons.settings_rounded, size: 14.sp, color: AppTheme.primaryColor),
+                  label: Text('إدارة الأقسام', style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w700, color: AppTheme.primaryColor)),
+                  style: TextButton.styleFrom(padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h), tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                ),
+              ),
               if (_customCategory) ...[SizedBox(height: 12.h), _field(controller: _customCategoryController, label: 'productFormCustomCategory'.tr(), hint: 'productFormCategoryHint'.tr(), icon: Icons.edit_rounded, required: true, validator: (v) => (v == null || v.trim().isEmpty) ? 'validatorRequired'.tr() : null)],
               SizedBox(height: 12.h),
               _field(controller: _codeController, label: 'productFormCode'.tr(), hint: 'productFormCodeHint'.tr(), icon: Icons.qr_code_2_rounded, suffixIcon: _iconBtn(Icons.autorenew_rounded, AppTheme.primaryColor, _regenerateCode)),
