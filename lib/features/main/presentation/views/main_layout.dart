@@ -80,7 +80,7 @@ class _MainShellState extends State<_MainShell> {
       const SalesView(),
       const ReturnsView(),
       const ReportsView(),
-      const ExpensesView(),
+      ExpensesView(),
       const MoreView(),
     ];
 

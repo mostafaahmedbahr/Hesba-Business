@@ -13,9 +13,20 @@ class ExpensesCubit extends Cubit<ExpensesState> {
   final ExpensesRepo expensesRepo;
   final FirebaseAuth? _auth;
   StreamSubscription<List<ExpenseModel>>? _expensesSubscription;
+  StreamSubscription<AppEvent>? _eventSub;
+  String? _lastShopId;
 
   ExpensesCubit({required this.expensesRepo, FirebaseAuth? this._auth})
-      : super(const ExpensesState());
+      : super(const ExpensesState()) {
+    // أي إضافة/تعديل/حذف من أي Cubit تاني يحدّث القائمة فوراً
+    _eventSub = AppEvents.instance.stream.listen((event) {
+      if (event.type == AppEventType.expenseCreated ||
+          event.type == AppEventType.expenseUpdated ||
+          event.type == AppEventType.expenseDeleted) {
+        if (_lastShopId != null) loadExpenses(shopId: _lastShopId!);
+      }
+    });
+  }
 
   void reset() {
     _expensesSubscription?.cancel();
@@ -34,15 +45,14 @@ class ExpensesCubit extends Cubit<ExpensesState> {
   }
 
   Future<void> loadExpenses({required String shopId}) async {
+    _lastShopId = shopId;
     _expensesSubscription?.cancel();
     _expensesSubscription = null;
     emit(state.copyWith(status: ExpensesStatus.loading, errorMessage: null));
     final resolvedShopId = await _resolveShopId(shopId);
-    if (resolvedShopId == null || resolvedShopId.isEmpty) {
-      emit(state.copyWith(status: ExpensesStatus.error, errorMessage: 'لم يتم العثور على المتجر'));
-      return;
-    }
-    _expensesSubscription = expensesRepo.watchExpenses(shopId: resolvedShopId).listen(
+    // حتى لو الـ shopId فاضي، اعرض الكل (repo بيعمل fallback)
+    final effectiveShopId = resolvedShopId ?? shopId;
+    _expensesSubscription = expensesRepo.watchExpenses(shopId: effectiveShopId).listen(
       (expenses) {
         final total = expenses.fold<double>(0, (sum, e) => sum + e.amount);
         emit(state.copyWith(
@@ -80,8 +90,9 @@ class ExpensesCubit extends Cubit<ExpensesState> {
       return;
     }
 
+    emit(state.copyWith(status: ExpensesStatus.loading, errorMessage: null));
     try {
-      await expensesRepo.addExpense(
+      final expense = await expensesRepo.addExpense(
         ownerId: ownerId,
         shopId: shopId,
         title: title,
@@ -92,6 +103,7 @@ class ExpensesCubit extends Cubit<ExpensesState> {
       );
       AppEvents.instance.expenseCreated();
       AppEvents.instance.productChanged();
+      emit(state.copyWith(status: ExpensesStatus.success, addedExpense: expense, errorMessage: null));
     } catch (e) {
       final msg = e.toString().replaceAll('Exception: ', '');
       emit(state.copyWith(status: ExpensesStatus.error, errorMessage: msg));
@@ -121,8 +133,9 @@ class ExpensesCubit extends Cubit<ExpensesState> {
       return;
     }
 
+    emit(state.copyWith(status: ExpensesStatus.loading, errorMessage: null));
     try {
-      await expensesRepo.updateExpense(
+      final expense = await expensesRepo.updateExpense(
         expenseId: expenseId,
         ownerId: ownerId,
         shopId: shopId,
@@ -134,6 +147,7 @@ class ExpensesCubit extends Cubit<ExpensesState> {
       );
       AppEvents.instance.expenseUpdated();
       AppEvents.instance.productChanged();
+      emit(state.copyWith(status: ExpensesStatus.success, addedExpense: expense, errorMessage: null));
     } catch (e) {
       final msg = e.toString().replaceAll('Exception: ', '');
       emit(state.copyWith(status: ExpensesStatus.error, errorMessage: msg));
@@ -155,6 +169,7 @@ class ExpensesCubit extends Cubit<ExpensesState> {
   @override
   Future<void> close() {
     _expensesSubscription?.cancel();
+    _eventSub?.cancel();
     return super.close();
   }
 }

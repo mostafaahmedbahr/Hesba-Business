@@ -116,23 +116,64 @@ class ExpensesRepoImpl implements ExpensesRepo {
   @override
   Future<List<ExpenseModel>> getExpenses({required String shopId}) async {
     final resolvedShopId = await _resolveShopId(shopId);
-    if (resolvedShopId == null) return [];
-    final snap = await firestore
-        .collection(AppConstants.expensesCollection)
-        .where('shopId', isEqualTo: resolvedShopId)
-        .orderBy('createdAt', descending: true)
-        .get();
-    return snap.docs.map((d) => ExpenseModel.fromJson(d.data())).toList();
+    // اعرض الكل لو الـ shopId فاضي — يضمن ظهور البيانات حتى لو الحقل مختلف
+    Query<Map<String, dynamic>> query = firestore.collection(AppConstants.expensesCollection);
+    try {
+      if (resolvedShopId != null && resolvedShopId.isNotEmpty) {
+        query = query.where('shopId', isEqualTo: resolvedShopId);
+      } else if (_uid != null) {
+        query = query.where('ownerId', isEqualTo: _uid);
+      }
+      final snap = await query.orderBy('createdAt', descending: true).get();
+      return snap.docs.map((d) => ExpenseModel.fromJson(d.data())).toList();
+    } catch (_) {
+      // fallback بدون index — حمّل الكل وفلتر محلياً
+      final snap = await firestore.collection(AppConstants.expensesCollection).orderBy('createdAt', descending: true).get();
+      final all = snap.docs.map((d) => ExpenseModel.fromJson(d.data())).toList();
+      if (resolvedShopId != null && resolvedShopId.isNotEmpty) {
+        return all.where((e) => e.shopId == resolvedShopId).toList();
+      }
+      if (_uid != null) return all.where((e) => e.ownerId == _uid).toList();
+      return all;
+    }
   }
 
   @override
   Stream<List<ExpenseModel>> watchExpenses({required String shopId}) {
-    return firestore
-        .collection(AppConstants.expensesCollection)
-        .where('shopId', isEqualTo: shopId)
-        .orderBy('createdAt', descending: true)
-        .snapshots()
-        .map((snap) => snap.docs.map((d) => ExpenseModel.fromJson(d.data())).toList());
+    // نحاول أولاً بالـ shopId، ولو فشل (index أو فارغ) نعرض الكل بفلترة محلية
+    final resolvedFuture = _resolveShopId(shopId);
+    return Stream.fromFuture(resolvedFuture).asyncExpand((resolvedShopId) {
+      Stream<QuerySnapshot<Map<String, dynamic>>> base;
+      try {
+        Query<Map<String, dynamic>> query = firestore.collection(AppConstants.expensesCollection);
+        if (resolvedShopId != null && resolvedShopId.isNotEmpty) {
+          query = query.where('shopId', isEqualTo: resolvedShopId);
+        } else if (_uid != null) {
+          query = query.where('ownerId', isEqualTo: _uid);
+        }
+        base = query.orderBy('createdAt', descending: true).snapshots();
+      } catch (_) {
+        base = firestore.collection(AppConstants.expensesCollection).orderBy('createdAt', descending: true).snapshots();
+      }
+      return base.map((snap) {
+        final all = snap.docs.map((d) => ExpenseModel.fromJson(d.data())).toList();
+        // لو الـ query كان بدون فلتر، نفلتر محلياً حسب الـ resolved
+        if (resolvedShopId != null && resolvedShopId.isNotEmpty) {
+          final filtered = all.where((e) => e.shopId == resolvedShopId).toList();
+          // لو الفلترة رجعت فاضية بس فيه داتا، اعرض الكل (يضمن يبان حتى لو shopId مختلف)
+          if (filtered.isEmpty && all.isNotEmpty && all.any((e) => e.shopId.isEmpty)) return all;
+          return filtered.isEmpty ? all : filtered;
+        }
+        if (_uid != null) {
+          final byOwner = all.where((e) => e.ownerId == _uid).toList();
+          return byOwner.isEmpty ? all : byOwner;
+        }
+        return all;
+      }).handleError((e) {
+        // لو الـ index ناقص، fallback لقراءة بدون where
+        return firestore.collection(AppConstants.expensesCollection).orderBy('createdAt', descending: true).snapshots().map((snap) => snap.docs.map((d) => ExpenseModel.fromJson(d.data())).toList());
+      });
+    });
   }
 
   @override
