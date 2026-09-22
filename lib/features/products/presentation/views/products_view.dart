@@ -82,7 +82,7 @@ class _ProductsViewState extends State<ProductsView> {
 
     return CustomScrollView(
       slivers: [
-        _buildHeader(context, products.length, inventoryValue, lowStockCount),
+        _buildHeader(context, products.length, inventoryValue, lowStockCount, onAdd: () => _openForm(context)),
         SliverToBoxAdapter(
           child: Padding(
             padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 0),
@@ -168,7 +168,7 @@ class _ProductsViewState extends State<ProductsView> {
     );
   }
 
-  Widget _buildHeader(BuildContext context, int count, double inventoryValue, int lowStockCount) {
+  Widget _buildHeader(BuildContext context, int count, double inventoryValue, int lowStockCount, {VoidCallback? onAdd}) {
     return SliverAppBar(
       pinned: true,
       expandedHeight: 188.h,
@@ -198,7 +198,7 @@ class _ProductsViewState extends State<ProductsView> {
                           SizedBox(height: 2.h),
                           Text('${count} منتج في المخزون', style: TextStyle(fontSize: 11.sp, color: Colors.white.withValues(alpha: 0.85), fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
                         ])),
-                        SizedBox(width: 10.w),
+                        SizedBox(width: 8.w),
                         Container(
                           padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
                           decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.16), borderRadius: BorderRadius.circular(20.r), border: Border.all(color: Colors.white.withValues(alpha: 0.22))),
@@ -208,6 +208,22 @@ class _ProductsViewState extends State<ProductsView> {
                             Text('productsCount'.tr(args: ['$count']), style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: Colors.white)),
                           ]),
                         ),
+                        if (onAdd != null) ...[
+                          SizedBox(width: 8.w),
+                          Material(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12.r),
+                            child: InkWell(
+                              onTap: () { HapticFeedback.lightImpact(); onAdd(); },
+                              borderRadius: BorderRadius.circular(12.r),
+                              child: Container(
+                                width: 36.w, height: 36.w,
+                                decoration: BoxDecoration(borderRadius: BorderRadius.circular(12.r)),
+                                child: Icon(Icons.add_rounded, size: 20.sp, color: AppTheme.primaryColor),
+                              ),
+                            ),
+                          ),
+                        ],
                       ]),
                     ),
                     SizedBox(height: 10.h),
@@ -244,7 +260,7 @@ class _ProductsViewState extends State<ProductsView> {
   Widget _buildEmptyState(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return CustomScrollView(slivers: [
-      _buildHeader(context, 0, 0, 0),
+      _buildHeader(context, 0, 0, 0, onAdd: () => _openForm(context)),
       SliverFillRemaining(
         hasScrollBody: false,
         child: Center(
