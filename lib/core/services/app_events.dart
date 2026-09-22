@@ -4,6 +4,11 @@ enum AppEventType {
   saleCreated,
   returnCreated,
   expenseCreated,
+  expenseUpdated,
+  expenseDeleted,
+  productAdded,
+  productUpdated,
+  productDeleted,
   productChanged,
 }
 
@@ -28,6 +33,11 @@ class AppEvents {
   void saleCreated() => emit(AppEventType.saleCreated);
   void returnCreated() => emit(AppEventType.returnCreated);
   void expenseCreated() => emit(AppEventType.expenseCreated);
+  void expenseUpdated() => emit(AppEventType.expenseUpdated);
+  void expenseDeleted() => emit(AppEventType.expenseDeleted);
+  void productAdded() => emit(AppEventType.productAdded);
+  void productUpdated() => emit(AppEventType.productUpdated);
+  void productDeleted() => emit(AppEventType.productDeleted);
   void productChanged() => emit(AppEventType.productChanged);
 
   void dispose() {

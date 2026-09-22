@@ -39,6 +39,7 @@ class ProductsCubit extends Cubit<ProductsState> {
   Future<bool> addProduct(Product product) async {
     try {
       await _repo.addProduct(product);
+      AppEvents.instance.productAdded();
       AppEvents.instance.productChanged();
       return true;
     } catch (_) {
@@ -49,6 +50,7 @@ class ProductsCubit extends Cubit<ProductsState> {
   Future<bool> updateProduct(Product product) async {
     try {
       await _repo.updateProduct(product);
+      AppEvents.instance.productUpdated();
       AppEvents.instance.productChanged();
       return true;
     } catch (_) {
@@ -59,6 +61,7 @@ class ProductsCubit extends Cubit<ProductsState> {
   Future<bool> deleteProduct(String productId) async {
     try {
       await _repo.deleteProduct(productId);
+      AppEvents.instance.productDeleted();
       AppEvents.instance.productChanged();
       return true;
     } catch (_) {

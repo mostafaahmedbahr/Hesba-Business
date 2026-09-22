@@ -24,6 +24,8 @@ import '../../features/expenses/data/repos/expenses_repo.dart';
 import '../../features/expenses/data/repos_impl/expenses_repo_impl.dart';
 import '../../features/settings/data/repos/preferences_repo.dart';
 import '../../features/settings/data/repos_impl/preferences_repo_impl.dart';
+import '../../features/notifications/data/repos/activity_repo.dart';
+import '../../features/notifications/data/repos_impl/activity_repo_impl.dart';
 
 final sl = GetIt.instance;
 
@@ -41,6 +43,7 @@ Future<void> initDependencies() async {
   _initSales();
   _initReturns();
   _initExpenses();
+  _initActivity();
 }
 
 void _initAuth() {
@@ -130,5 +133,11 @@ void _initExpenses() {
       firestore: sl<FirebaseFirestore>(),
       auth: sl<FirebaseAuth>(),
     ),
+  );
+}
+
+void _initActivity() {
+  sl.registerLazySingleton<ActivityRepo>(
+    () => ActivityRepoImpl(sl<SharedPreferences>()),
   );
 }

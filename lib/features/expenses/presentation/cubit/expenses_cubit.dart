@@ -132,7 +132,7 @@ class ExpensesCubit extends Cubit<ExpensesState> {
         note: note,
         date: date,
       );
-      AppEvents.instance.expenseCreated();
+      AppEvents.instance.expenseUpdated();
       AppEvents.instance.productChanged();
     } catch (e) {
       final msg = e.toString().replaceAll('Exception: ', '');
@@ -143,6 +143,8 @@ class ExpensesCubit extends Cubit<ExpensesState> {
   Future<void> deleteExpense({required String expenseId, required String shopId}) async {
     try {
       await expensesRepo.deleteExpense(expenseId: expenseId, shopId: shopId);
+      AppEvents.instance.expenseDeleted();
+      AppEvents.instance.productChanged();
       emit(state.copyWith(status: ExpensesStatus.success));
     } catch (e) {
       final msg = e.toString().replaceAll('Exception: ', '');
