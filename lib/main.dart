@@ -15,7 +15,6 @@ import 'package:hesba/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:hesba/features/settings/presentation/states/settings_state.dart';
 
 Future<void> main() async {
-  print('mostafa ahmed');
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await NotificationService().initialize(onTap: _handleNotificationTap);
