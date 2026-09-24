@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-/// Premium floating island bottom nav — 2026
+/// Premium floating island bottom nav — 2026 (4 items)
 /// • Glass + soft shadow, dark-mode aware
 /// • Selected pill animates, dot indicator
-/// • 7 items handled with FittedBox to stay crisp on 375px
+/// • 4 items = optimal tap target & Material3 compliance
 class ModernBottomNav extends StatelessWidget {
   final int currentIndex;
   final void Function(int) onTap;
@@ -84,10 +84,7 @@ const List<_NavItemData> _items = [
   _NavItemData(Icons.home_outlined, Icons.home_rounded, 'navHome'),
   _NavItemData(Icons.category_outlined, Icons.category_rounded, 'navProducts'),
   _NavItemData(Icons.receipt_long_outlined, Icons.receipt_long_rounded, 'navSales'),
-  _NavItemData(Icons.assignment_return_outlined, Icons.assignment_return_rounded, 'navReturns'),
   _NavItemData(Icons.bar_chart_outlined, Icons.bar_chart_rounded, 'navReports'),
-  _NavItemData(Icons.savings_outlined, Icons.savings_rounded, 'navExpenses'),
-  _NavItemData(Icons.grid_view_outlined, Icons.grid_view_rounded, 'navMore'),
 ];
 
 class _NavItem extends StatelessWidget {

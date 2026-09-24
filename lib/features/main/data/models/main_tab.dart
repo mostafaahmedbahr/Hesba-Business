@@ -1,10 +1,10 @@
-/// Represents the main bottom navigation tabs (data layer).
+/// Represents the main bottom navigation tabs (data layer) - 4 items only.
+/// Sales+Returns grouped, Reports+Expenses grouped, rest moved to Drawer.
 enum MainTab {
   home(0, 'navHome'),
   products(1, 'navProducts'),
   sales(2, 'navSales'),
-  reports(3, 'navReports'),
-  more(4, 'navMore');
+  reports(3, 'navReports');
 
   const MainTab(this.tabIndex, this.labelKey);
 

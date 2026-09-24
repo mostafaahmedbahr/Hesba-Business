@@ -22,7 +22,8 @@ import '../../../notifications/presentation/views/notifications_view.dart';
 
 class HomeView extends StatelessWidget {
   final void Function(int index)? onNavigateTab;
-  const HomeView({super.key, this.onNavigateTab});
+  final VoidCallback? onOpenDrawer;
+  const HomeView({super.key, this.onNavigateTab, this.onOpenDrawer});
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +42,7 @@ class HomeView extends StatelessWidget {
               ),
               slivers: [
                 SliverToBoxAdapter(
-                  child: _HeaderBar(state: state)
+                  child: _HeaderBar(state: state, onOpenDrawer: onOpenDrawer)
                       .animate()
                       .fadeIn(duration: 400.ms, curve: Curves.easeOut),
                 ),
@@ -93,7 +94,8 @@ class HomeView extends StatelessWidget {
 
 class _HeaderBar extends StatelessWidget {
   final DashboardState state;
-  const _HeaderBar({required this.state});
+  final VoidCallback? onOpenDrawer;
+  const _HeaderBar({required this.state, this.onOpenDrawer});
 
   @override
   Widget build(BuildContext context) {
@@ -113,10 +115,30 @@ class _HeaderBar extends StatelessWidget {
       ),
       child: Row(
         children: [
+          // زر القائمة (Drawer)
+          InkWell(
+            onTap: onOpenDrawer ??
+                () {
+                  final scaffold = Scaffold.maybeOf(context);
+                  scaffold?.openDrawer();
+                },
+            borderRadius: BorderRadius.circular(12.r),
+            child: Container(
+              width: 44.w,
+              height: 44.w,
+              decoration: BoxDecoration(
+                color: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(color: isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0)),
+              ),
+              child: Icon(Icons.menu_rounded, size: 20.sp, color: isDark ? Colors.white : const Color(0xFF0F172A)),
+            ),
+          ),
+          SizedBox(width: 8.w),
           // الشعار
           Container(
-            width: 48.w,
-            height: 48.w,
+            width: 44.w,
+            height: 44.w,
             decoration: BoxDecoration(
               gradient: AppTheme.primaryGradient,
               borderRadius: BorderRadius.circular(14.r),
@@ -128,9 +150,9 @@ class _HeaderBar extends StatelessWidget {
               ],
             ),
             child: Icon(Icons.storefront_rounded,
-                color: Colors.white, size: 24.sp),
+                color: Colors.white, size: 20.sp),
           ),
-          SizedBox(width: 12.w),
+          SizedBox(width: 10.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
