@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:hesba/core/router/app_routes.dart';
-import 'package:hesba/features/splash/presentation/screens/splash_screen.dart';
+import 'package:hesba/features/splash/presentation/views/splash_view.dart';
 import 'package:hesba/features/auth/presentation/views/login_view.dart';
 import 'package:hesba/features/auth/presentation/views/register_view.dart';
 import 'package:hesba/features/main/presentation/views/main_layout.dart';
@@ -20,7 +20,7 @@ class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
       case AppRoutes.splash:
-        return _buildRoute(const SplashScreen(), settings);
+        return _buildRoute(const SplashView(), settings);
 
       case AppRoutes.login:
         return _buildRoute(const LoginView(), settings);
@@ -78,7 +78,7 @@ class AppRouter {
       //   return _buildRoute(const ResetPasswordScreen(), settings);
 
       default:
-        return _buildRoute(const SplashScreen(), settings);
+        return _buildRoute(const SplashView(), settings);
     }
   }
 
