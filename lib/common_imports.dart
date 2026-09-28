@@ -5,3 +5,5 @@ export 'package:hesba/core/di/service_locator.dart';
 export 'package:hesba/core/router/app_routes.dart';
 export 'package:hesba/core/theme/app_theme.dart';
 export 'package:hesba/core/extensions/log_util.dart';
+export 'package:hesba/core/router/app_router.dart';
+export 'package:hesba/core/services/notification_service.dart';

@@ -1,21 +1,15 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui' as ui;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:hesba/core/di/service_locator.dart';
-import 'package:hesba/core/router/app_router.dart';
-import 'package:hesba/core/router/app_routes.dart';
-import 'package:hesba/core/services/notification_service.dart';
-import 'package:hesba/core/theme/app_theme.dart';
+import 'package:hesba/common_imports.dart';
 import 'package:hesba/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:hesba/features/settings/presentation/states/settings_state.dart';
 
 Future<void> main() async {
-  print('mostafa ahmed');
+  logSuccess('mostafa ahmed');
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await NotificationService().initialize(onTap: _handleNotificationTap);
