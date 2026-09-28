@@ -5,10 +5,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/models/local_reminder.dart';
 import '../../../../core/theme/app_theme.dart';
 
-/// كارت تذكير (وقت + عنوان + تكرار + تفعيل/تعديل/حذف).
+/// كارت تذكير (وقت + عنوان + تكرار + تفعيل/تجربة/تعديل/حذف).
 class ReminderCard extends StatelessWidget {
   final LocalReminder reminder;
   final VoidCallback? onToggle;
+  final VoidCallback? onTest;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
 
@@ -16,6 +17,7 @@ class ReminderCard extends StatelessWidget {
     super.key,
     required this.reminder,
     this.onToggle,
+    this.onTest,
     this.onEdit,
     this.onDelete,
   });
@@ -86,6 +88,14 @@ class ReminderCard extends StatelessWidget {
                     children: [
                       _RepeatPill(reminder: reminder),
                       const Spacer(),
+                      // يبعت الإشعار فورًا عشان تتأكد إنه شغال.
+                      if (onTest != null)
+                        _SmallBtn(
+                          icon: Icons.notifications_active_rounded,
+                          color: const Color(0xFF059669),
+                          onTap: onTest!,
+                        ),
+                      SizedBox(width: 6.w),
                       if (onEdit != null)
                         _SmallBtn(
                           icon: Icons.edit_rounded,

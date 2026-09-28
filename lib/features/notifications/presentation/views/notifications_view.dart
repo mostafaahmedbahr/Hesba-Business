@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/models/local_reminder.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/toast.dart';
 import '../../data/repos/activity_repo.dart';
 import '../../data/repos/notification_repo.dart';
 import '../cubit/notification_cubit.dart';
@@ -48,6 +49,20 @@ class _NotificationsViewState extends State<NotificationsView> {
       ),
       builder: (_) => ReminderFormSheet(cubit: cubit, reminder: reminder),
     );
+  }
+
+  /// يبعت التذكير فورًا (تجربة إنه شغال).
+  Future<void> _testNow(BuildContext context, LocalReminder r) async {
+    final ok = await context.read<NotificationCubit>().sendTest(
+          title: r.title,
+          body: r.body.isEmpty ? 'تذكير حسبة' : r.body,
+        );
+    if (!context.mounted) return;
+    if (ok) {
+      AppToast.success(context, 'وصل؟ كده الإشعارات شغالة وتذكيرك هييجي في وقته');
+    } else {
+      AppToast.error(context, 'موصلش — فعّل إذن الإشعارات من إعدادات الموبايل');
+    }
   }
 
   /// تأكيد حذف تذكير.
@@ -183,6 +198,7 @@ class _NotificationsViewState extends State<NotificationsView> {
                             onToggle: () => context
                                 .read<NotificationCubit>()
                                 .toggleReminderEnabled(r),
+                            onTest: () => _testNow(context, r),
                             onEdit: () => _openForm(context, reminder: r),
                             onDelete: () => _confirmDelete(context, r),
                           );

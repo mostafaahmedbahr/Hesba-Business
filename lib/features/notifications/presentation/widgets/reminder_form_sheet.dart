@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/models/local_reminder.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/toast.dart';
 import '../cubit/notification_cubit.dart';
 
 /// شيت إضافة / تعديل تذكير (تصميم جديد).
@@ -68,9 +69,17 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
     }
   }
 
-  /// يحفظ (إضافة أو تعديل).
+  /// يحفظ (إضافة أو تعديل) — يطلب الإذن الأول لو مقفول.
   Future<void> _save() async {
     if (_title.text.trim().isEmpty || _saving) return;
+    // لو الإذن مقفول الإشعار عمره ما هيوصلك — اطلبه قبل الحفظ.
+    if (!widget.cubit.state.permissionGranted) {
+      await widget.cubit.enablePermissions();
+      if (!widget.cubit.state.permissionGranted && mounted) {
+        AppToast.error(context, 'فعّل إذن الإشعارات من إعدادات الموبايل عشان التذكير يوصلك');
+        return;
+      }
+    }
     setState(() => _saving = true);
     if (_isEdit) {
       await widget.cubit.updateReminder(
@@ -93,7 +102,25 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
         weekday: _repeat == ReminderRepeat.weekly ? _weekday : null,
       );
     }
-    if (mounted) Navigator.pop(context);
+    if (!mounted) return;
+    // يأكدلك إنه هييجي إمتى قبل ما يقفل.
+    AppToast.success(context, 'تمام! هيجيلك ${_fireInfo()}');
+    Navigator.pop(context);
+  }
+
+  /// سطر "هيجيلك إمتى" (النهاردة / بكرة / يوم كذا + الوقت).
+  String _fireInfo() {
+    final when = _repeat == ReminderRepeat.weekly
+        ? 'يوم ${_dayName(_weekday)}'
+        : _isToday() ? 'النهاردة' : 'بكرة';
+    return '$when ${_timeText()}';
+  }
+
+  /// هل الوقت لسه جاي النهاردة؟ (يومي بس).
+  bool _isToday() {
+    final now = DateTime.now();
+    final target = DateTime(now.year, now.month, now.day, _hour, _minute);
+    return target.isAfter(now);
   }
 
   @override
