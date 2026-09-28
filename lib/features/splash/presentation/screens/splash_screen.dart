@@ -1,13 +1,6 @@
 import 'dart:async';
-
-import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-import 'package:hesba/core/di/service_locator.dart';
-import 'package:hesba/core/router/app_routes.dart';
-import 'package:hesba/core/theme/app_theme.dart';
 import 'package:hesba/features/profile/data/repos/account_repo.dart';
+import '../../../../common_imports.dart';
 import '../widgets/splash_background.dart';
 import '../widgets/splash_brand.dart';
 import '../widgets/splash_footer.dart';
@@ -37,7 +30,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void _navigateNext() {
     if (!mounted) return;
     final isLoggedIn = sl<AccountRepo>().currentUserId() != null;
-    print('[Splash] isLoggedIn: $isLoggedIn');
+    logSuccess('[Splash] isLoggedIn: $isLoggedIn');
     Navigator.pushReplacementNamed(
       context,
       isLoggedIn ? AppRoutes.dashboard : AppRoutes.login,
