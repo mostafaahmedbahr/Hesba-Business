@@ -51,7 +51,7 @@ class CustomDrawerTile extends StatelessWidget {
         ),
       ),
       trailing: Icon(
-        Icons.chevron_left_rounded,
+        Icons.chevron_right_rounded,
         size: 18.sp,
         color: const Color(0xFFCBD5E1),
       ),
