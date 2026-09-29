@@ -23,6 +23,8 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
   late ReminderRepeat _repeat;
   late Set<int> _days; // الأيام المختارة للأسبوعي.
   bool _saving = false;
+  bool _titleError = false; // العنوان فاضي.
+  bool _daysError = false; // ولا يوم مختار.
 
   /// وضع تعديل؟
   bool get _isEdit => widget.reminder != null;
@@ -71,25 +73,29 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
 
   /// يحفظ (إضافة أو تعديل) — يطلب الإذن الأول لو مقفول.
   Future<void> _save() async {
-    if (_title.text.trim().isEmpty || _saving) return;
+    if (_saving) return;
+    // العنوان فاضي: خطأ تحت الخانة + تنبيه (مش رجوع صامت).
+    if (_title.text.trim().isEmpty) {
+      setState(() => _titleError = true);
+      if (mounted) AppToast.error(context, 'اكتب عنوان التذكير الأول');
+      return;
+    }
     // لو الإذن مقفول الإشعار عمره ما هيوصلك.
     final granted = await widget.notificationCubit.ensurePermission();
     if (!granted && mounted) {
       AppToast.error(context, 'فعّل إذن الإشعارات من إعدادات الموبايل عشان التذكير يوصلك');
       return;
     }
-    setState(() => _saving = true);
-    // الأسبوعي لازم يوم واحد على الأقل.
+    // الأسبوعي لازم يوم واحد على الأقل: خطأ تحت الأيام + تنبيه.
     final days = _repeat == ReminderRepeat.weekly
         ? (_days.toList()..sort())
         : <int>[];
     if (_repeat == ReminderRepeat.weekly && days.isEmpty) {
-      setState(() => _saving = false);
-      if(mounted){
-      AppToast.error(context, 'اختار يوم واحد على الأقل');
-      }
+      setState(() => _daysError = true);
+      if (mounted) AppToast.error(context, 'اختار يوم واحد على الأقل');
       return;
     }
+    setState(() => _saving = true);
     if (_isEdit) {
       await widget.notificationCubit.updateReminder(
         widget.reminder!.copyWith(
@@ -234,7 +240,19 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
               hint: 'مثال: مراجعة مبيعات اليوم',
               icon: Icons.title_rounded,
               isDark: isDark,
+              onChanged: (_) {
+                if (_titleError) setState(() => _titleError = false);
+              },
             ),
+            // خطأ العنوان (ظاهر دايمًا مش تنبيه بس).
+            if (_titleError)
+              Padding(
+                padding: EdgeInsets.only(top: 6.h, right: 4.w),
+                child: Text(
+                  'اكتب عنوان التذكير الأول',
+                  style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w700, color: const Color(0xFFE11D48)),
+                ),
+              ),
             SizedBox(height: 14.h),
             // نص التذكير.
             _Label('reminderFormBodyField'.tr()),
@@ -365,6 +383,7 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
                       _days = _days.length >= 7
                           ? <int>{}
                           : {1, 2, 3, 4, 5, 6, 7};
+                      _daysError = false;
                     }),
                     borderRadius: BorderRadius.circular(10.r),
                     child: Container(
@@ -403,6 +422,7 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
                       // ضغطة تبدل اليوم (ممكن أكتر من واحد).
                       onSelected: (_) => setState(() {
                         _days.contains(d) ? _days.remove(d) : _days.add(d);
+                        _daysError = false;
                       }),
                       selectedColor: const Color(0xFF1A4FD6),
                       backgroundColor: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF1F5F9),
@@ -417,6 +437,15 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
                     ),
                 ],
               ),
+              // خطأ الأيام (ظاهر دايمًا مش تنبيه بس).
+              if (_daysError && _days.isEmpty)
+                Padding(
+                  padding: EdgeInsets.only(top: 8.h, right: 4.w),
+                  child: Text(
+                    'اختار يوم واحد على الأقل',
+                    style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w700, color: const Color(0xFFE11D48)),
+                  ),
+                ),
             ],
             SizedBox(height: 20.h),
             // زرار الحفظ.
@@ -475,6 +504,7 @@ class _Field extends StatelessWidget {
   final IconData icon;
   final bool isDark;
   final int maxLines;
+  final ValueChanged<String>? onChanged;
 
   const _Field({
     required this.controller,
@@ -482,6 +512,7 @@ class _Field extends StatelessWidget {
     required this.icon,
     required this.isDark,
     this.maxLines = 1,
+    this.onChanged,
   });
 
   @override
@@ -489,6 +520,7 @@ class _Field extends StatelessWidget {
     return TextField(
       controller: controller,
       maxLines: maxLines,
+      onChanged: onChanged,
       style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w600),
       decoration: InputDecoration(
         hintText: hint,

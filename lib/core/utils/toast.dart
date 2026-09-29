@@ -12,18 +12,27 @@ class AppToast {
     ToastType type = ToastType.info,
     Duration duration = const Duration(seconds: 3),
   }) {
-    _currentEntry?.remove();
+    // يشيل القديم لو موجود.
+    try {
+      _currentEntry?.remove();
+    } catch (_) {}
+    _currentEntry = null;
 
     final overlay = Overlay.of(context);
-    _currentEntry = OverlayEntry(
+    final entry = OverlayEntry(
       builder: (context) => _ToastWidget(message: message, type: type),
     );
+    _currentEntry = entry;
+    overlay.insert(entry);
 
-    overlay.insert(_currentEntry!);
-
+    // يمسح نفسه بس (لو جه تنبيه جديد بعده مايتمسحش غلط).
     Future.delayed(duration, () {
-      _currentEntry?.remove();
-      _currentEntry = null;
+      if (_currentEntry == entry) {
+        try {
+          entry.remove();
+        } catch (_) {}
+        _currentEntry = null;
+      }
     });
   }
 
