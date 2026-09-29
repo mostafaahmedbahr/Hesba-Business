@@ -36,8 +36,8 @@ class LocalReminder {
   final bool isBuiltIn;
   final ReminderRepeat repeat;
 
-  /// يوم الأسبوع للأسبوعي (1 = اثنين .. 7 = أحد).
-  final int? weekday;
+  /// أيام الأسبوع للأسبوعي (1 = اثنين .. 7 = أحد) — يوم أو أكتر.
+  final List<int> weekdays;
 
   const LocalReminder({
     required this.id,
@@ -48,7 +48,7 @@ class LocalReminder {
     this.enabled = true,
     this.isBuiltIn = false,
     this.repeat = ReminderRepeat.daily,
-    this.weekday,
+    this.weekdays = const [],
   });
 
   /// نسخ مع تعديل.
@@ -59,7 +59,7 @@ class LocalReminder {
     int? minute,
     bool? enabled,
     ReminderRepeat? repeat,
-    int? weekday,
+    List<int>? weekdays,
   }) {
     return LocalReminder(
       id: id,
@@ -70,7 +70,7 @@ class LocalReminder {
       enabled: enabled ?? this.enabled,
       isBuiltIn: isBuiltIn,
       repeat: repeat ?? this.repeat,
-      weekday: weekday ?? this.weekday,
+      weekdays: weekdays ?? this.weekdays,
     );
   }
 
@@ -85,13 +85,22 @@ class LocalReminder {
       'enabled': enabled,
       'isBuiltIn': isBuiltIn,
       'repeat': repeat.wire,
-      'weekday': weekday,
+      'weekdays': weekdays,
     };
   }
 
-  /// من Map مخزنة.
+  /// من Map مخزنة (يدعم الشكل القديم `weekday` المفرد).
   factory LocalReminder.fromJson(Map<String, dynamic> json) {
     final id = (json['id'] as num).toInt();
+    // ترحيل: القديم كان يوم واحد `weekday` — يتحول لقائمة.
+    var days = (json['weekdays'] as List<dynamic>?)
+        ?.map((e) => (e as num).toInt())
+        .where((d) => d >= 1 && d <= 7)
+        .toList();
+    days ??= switch ((json['weekday'] as num?)?.toInt()) {
+      final d? when d >= 1 && d <= 7 => [d],
+      _ => <int>[],
+    };
     return LocalReminder(
       id: id,
       title: json['title'] as String,
@@ -101,7 +110,7 @@ class LocalReminder {
       enabled: (json['enabled'] as bool?) ?? true,
       isBuiltIn: (json['isBuiltIn'] as bool?) ?? (id >= 1004 && id <= 1007),
       repeat: ReminderRepeat.fromString(json['repeat'] as String?),
-      weekday: (json['weekday'] as num?)?.toInt(),
+      weekdays: days,
     );
   }
 }

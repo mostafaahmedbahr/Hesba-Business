@@ -14,11 +14,11 @@ import '../../../dashboard/presentation/cubit/dashboard_cubit.dart';
 import '../../../dashboard/presentation/states/dashboard_state.dart';
 import '../../../expenses/data/models/expense_model.dart';
 import '../../../expenses/presentation/views/expenses_view.dart';
+import '../../../notifications/presentation/view_model/activity_cubit.dart';
+import '../../../notifications/presentation/view_model/activity_state.dart';
 import '../../../returns/data/models/return_model.dart';
 import '../../../sales/data/models/sale_model.dart';
-import '../../../notifications/presentation/viewmodel/activity_viewmodel.dart';
-import '../../../notifications/presentation/viewmodel/activity_state.dart';
-import '../../../notifications/presentation/views/notifications_view.dart';
+ import '../../../notifications/presentation/views/notifications_view.dart';
 
 class HomeView extends StatelessWidget {
   final void Function(int index)? onNavigateTab;
@@ -196,7 +196,7 @@ class _HeaderBar extends StatelessWidget {
             ),
           ),
           // الإشعارات مع عدّاد
-          BlocBuilder<ActivityViewModel, ActivityState>(
+          BlocBuilder<ActivityCubit, ActivityState>(
             builder: (context, activity) {
               final unread = activity.unreadCount;
               return InkWell(

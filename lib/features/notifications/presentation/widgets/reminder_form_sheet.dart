@@ -1,19 +1,15 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/utils/toast.dart';
-import '../../data/models/local_reminder.dart';
-import '../utils/reminder_labels.dart';
-import '../viewmodel/notification_viewmodel.dart';
+ import '../../../../common_imports.dart';
+ import '../../data/models/local_reminder.dart';
+import '../../../../core/utils/reminder_labels.dart';
+import '../view_model/notification_cubit.dart';
 
 /// شيت إضافة / تعديل تذكير.
 class ReminderFormSheet extends StatefulWidget {
-  final NotificationViewModel viewmodel;
+  final NotificationCubit notificationCubit;
   final LocalReminder? reminder;
 
-  const ReminderFormSheet({super.key, required this.viewmodel, this.reminder});
+  const ReminderFormSheet({super.key, required this.notificationCubit, this.reminder});
 
   @override
   State<ReminderFormSheet> createState() => _ReminderFormSheetState();
@@ -25,7 +21,7 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
   late int _hour;
   late int _minute;
   late ReminderRepeat _repeat;
-  late int _weekday;
+  late Set<int> _days; // الأيام المختارة للأسبوعي.
   bool _saving = false;
 
   /// وضع تعديل؟
@@ -40,7 +36,10 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
     _hour = r?.hour ?? 10;
     _minute = r?.minute ?? 0;
     _repeat = r?.repeat ?? ReminderRepeat.daily;
-    _weekday = r?.weekday ?? DateTime.now().weekday;
+    // القديم المحفوظ أو النهاردة كبداية.
+    _days = (r != null && r.weekdays.isNotEmpty)
+        ? r.weekdays.toSet()
+        : {DateTime.now().weekday};
   }
 
   @override
@@ -74,31 +73,42 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
   Future<void> _save() async {
     if (_title.text.trim().isEmpty || _saving) return;
     // لو الإذن مقفول الإشعار عمره ما هيوصلك.
-    final granted = await widget.viewmodel.ensurePermission();
+    final granted = await widget.notificationCubit.ensurePermission();
     if (!granted && mounted) {
       AppToast.error(context, 'فعّل إذن الإشعارات من إعدادات الموبايل عشان التذكير يوصلك');
       return;
     }
     setState(() => _saving = true);
+    // الأسبوعي لازم يوم واحد على الأقل.
+    final days = _repeat == ReminderRepeat.weekly
+        ? (_days.toList()..sort())
+        : <int>[];
+    if (_repeat == ReminderRepeat.weekly && days.isEmpty) {
+      setState(() => _saving = false);
+      if(mounted){
+      AppToast.error(context, 'اختار يوم واحد على الأقل');
+      }
+      return;
+    }
     if (_isEdit) {
-      await widget.viewmodel.updateReminder(
+      await widget.notificationCubit.updateReminder(
         widget.reminder!.copyWith(
           title: _title.text,
           body: _body.text,
           hour: _hour,
           minute: _minute,
           repeat: _repeat,
-          weekday: _repeat == ReminderRepeat.weekly ? _weekday : null,
+          weekdays: days,
         ),
       );
     } else {
-      await widget.viewmodel.addReminder(
+      await widget.notificationCubit.addReminder(
         title: _title.text,
         body: _body.text,
         hour: _hour,
         minute: _minute,
         repeat: _repeat,
-        weekday: _repeat == ReminderRepeat.weekly ? _weekday : null,
+        weekdays: days,
       );
     }
     if (!mounted) return;
@@ -107,12 +117,18 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
     Navigator.pop(context);
   }
 
-  /// سطر "هيجيلك إمتى" (النهاردة / بكرة / يوم كذا + الوقت).
+  /// سطر "هيجيلك إمتى" (النهاردة / بكرة / أيام كذا + الوقت).
   String _fireInfo() {
-    final when = _repeat == ReminderRepeat.weekly
-        ? 'يوم ${weekdayFull(context, _weekday)}'
-        : _isToday() ? 'النهاردة' : 'بكرة';
+    final when = _repeat == ReminderRepeat.weekly ? _daysInfo() : _isToday() ? 'النهاردة' : 'بكرة';
     return '$when ${timeText(context, _hour, _minute)}';
+  }
+
+  /// وصف الأيام (كل يوم / يومين... / أسماء).
+  String _daysInfo() {
+    final sorted = _days.toList()..sort();
+    if (sorted.length >= 7) return 'كل يوم';
+    if (sorted.length > 3) return '${sorted.length} أيام في الأسبوع';
+    return 'أيام ${sorted.map((d) => weekdayShort(context, d)).join('، ')}';
   }
 
   /// هل الوقت لسه جاي النهاردة؟ (يومي بس).
@@ -334,9 +350,39 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
                 ),
               ],
             ),
-            // أيام الأسبوع (لو أسبوعي).
+            // أيام الأسبوع (لو أسبوعي) — اختيار متعدد + زرار الكل.
             if (_repeat == ReminderRepeat.weekly) ...[
               SizedBox(height: 12.h),
+              Row(
+                children: [
+                  Text(
+                    '${_days.length} ${_days.length == 1 ? 'يوم' : 'أيام'} مختارة',
+                    style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w800, color: const Color(0xFF1A4FD6)),
+                  ),
+                  const Spacer(),
+                  InkWell(
+                    onTap: () => setState(() {
+                      _days = _days.length >= 7
+                          ? <int>{}
+                          : {1, 2, 3, 4, 5, 6, 7};
+                    }),
+                    borderRadius: BorderRadius.circular(10.r),
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1A4FD6).withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(10.r),
+                        border: Border.all(color: const Color(0xFF1A4FD6).withValues(alpha: 0.16)),
+                      ),
+                      child: Text(
+                        _days.length >= 7 ? 'مسح الكل' : 'كل الأيام',
+                        style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w800, color: const Color(0xFF1A4FD6)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10.h),
               Wrap(
                 spacing: 8.w,
                 runSpacing: 8.h,
@@ -347,18 +393,21 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
                         weekdayShort(context, d),
                         style: TextStyle(
                           fontSize: 12.sp,
-                          fontWeight: _weekday == d ? FontWeight.w800 : FontWeight.w600,
-                          color: _weekday == d
+                          fontWeight: _days.contains(d) ? FontWeight.w800 : FontWeight.w600,
+                          color: _days.contains(d)
                               ? Colors.white
                               : (isDark ? AppTheme.darkTextSecondary : const Color(0xFF475569)),
                         ),
                       ),
-                      selected: _weekday == d,
-                      onSelected: (_) => setState(() => _weekday = d),
+                      selected: _days.contains(d),
+                      // ضغطة تبدل اليوم (ممكن أكتر من واحد).
+                      onSelected: (_) => setState(() {
+                        _days.contains(d) ? _days.remove(d) : _days.add(d);
+                      }),
                       selectedColor: const Color(0xFF1A4FD6),
                       backgroundColor: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF1F5F9),
                       side: BorderSide(
-                        color: _weekday == d
+                        color: _days.contains(d)
                             ? const Color(0xFF1A4FD6)
                             : (isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0)),
                       ),

@@ -332,25 +332,35 @@ final channel = AndroidNotificationChannel(
   /// Cancels one notification by id (no-op if it was never scheduled).
   Future<void> cancelNotification(int id) => _local.cancel(id);
 
+  /// id الجدولة ليوم معين (كل يوم له id مستقل).
+  int _dayId(int reminderId, int weekday) => reminderId * 10 + weekday;
+
   /// Reconciles one reminders list: cancels the schedule of every reminder in
   /// that list, then re-schedules the enabled ones according to their repeat
   /// type. Each list (public, personal, ...) is reconciled independently and
   /// only touches its own namespace, so kinds never interfere.
   Future<void> syncReminders(List<LocalReminder> reminders) async {
     for (final r in reminders) {
+      // يلغي القديم (id المفرد) + كل أيام الشكل الجديد.
       await _local.cancel(r.id);
+      for (var d = 1; d <= 7; d++) {
+        await _local.cancel(_dayId(r.id, d));
+      }
     }
     for (final r in reminders) {
       if (!r.enabled) continue;
-      if (r.repeat == ReminderRepeat.weekly && r.weekday != null) {
-        await scheduleWeeklyReminder(
-          id: r.id,
-          title: r.title,
-          body: r.body,
-          hour: r.hour,
-          minute: r.minute,
-          weekday: r.weekday!,
-        );
+      // الأسبوعي: جدولة مستقلة لكل يوم مختار.
+      if (r.repeat == ReminderRepeat.weekly && r.weekdays.isNotEmpty) {
+        for (final d in r.weekdays) {
+          await scheduleWeeklyReminder(
+            id: _dayId(r.id, d),
+            title: r.title,
+            body: r.body,
+            hour: r.hour,
+            minute: r.minute,
+            weekday: d,
+          );
+        }
       } else {
         await scheduleDailyReminder(
           id: r.id,

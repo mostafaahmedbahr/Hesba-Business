@@ -1,10 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-import '../../../../core/theme/app_theme.dart';
+import 'package:flutter/foundation.dart';
+import '../../../../common_imports.dart';
 import '../../data/models/local_reminder.dart';
-import '../utils/reminder_labels.dart';
+import '../../../../core/utils/reminder_labels.dart';
 
 /// كارت تذكير (وقت + عنوان + تكرار + تفعيل/تجربة/تعديل/حذف).
 class ReminderCard extends StatelessWidget {
@@ -90,7 +88,7 @@ class ReminderCard extends StatelessWidget {
                       _RepeatPill(reminder: reminder),
                       const Spacer(),
                       // يبعت الإشعار فورًا عشان تتأكد إنه شغال.
-                      if (onTest != null)
+                      if (kDebugMode && onTest != null)
                         _SmallBtn(
                           icon: Icons.notifications_active_rounded,
                           color: const Color(0xFF059669),
@@ -180,12 +178,22 @@ class _RepeatPill extends StatelessWidget {
   final LocalReminder reminder;
   const _RepeatPill({required this.reminder});
 
+  /// نص التكرار (يومي / أيام مختارة).
+  String _label(BuildContext context) {
+    if (reminder.repeat != ReminderRepeat.weekly) return 'repeatDaily'.tr();
+    final days = reminder.weekdays.toSet().toList()..sort();
+    if (days.length >= 7) return 'كل يوم';
+    if (days.isEmpty) return 'repeatWeekly'.tr();
+    if (days.length <= 2) {
+      return '${'repeatWeekly'.tr()} • ${days.map((d) => weekdayShort(context, d)).join('، ')}';
+    }
+    return '${'repeatWeekly'.tr()} • ${days.length} أيام';
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final label = reminder.repeat == ReminderRepeat.weekly
-        ? '${'repeatWeekly'.tr()} • ${weekdayShort(context, reminder.weekday ?? 1)}'
-        : 'repeatDaily'.tr();
+    final label = _label(context);
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
       decoration: BoxDecoration(

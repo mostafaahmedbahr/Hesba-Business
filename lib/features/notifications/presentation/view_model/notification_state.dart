@@ -6,6 +6,9 @@ class NotificationState {
   final bool busy;
   final String? fcmToken;
 
+  /// true أثناء أول تحميل (الشاشة تعرض لودر).
+  final bool isLoading;
+
   /// الثابتة (عرض فقط).
   final List<LocalReminder> publicReminders;
 
@@ -16,6 +19,7 @@ class NotificationState {
     this.permissionGranted = false,
     this.busy = false,
     this.fcmToken,
+    this.isLoading = true,
     this.publicReminders = const [],
     this.personalReminders = const [],
   });
@@ -25,6 +29,7 @@ class NotificationState {
     bool? permissionGranted,
     bool? busy,
     String? fcmToken,
+    bool? isLoading,
     List<LocalReminder>? publicReminders,
     List<LocalReminder>? personalReminders,
   }) {
@@ -32,6 +37,7 @@ class NotificationState {
       permissionGranted: permissionGranted ?? this.permissionGranted,
       busy: busy ?? this.busy,
       fcmToken: fcmToken ?? this.fcmToken,
+      isLoading: isLoading ?? this.isLoading,
       publicReminders: publicReminders ?? this.publicReminders,
       personalReminders: personalReminders ?? this.personalReminders,
     );

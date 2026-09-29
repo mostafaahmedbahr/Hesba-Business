@@ -6,8 +6,8 @@ import '../../../../core/services/notification_service.dart';
 import '../../../dashboard/presentation/cubit/dashboard_cubit.dart';
 import '../../../notifications/data/repos/activity_repo.dart';
 import '../../../notifications/data/repos/notification_repo.dart';
-import '../../../notifications/presentation/viewmodel/activity_viewmodel.dart';
-import '../../../notifications/presentation/viewmodel/notification_viewmodel.dart';
+ import '../../../notifications/presentation/view_model/activity_cubit.dart';
+import '../../../notifications/presentation/view_model/notification_cubit.dart';
 import 'home_view.dart';
 import '../widgets/modern_bottom_nav.dart';
 import '../widgets/app_drawer.dart';
@@ -82,12 +82,12 @@ class _MainLayoutState extends State<MainLayout> {
       providers: [
         BlocProvider(create: (_) => DashboardCubit(repo: sl())..init()),
         BlocProvider(
-          create: (_) => NotificationViewModel(
+          create: (_) => NotificationCubit(
             repo: sl<NotificationRepo>(),
             activityRepo: sl<ActivityRepo>(),
           ),
         ),
-        BlocProvider(create: (_) => ActivityViewModel(repo: sl<ActivityRepo>())),
+        BlocProvider(create: (_) => ActivityCubit(repo: sl<ActivityRepo>())),
       ],
       child: _MainShell(
         currentIndex: _currentIndex,
@@ -127,7 +127,7 @@ class _MainShellState extends State<_MainShell> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      context.read<NotificationViewModel>().loadReminders();
+      context.read<NotificationCubit>().loadReminders();
       NotificationService().setupFcm();
     });
   }

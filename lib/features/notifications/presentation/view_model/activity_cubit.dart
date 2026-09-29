@@ -8,12 +8,12 @@ import '../../data/repos/activity_repo.dart';
 import 'activity_state.dart';
 
 /// فيو موديل سجل النشاطات (شارة الجرس).
-class ActivityViewModel extends Cubit<ActivityState> {
+class ActivityCubit extends Cubit<ActivityState> {
   final ActivityRepo _repo;
   StreamSubscription<List<ActivityModel>>? _sub;
   StreamSubscription<AppEvent>? _eventSub;
 
-  ActivityViewModel({required ActivityRepo repo}) : _repo = repo, super(const ActivityState()) {
+  ActivityCubit({required ActivityRepo repo}) : _repo = repo, super(const ActivityState()) {
     _init();
   }
 

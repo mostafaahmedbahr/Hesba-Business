@@ -1,17 +1,20 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../common_imports.dart';
 import '../../data/models/default_reminders.dart';
 import '../../data/models/local_reminder.dart';
 import '../../data/repos/activity_repo.dart';
 import '../../data/repos/notification_repo.dart';
+import '../widgets/reminder_delete_dialog.dart';
+import '../widgets/reminder_form_sheet.dart';
 import 'notification_state.dart';
 
 /// فيو موديل التذكيرات (كل لوجيك الشاشة هنا).
-class NotificationViewModel extends Cubit<NotificationState> {
+class NotificationCubit extends Cubit<NotificationState> {
   final NotificationRepo _repo;
   final ActivityRepo _activityRepo;
 
-  NotificationViewModel({required NotificationRepo repo, required ActivityRepo activityRepo})
+  NotificationCubit({required NotificationRepo repo, required ActivityRepo activityRepo})
       : _repo = repo,
         _activityRepo = activityRepo,
         super(const NotificationState());
@@ -30,18 +33,32 @@ class NotificationViewModel extends Cubit<NotificationState> {
     }
   }
 
+  /// تجهيز الشاشة: إذن + تحميل + جدولة (مع لودر).
+  Future<void> bootstrap() async {
+    emit(state.copyWith(isLoading: true));
+    await init();
+    await loadReminders();
+    if (!isClosed) emit(state.copyWith(isLoading: false));
+  }
+
   /// يحمل القائمتين ويجدولهما.
   Future<void> loadReminders() async {
-    final public = await _repo.loadPublicReminders(
-      defaults: buildDefaultReminders(),
-    );
-    final personal = await _repo.loadPersonalReminders();
-    emit(
-      state.copyWith(
-        publicReminders: public,
-        personalReminders: personal,
-      ),
-    );
+    try {
+      final public = await _repo.loadPublicReminders(
+        defaults: buildDefaultReminders(),
+      );
+      final personal = await _repo.loadPersonalReminders();
+      emit(
+        state.copyWith(
+          publicReminders: public,
+          personalReminders: personal,
+          isLoading: false,
+        ),
+      );
+    } catch (_) {
+      // لو فشل: يطفي اللودر وتعرض الفاضي.
+      if (!isClosed) emit(state.copyWith(isLoading: false));
+    }
   }
 
   /// يصفر شارة الجرس بعد فتح الشاشة.
@@ -75,14 +92,14 @@ class NotificationViewModel extends Cubit<NotificationState> {
     }
   }
 
-  /// يضيف تذكير شخصي.
+  /// يضيف تذكير شخصي (أيام متعددة للأسبوعي).
   Future<void> addReminder({
     required String title,
     required String body,
     required int hour,
     required int minute,
     ReminderRepeat repeat = ReminderRepeat.daily,
-    int? weekday,
+    List<int> weekdays = const [],
   }) async {
     final list = [...state.personalReminders];
     final reminder = LocalReminder(
@@ -92,7 +109,7 @@ class NotificationViewModel extends Cubit<NotificationState> {
       hour: hour,
       minute: minute,
       repeat: repeat,
-      weekday: weekday,
+      weekdays: weekdays,
     );
     final updated = [...list, reminder];
     emit(state.copyWith(personalReminders: updated));
@@ -146,4 +163,45 @@ class NotificationViewModel extends Cubit<NotificationState> {
     }
     return max + 1;
   }
+
+
+
+  /// يفتح شيت الإضافة / التعديل.
+  Future<void> openForm(BuildContext context, {LocalReminder? reminder}) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
+      ),
+      builder: (_) => ReminderFormSheet(
+        notificationCubit: context.read<NotificationCubit>(),
+        reminder: reminder,
+      ),
+    );
+  }
+
+  /// يبعت التذكير فورًا (تجربة).
+  Future<void> testNow(BuildContext context, LocalReminder r) async {
+    final ok = await context.read<NotificationCubit>().testReminder(r);
+    if (!context.mounted) return;
+    if (ok) {
+      AppToast.success(context, 'وصل؟ كده الإشعارات شغالة وتذكيرك هييجي في وقته');
+    } else {
+      AppToast.error(context, 'موصلش — فعّل إذن الإشعارات من إعدادات الموبايل');
+    }
+  }
+
+  /// تأكيد ثم حذف.
+  Future<void> confirmDelete(BuildContext context, LocalReminder r) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (_) => const ReminderDeleteDialog(),
+    );
+    if (ok == true && context.mounted) {
+      context.read<NotificationCubit>().deleteReminder(r.id);
+    }
+  }
+
 }
