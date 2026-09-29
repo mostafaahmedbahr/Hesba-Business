@@ -1,12 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 
-import '../../../../core/models/local_reminder.dart';
+import 'local_reminder.dart';
 
-/// The 4 built-in public daily reminders that EVERY user receives.
-///
-/// They live in the public namespace (ids 1004..1007, reserved in the model),
-/// are re-seeded/synced on every launch and can NEVER be edited, deleted or
-/// paused by the client. They are fully independent of personal reminders.
+/// الـ 4 تذكيرات اليومية الثابتة (أول تشغيل بس).
 List<LocalReminder> buildDefaultReminders() {
   return [
     LocalReminder(

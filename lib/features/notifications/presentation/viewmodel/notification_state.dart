@@ -1,14 +1,15 @@
-import '../../../../core/models/local_reminder.dart';
+import '../../data/models/local_reminder.dart';
 
+/// حالة التذكيرات.
 class NotificationState {
   final bool permissionGranted;
   final bool busy;
   final String? fcmToken;
 
-  /// Read-only public daily reminders (always shown, never editable).
+  /// الثابتة (عرض فقط).
   final List<LocalReminder> publicReminders;
 
-  /// User-created personal reminders (full CRUD).
+  /// الشخصية (تتعدل).
   final List<LocalReminder> personalReminders;
 
   const NotificationState({
@@ -19,6 +20,7 @@ class NotificationState {
     this.personalReminders = const [],
   });
 
+  /// نسخ مع تعديل.
   NotificationState copyWith({
     bool? permissionGranted,
     bool? busy,

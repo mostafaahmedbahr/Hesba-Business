@@ -1,17 +1,22 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/models/local_reminder.dart';
+import '../../data/models/default_reminders.dart';
+import '../../data/models/local_reminder.dart';
+import '../../data/repos/activity_repo.dart';
 import '../../data/repos/notification_repo.dart';
-import '../states/notification_state.dart';
-import '../utils/default_reminders.dart';
+import 'notification_state.dart';
 
-class NotificationCubit extends Cubit<NotificationState> {
+/// فيو موديل التذكيرات (كل لوجيك الشاشة هنا).
+class NotificationViewModel extends Cubit<NotificationState> {
   final NotificationRepo _repo;
+  final ActivityRepo _activityRepo;
 
-  NotificationCubit({required this._repo}) : super(const NotificationState());
+  NotificationViewModel({required NotificationRepo repo, required ActivityRepo activityRepo})
+      : _repo = repo,
+        _activityRepo = activityRepo,
+        super(const NotificationState());
 
-  /// Initializes FCM (permission + token). Personal/public reminders are
-  /// loaded separately via [loadReminders].
+  /// يجهز الإذن والتوكن.
   Future<void> init() async {
     final granted = await _repo.requestPermissions();
     emit(state.copyWith(permissionGranted: granted));
@@ -25,12 +30,7 @@ class NotificationCubit extends Cubit<NotificationState> {
     }
   }
 
-  /// Called at app startup: seeds + schedules the public daily reminders
-  /// (idempotent) and re-syncs personal ones. That's it.
-  Future<void> ensureAllRemindersScheduled() => loadReminders();
-
-  /// Loads BOTH lists: public (read-only) and personal. Each list is synced
-  /// to the OS scheduler independently.
+  /// يحمل القائمتين ويجدولهما.
   Future<void> loadReminders() async {
     final public = await _repo.loadPublicReminders(
       defaults: buildDefaultReminders(),
@@ -44,11 +44,38 @@ class NotificationCubit extends Cubit<NotificationState> {
     );
   }
 
-  // ── Public (client has no control here) ──────────────────────────────────
-  // Intentionally no mutating methods: public reminders are fixed for
-  // everyone and never affected by personal CRUD.
+  /// يصفر شارة الجرس بعد فتح الشاشة.
+  Future<void> markSeenAfterOpen() async {
+    await Future.delayed(const Duration(milliseconds: 600));
+    if (isClosed) return;
+    try {
+      await _activityRepo.markAllRead();
+    } catch (_) {}
+  }
 
-  // ── Personal reminders (independent per-reminder) ─────────────────────────
+  /// يتأكد إن الإذن مفتوح (يطلبه لو مقفول).
+  Future<bool> ensurePermission() async {
+    if (state.permissionGranted) return true;
+    final granted = await _repo.requestPermissions();
+    emit(state.copyWith(permissionGranted: granted));
+    if (granted) await _repo.setupFcm();
+    return granted;
+  }
+
+  /// يبعت تذكير فورًا (تجربة).
+  Future<bool> testReminder(LocalReminder r) async {
+    try {
+      await _repo.sendTestNotification(
+        title: r.title,
+        body: r.body.isEmpty ? 'تذكير حسبة' : r.body,
+      );
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// يضيف تذكير شخصي.
   Future<void> addReminder({
     required String title,
     required String body,
@@ -58,9 +85,8 @@ class NotificationCubit extends Cubit<NotificationState> {
     int? weekday,
   }) async {
     final list = [...state.personalReminders];
-    final id = _nextId(list);
     final reminder = LocalReminder(
-      id: id,
+      id: _nextId(list),
       title: title.trim(),
       body: body.trim(),
       hour: hour,
@@ -73,6 +99,7 @@ class NotificationCubit extends Cubit<NotificationState> {
     await _repo.persistPersonalReminders(updated);
   }
 
+  /// يعدل تذكير.
   Future<void> updateReminder(LocalReminder reminder) async {
     final updated = [
       for (final r in state.personalReminders)
@@ -82,6 +109,7 @@ class NotificationCubit extends Cubit<NotificationState> {
     await _repo.persistPersonalReminders(updated);
   }
 
+  /// يحذف تذكير.
   Future<void> deleteReminder(int id) async {
     final updated =
         state.personalReminders.where((r) => r.id != id).toList();
@@ -89,6 +117,7 @@ class NotificationCubit extends Cubit<NotificationState> {
     await _repo.persistPersonalReminders(updated);
   }
 
+  /// يشغل / يطفي تذكير.
   Future<void> toggleReminderEnabled(LocalReminder reminder) async {
     final updated = [
       for (final r in state.personalReminders)
@@ -98,6 +127,7 @@ class NotificationCubit extends Cubit<NotificationState> {
     await _repo.persistPersonalReminders(updated);
   }
 
+  /// يطلب الإذن يدويًا (بانر التفعيل).
   Future<void> enablePermissions() async {
     final granted = await _repo.requestPermissions();
     emit(state.copyWith(permissionGranted: granted));
@@ -108,18 +138,7 @@ class NotificationCubit extends Cubit<NotificationState> {
     }
   }
 
-  Future<bool> sendTest({
-    required String title,
-    required String body,
-  }) async {
-    try {
-      await _repo.sendTestNotification(title: title, body: body);
-      return true;
-    } catch (_) {
-      return false;
-    }
-  }
-
+  /// id جديد (نطاق الشخصية 2000+).
   int _nextId(List<LocalReminder> current) {
     var max = 1999;
     for (final r in current) {

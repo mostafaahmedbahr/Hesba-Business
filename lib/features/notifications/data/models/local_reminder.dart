@@ -1,9 +1,9 @@
-/// How a local reminder repeats.
+/// شكل تكرار التذكير.
 enum ReminderRepeat {
-  /// Fires daily at the same time.
+  /// كل يوم نفس الوقت.
   daily,
 
-  /// Fires weekly on a chosen [LocalReminder.weekday].
+  /// كل أسبوع في يوم معين.
   weekly;
 
   static ReminderRepeat fromString(String? value) => value == 'weekly'
@@ -13,26 +13,19 @@ enum ReminderRepeat {
   String get wire => name;
 }
 
-/// The kind of notification. Every kind lives in its own independent
-/// namespace/slot so the three systems never interfere with each other.
+/// نوع الإشعار (كل نوع في نطاق ids مستقل).
 enum NotificationKind {
-  /// Remote push messages sent from Firebase Console / backend.
+  /// push من Firebase.
   firebase,
 
-  /// Fixed daily reminders that every user always receives.
+  /// اليومية الثابتة للكل.
   publicDaily,
 
-  /// User-created personal reminders (editable, deletable, toggleable).
+  /// الشخصية (تتعدل وتتمسح).
   personal,
 }
 
-/// A single user-defined local reminder shown at a fixed time.
-///
-/// Reminder [id]s are globally unique and namespaced by kind so cancelling or
-/// editing one kind can never affect another:
-/// - 1001..1099: app/system notifications (test, FCM display)
-/// - 1004..1007: reserved public daily reminders
-/// - >= 2000: personal reminders
+/// تذكير واحد بوقت ثابت.
 class LocalReminder {
   final int id;
   final String title;
@@ -43,8 +36,7 @@ class LocalReminder {
   final bool isBuiltIn;
   final ReminderRepeat repeat;
 
-  /// Target weekday for [ReminderRepeat.weekly] (1 = Monday .. 7 = Sunday,
-  /// matching [DateTime.weekday]).
+  /// يوم الأسبوع للأسبوعي (1 = اثنين .. 7 = أحد).
   final int? weekday;
 
   const LocalReminder({
@@ -59,6 +51,7 @@ class LocalReminder {
     this.weekday,
   });
 
+  /// نسخ مع تعديل.
   LocalReminder copyWith({
     String? title,
     String? body,
@@ -81,6 +74,7 @@ class LocalReminder {
     );
   }
 
+  /// للتحويل لـ Map (تخزين).
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -95,6 +89,7 @@ class LocalReminder {
     };
   }
 
+  /// من Map مخزنة.
   factory LocalReminder.fromJson(Map<String, dynamic> json) {
     final id = (json['id'] as num).toInt();
     return LocalReminder(
@@ -104,8 +99,6 @@ class LocalReminder {
       hour: (json['hour'] as num).toInt(),
       minute: (json['minute'] as num).toInt(),
       enabled: (json['enabled'] as bool?) ?? true,
-      // Migrates reminders persisted before the flag existed: the reserved
-      // default ids (1004..1007) are always locked built-ins.
       isBuiltIn: (json['isBuiltIn'] as bool?) ?? (id >= 1004 && id <= 1007),
       repeat: ReminderRepeat.fromString(json['repeat'] as String?),
       weekday: (json['weekday'] as num?)?.toInt(),

@@ -2,8 +2,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/models/local_reminder.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../data/models/local_reminder.dart';
+import '../utils/reminder_labels.dart';
 
 /// كارت تذكير (وقت + عنوان + تكرار + تفعيل/تجربة/تعديل/حذف).
 class ReminderCard extends StatelessWidget {
@@ -183,7 +184,7 @@ class _RepeatPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final label = reminder.repeat == ReminderRepeat.weekly
-        ? '${'repeatWeekly'.tr()} • ${_weekdayShort(context, reminder.weekday ?? 1)}'
+        ? '${'repeatWeekly'.tr()} • ${weekdayShort(context, reminder.weekday ?? 1)}'
         : 'repeatDaily'.tr();
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
@@ -209,17 +210,9 @@ class _RepeatPill extends StatelessWidget {
       ),
     );
   }
-
-  String _weekdayShort(BuildContext context, int day) {
-    final isAr = context.locale.languageCode == 'ar';
-    const ar = ['', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت', 'أحد'];
-    const en = ['', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    final i = day.clamp(1, 7);
-    return isAr ? ar[i] : en[i];
-  }
 }
 
-/// زرار أيقونة صغير (تعديل / حذف).
+/// زرار أيقونة صغير.
 class _SmallBtn extends StatelessWidget {
   final IconData icon;
   final Color color;

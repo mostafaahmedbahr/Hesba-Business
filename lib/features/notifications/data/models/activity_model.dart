@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// نوع النشاط المسجل.
 enum ActivityType { sale, saleUpdate, saleDelete, productAdd, productUpdate, productDelete, returnAdd, expenseAdd, expenseUpdate, expenseDelete, generic }
 
+/// تحويل النوع لنص والعكس (تخزين).
 extension ActivityTypeX on ActivityType {
   String get label {
     switch (this) {
@@ -24,6 +26,7 @@ extension ActivityTypeX on ActivityType {
   }
 }
 
+/// نشاط واحد (عملية حصلت في المحل).
 class ActivityModel {
   final String id;
   final ActivityType type;
@@ -41,11 +44,13 @@ class ActivityModel {
     this.isRead = false,
   });
 
+  /// نسخ مع تعديل المقروء.
   ActivityModel copyWith({bool? isRead}) {
     return ActivityModel(
       id: id, type: type, title: title, body: body, createdAt: createdAt, isRead: isRead ?? this.isRead);
   }
 
+  /// للتحويل لـ Map (تخزين).
   Map<String, dynamic> toJson() => {
     'id': id,
     'type': type.label,
@@ -55,6 +60,7 @@ class ActivityModel {
     'isRead': isRead,
   };
 
+  /// من Map مخزنة.
   factory ActivityModel.fromJson(Map<String, dynamic> json) {
     return ActivityModel(
       id: json['id'] as String? ?? '',

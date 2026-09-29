@@ -16,8 +16,8 @@ import '../../../expenses/data/models/expense_model.dart';
 import '../../../expenses/presentation/views/expenses_view.dart';
 import '../../../returns/data/models/return_model.dart';
 import '../../../sales/data/models/sale_model.dart';
-import '../../../notifications/presentation/cubit/activity_cubit.dart';
-import '../../../notifications/presentation/cubit/activity_state.dart';
+import '../../../notifications/presentation/viewmodel/activity_viewmodel.dart';
+import '../../../notifications/presentation/viewmodel/activity_state.dart';
 import '../../../notifications/presentation/views/notifications_view.dart';
 
 class HomeView extends StatelessWidget {
@@ -196,7 +196,7 @@ class _HeaderBar extends StatelessWidget {
             ),
           ),
           // الإشعارات مع عدّاد
-          BlocBuilder<ActivityCubit, ActivityState>(
+          BlocBuilder<ActivityViewModel, ActivityState>(
             builder: (context, activity) {
               final unread = activity.unreadCount;
               return InkWell(

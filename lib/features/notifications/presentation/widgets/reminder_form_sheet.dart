@@ -2,17 +2,18 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/models/local_reminder.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/toast.dart';
-import '../cubit/notification_cubit.dart';
+import '../../data/models/local_reminder.dart';
+import '../utils/reminder_labels.dart';
+import '../viewmodel/notification_viewmodel.dart';
 
-/// شيت إضافة / تعديل تذكير (تصميم جديد).
+/// شيت إضافة / تعديل تذكير.
 class ReminderFormSheet extends StatefulWidget {
-  final NotificationCubit cubit;
+  final NotificationViewModel viewmodel;
   final LocalReminder? reminder;
 
-  const ReminderFormSheet({super.key, required this.cubit, this.reminder});
+  const ReminderFormSheet({super.key, required this.viewmodel, this.reminder});
 
   @override
   State<ReminderFormSheet> createState() => _ReminderFormSheetState();
@@ -72,17 +73,15 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
   /// يحفظ (إضافة أو تعديل) — يطلب الإذن الأول لو مقفول.
   Future<void> _save() async {
     if (_title.text.trim().isEmpty || _saving) return;
-    // لو الإذن مقفول الإشعار عمره ما هيوصلك — اطلبه قبل الحفظ.
-    if (!widget.cubit.state.permissionGranted) {
-      await widget.cubit.enablePermissions();
-      if (!widget.cubit.state.permissionGranted && mounted) {
-        AppToast.error(context, 'فعّل إذن الإشعارات من إعدادات الموبايل عشان التذكير يوصلك');
-        return;
-      }
+    // لو الإذن مقفول الإشعار عمره ما هيوصلك.
+    final granted = await widget.viewmodel.ensurePermission();
+    if (!granted && mounted) {
+      AppToast.error(context, 'فعّل إذن الإشعارات من إعدادات الموبايل عشان التذكير يوصلك');
+      return;
     }
     setState(() => _saving = true);
     if (_isEdit) {
-      await widget.cubit.updateReminder(
+      await widget.viewmodel.updateReminder(
         widget.reminder!.copyWith(
           title: _title.text,
           body: _body.text,
@@ -93,7 +92,7 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
         ),
       );
     } else {
-      await widget.cubit.addReminder(
+      await widget.viewmodel.addReminder(
         title: _title.text,
         body: _body.text,
         hour: _hour,
@@ -111,9 +110,9 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
   /// سطر "هيجيلك إمتى" (النهاردة / بكرة / يوم كذا + الوقت).
   String _fireInfo() {
     final when = _repeat == ReminderRepeat.weekly
-        ? 'يوم ${_dayName(_weekday)}'
+        ? 'يوم ${weekdayFull(context, _weekday)}'
         : _isToday() ? 'النهاردة' : 'بكرة';
-    return '$when ${_timeText()}';
+    return '$when ${timeText(context, _hour, _minute)}';
   }
 
   /// هل الوقت لسه جاي النهاردة؟ (يومي بس).
@@ -270,7 +269,7 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            _timeText(),
+                            timeText(context, _hour, _minute),
                             style: TextStyle(
                               fontSize: 22.sp,
                               fontWeight: FontWeight.w900,
@@ -295,12 +294,12 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12.r),
                       ),
-                      child: Text(
+                      child: const Text(
                         'تغيير',
                         style: TextStyle(
-                          fontSize: 12.sp,
+                          fontSize: 12,
                           fontWeight: FontWeight.w800,
-                          color: const Color(0xFF1A4FD6),
+                          color: Color(0xFF1A4FD6),
                         ),
                       ),
                     ),
@@ -345,7 +344,7 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
                   for (int d = 1; d <= 7; d++)
                     ChoiceChip(
                       label: Text(
-                        _dayName(d),
+                        weekdayShort(context, d),
                         style: TextStyle(
                           fontSize: 12.sp,
                           fontWeight: _weekday == d ? FontWeight.w800 : FontWeight.w600,
@@ -398,23 +397,6 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
         ),
       ),
     );
-  }
-
-  /// نص الوقت الحالي (12h + صباحًا/مساءً).
-  String _timeText() {
-    final isAr = context.locale.languageCode == 'ar';
-    final h12 = _hour % 12 == 0 ? 12 : _hour % 12;
-    final mm = _minute.toString().padLeft(2, '0');
-    if (!isAr) return '$h12:$mm ${_hour >= 12 ? 'PM' : 'AM'}';
-    return '$h12:$mm ${_hour >= 12 ? 'مساءً' : 'صباحًا'}';
-  }
-
-  /// اسم اليوم (مختصر).
-  String _dayName(int d) {
-    final isAr = context.locale.languageCode == 'ar';
-    const ar = ['', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت', 'أحد'];
-    const en = ['', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return isAr ? ar[d.clamp(1, 7)] : en[d.clamp(1, 7)];
   }
 }
 

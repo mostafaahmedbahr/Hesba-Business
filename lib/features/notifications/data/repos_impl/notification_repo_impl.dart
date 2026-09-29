@@ -2,23 +2,22 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../../core/models/local_reminder.dart';
 import '../../../../core/services/notification_service.dart';
+import '../models/local_reminder.dart';
 import '../repos/notification_repo.dart';
 
+/// تنفيذ التخزين (SharedPreferences + جدولة).
 class NotificationRepoImpl implements NotificationRepo {
   final SharedPreferences _prefs;
   final NotificationService _service;
 
   NotificationRepoImpl(this._prefs, this._service);
 
-  /// Public daily reminders are stored and seeded separately from personal
-  /// ones so the two kinds can never corrupt each other.
+  /// مفاتيح التخزين (عامة وشخصية منفصلة).
   static const _kPublicKey = 'public_reminders';
   static const _kPublicSeededKey = 'public_reminders_seeded';
   static const _kPersonalKey = 'personal_reminders';
 
-  // ── Firebase ──────────────────────────────────────────────────────────────
   @override
   Future<bool> requestPermissions() {
     return _service.requestPermissions();
@@ -45,7 +44,6 @@ class NotificationRepoImpl implements NotificationRepo {
     return _service.showReminder(title: title, body: body);
   }
 
-  // ── Public daily reminders ────────────────────────────────────────────────
   @override
   Future<List<LocalReminder>> loadPublicReminders({
     required List<LocalReminder> defaults,
@@ -54,6 +52,7 @@ class NotificationRepoImpl implements NotificationRepo {
     final List<LocalReminder> list;
 
     if (!seeded) {
+      // أول مرة: يزرع الافتراضي.
       list = List.of(defaults);
       await _prefs.setString(
         _kPublicKey,
@@ -61,6 +60,7 @@ class NotificationRepoImpl implements NotificationRepo {
       );
       await _prefs.setBool(_kPublicSeededKey, true);
     } else {
+      // بعد كده: يقرأ المخزن.
       final raw = _prefs.getString(_kPublicKey);
       list = <LocalReminder>[];
       if (raw != null && raw.isNotEmpty) {
@@ -73,12 +73,10 @@ class NotificationRepoImpl implements NotificationRepo {
       }
     }
 
-    // Public list is always fully re-synced on launch, independent of personal.
     await _service.syncReminders(list);
     return list;
   }
 
-  // ── Personal reminders ────────────────────────────────────────────────────
   @override
   Future<List<LocalReminder>> loadPersonalReminders() async {
     final raw = _prefs.getString(_kPersonalKey);
@@ -92,8 +90,6 @@ class NotificationRepoImpl implements NotificationRepo {
       );
     }
 
-    // Cancel personal schedules that are no longer in the list (e.g. a
-    // reminder removed while the app was closed) then re-schedule the rest.
     await _service.syncReminders(list);
     return list;
   }

@@ -1,41 +1,30 @@
-import '../../../../core/models/local_reminder.dart';
+import '../models/local_reminder.dart';
 
-/// Operations for the notifications feature.
-///
-/// The three kinds of notifications are completely independent:
-/// - Firebase (FCM): handled by [NotificationService] itself.
-/// - Public daily reminders: read-only, seeded once, always re-synced at
-///   startup, never touched by personal CRUD.
-/// - Personal reminders: full CRUD, __only__ touching the personal namespace.
+/// عقد تخزين وجدولة التذكيرات.
 abstract class NotificationRepo {
-  // ── Firebase ──────────────────────────────────────────────────────────────
-  /// Requests notification permission from the OS.
+  /// يطلب إذن الإشعارات.
   Future<bool> requestPermissions();
 
-  /// Requests permission + fetches & stores the FCM token.
+  /// يجهز FCM (إذن + توكن).
   Future<bool> setupFcm();
 
-  /// Returns the current FCM registration token for this device.
+  /// توكن الجهاز الحالي.
   Future<String?> getFcmToken();
 
-  /// Shows one immediate local notification.
+  /// يبعت إشعار فوري (تجربة).
   Future<void> sendTestNotification({
     required String title,
     required String body,
   });
 
-  // ── Public daily reminders (read-only, for everyone) ──────────────────────
-  /// Loads the public daily list. Seeds the provided [defaults] on first run
-  /// and always re-syncs public schedules. The client cannot modify these.
+  /// يحمل اليومية الثابتة (ويجدولها).
   Future<List<LocalReminder>> loadPublicReminders({
     required List<LocalReminder> defaults,
   });
 
-  // ── Personal reminders (full user CRUD) ───────────────────────────────────
-  /// Loads the user's personal reminders and re-syncs their schedules.
+  /// يحمل الشخصية (ويجدولها).
   Future<List<LocalReminder>> loadPersonalReminders();
 
-  /// Persists the whole personal list and re-syncs schedules. Only personal
-  /// notification ids are touched; public/Firebase are never affected.
+  /// يحفظ الشخصية كلها (ويعيد جدولتها).
   Future<void> persistPersonalReminders(List<LocalReminder> reminders);
 }
