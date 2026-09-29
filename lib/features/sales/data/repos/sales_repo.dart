@@ -1,5 +1,6 @@
 import '../models/sale_model.dart';
 
+/// عقد مبيعات المحل (كتابة + قراءة).
 abstract class SalesRepo {
   Future<SaleModel> addSale({
     required String ownerId,
@@ -13,4 +14,7 @@ abstract class SalesRepo {
   Future<List<SaleModel>> getSales({required String shopId});
 
   Stream<List<SaleModel>> watchSales({required String shopId});
+
+  /// id محل اليوزر الحالي (null لو مفيش).
+  Future<String?> getShopId();
 }

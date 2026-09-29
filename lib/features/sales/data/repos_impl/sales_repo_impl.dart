@@ -139,6 +139,10 @@ class SalesRepoImpl implements SalesRepo {
         .toList();
   }
 
+  /// id محل اليوزر الحالي.
+  @override
+  Future<String?> getShopId() => _resolveShopId(null);
+
   @override
   Stream<List<SaleModel>> watchSales({required String shopId}) {
     return firestore
