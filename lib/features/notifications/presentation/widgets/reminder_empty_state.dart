@@ -48,23 +48,7 @@ class ReminderEmptyState extends StatelessWidget {
               style: TextStyle(fontSize: 12.sp, height: 1.6, color: const Color(0xFF64748B)),
             ),
             SizedBox(height: 20.h),
-            SizedBox(
-              width: double.infinity,
-              height: 50.h,
-              child: FilledButton.icon(
-                onPressed: onAdd,
-                style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF1A4FD6),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
-                ),
-                icon: const Icon(Icons.add_rounded),
-                label: Text(
-                  'remindersAddButton'.tr(),
-                  style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800),
-                ),
-              ),
-            ),
+
           ],
         ),
       ),
