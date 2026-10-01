@@ -59,13 +59,16 @@ class _ReportsBody extends StatelessWidget {
                     ),
                   ),
                 ),
-                SliverPadding(
-                  padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 110.h),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      if (loading) ...[
-                        const ReportsLoadingGrid(),
-                      ] else ...[
+                if (loading)
+                  const SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: ReportsFullLoading(),
+                  )
+                else
+                  SliverPadding(
+                    padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 110.h),
+                    sliver: SliverList(
+                      delegate: SliverChildListDelegate([
                         ReportsTrendCard(state: state)
                             .animate()
                             .fadeIn(duration: 350.ms)
@@ -80,10 +83,9 @@ class _ReportsBody extends StatelessWidget {
                         ReportsTopProducts(state: state),
                         SizedBox(height: 14.h),
                         ReportsRecentActivity(state: state),
-                      ],
-                    ]),
+                      ]),
+                    ),
                   ),
-                ),
               ],
             ),
           ),
