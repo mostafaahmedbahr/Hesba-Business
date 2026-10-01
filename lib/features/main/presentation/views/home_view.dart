@@ -8,9 +8,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/di/service_locator.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../dashboard/presentation/cubit/dashboard_cubit.dart';
+import '../../../products/data/repos/products_repo.dart';
+import '../../../products/presentation/cubit/products_cubit.dart';
+import '../../../products/presentation/views/product_form_view.dart';
 import '../../../dashboard/presentation/states/dashboard_state.dart';
 import '../../../expenses/data/models/expense_model.dart';
 import '../../../expenses/presentation/views/expenses_view.dart';
@@ -752,8 +756,24 @@ class _QuickActionsGrid extends StatelessWidget {
         Expanded(
             child: _QA(
                 data: actions[1],
-                onTap: () {
-                  if (onNavigateTab != null) { onNavigateTab!(1); } else { Navigator.pushNamed(context, AppRoutes.dashboard, arguments: {'initialTab': 1}); }
+                onTap: () async {
+                  // يفتح فورم إضافة منتج مباشرة.
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => BlocProvider(
+                        create: (_) => ProductsCubit(repo: sl<ProductsRepo>())..init(),
+                        child: Builder(
+                          builder: (formCtx) => ProductFormView(
+                            cubit: formCtx.read<ProductsCubit>(),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                  if (context.mounted) {
+                    try { context.read<DashboardCubit>().refresh(); } catch (_) {}
+                  }
                 }).animate().fadeIn(delay: 70.ms).scale(begin: const Offset(0.96, 0.96), end: const Offset(1, 1))),
       ]),
       SizedBox(height: 10.h),
@@ -761,15 +781,23 @@ class _QuickActionsGrid extends StatelessWidget {
         Expanded(
             child: _QA(
                 data: actions[2],
-                onTap: () {
-                  if (onNavigateTab != null) { onNavigateTab!(3); } else { Navigator.pushNamed(context, AppRoutes.returnsView).then((r) { if (r == true && context.mounted) { try { context.read<DashboardCubit>().refresh(); } catch (_) {} } }); }
+                onTap: () async {
+                  // يفتح إضافة مرتجع مباشرة.
+                  final r = await Navigator.pushNamed(context, AppRoutes.addReturnView);
+                  if (r == true && context.mounted) {
+                    try { context.read<DashboardCubit>().refresh(); } catch (_) {}
+                  }
                 }).animate().fadeIn(delay: 140.ms).scale(begin: const Offset(0.96, 0.96), end: const Offset(1, 1))),
         SizedBox(width: 10.w),
         Expanded(
             child: _QA(
                 data: actions[3],
-                onTap: () {
-                  if (onNavigateTab != null) { onNavigateTab!(5); } else { Navigator.push(context, MaterialPageRoute(builder: (_) => ExpensesView(shopId: ''))); }
+                onTap: () async {
+                  // يفتح إضافة مصروف مباشرة.
+                  final r = await Navigator.pushNamed(context, AppRoutes.addExpenseView);
+                  if (r == true && context.mounted) {
+                    try { context.read<DashboardCubit>().refresh(); } catch (_) {}
+                  }
                 }).animate().fadeIn(delay: 210.ms).scale(begin: const Offset(0.96, 0.96), end: const Offset(1, 1))),
       ]),
     ]);
