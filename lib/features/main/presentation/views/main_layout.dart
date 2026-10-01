@@ -8,20 +8,20 @@ import '../../../notifications/data/repos/activity_repo.dart';
 import '../../../notifications/data/repos/notification_repo.dart';
 import '../../../notifications/presentation/view_model/activity_cubit.dart';
 import '../../../notifications/presentation/view_model/notification_cubit.dart';
+import '../../../expenses/presentation/views/expenses_view.dart';
 import '../../../returns/presentation/views/returns_view.dart';
 import '../../../sales/presentation/views/sales_view.dart';
 import 'home_view.dart';
 import '../widgets/modern_bottom_nav.dart';
 import '../widgets/app_drawer.dart';
 import '../../../products/presentation/views/products_view.dart';
-import 'reports_expenses_view.dart';
+import 'reports_view.dart';
 
-/// التابات: 0 رئيسية | 1 منتجات | 2 مبيعات | 3 تقارير+مصروفات.
-/// المرتجع صفحة داخلية لوحدها (تتفتح push).
+/// التابات: 0 رئيسية | 1 منتجات | 2 مبيعات | 3 تقارير.
+/// المرتجع والمصروفات صفحات داخلية لوحدها (تتفتح push).
 class MainLayout extends StatefulWidget {
   final int? initialTab;
-  final int? initialSubTab;
-  const MainLayout({super.key, this.initialTab, this.initialSubTab});
+  const MainLayout({super.key, this.initialTab});
 
   @override
   State<MainLayout> createState() => _MainLayoutState();
@@ -29,20 +29,21 @@ class MainLayout extends StatefulWidget {
 
 class _MainLayoutState extends State<MainLayout> {
   int _currentIndex = 0;
-  int _reportsSubTab = 0;
 
   @override
   void initState() {
     super.initState();
     if (widget.initialTab != null) {
       _currentIndex = widget.initialTab!.clamp(0, 3);
-      if (widget.initialSubTab != null && _currentIndex == 3) {
-        _reportsSubTab = widget.initialSubTab!.clamp(0, 1);
-      }
     }
   }
 
   void _onTabSelected(int index) {
+    setState(() => _currentIndex = index.clamp(0, 3));
+  }
+
+  /// تنقل الـ Drawer (تابات فقط).
+  void _onDrawerNavigate(int index) {
     setState(() => _currentIndex = index.clamp(0, 3));
   }
 
@@ -51,6 +52,14 @@ class _MainLayoutState extends State<MainLayout> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const ReturnsView()),
+    );
+  }
+
+  /// يفتح المصروفات كصفحة مستقلة.
+  void _openExpenses() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const ExpensesView()),
     );
   }
 
@@ -67,10 +76,7 @@ class _MainLayoutState extends State<MainLayout> {
         _openReturns();
         break;
       case 5:
-        setState(() {
-          _currentIndex = 3;
-          _reportsSubTab = 1;
-        });
+        _openExpenses();
         break;
       default:
         _onTabSelected(oldIndex.clamp(0, 3));
@@ -92,9 +98,10 @@ class _MainLayoutState extends State<MainLayout> {
       ],
       child: _MainShell(
         currentIndex: _currentIndex,
-        reportsSubTab: _reportsSubTab,
         onTabSelected: _onTabSelected,
+        onDrawerNavigate: _onDrawerNavigate,
         onOpenReturns: _openReturns,
+        onOpenExpenses: _openExpenses,
         onHomeNavigate: _onHomeNavigate,
       ),
     );
@@ -103,15 +110,17 @@ class _MainLayoutState extends State<MainLayout> {
 
 class _MainShell extends StatefulWidget {
   final int currentIndex;
-  final int reportsSubTab;
   final ValueChanged<int> onTabSelected;
+  final ValueChanged<int> onDrawerNavigate;
   final VoidCallback onOpenReturns;
+  final VoidCallback onOpenExpenses;
   final void Function(int) onHomeNavigate;
   const _MainShell({
     required this.currentIndex,
-    required this.reportsSubTab,
     required this.onTabSelected,
+    required this.onDrawerNavigate,
     required this.onOpenReturns,
+    required this.onOpenExpenses,
     required this.onHomeNavigate,
   });
 
@@ -135,14 +144,18 @@ class _MainShellState extends State<_MainShell> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       extendBody: true,
-      drawer: AppDrawer(onOpenReturns: widget.onOpenReturns),
+      drawer: AppDrawer(
+        onNavigateTab: widget.onDrawerNavigate,
+        onOpenReturns: widget.onOpenReturns,
+        onOpenExpenses: widget.onOpenExpenses,
+      ),
       body: Builder(
         builder: (drawerContext) {
           final pages = <Widget>[
             HomeView(onNavigateTab: widget.onHomeNavigate, onOpenDrawer: () => Scaffold.of(drawerContext).openDrawer()),
             const ProductsView(),
             const SalesView(),
-            ReportsExpensesView(initialTab: widget.reportsSubTab),
+            const ReportsView(),
           ];
           return AnimatedSwitcher(
             duration: const Duration(milliseconds: 280),
@@ -156,7 +169,7 @@ class _MainShellState extends State<_MainShell> {
               ),
             ),
             child: KeyedSubtree(
-              key: ValueKey('${widget.currentIndex}_${widget.reportsSubTab}'),
+              key: ValueKey(widget.currentIndex),
               child: IndexedStack(index: widget.currentIndex, children: pages),
             ),
           );

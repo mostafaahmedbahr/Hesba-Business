@@ -14,10 +14,11 @@ import 'section_label.dart';
 /// عناصر الـ Drawer (تركيب بس — من غير المبيعات).
 class DrawerItemsList extends StatelessWidget {
   final bool isDark;
-  final void Function(int bottomIndex, {int? subTab})? onNavigateTab;
+  final ValueChanged<int>? onNavigateTab;
   final VoidCallback? onOpenReturns;
+  final VoidCallback? onOpenExpenses;
 
-  const DrawerItemsList({super.key, required this.isDark, this.onNavigateTab, this.onOpenReturns});
+  const DrawerItemsList({super.key, required this.isDark, this.onNavigateTab, this.onOpenReturns, this.onOpenExpenses});
 
   /// يفتح صفحة فوق الـ Drawer.
   void _open(BuildContext context, Widget page) {
@@ -47,7 +48,7 @@ class DrawerItemsList extends StatelessWidget {
             color: const Color(0xFFE11D48),
             onTap: () {
               Navigator.pop(context);
-              onNavigateTab?.call(3, subTab: 1);
+              onOpenExpenses?.call();
             },
           ),
           CustomDrawerTile(
@@ -56,7 +57,7 @@ class DrawerItemsList extends StatelessWidget {
             color: const Color(0xFF7C3AED),
             onTap: () {
               Navigator.pop(context);
-              onNavigateTab?.call(3, subTab: 0);
+              onNavigateTab?.call(3);
             },
           ),
           SizedBox(height: 10.h),

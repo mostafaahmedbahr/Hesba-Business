@@ -154,6 +154,18 @@ class ExpensesCubit extends Cubit<ExpensesState> {
     }
   }
 
+  /// يحدث البحث.
+  void setSearch(String query) {
+    if (query == state.searchQuery) return;
+    emit(state.copyWith(searchQuery: query));
+  }
+
+  /// يحدث فلتر التصنيف.
+  void setCategoryFilter(String filter) {
+    if (filter == state.categoryFilter) return;
+    emit(state.copyWith(categoryFilter: filter));
+  }
+
   Future<void> deleteExpense({required String expenseId, required String shopId}) async {
     try {
       await expensesRepo.deleteExpense(expenseId: expenseId, shopId: shopId);
