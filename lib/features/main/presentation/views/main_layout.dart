@@ -6,7 +6,6 @@ import '../../../../core/services/notification_service.dart';
 import '../../../dashboard/presentation/cubit/dashboard_cubit.dart';
 import '../../../notifications/data/repos/activity_repo.dart';
 import '../../../notifications/data/repos/notification_repo.dart';
-import '../../../notifications/presentation/view_model/activity_cubit.dart';
 import '../../../notifications/presentation/view_model/notification_cubit.dart';
 import '../../../expenses/presentation/views/expenses_view.dart';
 import '../../../returns/presentation/views/returns_view.dart';
@@ -94,7 +93,6 @@ class _MainLayoutState extends State<MainLayout> {
             activityRepo: sl<ActivityRepo>(),
           ),
         ),
-        BlocProvider(create: (_) => ActivityCubit(repo: sl<ActivityRepo>())),
       ],
       child: _MainShell(
         currentIndex: _currentIndex,

@@ -5,25 +5,9 @@ import '../../data/repos/notification_repo.dart';
 import '../view_model/notification_cubit.dart';
 import '../widgets/notifications_view_body.dart';
 
-/// شاشة تذكيراتي (عرض بس — اللوجيك في ViewModel).
-class NotificationsView extends StatefulWidget {
+/// شاشة الإشعارات (تذكيراتي + سجل العمليات — اللوجيك في ViewModel).
+class NotificationsView extends StatelessWidget {
   const NotificationsView({super.key});
-
-  @override
-  State<NotificationsView> createState() => _NotificationsViewState();
-}
-
-class _NotificationsViewState extends State<NotificationsView> {
-  @override
-  void initState() {
-    super.initState();
-    // يصفر شارة الجرس (اللوجيك في ViewModel).
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) context.read<NotificationCubit>().markSeenAfterOpen();
-    });
-  }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -47,10 +31,9 @@ class _NotificationsViewState extends State<NotificationsView> {
               style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800),
             ),
           ),
-          body: NotificationsViewBody(),
+          body: const NotificationsViewBody(),
         ),
       ),
     );
   }
 }
-
