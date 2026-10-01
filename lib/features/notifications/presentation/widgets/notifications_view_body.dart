@@ -11,7 +11,7 @@ import '../view_model/activity_state.dart';
 import '../view_model/notification_state.dart';
 import '../view_model/notification_cubit.dart';
 
-/// جسم الشاشة (تذكيراتي ثم سجل العمليات — بدون تبديل).
+/// جسم الشاشة (تاب تذكيراتي | تاب سجل العمليات).
 class NotificationsViewBody extends StatefulWidget {
   const NotificationsViewBody({super.key});
 
@@ -20,6 +20,9 @@ class NotificationsViewBody extends StatefulWidget {
 }
 
 class _NotificationsViewBodyState extends State<NotificationsViewBody> {
+  /// 0 تذكيرات | 1 عمليات.
+  int _tab = 0;
+
   @override
   void initState() {
     super.initState();
@@ -38,6 +41,11 @@ class _NotificationsViewBodyState extends State<NotificationsViewBody> {
     super.dispose();
   }
 
+  void _setTab(int i) {
+    if (i == _tab) return;
+    setState(() => _tab = i);
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<NotificationCubit, NotificationState>(
@@ -46,24 +54,86 @@ class _NotificationsViewBodyState extends State<NotificationsViewBody> {
         return CustomScrollView(
           slivers: [
             ReminderHeader(count: list.length),
-            // لودر أول فتح (بدل اللاج والشاشة الفاضية).
-            if (state.isLoading)
-              const SliverFillRemaining(
-                hasScrollBody: false,
-                child: LoadingWidget(message: 'جاري تحميل تذكيراتك...'),
-              )
-            else ...[
-              if (!state.permissionGranted)
-                SliverToBoxAdapter(
-                  child: ReminderEnableBanner(
-                    onEnable: () => context.read<NotificationCubit>().enablePermissions(),
+            // مبدل التابين (Material ثابتة عشان الـ ripple).
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: Container(
+                    padding: EdgeInsets.all(4.w),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? AppTheme.darkSurfaceAlt
+                          : const Color(0xFFF1F5F9),
+                      borderRadius: BorderRadius.circular(14.r),
+                      border: Border.all(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? AppTheme.darkBorder
+                            : const Color(0xFFE2E8F0),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        _TabBtn(icon: Icons.add_alert_rounded, label: 'تذكيراتي', selected: _tab == 0, onTap: () => _setTab(0)),
+                        _TabBtn(icon: Icons.receipt_long_rounded, label: 'سجل العمليات', selected: _tab == 1, onTap: () => _setTab(1)),
+                      ],
+                    ),
                   ),
                 ),
-              // قسم التذكيرات.
-              SliverToBoxAdapter(child: _RemindersSection(list: list)),
-              // قسم سجل العمليات.
+              ),
+            ),
+            if (_tab == 0) ...[
+              // لودر أول فتح (بدل اللاج والشاشة الفاضية).
+              if (state.isLoading)
+                const SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: LoadingWidget(message: 'جاري تحميل تذكيراتك...'),
+                )
+              else ...[
+                if (!state.permissionGranted)
+                  SliverToBoxAdapter(
+                    child: ReminderEnableBanner(
+                      onEnable: () => context.read<NotificationCubit>().enablePermissions(),
+                    ),
+                  ),
+                // زرار إضافة ثابت (بدل الـ FAB).
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
+                    child: _AddReminderBtn(
+                      onTap: () => context.read<NotificationCubit>().openForm(context),
+                    ),
+                  ),
+                ),
+                if (list.isEmpty)
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: ReminderEmptyState(
+                      onAdd: () => context.read<NotificationCubit>().openForm(context),
+                    ),
+                  )
+                else
+                  SliverPadding(
+                    padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 110.h),
+                    sliver: SliverList.separated(
+                      itemCount: list.length,
+                      separatorBuilder: (_, _) => SizedBox(height: 10.h),
+                      itemBuilder: (context, i) {
+                        final r = list[i];
+                        return ReminderCard(
+                          reminder: r,
+                          onToggle: () => context.read<NotificationCubit>().toggleReminderEnabled(r),
+                          onTest: () => context.read<NotificationCubit>().testNow(context, r),
+                          onEdit: () => context.read<NotificationCubit>().openForm(context, reminder: r),
+                          onDelete: () => context.read<NotificationCubit>().confirmDelete(context, r),
+                        );
+                      },
+                    ),
+                  ),
+              ],
+            ] else
               const SliverToBoxAdapter(child: _ActivitySection()),
-            ],
           ],
         );
       },
@@ -71,34 +141,77 @@ class _NotificationsViewBodyState extends State<NotificationsViewBody> {
   }
 }
 
-/// قسم التذكيرات (فاضي أو كروت).
-class _RemindersSection extends StatelessWidget {
-  final List<LocalReminder> list;
-  const _RemindersSection({required this.list});
+/// زرار تاب واحد.
+class _TabBtn extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  const _TabBtn({required this.icon, required this.label, required this.selected, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    if (list.isEmpty) {
-      return ReminderEmptyState(
-        onAdd: () => context.read<NotificationCubit>().openForm(context),
-      );
-    }
-    return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 0),
-      child: Column(
-        children: List.generate(list.length, (i) {
-          final r = list[i];
-          return Padding(
-            padding: EdgeInsets.only(bottom: i == list.length - 1 ? 0 : 10.h),
-            child: ReminderCard(
-              reminder: r,
-              onToggle: () => context.read<NotificationCubit>().toggleReminderEnabled(r),
-              onTest: () => context.read<NotificationCubit>().testNow(context, r),
-              onEdit: () => context.read<NotificationCubit>().openForm(context, reminder: r),
-              onDelete: () => context.read<NotificationCubit>().confirmDelete(context, r),
-            ),
-          );
-        }),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10.r),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          padding: EdgeInsets.symmetric(vertical: 9.h),
+          decoration: BoxDecoration(
+            color: selected ? AppTheme.primaryColor : Colors.transparent,
+            borderRadius: BorderRadius.circular(10.r),
+            boxShadow: selected
+                ? [BoxShadow(color: AppTheme.primaryColor.withValues(alpha: 0.30), blurRadius: 8, offset: const Offset(0, 3))]
+                : null,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 15.sp, color: selected ? Colors.white : (isDark ? AppTheme.darkTextSecondary : const Color(0xFF64748B))),
+              SizedBox(width: 6.w),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12.5.sp,
+                  fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                  color: selected ? Colors.white : (isDark ? AppTheme.darkTextSecondary : const Color(0xFF64748B)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// زرار "تذكير جديد" بعرض الشاشة.
+class _AddReminderBtn extends StatelessWidget {
+  final VoidCallback onTap;
+  const _AddReminderBtn({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14.r),
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 13.h),
+        decoration: BoxDecoration(
+          gradient: AppTheme.primaryGradient,
+          borderRadius: BorderRadius.circular(14.r),
+          boxShadow: [BoxShadow(color: AppTheme.primaryColor.withValues(alpha: 0.30), blurRadius: 14, offset: const Offset(0, 6))],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.add_rounded, size: 19.sp, color: Colors.white),
+            SizedBox(width: 7.w),
+            Text('تذكير جديد', style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w900, color: Colors.white)),
+          ],
+        ),
       ),
     );
   }
@@ -115,28 +228,15 @@ class _ActivitySection extends StatelessWidget {
       builder: (context, state) {
         final list = state.activities;
         return Padding(
-          padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 110.h),
+          padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 110.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(children: [
-                Container(
-                  width: 34.w,
-                  height: 34.w,
-                  decoration: BoxDecoration(
-                    gradient: AppTheme.primaryGradient,
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
-                  child: Icon(Icons.receipt_long_rounded, color: Colors.white, size: 17.sp),
-                ),
-                SizedBox(width: 10.w),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('سجل العمليات', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : const Color(0xFF0F172A))),
-                      Text('كل عملية بتعملها بتتسجل هنا', style: TextStyle(fontSize: 11.sp, color: isDark ? AppTheme.darkTextSecondary : const Color(0xFF64748B))),
-                    ],
+                  child: Text(
+                    'كل عملية بتعملها بتتسجل هنا (${list.length})',
+                    style: TextStyle(fontSize: 12.sp, color: isDark ? AppTheme.darkTextSecondary : const Color(0xFF64748B)),
                   ),
                 ),
                 if (list.isNotEmpty && state.unreadCount > 0)
@@ -145,7 +245,7 @@ class _ActivitySection extends StatelessWidget {
                     child: Text('تعليم كمقروء', style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w800, color: AppTheme.primaryColor)),
                   ),
               ]),
-              SizedBox(height: 12.h),
+              SizedBox(height: 10.h),
               if (list.isEmpty)
                 Container(
                   width: double.infinity,
