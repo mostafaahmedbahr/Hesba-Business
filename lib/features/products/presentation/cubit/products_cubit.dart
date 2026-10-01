@@ -16,14 +16,27 @@ class ProductsCubit extends Cubit<ProductsState> {
 
   void init() {
     _sub ??= _repo.watchProducts().listen(
+          // copyWith عشان البحث والفلتر مايتصفروش مع كل تحديث.
           (products) => emit(
-            ProductsState(status: ProductsStatus.success, products: products),
+            state.copyWith(status: ProductsStatus.success, products: products, clearError: true),
           ),
           onError: (Object e) => emit(
-            ProductsState(status: ProductsStatus.failure, errorMessage: '$e'),
+            state.copyWith(status: ProductsStatus.failure, errorMessage: '$e'),
           ),
         );
     loadShopType();
+  }
+
+  /// يحدث البحث.
+  void setSearch(String query) {
+    if (query == state.searchQuery) return;
+    emit(state.copyWith(searchQuery: query));
+  }
+
+  /// يحدث فلتر القسم.
+  void setCategoryFilter(String filter) {
+    if (filter == state.categoryFilter) return;
+    emit(state.copyWith(categoryFilter: filter));
   }
 
   /// Fetches the shop business type and keeps it in the state. Safe to call
