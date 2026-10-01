@@ -138,42 +138,49 @@ class ExpensesRepoImpl implements ExpensesRepo {
     }
   }
 
+  /// يحول الـ snapshot لقائمة مع فلترة محلية حسب المحل.
+  List<ExpenseModel> _toFiltered(
+    QuerySnapshot<Map<String, dynamic>> snap,
+    String? resolvedShopId,
+  ) {
+    final all = snap.docs.map((d) => ExpenseModel.fromJson(d.data())).toList();
+    if (resolvedShopId != null && resolvedShopId.isNotEmpty) {
+      final filtered = all.where((e) => e.shopId == resolvedShopId).toList();
+      // لو الفلترة رجعت فاضية بس فيه داتا، اعرض الكل (يضمن يبان حتى لو shopId مختلف)
+      if (filtered.isEmpty && all.isNotEmpty && all.any((e) => e.shopId.isEmpty)) return all;
+      return filtered.isEmpty ? all : filtered;
+    }
+    if (_uid != null) {
+      final byOwner = all.where((e) => e.ownerId == _uid).toList();
+      return byOwner.isEmpty ? all : byOwner;
+    }
+    return all;
+  }
+
   @override
-  Stream<List<ExpenseModel>> watchExpenses({required String shopId}) {
-    // نحاول أولاً بالـ shopId، ولو فشل (index أو فارغ) نعرض الكل بفلترة محلية
-    final resolvedFuture = _resolveShopId(shopId);
-    return Stream.fromFuture(resolvedFuture).asyncExpand((resolvedShopId) {
-      Stream<QuerySnapshot<Map<String, dynamic>>> base;
-      try {
-        Query<Map<String, dynamic>> query = firestore.collection(AppConstants.expensesCollection);
-        if (resolvedShopId != null && resolvedShopId.isNotEmpty) {
-          query = query.where('shopId', isEqualTo: resolvedShopId);
-        } else if (_uid != null) {
-          query = query.where('ownerId', isEqualTo: _uid);
-        }
-        base = query.orderBy('createdAt', descending: true).snapshots();
-      } catch (_) {
-        base = firestore.collection(AppConstants.expensesCollection).orderBy('createdAt', descending: true).snapshots();
+  Stream<List<ExpenseModel>> watchExpenses({required String shopId}) async* {
+    final resolvedShopId = await _resolveShopId(shopId);
+    Query<Map<String, dynamic>> query = firestore.collection(AppConstants.expensesCollection);
+    if (resolvedShopId != null && resolvedShopId.isNotEmpty) {
+      query = query.where('shopId', isEqualTo: resolvedShopId);
+    } else if (_uid != null) {
+      query = query.where('ownerId', isEqualTo: _uid);
+    }
+    try {
+      // المحاولة الأساسية (تحتاج composite index).
+      await for (final snap
+          in query.orderBy('createdAt', descending: true).snapshots()) {
+        yield _toFiltered(snap, resolvedShopId);
       }
-      return base.map((snap) {
-        final all = snap.docs.map((d) => ExpenseModel.fromJson(d.data())).toList();
-        // لو الـ query كان بدون فلتر، نفلتر محلياً حسب الـ resolved
-        if (resolvedShopId != null && resolvedShopId.isNotEmpty) {
-          final filtered = all.where((e) => e.shopId == resolvedShopId).toList();
-          // لو الفلترة رجعت فاضية بس فيه داتا، اعرض الكل (يضمن يبان حتى لو shopId مختلف)
-          if (filtered.isEmpty && all.isNotEmpty && all.any((e) => e.shopId.isEmpty)) return all;
-          return filtered.isEmpty ? all : filtered;
-        }
-        if (_uid != null) {
-          final byOwner = all.where((e) => e.ownerId == _uid).toList();
-          return byOwner.isEmpty ? all : byOwner;
-        }
-        return all;
-      }).handleError((e) {
-        // لو الـ index ناقص، fallback لقراءة بدون where
-        return firestore.collection(AppConstants.expensesCollection).orderBy('createdAt', descending: true).snapshots().map((snap) => snap.docs.map((d) => ExpenseModel.fromJson(d.data())).toList());
-      });
-    });
+    } catch (_) {
+      // الـ index ناقص: fallback لقراءة بدون where + فلترة محلية.
+      await for (final snap in firestore
+          .collection(AppConstants.expensesCollection)
+          .orderBy('createdAt', descending: true)
+          .snapshots()) {
+        yield _toFiltered(snap, resolvedShopId);
+      }
+    }
   }
 
   @override
