@@ -6,7 +6,6 @@ import '../../data/repos/sales_repo.dart';
 import '../cubit/sales_list_cubit.dart';
 import '../cubit/sales_list_state.dart';
 import '../widgets/sales_list_card.dart';
-import '../widgets/sales_list_cta.dart';
 import '../widgets/sales_list_header.dart';
 import '../widgets/sales_list_placeholders.dart';
 import '../widgets/sales_list_search.dart';
@@ -58,19 +57,17 @@ class _SalesBody extends StatelessWidget {
           return Scaffold(body: SalesListError(message: state.errorMessage ?? 'حدث خطأ'));
         }
         final cubit = context.read<SalesListCubit>();
-        // فاضي خالص.
+        // فاضي خالص: زرار واحد بس (بتاع الـ empty).
         if (state.sales.isEmpty) {
           return Scaffold(
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            floatingActionButton: _AddFab(onTap: () => _goToAddSale(context)),
             body: CustomScrollView(
               slivers: [
-                SalesListHeader(
+                const SalesListHeader(
                   count: 0,
                   totalValue: 0,
                   todayCount: 0,
                   todayValue: 0,
-                  onAdd: () => _goToAddSale(context),
                 ),
                 SliverFillRemaining(
                   hasScrollBody: false,
@@ -84,7 +81,6 @@ class _SalesBody extends StatelessWidget {
         final filtered = state.filtered;
         return Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          floatingActionButton: _AddFab(onTap: () => _goToAddSale(context)),
           body: RefreshIndicator(
             color: AppTheme.primaryColor,
             onRefresh: () async => cubit.bootstrap(),
@@ -108,12 +104,6 @@ class _SalesBody extends StatelessWidget {
                     ),
                   ),
                 ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
-                    child: SalesListAddCta(onTap: () => _goToAddSale(context)),
-                  ),
-                ),
                 if (filtered.isEmpty)
                   const SliverToBoxAdapter(child: SalesListNoResults())
                 else
@@ -122,7 +112,10 @@ class _SalesBody extends StatelessWidget {
                     sliver: SliverList.separated(
                       itemCount: filtered.length,
                       separatorBuilder: (_, _) => SizedBox(height: 12.h),
-                      itemBuilder: (context, i) => SalesListCard(sale: filtered[i]),
+                      itemBuilder: (context, i) => SalesListCard(sale: filtered[i])
+                          .animate(delay: (50 * i).ms)
+                          .fadeIn(duration: 320.ms)
+                          .slideY(begin: 0.06, end: 0),
                     ),
                   ),
               ],

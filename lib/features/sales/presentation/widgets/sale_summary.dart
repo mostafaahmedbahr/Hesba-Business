@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../common_imports.dart';
 
+/// ملخص الفاتورة (كارت gradient بالإجمالي الكبير).
 class SaleSummary extends StatelessWidget {
   final double subtotal;
   final double discount;
@@ -17,105 +17,81 @@ class SaleSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Container(
+      width: double.infinity,
       padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20.r),
-        color: Colors.white,
-        border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
+        gradient: const LinearGradient(
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+          colors: [Color(0xFF0A1F5C), Color(0xFF1A4FD6), Color(0xFF4A7BFF)],
+        ),
+        borderRadius: BorderRadius.circular(22.r),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          )
+          BoxShadow(color: const Color(0xFF1A4FD6).withValues(alpha: 0.30), blurRadius: 22, offset: const Offset(0, 10)),
         ],
       ),
-      child: Column(
+      child: Stack(
         children: [
-          if (itemsCount > 0)
-            Padding(
-              padding: EdgeInsets.only(bottom: 8.h),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('عدد الأصناف',
-                      style: TextStyle(fontSize: 12.sp, color: theme.hintColor)),
-                  Text('$itemsCount',
-                      style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700)),
-                ],
-              ),
-            ),
-          _Row(
-            title: 'المجموع',
-            value: '${subtotal.toStringAsFixed(2)} ج.م',
-          ),
-          SizedBox(height: 8.h),
-          _Row(
-            title: 'الخصم',
-            value: '- ${discount.toStringAsFixed(2)} ج.م',
-            valueColor: discount > 0 ? Colors.red.shade600 : null,
-          ),
-          Divider(height: 24.h),
-          _Row(
-            title: 'الإجمالي النهائي',
-            value: '${total.toStringAsFixed(2)} ج.م',
-            isTotal: true,
-          ),
-          if (discount > subtotal) ...[
-            SizedBox(height: 8.h),
-            Row(
-              children: [
-                Icon(Icons.warning_amber_rounded, size: 14.sp, color: Colors.orange),
+          Positioned(top: -30.h, left: -20.w, child: Container(width: 110.w, height: 110.w, decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.07)))),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(children: [
+                Icon(Icons.receipt_long_rounded, size: 15.sp, color: Colors.white.withValues(alpha: 0.85)),
                 SizedBox(width: 6.w),
-                Expanded(
-                  child: Text('الخصم أكبر من المجموع، سيتم اعتباره مساوياً للمجموع',
-                      style: TextStyle(fontSize: 11.sp, color: Colors.orange.shade800)),
+                Text('ملخص الفاتورة', style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.88))),
+                const Spacer(),
+                if (itemsCount > 0)
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.18), borderRadius: BorderRadius.circular(20.r)),
+                    child: Text('$itemsCount ${itemsCount == 1 ? 'صنف' : 'أصناف'}', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: Colors.white)),
+                  ),
+              ]),
+              SizedBox(height: 10.h),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: AlignmentDirectional.centerStart,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      total.toStringAsFixed(total == total.roundToDouble() ? 0 : 2),
+                      style: TextStyle(fontSize: 38.sp, fontWeight: FontWeight.w900, color: Colors.white, height: 1, letterSpacing: -1),
+                    ),
+                    SizedBox(width: 8.w),
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 5.h),
+                      child: Text('ج.م', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.88))),
+                    ),
+                  ],
                 ),
+              ),
+              SizedBox(height: 10.h),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 9.h),
+                decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(12.r)),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('المجموع ${subtotal.toStringAsFixed(2)}', style: TextStyle(fontSize: 11.sp, color: Colors.white.withValues(alpha: 0.88), fontWeight: FontWeight.w600)),
+                    Text('الخصم -${discount.toStringAsFixed(2)}', style: TextStyle(fontSize: 11.sp, color: discount > 0 ? const Color(0xFFFFD1D1) : Colors.white.withValues(alpha: 0.88), fontWeight: FontWeight.w700)),
+                  ],
+                ),
+              ),
+              if (discount > subtotal) ...[
+                SizedBox(height: 8.h),
+                Row(children: [
+                  Icon(Icons.info_outline_rounded, size: 13.sp, color: const Color(0xFFFFD54F)),
+                  SizedBox(width: 6.w),
+                  Expanded(child: Text('الخصم أكبر من المجموع، هيتحسب مساوياً ليه', style: TextStyle(fontSize: 11.sp, color: const Color(0xFFFFD54F), fontWeight: FontWeight.w600))),
+                ]),
               ],
-            )
-          ]
+            ],
+          ),
         ],
       ),
-    );
-  }
-}
-
-class _Row extends StatelessWidget {
-  final String title;
-  final String value;
-  final bool isTotal;
-  final Color? valueColor;
-
-  const _Row({
-    required this.title,
-    required this.value,
-    this.isTotal = false,
-    this.valueColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontWeight: isTotal ? FontWeight.bold : FontWeight.w500,
-            fontSize: isTotal ? 14.sp : 13.sp,
-          ),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: isTotal ? 18.sp : 14.sp,
-            color: valueColor ?? (isTotal ? Theme.of(context).colorScheme.primary : null),
-          ),
-        ),
-      ],
     );
   }
 }

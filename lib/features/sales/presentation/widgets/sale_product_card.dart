@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/models/product.dart';
+import '../../../../core/theme/app_theme.dart';
 
+/// كارت صنف (بحث مخزون + stepper كمية + سعر).
 class SaleProductCard extends StatelessWidget {
   final TextEditingController nameController;
   final TextEditingController quantityController;
@@ -12,6 +15,7 @@ class SaleProductCard extends StatelessWidget {
   final Product? selectedProduct;
   final ValueChanged<Product?> onProductSelected;
   final VoidCallback onChanged;
+  final int index;
 
   const SaleProductCard({
     super.key,
@@ -23,86 +27,90 @@ class SaleProductCard extends StatelessWidget {
     required this.selectedProduct,
     required this.onProductSelected,
     required this.onChanged,
+    this.index = 0,
   });
+
+  /// يزود / ينقص الكمية من الـ stepper.
+  void _step(double delta, double maxStock) {
+    final current = double.tryParse(quantityController.text) ?? 0;
+    var next = current + delta;
+    if (next < 0.5) next = 0.5;
+    if (maxStock > 0 && next > maxStock) next = maxStock;
+    quantityController.text = next.toStringAsFixed(next % 1 == 0 ? 0 : 1);
+    onChanged();
+    HapticFeedback.selectionClick();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final maxStock = (selectedProduct?.stock ?? 0).toDouble();
 
     return Container(
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18.r),
+        color: isDark ? AppTheme.darkSurface : Colors.white,
+        borderRadius: BorderRadius.circular(20.r),
         border: Border.all(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
+          color: selectedProduct != null
+              ? AppTheme.primaryColor.withValues(alpha: 0.25)
+              : (isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB)),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: .04),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        boxShadow: AppTheme.cardShadow(context),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // رقم الصنف + المخزون + حذف.
           Row(
             children: [
               Container(
-                padding: EdgeInsets.all(8.w),
+                width: 30.w,
+                height: 30.w,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                  gradient: AppTheme.primaryGradient,
                   borderRadius: BorderRadius.circular(10.r),
                 ),
-                child: Icon(
-                  Icons.inventory_2_rounded,
-                  size: 18.sp,
-                  color: theme.colorScheme.primary,
+                child: Center(
+                  child: Text('${index + 1}', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w900, color: Colors.white)),
                 ),
               ),
-              SizedBox(width: 10.w),
-              Expanded(
-                child: Text(
-                  'المنتج',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
+              SizedBox(width: 8.w),
               if (selectedProduct != null)
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
                   decoration: BoxDecoration(
-                    color: selectedProduct!.isOutOfStock
-                        ? Colors.red.withValues(alpha: 0.1)
-                        : Colors.green.withValues(alpha: 0.1),
+                    color: (selectedProduct!.isOutOfStock ? const Color(0xFFE11D48) : const Color(0xFF059669)).withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(20.r),
                   ),
                   child: Text(
-                    'متاح: ${selectedProduct!.stock}',
+                    selectedProduct!.isOutOfStock ? 'خلصان' : 'متاح: ${selectedProduct!.stock}',
                     style: TextStyle(
                       fontSize: 11.sp,
-                      fontWeight: FontWeight.w700,
-                      color: selectedProduct!.isOutOfStock
-                          ? Colors.red
-                          : Colors.green.shade700,
+                      fontWeight: FontWeight.w800,
+                      color: selectedProduct!.isOutOfStock ? const Color(0xFFE11D48) : const Color(0xFF059669),
                     ),
                   ),
                 ),
-              IconButton(
-                onPressed: onDelete,
-                icon: const Icon(Icons.delete_outline),
-                color: Colors.red.shade400,
-                tooltip: 'حذف',
+              const Spacer(),
+              InkWell(
+                onTap: onDelete,
+                borderRadius: BorderRadius.circular(10.r),
+                child: Container(
+                  width: 34.w,
+                  height: 34.w,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE11D48).withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                  child: Icon(Icons.delete_outline_rounded, size: 17.sp, color: const Color(0xFFE11D48)),
+                ),
               ),
             ],
           ),
           SizedBox(height: 12.h),
 
-          // Autocomplete for product selection
+          // بحث المنتج.
           Autocomplete<Product>(
             displayStringForOption: (p) => p.name,
             optionsBuilder: (textEditingValue) {
@@ -117,30 +125,38 @@ class SaleProductCard extends StatelessWidget {
             },
             optionsViewBuilder: (context, onSelected, options) {
               return Align(
-                alignment: Alignment.topLeft,
+                alignment: Alignment.topCenter,
                 child: Material(
-                  elevation: 6,
-                  borderRadius: BorderRadius.circular(12.r),
+                  elevation: 8,
+                  borderRadius: BorderRadius.circular(14.r),
                   child: ConstrainedBox(
-                    constraints: BoxConstraints(maxHeight: 200.h, maxWidth: 340.w),
+                    constraints: BoxConstraints(maxHeight: 220.h),
                     child: ListView.separated(
                       padding: EdgeInsets.all(6.w),
                       shrinkWrap: true,
                       itemCount: options.length,
-                      separatorBuilder: (_, __) => Divider(height: 1.h),
+                      separatorBuilder: (_, _) => Divider(height: 1.h),
                       itemBuilder: (context, index) {
                         final p = options.elementAt(index);
                         return ListTile(
                           dense: true,
-                          title: Text(p.name,
-                              style: TextStyle(
-                                  fontSize: 13.sp, fontWeight: FontWeight.w600)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+                          leading: Container(
+                            width: 38.w,
+                            height: 38.w,
+                            decoration: BoxDecoration(
+                              color: AppTheme.primaryColor.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(10.r),
+                            ),
+                            child: Icon(Icons.inventory_2_rounded, size: 18.sp, color: AppTheme.primaryColor),
+                          ),
+                          title: Text(p.name, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700)),
                           subtitle: Text(
-                              '${p.code.isNotEmpty ? '${p.code} • ' : ''}${p.price.toStringAsFixed(0)} ج.م • مخزون: ${p.stock}',
-                              style: TextStyle(fontSize: 11.sp)),
+                            '${p.price.toStringAsFixed(0)} ج.م • مخزون: ${p.stock}',
+                            style: TextStyle(fontSize: 11.sp, color: const Color(0xFF64748B)),
+                          ),
                           trailing: p.isLowStock
-                              ? Icon(Icons.warning_amber_rounded,
-                                  size: 16.sp, color: Colors.orange)
+                              ? Icon(Icons.warning_amber_rounded, size: 16.sp, color: Colors.orange)
                               : null,
                           onTap: () => onSelected(p),
                         );
@@ -150,31 +166,36 @@ class SaleProductCard extends StatelessWidget {
                 ),
               );
             },
-            fieldViewBuilder:
-                (context, textController, focusNode, onFieldSubmitted) {
-              // Sync external controller with internal one
-              // We use nameController as source of truth, so mirror it
+            fieldViewBuilder: (context, textController, focusNode, onFieldSubmitted) {
               textController.text = nameController.text;
               textController.selection = TextSelection.fromPosition(
                   TextPosition(offset: textController.text.length));
-
-              // Listen to keep them in sync (one way)
               textController.addListener(() {
                 if (nameController.text != textController.text) {
                   nameController.text = textController.text;
                   onChanged();
                 }
               });
-
               return TextFormField(
                 controller: textController,
                 focusNode: focusNode,
+                style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w600),
                 decoration: InputDecoration(
-                  hintText: 'اسم المنتج / ابحث من المخزون',
-                  prefixIcon: const Icon(Icons.search_rounded),
+                  hintText: 'ابحث بالاسم أو الكود...',
+                  hintStyle: TextStyle(fontSize: 12.5.sp, color: const Color(0xFF94A3B8)),
+                  prefixIcon: Container(
+                    margin: EdgeInsets.all(8.w),
+                    width: 34.w,
+                    height: 34.w,
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryColor.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(10.r),
+                    ),
+                    child: Icon(Icons.search_rounded, size: 17.sp, color: AppTheme.primaryColor),
+                  ),
                   suffixIcon: textController.text.isNotEmpty
                       ? IconButton(
-                          icon: const Icon(Icons.clear_rounded, size: 18),
+                          icon: Icon(Icons.clear_rounded, size: 17.sp),
                           onPressed: () {
                             textController.clear();
                             nameController.clear();
@@ -183,12 +204,20 @@ class SaleProductCard extends StatelessWidget {
                           },
                         )
                       : null,
-                  border: const OutlineInputBorder(),
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                  filled: true,
+                  fillColor: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF6F8FC),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide.none),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14.r),
+                    borderSide: BorderSide(color: isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14.r),
+                    borderSide: const BorderSide(color: AppTheme.primaryColor, width: 1.6),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 13.h),
                 ),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'مطلوب' : null,
+                validator: (v) => (v == null || v.trim().isEmpty) ? 'اختار المنتج' : null,
               );
             },
             onSelected: (product) {
@@ -203,63 +232,79 @@ class SaleProductCard extends StatelessWidget {
             },
           ),
 
-          if (selectedProduct != null) ...[
+          if (selectedProduct != null && selectedProduct!.category.isNotEmpty) ...[
             SizedBox(height: 6.h),
             Text(
-              '${selectedProduct!.category.isNotEmpty ? '${selectedProduct!.category} • ' : ''}سعر الشراء: ${selectedProduct!.costPrice.toStringAsFixed(0)} ج.م',
-              style: TextStyle(
-                fontSize: 11.sp,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
+              selectedProduct!.category,
+              style: TextStyle(fontSize: 11.sp, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w600),
             ),
           ],
+          SizedBox(height: 12.h),
 
-          SizedBox(height: 10.h),
+          // الكمية (stepper) + السعر.
           Row(
             children: [
               Expanded(
-                child: TextFormField(
-                  controller: quantityController,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: InputDecoration(
-                    labelText: 'الكمية',
-                    hintText: '1',
-                    prefixIcon: const Icon(Icons.numbers_rounded),
-                    border: const OutlineInputBorder(),
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+                  decoration: BoxDecoration(
+                    color: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF6F8FC),
+                    borderRadius: BorderRadius.circular(14.r),
+                    border: Border.all(color: isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0)),
                   ),
-                  onChanged: (_) => onChanged(),
-                  validator: (v) {
-                    final q = double.tryParse(v ?? '');
-                    if (q == null || q <= 0) return '>';
-                    if (selectedProduct != null &&
-                        q > selectedProduct!.stock) {
-                      return 'المتاح ${selectedProduct!.stock}';
-                    }
-                    return null;
-                  },
+                  child: Row(
+                    children: [
+                      _StepBtn(icon: Icons.remove_rounded, onTap: () => _step(-1, maxStock)),
+                      Expanded(
+                        child: TextFormField(
+                          controller: quantityController,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900),
+                          decoration: const InputDecoration(border: InputBorder.none, contentPadding: EdgeInsets.zero, isDense: true),
+                          onChanged: (_) => onChanged(),
+                          validator: (v) {
+                            final q = double.tryParse(v ?? '');
+                            if (q == null || q <= 0) return '!';
+                            if (selectedProduct != null && q > selectedProduct!.stock) {
+                              return 'المتاح ${selectedProduct!.stock}';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      _StepBtn(icon: Icons.add_rounded, onTap: () => _step(1, maxStock)),
+                    ],
+                  ),
                 ),
               ),
               SizedBox(width: 10.w),
               Expanded(
                 child: TextFormField(
                   controller: priceController,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w700),
                   decoration: InputDecoration(
-                    labelText: 'سعر الوحدة',
-                    hintText: '0',
+                    labelText: 'السعر',
                     suffixText: 'ج.م',
-                    prefixIcon: const Icon(Icons.payments_outlined),
-                    border: const OutlineInputBorder(),
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                    prefixIcon: Icon(Icons.payments_outlined, size: 18.sp, color: AppTheme.primaryColor),
+                    filled: true,
+                    fillColor: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF6F8FC),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide.none),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14.r),
+                      borderSide: BorderSide(color: isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14.r),
+                      borderSide: const BorderSide(color: AppTheme.primaryColor, width: 1.6),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 13.h),
                   ),
                   onChanged: (_) => onChanged(),
                   validator: (v) {
                     final p = double.tryParse(v ?? '');
-                    if (p == null || p <= 0) return '>';
+                    if (p == null || p <= 0) return '!';
                     return null;
                   },
                 ),
@@ -267,26 +312,57 @@ class SaleProductCard extends StatelessWidget {
             ],
           ),
 
-          // Live line total
-          SizedBox(height: 8.h),
+          // إجمالي السطر.
           Builder(builder: (context) {
             final q = double.tryParse(quantityController.text) ?? 0;
             final p = double.tryParse(priceController.text) ?? 0;
             final lineTotal = q * p;
             if (lineTotal <= 0) return const SizedBox.shrink();
-            return Align(
-              alignment: AlignmentDirectional.centerEnd,
-              child: Text(
-                'الإجمالي: ${lineTotal.toStringAsFixed(2)} ج.م',
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w700,
-                  color: theme.colorScheme.primary,
-                ),
+            return Padding(
+              padding: EdgeInsets.only(top: 10.h),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF059669).withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(20.r),
+                    ),
+                    child: Text(
+                      '= ${lineTotal.toStringAsFixed(2)} ج.م',
+                      style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w800, color: const Color(0xFF059669)),
+                    ),
+                  ),
+                ],
               ),
             );
           }),
         ],
+      ),
+    );
+  }
+}
+
+/// زرار + / - للكمية.
+class _StepBtn extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  const _StepBtn({required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10.r),
+      child: Container(
+        width: 32.w,
+        height: 32.w,
+        decoration: BoxDecoration(
+          color: AppTheme.primaryColor.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(10.r),
+        ),
+        child: Icon(icon, size: 17.sp, color: AppTheme.primaryColor),
       ),
     );
   }

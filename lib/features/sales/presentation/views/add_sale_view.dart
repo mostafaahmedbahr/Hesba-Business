@@ -3,12 +3,14 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/models/product.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/toast.dart';
 import '../../../products/data/repos/products_repo.dart';
 import '../../data/models/sale_model.dart';
@@ -19,6 +21,7 @@ import '../widgets/payment_method_selector.dart';
 import '../widgets/sale_product_card.dart';
 import '../widgets/sale_summary.dart';
 
+/// شاشة بيع جديد (فورم + ملخص live + شريط حفظ ثابت).
 class AddSaleView extends StatefulWidget {
   final String? ownerId;
   final String? shopId;
@@ -115,11 +118,13 @@ class _AddSaleViewState extends State<AddSaleView> {
     c.price.addListener(_onRecalc);
     c.name.addListener(_onRecalc);
     setState(() => _items.add(c));
+    HapticFeedback.lightImpact();
   }
 
   void _removeItem(int index) {
     final removed = _items.removeAt(index);
     removed.dispose();
+    HapticFeedback.mediumImpact();
     setState(() {});
   }
 
@@ -212,6 +217,7 @@ class _AddSaleViewState extends State<AddSaleView> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return BlocProvider(
       create: (_) => SalesCubit(salesRepo: sl())..reset(),
       // Use Builder to obtain innerContext that has access to SalesCubit
@@ -228,140 +234,228 @@ class _AddSaleViewState extends State<AddSaleView> {
               }
             },
             child: Scaffold(
-              appBar: AppBar(
-                title: const Text('إضافة بيع جديد'),
-                centerTitle: true,
-              ),
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               body: SafeArea(
+                top: false,
                 child: Form(
                   key: _formKey,
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.all(16.w),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                  child: CustomScrollView(
+                    slivers: [
+                      // هيدر gradient بالإجمالي الحي.
+                      _AddHeader(
+                        total: _total,
+                        itemsCount: _items.length,
+                        subtotal: _subtotal,
+                      ),
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // عنوان الأصناف + المتاح.
+                              Row(
+                                children: [
+                                  Text('الأصناف', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : const Color(0xFF0F172A))),
+                                  SizedBox(width: 8.w),
+                                  Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 4.h),
+                                    decoration: BoxDecoration(color: AppTheme.primaryColor.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(20.r)),
+                                    child: Text('${_items.length}', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w900, color: AppTheme.primaryColor)),
+                                  ),
+                                  const Spacer(),
+                                  if (_loadingProducts)
+                                    SizedBox(width: 16.w, height: 16.w, child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primaryColor))
+                                  else
+                                    Text('${_availableProducts.length} متاح بالمخزون', style: TextStyle(fontSize: 11.sp, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w600)),
+                                ],
+                              ),
+                              SizedBox(height: 4.h),
+                              Text('ابحث واختار من المخزون أو اكتب صنف يدوياً', style: TextStyle(fontSize: 11.5.sp, color: const Color(0xFF94A3B8))),
+                              SizedBox(height: 12.h),
+
+                              // كروت الأصناف.
+                              ...List.generate(_items.length, (index) {
+                                final e = _items[index];
+                                return Padding(
+                                  padding: EdgeInsets.only(bottom: 12.h),
+                                  child: SaleProductCard(
+                                    index: index,
+                                    nameController: e.name,
+                                    quantityController: e.quantity,
+                                    priceController: e.price,
+                                    availableProducts: _availableProducts,
+                                    selectedProduct: e.selectedProduct,
+                                    onProductSelected: (p) {
+                                      setState(() => e.selectedProduct = p);
+                                    },
+                                    onChanged: _onRecalc,
+                                    onDelete: () {
+                                      if (_items.length == 1) {
+                                        AppToast.warning(innerContext, 'يجب أن يبقى صنف واحد على الأقل');
+                                        return;
+                                      }
+                                      _removeItem(index);
+                                    },
+                                  ),
+                                );
+                              }),
+
+                              // زرار إضافة صنف (dashed).
+                              InkWell(
+                                onTap: _addItem,
+                                borderRadius: BorderRadius.circular(16.r),
+                                child: Container(
+                                  width: double.infinity,
+                                  padding: EdgeInsets.symmetric(vertical: 14.h),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(16.r),
+                                    border: Border.all(color: AppTheme.primaryColor.withValues(alpha: 0.35), width: 1.4, style: BorderStyle.solid),
+                                    color: AppTheme.primaryColor.withValues(alpha: 0.04),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.add_circle_outline_rounded, size: 19.sp, color: AppTheme.primaryColor),
+                                      SizedBox(width: 8.w),
+                                      Text('إضافة صنف آخر', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: AppTheme.primaryColor)),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 20.h),
+
+                              // الدفع.
+                              Text('طريقة الدفع', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : const Color(0xFF0F172A))),
+                              SizedBox(height: 10.h),
+                              PaymentMethodSelector(
+                                value: _paymentMethod,
+                                onChanged: (v) => setState(() => _paymentMethod = v),
+                              ),
+                              SizedBox(height: 20.h),
+
+                              // الخصم + ملاحظة.
+                              Text('إضافات', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : const Color(0xFF0F172A))),
+                              SizedBox(height: 10.h),
+                              Container(
+                                padding: EdgeInsets.all(14.w),
+                                decoration: BoxDecoration(
+                                  color: isDark ? AppTheme.darkSurface : Colors.white,
+                                  borderRadius: BorderRadius.circular(18.r),
+                                  border: Border.all(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB)),
+                                  boxShadow: AppTheme.cardShadow(context),
+                                ),
+                                child: Column(children: [
+                                  TextFormField(
+                                    controller: _discountController,
+                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                    style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w700),
+                                    decoration: InputDecoration(
+                                      labelText: 'الخصم',
+                                      hintText: '0',
+                                      suffixText: 'ج.م',
+                                      prefixIcon: Container(
+                                        margin: EdgeInsets.all(8.w),
+                                        width: 34.w,
+                                        height: 34.w,
+                                        decoration: BoxDecoration(color: const Color(0xFFE11D48).withValues(alpha: 0.08), borderRadius: BorderRadius.circular(10.r)),
+                                        child: Icon(Icons.discount_rounded, size: 17.sp, color: const Color(0xFFE11D48)),
+                                      ),
+                                      filled: true,
+                                      fillColor: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF6F8FC),
+                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide.none),
+                                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide(color: isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0))),
+                                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: const BorderSide(color: AppTheme.primaryColor, width: 1.6)),
+                                      contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 13.h),
+                                    ),
+                                    validator: (v) {
+                                      if (v == null || v.isEmpty) return null;
+                                      final d = double.tryParse(v);
+                                      if (d == null) return 'رقم غير صحيح';
+                                      if (d < 0) return 'لا يمكن أن يكون سالباً';
+                                      return null;
+                                    },
+                                    onChanged: (_) => _onRecalc(),
+                                  ),
+                                  SizedBox(height: 12.h),
+                                  TextFormField(
+                                    controller: _noteController,
+                                    maxLines: 2,
+                                    style: TextStyle(fontSize: 13.sp),
+                                    decoration: InputDecoration(
+                                      labelText: 'ملاحظة (اختياري)',
+                                      hintText: 'مثال: بيع لعميل دائم...',
+                                      hintStyle: TextStyle(fontSize: 12.sp, color: const Color(0xFF94A3B8)),
+                                      prefixIcon: Container(
+                                        margin: EdgeInsets.all(8.w),
+                                        width: 34.w,
+                                        height: 34.w,
+                                        decoration: BoxDecoration(color: const Color(0xFF64748B).withValues(alpha: 0.08), borderRadius: BorderRadius.circular(10.r)),
+                                        child: Icon(Icons.note_alt_outlined, size: 17.sp, color: const Color(0xFF64748B)),
+                                      ),
+                                      filled: true,
+                                      fillColor: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF6F8FC),
+                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide.none),
+                                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide(color: isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0))),
+                                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: const BorderSide(color: AppTheme.primaryColor, width: 1.6)),
+                                      contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 13.h),
+                                    ),
+                                  ),
+                                ]),
+                              ),
+                              SizedBox(height: 16.h),
+
+                              // الملخص.
+                              SaleSummary(
+                                subtotal: _subtotal,
+                                discount: _discount > _subtotal
+                                    ? _subtotal
+                                    : (_discount < 0 ? 0 : _discount),
+                                total: _total,
+                                itemsCount: _items.length,
+                              ),
+                              SizedBox(height: 110.h),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              // شريط الحفظ الثابت (إجمالي + حفظ).
+              bottomNavigationBar: Container(
+                padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 16.h),
+                decoration: BoxDecoration(
+                  color: isDark ? AppTheme.darkSurface : Colors.white,
+                  border: Border(top: BorderSide(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB))),
+                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 20, offset: const Offset(0, -6))],
+                ),
+                child: SafeArea(
+                  top: false,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('المنتجات',
-                                style: TextStyle(
-                                    fontSize: 18.sp, fontWeight: FontWeight.bold)),
-                            const Spacer(),
-                            if (_loadingProducts)
-                              SizedBox(
-                                  width: 16.w,
-                                  height: 16.w,
-                                  child: const CircularProgressIndicator(strokeWidth: 2))
-                            else
-                              Text('${_availableProducts.length} منتج متاح',
-                                  style: TextStyle(
-                                      fontSize: 11.sp, color: Colors.grey.shade600)),
+                            Text('الإجمالي', style: TextStyle(fontSize: 11.sp, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w600)),
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: AlignmentDirectional.centerStart,
+                              child: Text(
+                                '${_total.toStringAsFixed(_total == _total.roundToDouble() ? 0 : 2)} ج.م',
+                                style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w900, color: const Color(0xFF059669), height: 1.1),
+                              ),
+                            ),
                           ],
                         ),
-                        SizedBox(height: 4.h),
-                        Text('ابحث واختر من المخزون أو اكتب منتج يدوياً',
-                            style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600)),
-                        SizedBox(height: 12.h),
-
-                        ...List.generate(_items.length, (index) {
-                          final e = _items[index];
-                          return Padding(
-                            padding: EdgeInsets.only(bottom: 12.h),
-                            child: SaleProductCard(
-                              nameController: e.name,
-                              quantityController: e.quantity,
-                              priceController: e.price,
-                              availableProducts: _availableProducts,
-                              selectedProduct: e.selectedProduct,
-                              onProductSelected: (p) {
-                                setState(() => e.selectedProduct = p);
-                              },
-                              onChanged: _onRecalc,
-                              onDelete: () {
-                                if (_items.length == 1) {
-                                  AppToast.warning(innerContext, 'يجب أن يبقى منتج واحد على الأقل');
-                                  return;
-                                }
-                                _removeItem(index);
-                              },
-                            ),
-                          );
-                        }),
-
-                        SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton.icon(
-                            onPressed: _addItem,
-                            icon: const Icon(Icons.add_rounded),
-                            label: const Text('إضافة منتج آخر'),
-                            style: OutlinedButton.styleFrom(
-                              padding: EdgeInsets.symmetric(vertical: 14.h),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12.r)),
-                            ),
-                          ),
-                        ),
-
-                        SizedBox(height: 24.h),
-                        Text('الخصم وطريقة الدفع',
-                            style: TextStyle(
-                                fontSize: 16.sp, fontWeight: FontWeight.w700)),
-                        SizedBox(height: 12.h),
-
-                        TextFormField(
-                          controller: _discountController,
-                          keyboardType:
-                              const TextInputType.numberWithOptions(decimal: true),
-                          decoration: InputDecoration(
-                            labelText: 'الخصم',
-                            hintText: '0',
-                            suffixText: 'ج.م',
-                            prefixIcon: const Icon(Icons.discount_rounded),
-                            border: const OutlineInputBorder(),
-                          ),
-                          validator: (v) {
-                            if (v == null || v.isEmpty) return null;
-                            final d = double.tryParse(v);
-                            if (d == null) return 'رقم غير صحيح';
-                            if (d < 0) return 'لا يمكن أن يكون سالباً';
-                            return null;
-                          },
-                          onChanged: (_) => _onRecalc(),
-                        ),
-
-                        SizedBox(height: 16.h),
-
-                        PaymentMethodSelector(
-                          value: _paymentMethod,
-                          onChanged: (v) => setState(() => _paymentMethod = v),
-                        ),
-
-                        SizedBox(height: 16.h),
-
-                        TextFormField(
-                          controller: _noteController,
-                          maxLines: 3,
-                          decoration: const InputDecoration(
-                            labelText: 'ملاحظات (اختياري)',
-                            hintText: 'مثال: بيع لعميل دائم...',
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.note_alt_outlined),
-                          ),
-                        ),
-
-                        SizedBox(height: 20.h),
-
-                        SaleSummary(
-                          subtotal: _subtotal,
-                          discount: _discount > _subtotal
-                              ? _subtotal
-                              : (_discount < 0 ? 0 : _discount),
-                          total: _total,
-                          itemsCount: _items.length,
-                        ),
-
-                        SizedBox(height: 20.h),
-
-                        BlocBuilder<SalesCubit, SalesState>(
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        flex: 2,
+                        child: BlocBuilder<SalesCubit, SalesState>(
                           builder: (ctx, state) {
                             final loading = state.status == SalesStatus.loading;
                             return AddSaleButton(
@@ -370,15 +464,102 @@ class _AddSaleViewState extends State<AddSaleView> {
                             );
                           },
                         ),
-                        SizedBox(height: 12.h),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+/// هيدر الإضافة (رجوع + عنوان + إجمالي حي).
+class _AddHeader extends StatelessWidget {
+  final double total;
+  final int itemsCount;
+  final double subtotal;
+  const _AddHeader({required this.total, required this.itemsCount, required this.subtotal});
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverAppBar(
+      pinned: true,
+      expandedHeight: 178.h,
+      backgroundColor: AppTheme.primaryColor,
+      foregroundColor: Colors.white,
+      elevation: 0,
+      stretch: true,
+      centerTitle: true,
+      leading: IconButton(
+        icon: Container(
+          width: 36.w,
+          height: 36.w,
+          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.16), borderRadius: BorderRadius.circular(11.r)),
+          child: Icon(Icons.arrow_back_rounded, size: 19.sp, color: Colors.white),
+        ),
+        onPressed: () => Navigator.pop(context),
+      ),
+      title: Text('بيع جديد', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w800, color: Colors.white)),
+      flexibleSpace: FlexibleSpaceBar(
+        collapseMode: CollapseMode.parallax,
+        background: Container(
+          decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topRight, end: Alignment.bottomLeft, colors: [Color(0xFF0A1F5C), Color(0xFF1A4FD6), Color(0xFF6D9BFF)])),
+          child: Stack(children: [
+            Positioned(top: -50.h, left: -30.w, child: Container(width: 150.w, height: 150.w, decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.08)))),
+            Positioned(bottom: -60.h, right: -40.w, child: Container(width: 170.w, height: 170.w, decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xFFF5A623).withValues(alpha: 0.13)))),
+            SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(18.w, 52.h, 18.w, 12.h),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('إجمالي الفاتورة', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600, color: Colors.white.withValues(alpha: 0.85))),
+                          SizedBox(height: 4.h),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: AlignmentDirectional.centerStart,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  total.toStringAsFixed(total == total.roundToDouble() ? 0 : 2),
+                                  style: TextStyle(fontSize: 36.sp, fontWeight: FontWeight.w900, color: Colors.white, height: 1, letterSpacing: -1),
+                                ),
+                                SizedBox(width: 7.w),
+                                Padding(
+                                  padding: EdgeInsets.only(bottom: 5.h),
+                                  child: Text('ج.م', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.88))),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.16), borderRadius: BorderRadius.circular(12.r), border: Border.all(color: Colors.white.withValues(alpha: 0.22))),
+                      child: Column(children: [
+                        Text('$itemsCount', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: Colors.white, height: 1)),
+                        Text('أصناف', style: TextStyle(fontSize: 10.sp, color: Colors.white.withValues(alpha: 0.85))),
+                      ]),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ]),
+        ),
       ),
     );
   }
