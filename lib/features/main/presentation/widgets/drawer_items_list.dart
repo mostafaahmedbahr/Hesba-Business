@@ -51,15 +51,6 @@ class DrawerItemsList extends StatelessWidget {
               onOpenExpenses?.call();
             },
           ),
-          CustomDrawerTile(
-            icon: Icons.bar_chart_rounded,
-            label: 'navReports'.tr(),
-            color: const Color(0xFF7C3AED),
-            onTap: () {
-              Navigator.pop(context);
-              onNavigateTab?.call(3);
-            },
-          ),
           SizedBox(height: 10.h),
           Divider(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB), height: 1),
           SizedBox(height: 10.h),
