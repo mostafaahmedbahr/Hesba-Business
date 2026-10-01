@@ -81,6 +81,7 @@ class _SalesBody extends StatelessWidget {
         final filtered = state.filtered;
         return Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          floatingActionButton: _AddFab(onTap: () => _goToAddSale(context)),
           body: RefreshIndicator(
             color: AppTheme.primaryColor,
             onRefresh: () async => cubit.bootstrap(),
