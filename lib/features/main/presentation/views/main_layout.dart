@@ -14,7 +14,7 @@ import 'home_view.dart';
 import '../widgets/modern_bottom_nav.dart';
 import '../widgets/app_drawer.dart';
 import '../../../products/presentation/views/products_view.dart';
-import 'reports_view.dart';
+import '../../../reports/presentation/views/reports_view.dart';
 
 /// التابات: 0 رئيسية | 1 منتجات | 2 مبيعات | 3 تقارير.
 /// المرتجع والمصروفات صفحات داخلية لوحدها (تتفتح push).
