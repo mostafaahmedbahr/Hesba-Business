@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/models/product.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -38,15 +37,6 @@ class _ProductsViewState extends State<ProductsView> {
         builder: (context, state) {
           return Scaffold(
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            floatingActionButton: FloatingActionButton.extended(
-              heroTag: 'products_fab',
-              onPressed: () => _openForm(context),
-              elevation: 0,
-              backgroundColor: AppTheme.primaryColor,
-              foregroundColor: Colors.white,
-              icon: const Icon(Icons.add_rounded),
-              label: Text('productsAdd'.tr(), style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800)),
-            ).animate().scale(delay: 400.ms, duration: 300.ms),
             body: switch (state.status) {
               ProductsStatus.failure => _buildFailure(context),
               ProductsStatus.loading => const _LoadingView(),
