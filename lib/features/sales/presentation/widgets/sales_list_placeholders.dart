@@ -1,3 +1,5 @@
+import 'package:hesba/core/widgets/loading_widget.dart';
+
 import '../../../../common_imports.dart';
 
 /// لودر القائمة.
@@ -6,16 +8,7 @@ class SalesListLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(width: 36.w, height: 36.w, child: CircularProgressIndicator(strokeWidth: 3, color: AppTheme.primaryColor)),
-          SizedBox(height: 12.h),
-          Text('جاري تحميل المبيعات...', style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurfaceVariant)),
-        ],
-      ),
-    );
+    return const LoadingWidget(message: 'جاري تحميل المبيعات...');
   }
 }
 

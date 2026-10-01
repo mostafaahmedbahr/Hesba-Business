@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/widgets/loading_widget.dart';
 
 import '../../../../common_imports.dart';
 
@@ -8,11 +9,7 @@ class ProductListLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-      SizedBox(width: 40.w, height: 40.w, child: CircularProgressIndicator(strokeWidth: 3, color: AppTheme.primaryColor)),
-      SizedBox(height: 12.h),
-      Text('جاري تحميل المنتجات...', style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurfaceVariant)),
-    ]));
+    return const LoadingWidget(message: 'جاري تحميل المنتجات...');
   }
 }
 

@@ -1,3 +1,5 @@
+import 'package:hesba/core/widgets/loading_widget.dart';
+
 import '../../../../common_imports.dart';
 
 /// شimmer التحميل (شبكة + كروت).
@@ -34,45 +36,7 @@ class ReportsFullLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 84.w,
-            height: 84.w,
-            decoration: BoxDecoration(
-              color: const Color(0xFF1A4FD6).withValues(alpha: isDark ? 0.16 : 0.08),
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: const Color(0xFF1A4FD6).withValues(alpha: isDark ? 0.35 : 0.18),
-              ),
-            ),
-            child: Center(
-              child: SizedBox(
-                width: 38.w,
-                height: 38.w,
-                child: CircularProgressIndicator(
-                  strokeWidth: 4,
-                  color: isDark ? const Color(0xFF8FB0FF) : const Color(0xFF0F2D8A),
-                  backgroundColor: const Color(0xFF1A4FD6).withValues(alpha: 0.15),
-                ),
-              ),
-            ),
-          ),
-          SizedBox(height: 14.h),
-          Text(
-            'جاري تجهيز التقارير...',
-            style: TextStyle(
-              fontSize: 13.5.sp,
-              fontWeight: FontWeight.w800,
-              color: isDark ? Colors.white : const Color(0xFF0F2D8A),
-            ),
-          ),
-        ],
-      ),
-    );
+    return const LoadingWidget(message: 'جاري تجهيز التقارير...');
   }
 }
 

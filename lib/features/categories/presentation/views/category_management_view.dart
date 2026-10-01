@@ -1,4 +1,4 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hesba/core/widgets/loading_widget.dart';
 
 import '../../../../common_imports.dart';
 import '../../data/repos/category_repo.dart';
@@ -62,23 +62,7 @@ class _LoadingView extends StatelessWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(title: const Text('إدارة الأقسام'), centerTitle: true),
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: 36.w,
-              height: 36.w,
-              child: CircularProgressIndicator(strokeWidth: 3, color: AppTheme.primaryColor),
-            ),
-            SizedBox(height: 12.h),
-            Text(
-              'جاري تحميل الأقسام...',
-              style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
-            ),
-          ],
-        ),
-      ),
+      body: const LoadingWidget(message: 'جاري تحميل الأقسام...'),
     );
   }
 }
