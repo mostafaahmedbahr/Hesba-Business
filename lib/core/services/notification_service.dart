@@ -56,6 +56,9 @@ final channel = AndroidNotificationChannel(
       remindersChannelId,
       remindersChannelName,
       importance: Importance.high,
+  playSound: true,
+  showBadge: true,
+  enableVibration: true,
     );
     await local
         .resolvePlatformSpecificImplementation<
@@ -73,6 +76,8 @@ final channel = AndroidNotificationChannel(
           icon: '@mipmap/ic_launcher',
           importance: Importance.high,
           priority: Priority.high,
+          playSound: true,
+          enableVibration: true,
         ),
         iOS: const DarwinNotificationDetails(),
       ),
@@ -145,6 +150,9 @@ final channel = AndroidNotificationChannel(
       remindersChannelName,
       description: 'تنبيهات دورية لتذكيرك بمتابعة محلك',
       importance: Importance.high,
+      playSound: true,
+      showBadge: true,
+      enableVibration: true,
     );
     await _local
         .resolvePlatformSpecificImplementation<
@@ -158,6 +166,9 @@ final channel = AndroidNotificationChannel(
       'إشعارات حسبة',
       description: 'إشعارات وتنبيهات من حسبة',
       importance: Importance.max,
+      playSound: true,
+      showBadge: true,
+      enableVibration: true,
     );
     await _local
         .resolvePlatformSpecificImplementation<
@@ -253,6 +264,8 @@ final channel = AndroidNotificationChannel(
         channelDescription: 'إشعارات وتنبيهات من حسبة',
         icon: '@mipmap/ic_launcher',
         importance: Importance.max,
+        playSound: true,
+        enableVibration: true,
         priority: Priority.high,
       ),
       iOS: DarwinNotificationDetails(),
@@ -268,6 +281,8 @@ final channel = AndroidNotificationChannel(
         icon: '@mipmap/ic_launcher',
         importance: Importance.high,
         priority: Priority.high,
+        playSound: true,
+        enableVibration: true,
       ),
       iOS: DarwinNotificationDetails(),
     );

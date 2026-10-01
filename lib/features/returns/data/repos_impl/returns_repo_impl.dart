@@ -197,6 +197,10 @@ class ReturnsRepoImpl implements ReturnsRepo {
     return snap.docs.map((d) => ReturnModel.fromJson(d.data())).toList();
   }
 
+  /// id محل اليوزر الحالي.
+  @override
+  Future<String?> getShopId() => _resolveShopId(null);
+
   @override
   Stream<List<ReturnModel>> watchReturns({required String shopId}) {
     return firestore

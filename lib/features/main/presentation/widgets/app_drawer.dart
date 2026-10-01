@@ -5,8 +5,9 @@ import 'drawer_logout_button.dart';
 
 /// Drawer التطبيق (تركيب بس — كل جزء في كلاس منفصل).
 class AppDrawer extends StatelessWidget {
-  final void Function(int bottomIndex, {int? subTab})? onNavigateBottom;
-  const AppDrawer({super.key, this.onNavigateBottom});
+  final void Function(int bottomIndex, {int? subTab})? onNavigateTab;
+  final VoidCallback? onOpenReturns;
+  const AppDrawer({super.key, this.onNavigateTab, this.onOpenReturns});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +25,11 @@ class AppDrawer extends StatelessWidget {
         child: Column(
           children: [
             CustomDrawerHeader(isDark: isDark),
-            DrawerItemsList(isDark: isDark, onNavigateBottom: onNavigateBottom),
+            DrawerItemsList(
+              isDark: isDark,
+              onNavigateTab: onNavigateTab,
+              onOpenReturns: onOpenReturns,
+            ),
             Padding(
               padding: EdgeInsets.all(12.w),
               child: const DrawerLogoutButton(),

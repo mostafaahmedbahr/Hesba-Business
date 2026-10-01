@@ -11,12 +11,13 @@ import 'drawer_theme_tile.dart';
 import 'drawer_tile.dart';
 import 'section_label.dart';
 
-/// عناصر الـ Drawer (تركيب بس).
+/// عناصر الـ Drawer (تركيب بس — من غير المبيعات).
 class DrawerItemsList extends StatelessWidget {
   final bool isDark;
-  final void Function(int bottomIndex, {int? subTab})? onNavigateBottom;
+  final void Function(int bottomIndex, {int? subTab})? onNavigateTab;
+  final VoidCallback? onOpenReturns;
 
-  const DrawerItemsList({super.key, required this.isDark, this.onNavigateBottom});
+  const DrawerItemsList({super.key, required this.isDark, this.onNavigateTab, this.onOpenReturns});
 
   /// يفتح صفحة فوق الـ Drawer.
   void _open(BuildContext context, Widget page) {
@@ -32,21 +33,12 @@ class DrawerItemsList extends StatelessWidget {
         children: [
           SectionLabel('العمليات', isDark),
           CustomDrawerTile(
-            icon: Icons.receipt_long_rounded,
-            label: 'navSales'.tr(),
-            color: const Color(0xFF1A4FD6),
-            onTap: () {
-              Navigator.pop(context);
-              onNavigateBottom?.call(2, subTab: 0);
-            },
-          ),
-          CustomDrawerTile(
             icon: Icons.assignment_return_rounded,
             label: 'navReturns'.tr(),
             color: const Color(0xFFF59E0B),
             onTap: () {
               Navigator.pop(context);
-              onNavigateBottom?.call(2, subTab: 1);
+              onOpenReturns?.call();
             },
           ),
           CustomDrawerTile(
@@ -55,7 +47,7 @@ class DrawerItemsList extends StatelessWidget {
             color: const Color(0xFFE11D48),
             onTap: () {
               Navigator.pop(context);
-              onNavigateBottom?.call(3, subTab: 1);
+              onNavigateTab?.call(3, subTab: 1);
             },
           ),
           CustomDrawerTile(
@@ -64,7 +56,7 @@ class DrawerItemsList extends StatelessWidget {
             color: const Color(0xFF7C3AED),
             onTap: () {
               Navigator.pop(context);
-              onNavigateBottom?.call(3, subTab: 0);
+              onNavigateTab?.call(3, subTab: 0);
             },
           ),
           SizedBox(height: 10.h),
