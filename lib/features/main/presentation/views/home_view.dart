@@ -1039,22 +1039,50 @@ class _LastExpenseCard extends StatelessWidget {
   final void Function(int index)? onNavigateTab;
   const _LastExpenseCard({required this.shopId, this.onNavigateTab});
 
+  /// ستريم آخر مصروف — مش معتمد على composite index.
+  Stream<List<ExpenseModel>> _watchLastExpense() async* {
+    final col = FirebaseFirestore.instance.collection(AppConstants.expensesCollection);
+    try {
+      await for (final snap in col
+          .where('shopId', isEqualTo: shopId)
+          .orderBy('date', descending: true)
+          .limit(5)
+          .snapshots()) {
+        yield _parseDocs(snap.docs);
+      }
+    } catch (_) {
+      // الـ index ناقص: قراءة بدون where + فلترة محلية.
+      await for (final snap
+          in col.orderBy('date', descending: true).limit(20).snapshots()) {
+        yield _parseDocs(snap.docs);
+      }
+    }
+  }
+
+  /// parse آمن — يتخطى المستند التالف بدل ما يكسر الستريم.
+  List<ExpenseModel> _parseDocs(
+      List<QueryDocumentSnapshot<Map<String, dynamic>>> docs) {
+    final list = <ExpenseModel>[];
+    for (final d in docs) {
+      try {
+        final e = ExpenseModel.fromJson(d.data());
+        if (e.shopId == shopId) list.add(e);
+      } catch (_) {}
+    }
+    return list;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance
-          .collection(AppConstants.expensesCollection)
-          .where('shopId', isEqualTo: shopId)
-          .orderBy('date', descending: true)
-          .limit(1)
-          .snapshots(),
+    return StreamBuilder<List<ExpenseModel>>(
+      stream: _watchLastExpense(),
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) {
           return _recentSkeleton(isDark, const Color(0xFFE11D48));
         }
-        final docs = snap.data?.docs ?? [];
-        if (docs.isEmpty) {
+        final list = snap.data ?? [];
+        if (list.isEmpty) {
           return _RecentEmpty(
             isDark: isDark,
             icon: Icons.savings_rounded,
@@ -1067,7 +1095,7 @@ class _LastExpenseCard extends StatelessWidget {
             },
           );
         }
-        final exp = ExpenseModel.fromJson(docs.first.data());
+        final exp = list.first;
         final time = _timeAgo(exp.date);
         return _RecentCard(
           isDark: isDark,
