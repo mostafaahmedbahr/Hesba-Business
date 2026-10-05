@@ -3,6 +3,7 @@ enum DashboardStatus { initial, loading, success, failure }
 class DashboardState {
   final DashboardStatus status;
   final String shopName;
+  final String shopImageUrl;
   final double todaySalesTotal;
   final double todayReturnsTotal;
   final int todayReturnsCount;
@@ -15,6 +16,7 @@ class DashboardState {
   const DashboardState({
     this.status = DashboardStatus.initial,
     this.shopName = '',
+    this.shopImageUrl = '',
     this.todaySalesTotal = 0,
     this.todayReturnsTotal = 0,
     this.todayReturnsCount = 0,
@@ -28,6 +30,7 @@ class DashboardState {
   DashboardState copyWith({
     DashboardStatus? status,
     String? shopName,
+    String? shopImageUrl,
     double? todaySalesTotal,
     double? todayReturnsTotal,
     int? todayReturnsCount,
@@ -41,6 +44,7 @@ class DashboardState {
     return DashboardState(
       status: status ?? this.status,
       shopName: shopName ?? this.shopName,
+      shopImageUrl: shopImageUrl ?? this.shopImageUrl,
       todaySalesTotal: todaySalesTotal ?? this.todaySalesTotal,
       todayReturnsTotal: todayReturnsTotal ?? this.todayReturnsTotal,
       todayReturnsCount: todayReturnsCount ?? this.todayReturnsCount,

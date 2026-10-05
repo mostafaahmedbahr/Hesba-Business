@@ -4,6 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../core/di/service_locator.dart';
+import '../../../../core/widgets/shop_image_view.dart';
+import '../../data/models/user_profile.dart';
 import '../../data/repos/account_repo.dart';
 import '../cubit/profile_cubit.dart';
 import '../states/profile_state.dart';
@@ -34,7 +36,7 @@ class ProfileView extends StatelessWidget {
           return ListView(
             padding: EdgeInsets.all(20.w),
             children: [
-              _buildHeader(context, profile.ownerName, profile.email),
+              _buildHeader(context, profile),
               SizedBox(height: 20.h),
               _ProfileTile(
                 icon: Icons.person_rounded,
@@ -78,26 +80,20 @@ class ProfileView extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, String name, String email) {
+  Widget _buildHeader(BuildContext context, UserProfile profile) {
     return Center(
       child: Column(
         children: [
-          Container(
-            width: 90.w,
-            height: 90.w,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.person_rounded,
-              size: 48.sp,
-              color: Theme.of(context).colorScheme.primary,
-            ),
+          ShopImageView(
+            imageUrl: profile.shopImageUrl,
+            size: 90.w,
+            borderRadius: 45,
+            fallbackIcon: Icons.person_rounded,
+            fallbackIconSize: 48,
           ),
           SizedBox(height: 12.h),
           Text(
-            name,
+            profile.ownerName,
             style: TextStyle(
               fontSize: 20.sp,
               fontWeight: FontWeight.w800,
@@ -106,7 +102,7 @@ class ProfileView extends StatelessWidget {
           ),
           SizedBox(height: 4.h),
           Text(
-            email,
+            profile.email,
             style: TextStyle(
               fontSize: 13.sp,
               color: Theme.of(context).colorScheme.onSurfaceVariant,

@@ -11,6 +11,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/shop_image_view.dart';
 import '../../../dashboard/presentation/cubit/dashboard_cubit.dart';
 import '../../../products/data/repos/products_repo.dart';
 import '../../../products/presentation/cubit/products_cubit.dart';
@@ -139,22 +140,13 @@ class _HeaderBar extends StatelessWidget {
             ),
           ),
           SizedBox(width: 8.w),
-          // الشعار
-          Container(
-            width: 44.w,
-            height: 44.w,
-            decoration: BoxDecoration(
-              gradient: AppTheme.primaryGradient,
-              borderRadius: BorderRadius.circular(14.r),
-              boxShadow: [
-                BoxShadow(
-                    color: AppTheme.primaryColor.withValues(alpha: 0.28),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4)),
-              ],
-            ),
-            child: Icon(Icons.storefront_rounded,
-                color: Colors.white, size: 20.sp),
+          // صورة المحل
+          ShopImageView(
+            imageUrl: state.shopImageUrl,
+            size: 44.w,
+            borderRadius: 14,
+            fallbackIcon: Icons.storefront_rounded,
+            withShadow: true,
           ),
           SizedBox(width: 10.w),
           Expanded(

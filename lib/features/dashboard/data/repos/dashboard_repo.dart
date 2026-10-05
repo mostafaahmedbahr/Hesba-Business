@@ -17,8 +17,8 @@ abstract class DashboardRepo {
   /// Returns the number of products with stock <= lowStockThreshold.
   Future<int> getLowStockProductsCount();
 
-  /// Streams the shop name from the current user's profile.
-  Stream<String?> watchShopName();
+/// Streams the shop name and photo from the current user's profile.
+Stream<({String? name, String? imageUrl})> watchShopIdentity();
 
   /// Returns the current user's shopId.
   Future<String?> getShopId();

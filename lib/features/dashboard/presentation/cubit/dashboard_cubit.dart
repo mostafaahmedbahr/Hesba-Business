@@ -9,7 +9,7 @@ import '../states/dashboard_state.dart';
 class DashboardCubit extends Cubit<DashboardState> {
   final DashboardRepo _repo;
   StreamSubscription<void>? _dashboardSub;
-  StreamSubscription<String?>? _shopNameSub;
+  StreamSubscription<({String? name, String? imageUrl})>? _shopSub;
   StreamSubscription<AppEvent>? _appEventSub;
   Timer? _debounce;
   DateTime? _lastLoadTime;
@@ -21,17 +21,22 @@ class DashboardCubit extends Cubit<DashboardState> {
         super(const DashboardState());
 
   void init() {
-    _listenShopName();
+    _listenShopIdentity();
     loadDashboardData();
     _startAutoRefresh();
     _listenAppEvents();
   }
 
-  void _listenShopName() {
-    _shopNameSub?.cancel();
-    _shopNameSub = _repo.watchShopName().listen((name) {
+  void _listenShopIdentity() {
+    _shopSub?.cancel();
+    _shopSub = _repo.watchShopIdentity().listen((shop) {
       if (!isClosed) {
-        emit(state.copyWith(shopName: name ?? ''));
+        emit(
+          state.copyWith(
+            shopName: shop.name ?? '',
+            shopImageUrl: shop.imageUrl ?? '',
+          ),
+        );
       }
     });
   }
@@ -134,7 +139,7 @@ class DashboardCubit extends Cubit<DashboardState> {
   Future<void> close() {
     _debounce?.cancel();
     _dashboardSub?.cancel();
-    _shopNameSub?.cancel();
+    _shopSub?.cancel();
     _appEventSub?.cancel();
     return super.close();
   }

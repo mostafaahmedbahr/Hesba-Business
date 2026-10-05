@@ -150,11 +150,14 @@ class DashboardRepoImpl implements DashboardRepo {
   }
 
   @override
-  Stream<String?> watchShopName() {
-    if (_uid == null) return Stream.value(null);
+  Stream<({String? name, String? imageUrl})> watchShopIdentity() {
+    if (_uid == null) return Stream.value((name: null, imageUrl: null));
     return _firestore.collection('users').doc(_uid).snapshots().map((snap) {
-      if (!snap.exists) return null;
-      return snap.data()?['shopName'] as String?;
+      if (!snap.exists) return (name: null, imageUrl: null);
+      return (
+        name: snap.data()?['shopName'] as String?,
+        imageUrl: snap.data()?['shopImageUrl'] as String?,
+      );
     });
   }
 
