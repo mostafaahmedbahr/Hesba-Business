@@ -176,10 +176,11 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
                                 Expanded(
                                   child: DropdownButtonFormField<String>(
                                     initialValue: _governorate,
+                                    isExpanded: true,
                                     decoration: _dropdownDecoration(isDark, 'shopGovernorate'.tr(), Icons.map_outlined),
                                     items: [
                                       for (final g in RegisterConstants.governorates)
-                                        DropdownMenuItem(value: g, child: Text(g, style: TextStyle(fontSize: 13.sp))),
+                                        DropdownMenuItem(value: g, child: Text(g, style: TextStyle(fontSize: 13.sp), overflow: TextOverflow.ellipsis, maxLines: 1)),
                                     ],
                                     onChanged: (v) => setState(() {
                                       _governorate = v;
@@ -203,10 +204,11 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
                                         )
                                       : DropdownButtonFormField<String>(
                                           initialValue: _centers.contains(_cityController.text) ? _cityController.text : null,
+                                          isExpanded: true,
                                           decoration: _dropdownDecoration(isDark, 'shopCity'.tr(), Icons.location_city_rounded),
                                           items: [
                                             for (final c in _centers)
-                                              DropdownMenuItem(value: c, child: Text(c, style: TextStyle(fontSize: 13.sp), overflow: TextOverflow.ellipsis)),
+                                              DropdownMenuItem(value: c, child: Text(c, style: TextStyle(fontSize: 13.sp), overflow: TextOverflow.ellipsis, maxLines: 1)),
                                           ],
                                           onChanged: (v) => setState(() => _cityController.text = v ?? ''),
                                           validator: (v) {
