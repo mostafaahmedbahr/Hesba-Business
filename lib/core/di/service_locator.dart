@@ -1,8 +1,13 @@
 import 'package:get_it/get_it.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloudinary_flutter/cloudinary_object.dart';
 
+import '../../core/constants/app_constants.dart';
+import '../../core/services/cloudinary_image_service.dart';
 import '../../core/services/notification_service.dart';
 import '../../features/auth/data/repos/auth_repo.dart';
 import '../../features/auth/data/repos_impl/auth_repo_impl.dart';
@@ -37,6 +42,7 @@ Future<void> initDependencies() async {
 
   _initAuth();
   _initSettings();
+  _initMedia();
   _initProfile();
   _initContact();
   _initDashboard();
@@ -64,6 +70,22 @@ void _initAuth() {
 void _initSettings() {
   sl.registerLazySingleton<PreferencesRepo>(
     () => PreferencesRepoImpl(sl<SharedPreferences>()),
+  );
+}
+
+void _initMedia() {
+  // Cloudinary SDK entry point, configured with the account cloud name.
+  sl.registerLazySingleton<CloudinaryObject>(
+    () => CloudinaryObject.fromCloudName(
+      cloudName: AppConstants.cloudinaryCloudName,
+    ),
+  );
+  sl.registerLazySingleton<CloudinaryImageService>(
+    () => CloudinaryImageService(
+      picker: ImagePicker(),
+      client: http.Client(),
+      cloudinary: sl<CloudinaryObject>(),
+    ),
   );
 }
 

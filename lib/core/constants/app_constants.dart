@@ -11,6 +11,25 @@ class AppConstants {
   static const String expensesCollection = 'expenses';
   static const String cashRegisterCollection = 'cashRegister';
 
+  // Cloudinary unsigned uploads. Only the returned secure URL is stored.
+  // Each value can be overridden at build time without touching this file:
+  // flutter run --dart-define=CLOUDINARY_UPLOAD_PRESET=my_preset
+  static const String cloudinaryCloudName = String.fromEnvironment(
+    'qavqsavd',
+    defaultValue: 'qavqsavd',
+  );
+  static const String cloudinaryUploadPreset = String.fromEnvironment(
+    'hesba_images',
+    defaultValue: 'hesba_images',
+  );
+  static const String cloudinaryShopImageFolder = 'hesba/shop-images';
+  static const int cloudinaryShopImageSize = 250;
+
+  static bool get isCloudinaryConfigured {
+    return !cloudinaryCloudName.startsWith('REPLACE_') &&
+        !cloudinaryUploadPreset.startsWith('REPLACE_');
+  }
+
   // User Roles
   static const String roleOwner = 'owner';
   static const String roleManager = 'manager';

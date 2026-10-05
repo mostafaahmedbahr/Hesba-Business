@@ -2,8 +2,12 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/di/service_locator.dart';
+import '../../../../core/services/cloudinary_image_service.dart';
+import '../../../../core/utils/shop_image_upload.dart';
+import '../../../../core/widgets/shop_image_picker.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/toast.dart';
 import '../../../auth/presentation/widgets/register_widgets/governorate_centers.dart';
@@ -31,12 +35,13 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
   final _cityController = TextEditingController();
   final _locationController = TextEditingController();
 
-  /// قيم ثابتة من التسجيل (التخصص والصورة مش قابلين للتعديل هنا).
+  /// التخصص ثابت من التسجيل، بينما رابط صورة المحل يتحدث عبر Cloudinary.
   String _businessType = '';
   String _shopImageUrl = '';
   String? _governorate;
   bool _prefilled = false;
   bool _loading = false;
+  bool _uploadingImage = false;
 
   @override
   void dispose() {
@@ -226,9 +231,11 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
                       _SectionCard(
                         isDark: isDark,
                         icon: Icons.map_rounded,
-                        title: 'موقع المحل',
+                        title: 'shopImageSection'.tr(),
                         gradient: const [Color(0xFFF59E0B), Color(0xFFFBBF24)],
                         child: Column(children: [
+                          ShopImagePicker(isDark: isDark, imageUrl: _shopImageUrl, uploading: _uploadingImage, changeLabel: 'shopImageChange'.tr(), uploadingLabel: 'shopImageUploading'.tr(), onTap: _chooseShopImage),
+                          SizedBox(height: 12.h),
                           _Field(
                             isDark: isDark,
                             controller: _locationController,
@@ -284,6 +291,33 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
     return null;
   }
 
+  /// يفتح اختيار مصدر صورة المحل.
+  Future<void> _chooseShopImage() async {
+    if (_uploadingImage) return;
+    final source = await pickShopImageSource(context);
+    if (source == null || !mounted) return;
+    await _uploadShopImage(source);
+  }
+
+  /// يرفع الصورة إلى Cloudinary ويحتفظ بالرابط الآمن فقط.
+  Future<void> _uploadShopImage(ImageSource source) async {
+    setState(() => _uploadingImage = true);
+    String? imageUrl;
+    try {
+      imageUrl = await sl<CloudinaryImageService>().uploadShopImage(source: source);
+    } on CloudinaryUploadException catch (error) {
+      if (!mounted) return;
+      AppToast.error(context, shopImageUploadErrorMessage(error));
+      return;
+    } finally {
+      if (mounted) setState(() => _uploadingImage = false);
+    }
+
+    if (!mounted || imageUrl == null) return;
+    setState(() => _shopImageUrl = imageUrl!);
+    AppToast.success(context, 'shopImageUploaded'.tr());
+  }
+
   InputDecoration _dropdownDecoration(bool isDark, String label, IconData icon) {
     return InputDecoration(
       labelText: label,
@@ -323,7 +357,7 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
           shopImageUrl: _shopImageUrl,
         );
 
-    if (!mounted) return;
+    if (!ctx.mounted) return;
     setState(() => _loading = false);
 
     if (error == null) {

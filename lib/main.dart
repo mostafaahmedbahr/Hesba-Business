@@ -2,15 +2,14 @@ import 'package:flutter/services.dart';
 import 'dart:ui' as ui;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:easy_localization/easy_localization.dart';
+ import 'package:easy_localization/easy_localization.dart';
 import 'package:hesba/common_imports.dart';
 import 'package:hesba/features/notifications/data/repos/activity_repo.dart';
 import 'package:hesba/features/notifications/presentation/view_model/activity_cubit.dart';
 import 'package:hesba/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:hesba/features/settings/presentation/states/settings_state.dart';
 
-Future<void> main() async {
+ Future<void> main() async {
   logSuccess('mostafa ahmed');
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();

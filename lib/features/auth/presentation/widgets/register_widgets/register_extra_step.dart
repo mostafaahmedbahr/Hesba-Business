@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:image_picker/image_picker.dart';
 
+import '../../../../../core/di/service_locator.dart';
+import '../../../../../core/services/cloudinary_image_service.dart';
+import '../../../../../core/utils/shop_image_upload.dart';
+import '../../../../../core/utils/toast.dart';
+import '../../../../../core/widgets/shop_image_picker.dart';
 import 'register_section_title.dart';
 import 'register_text_field.dart';
 
-class RegisterExtraStep extends StatelessWidget {
+class RegisterExtraStep extends StatefulWidget {
   final TextEditingController locationUrlController;
   final TextEditingController shopImageUrlController;
 
@@ -14,6 +20,13 @@ class RegisterExtraStep extends StatelessWidget {
     required this.locationUrlController,
     required this.shopImageUrlController,
   });
+
+  @override
+  State<RegisterExtraStep> createState() => _RegisterExtraStepState();
+}
+
+class _RegisterExtraStepState extends State<RegisterExtraStep> {
+  bool _uploading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +87,7 @@ class RegisterExtraStep extends StatelessWidget {
 
   Widget _buildLocationField() {
     return RegisterTextField(
-      controller: locationUrlController,
+      controller: widget.locationUrlController,
       label: 'extraLocation'.tr(),
       hint: 'https://maps.app.goo.gl/...',
       icon: Icons.location_on_outlined,
@@ -84,14 +97,89 @@ class RegisterExtraStep extends StatelessWidget {
   }
 
   Widget _buildImageField() {
-    return RegisterTextField(
-      controller: shopImageUrlController,
-      label: 'extraImage'.tr(),
-      hint: 'https://...',
-      icon: Icons.image_outlined,
-      keyboardType: TextInputType.url,
-      validator: _validateUrl,
+    return FormField<String>(
+      initialValue: widget.shopImageUrlController.text,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      validator: (_) => _validateUrl(widget.shopImageUrlController.text),
+      builder: (field) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ShopImagePicker(
+              imageUrl: widget.shopImageUrlController.text,
+              uploading: _uploading,
+              changeLabel: 'shopImageChange'.tr(),
+              uploadingLabel: 'shopImageUploading'.tr(),
+              onTap: () => _choose(field),
+            ),
+            if (field.hasError)
+              Padding(
+                padding: EdgeInsets.only(top: 8.h, right: 4.w),
+                child: Text(
+                  field.errorText!,
+                  style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w700, color: const Color(0xFFE11D48)),
+                ),
+              ),
+          ],
+        );
+      },
     );
+  }
+
+  /// Picks a shop photo, uploads it to Cloudinary, and keeps its secure URL.
+  Future<void> _choose(FormFieldState<String> field) async {
+    if (_uploading) return;
+    final source = await pickShopImageSource(context);
+    if (source == null || !mounted) return;
+    await _upload(field, source);
+  }
+
+  /// Blocks step navigation while the upload is in flight.
+  Future<void> _upload(FormFieldState<String> field, ImageSource source) async {
+    setState(() => _uploading = true);
+    final navigator = Navigator.of(context);
+    final dialog = showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => PopScope(
+        canPop: false,
+        child: Dialog(
+          child: Padding(
+            padding: EdgeInsets.all(20.w),
+            child: Row(
+              children: [
+                const CircularProgressIndicator(),
+                SizedBox(width: 16.w),
+                Expanded(child: Text('shopImageUploading'.tr())),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    String? imageUrl;
+    CloudinaryUploadException? failure;
+    try {
+      imageUrl = await sl<CloudinaryImageService>().uploadShopImage(source: source);
+    } on CloudinaryUploadException catch (error) {
+      failure = error;
+    } finally {
+      navigator.pop();
+      if (mounted) setState(() => _uploading = false);
+    }
+    await dialog;
+
+    if (!mounted || !field.mounted) return;
+    if (failure != null) {
+      AppToast.error(context, shopImageUploadErrorMessage(failure));
+      return;
+    }
+    if (imageUrl == null) return;
+
+    widget.shopImageUrlController.text = imageUrl;
+    field.didChange(imageUrl);
+    AppToast.success(context, 'shopImageUploaded'.tr());
   }
 
   static String? _validateUrl(String? value) {
