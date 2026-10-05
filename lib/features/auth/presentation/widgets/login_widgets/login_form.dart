@@ -3,9 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-import '../../../../../core/utils/toast.dart';
 import '../../cubit/login_cubit.dart';
 import '../../states/login_state.dart';
+import 'forgot_password_dialog.dart';
 import 'login_header.dart';
 import 'login_text_field.dart';
 
@@ -118,9 +118,10 @@ class _LoginFormState extends State<LoginForm> {
     return Align(
       alignment: Alignment.centerLeft,
       child: TextButton(
-        onPressed: () {
-          AppToast.info(context, 'loginComingSoon'.tr());
-        },
+        onPressed: () => ForgotPasswordDialog.show(
+          context,
+          initialEmail: widget.emailController.text,
+        ),
         child: Text(
           'loginForgotPassword'.tr(),
           style: TextStyle(

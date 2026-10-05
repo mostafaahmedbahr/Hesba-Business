@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../../../core/extensions/log_util.dart';
 import '../models/register_model.dart';
 import '../repos/auth_repo.dart';
 
@@ -113,5 +114,12 @@ class AuthRepoImpl implements AuthRepo {
 
     print('[AuthRepoImpl] register() completed successfully');
     return registerModel;
+  }
+
+  @override
+  Future<void> sendPasswordResetEmail({required String email}) async {
+    logSuccess('[AuthRepoImpl] sending password reset email');
+    await firebaseAuth.sendPasswordResetEmail(email: email.trim());
+    logSuccess('[AuthRepoImpl] password reset email sent');
   }
 }

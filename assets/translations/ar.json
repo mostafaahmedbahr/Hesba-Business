@@ -24,6 +24,15 @@
   "loginPasswordEmpty": "اكتب كلمة المرور",
   "loginPasswordShort": "6 أحرف على الأقل",
 
+  "forgotPasswordTitle": "استعادة كلمة المرور",
+  "forgotPasswordDesc": "اكتب بريدك الإلكتروني وهنبعتلك لينك لإعادة تعيين كلمة المرور",
+  "forgotPasswordSend": "إرسال اللينك",
+  "forgotPasswordSent": "تم إرسال لينك إعادة التعيين على بريدك",
+  "forgotPasswordNotFound": "البريد الإلكتروني غير مسجل",
+  "forgotPasswordTooMany": "طلبات كثيرة، حاول بعد قليل",
+  "forgotPasswordNoNetwork": "تحقق من اتصال الإنترنت",
+  "forgotPasswordFailed": "تعذر إرسال اللينك، حاول مرة أخرى",
+
   "registerTitle": "إنشاء حساب",
   "registerSubtitle": "ابدأ بإدارة محلك بطريقة أذكى",
   "registerStep1": "حسابك",

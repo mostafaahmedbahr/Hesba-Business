@@ -10,4 +10,7 @@ abstract class AuthRepo {
     required RegisterModel model,
     required String password,
   });
+
+  /// Sends a password reset email to the given address.
+  Future<void> sendPasswordResetEmail({required String email});
 }

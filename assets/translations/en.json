@@ -24,6 +24,15 @@
   "loginPasswordEmpty": "Enter your password",
   "loginPasswordShort": "At least 6 characters",
 
+  "forgotPasswordTitle": "Reset password",
+  "forgotPasswordDesc": "Enter your email and we will send you a link to reset your password",
+  "forgotPasswordSend": "Send link",
+  "forgotPasswordSent": "Reset link sent to your email",
+  "forgotPasswordNotFound": "This email is not registered",
+  "forgotPasswordTooMany": "Too many requests, try again later",
+  "forgotPasswordNoNetwork": "Check your internet connection",
+  "forgotPasswordFailed": "Could not send the link, try again",
+
   "registerTitle": "Create Account",
   "registerSubtitle": "Start managing your shop smarter",
   "registerStep1": "Account",
