@@ -222,9 +222,9 @@ class _ProductFormViewState extends State<ProductFormView> {
         child: ListView(
           padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 24.h),
           children: [
-            // معاينة الصورة
-            _imagePreviewCard(isDark),
-            SizedBox(height: 14.h),
+            // // معاينة الصورة
+            // _imagePreviewCard(isDark),
+            // SizedBox(height: 14.h),
 
             _SectionCard(icon: Icons.info_outline_rounded, title: 'المعلومات الأساسية', gradient: const [Color(0xFF1A4FD6), Color(0xFF4A7BFF)], child: Column(children: [
               _field(controller: _nameController, label: 'productFormName'.tr(), hint: 'productFormNameHint'.tr(), icon: Icons.inventory_2_rounded, required: true, validator: (v) => (v == null || v.trim().isEmpty) ? 'validatorRequired'.tr() : null),
@@ -275,8 +275,8 @@ class _ProductFormViewState extends State<ProductFormView> {
 
             SizedBox(height: 14.h),
             _SectionCard(icon: Icons.image_rounded, title: 'الوسائط والملاحظات', gradient: const [Color(0xFFF59E0B), Color(0xFFFBBF24)], child: Column(children: [
-              _field(controller: _imageUrlController, label: 'productFormImageUrl'.tr(), hint: 'productFormImageUrlHint'.tr(), icon: Icons.link_rounded, keyboard: TextInputType.url, onChanged: (_) => setState(() {})),
-              SizedBox(height: 12.h),
+              // _field(controller: _imageUrlController, label: 'productFormImageUrl'.tr(), hint: 'productFormImageUrlHint'.tr(), icon: Icons.link_rounded, keyboard: TextInputType.url, onChanged: (_) => setState(() {})),
+              // SizedBox(height: 12.h),
               _field(controller: _notesController, label: 'productFormNotes'.tr(), hint: 'productFormNotesHint'.tr(), icon: Icons.notes_rounded, maxLines: 3),
             ])),
 
