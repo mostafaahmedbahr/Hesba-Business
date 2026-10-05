@@ -11,10 +11,22 @@ abstract class AccountRepo {
   /// Fetches the profile document once.
   Future<UserProfile?> getProfile();
 
-  /// Updates the editable owner fields on the user document.
+  /// Updates all editable registration fields.
+  ///
+  /// Owner fields go to `users/{uid}`, shop fields go to both
+  /// `users/{uid}` (profile view) and `shops/{shopId}` (shop features).
+  /// Email/password are NOT editable here (separate secure flows).
   Future<void> updateProfile({
     required String ownerName,
     required String phone,
+    required String shopName,
+    required String businessType,
+    required String shopPhone,
+    required String address,
+    required String state,
+    required String city,
+    required String locationUrl,
+    required String shopImageUrl,
   });
 
   /// Changes the account password (requires recent re-authentication).

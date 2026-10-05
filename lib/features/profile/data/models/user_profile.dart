@@ -51,6 +51,14 @@ class UserProfile {
   UserProfile copyWith({
     String? ownerName,
     String? phone,
+    String? shopName,
+    String? businessType,
+    String? shopPhone,
+    String? locationUrl,
+    String? shopImageUrl,
+    String? address,
+    String? city,
+    String? state,
   }) {
     return UserProfile(
       ownerId: ownerId,
@@ -58,14 +66,14 @@ class UserProfile {
       ownerName: ownerName ?? this.ownerName,
       email: email,
       phone: phone ?? this.phone,
-      shopName: shopName,
-      businessType: businessType,
-      shopPhone: shopPhone,
-      locationUrl: locationUrl,
-      shopImageUrl: shopImageUrl,
-      address: address,
-      city: city,
-      state: state,
+      shopName: shopName ?? this.shopName,
+      businessType: businessType ?? this.businessType,
+      shopPhone: shopPhone ?? this.shopPhone,
+      locationUrl: locationUrl ?? this.locationUrl,
+      shopImageUrl: shopImageUrl ?? this.shopImageUrl,
+      address: address ?? this.address,
+      city: city ?? this.city,
+      state: state ?? this.state,
     );
   }
 }

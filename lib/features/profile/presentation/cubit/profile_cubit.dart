@@ -29,9 +29,28 @@ class ProfileCubit extends Cubit<ProfileState> {
   Future<String?> updateProfile({
     required String ownerName,
     required String phone,
+    required String shopName,
+    required String businessType,
+    required String shopPhone,
+    required String address,
+    required String state,
+    required String city,
+    required String locationUrl,
+    required String shopImageUrl,
   }) async {
     try {
-      await _repo.updateProfile(ownerName: ownerName, phone: phone);
+      await _repo.updateProfile(
+        ownerName: ownerName,
+        phone: phone,
+        shopName: shopName,
+        businessType: businessType,
+        shopPhone: shopPhone,
+        address: address,
+        state: state,
+        city: city,
+        locationUrl: locationUrl,
+        shopImageUrl: shopImageUrl,
+      );
       return null;
     } catch (e) {
       return _mapError(e);
