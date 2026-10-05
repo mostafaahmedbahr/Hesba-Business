@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/utils/toast.dart';
+import '../../../auth/presentation/widgets/register_widgets/password_strength_indicator.dart';
 import '../../data/repos/account_repo.dart';
 import '../cubit/profile_cubit.dart';
 import '../widgets/app_scaffold.dart';
@@ -40,60 +41,103 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
       title: 'changePasswordTitle'.tr(),
       body: BlocProvider(
         create: (_) => ProfileCubit(repo: sl<AccountRepo>()),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            padding: EdgeInsets.all(20.w),
-            children: [
-              _buildPasswordField(
-                label: 'changePasswordCurrent'.tr(),
-                icon: Icons.lock_outline_rounded,
-                controller: _currentController,
-                obscure: _obscureCurrent,
-                onToggle: () => setState(() => _obscureCurrent = !_obscureCurrent),
-                validator: (v) =>
-                    (v == null || v.isEmpty) ? 'changePasswordCurrentEmpty'.tr() : null,
-              ),
-              SizedBox(height: 14.h),
-              _buildPasswordField(
-                label: 'changePasswordNew'.tr(),
-                icon: Icons.lock_reset_rounded,
-                controller: _newController,
-                obscure: _obscureNew,
-                onToggle: () => setState(() => _obscureNew = !_obscureNew),
-                validator: (v) => _validateNewPassword(v),
-              ),
-              SizedBox(height: 14.h),
-              _buildPasswordField(
-                label: 'changePasswordConfirm'.tr(),
-                icon: Icons.verified_user_outlined,
-                controller: _confirmController,
-                obscure: _obscureConfirm,
-                onToggle: () =>
-                    setState(() => _obscureConfirm = !_obscureConfirm),
-                validator: (v) {
-                  if (v == null || v.isEmpty) return 'changePasswordConfirmEmpty'.tr();
-                  if (v != _newController.text) {
-                    return 'changePasswordMismatch'.tr();
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 26.h),
-              _buildSubmitButton(),
-            ],
+        // الـ Builder يدينا context تحت الـ Provider (عشان الـ read مايضربش).
+        child: Builder(
+          builder: (innerContext) => Form(
+            key: _formKey,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            child: ListView(
+              padding: EdgeInsets.all(20.w),
+              children: [
+                _buildPasswordField(
+                  label: 'changePasswordCurrent'.tr(),
+                  icon: Icons.lock_outline_rounded,
+                  controller: _currentController,
+                  obscure: _obscureCurrent,
+                  onToggle: () => setState(() => _obscureCurrent = !_obscureCurrent),
+                  validator: (v) =>
+                      (v == null || v.isEmpty) ? 'changePasswordCurrentEmpty'.tr() : null,
+                ),
+                SizedBox(height: 14.h),
+                _buildPasswordField(
+                  label: 'changePasswordNew'.tr(),
+                  icon: Icons.lock_reset_rounded,
+                  controller: _newController,
+                  obscure: _obscureNew,
+                  onToggle: () => setState(() => _obscureNew = !_obscureNew),
+                  validator: (v) => _validateNewPassword(v),
+                  onChanged: (_) => setState(() {}),
+                ),
+                // قوة الباسورد live.
+                ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _newController,
+                  builder: (_, value, __) => value.text.isEmpty
+                      ? const SizedBox.shrink()
+                      : PasswordStrengthIndicator(password: value.text),
+                ),
+                SizedBox(height: 14.h),
+                _buildPasswordField(
+                  label: 'changePasswordConfirm'.tr(),
+                  icon: Icons.verified_user_outlined,
+                  controller: _confirmController,
+                  obscure: _obscureConfirm,
+                  onToggle: () =>
+                      setState(() => _obscureConfirm = !_obscureConfirm),
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return 'changePasswordConfirmEmpty'.tr();
+                    if (v != _newController.text) {
+                      return 'changePasswordMismatch'.tr();
+                    }
+                    return null;
+                  },
+                ),
+                // تطابق live (علامة صح أول ما يتطابقوا).
+                ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _confirmController,
+                  builder: (_, value, __) {
+                    if (value.text.isEmpty) return const SizedBox.shrink();
+                    final match = value.text == _newController.text;
+                    return Padding(
+                      padding: EdgeInsets.only(top: 8.h),
+                      child: Row(
+                        children: [
+                          Icon(
+                            match ? Icons.check_circle_rounded : Icons.cancel_rounded,
+                            size: 16.sp,
+                            color: match ? const Color(0xFF059669) : const Color(0xFFE11D48),
+                          ),
+                          SizedBox(width: 6.w),
+                          Text(
+                            match ? 'كلمتا المرور متطابقتان' : 'changePasswordMismatch'.tr(),
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w600,
+                              color: match ? const Color(0xFF059669) : const Color(0xFFE11D48),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+                SizedBox(height: 26.h),
+                _buildSubmitButton(innerContext),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
+  /// تحقق حقيقي: طول + أنواع حروف + مختلف عن الحالي.
   String? _validateNewPassword(String? v) {
     if (v == null || v.isEmpty) return 'changePasswordNewEmpty'.tr();
     if (v.length < 8) return 'changePasswordNewShort'.tr();
     if (!RegExp(r'[A-Z]').hasMatch(v)) return 'changePasswordNewUpper'.tr();
     if (!RegExp(r'[a-z]').hasMatch(v)) return 'changePasswordNewLower'.tr();
     if (!RegExp(r'[0-9]').hasMatch(v)) return 'changePasswordNewDigit'.tr();
+    if (v == _currentController.text) return 'الجديدة لازم تختلف عن الحالية';
     return null;
   }
 
@@ -104,11 +148,13 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
     required bool obscure,
     required VoidCallback onToggle,
     required String? Function(String?) validator,
+    ValueChanged<String>? onChanged,
   }) {
     return TextFormField(
       controller: controller,
       obscureText: obscure,
       validator: validator,
+      onChanged: onChanged,
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon),
@@ -122,11 +168,11 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
     );
   }
 
-  Widget _buildSubmitButton() {
+  Widget _buildSubmitButton(BuildContext ctx) {
     return SizedBox(
       height: 52.h,
       child: ElevatedButton(
-        onPressed: _loading ? null : () => _submit(),
+        onPressed: _loading ? null : () => _submit(ctx),
         style: ElevatedButton.styleFrom(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14.r),
@@ -149,11 +195,12 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
     );
   }
 
-  Future<void> _submit() async {
+  /// الحفظ بـ context تحت الـ Provider (القديم كان فوقه وبيضرب).
+  Future<void> _submit(BuildContext ctx) async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
 
-    final error = await context.read<ProfileCubit>().changePassword(
+    final error = await ctx.read<ProfileCubit>().changePassword(
           currentPassword: _currentController.text,
           newPassword: _newController.text,
         );
@@ -162,10 +209,10 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
     setState(() => _loading = false);
 
     if (error == null) {
-      AppToast.success(context, 'changePasswordSuccess'.tr());
-      Navigator.pop(context);
+      AppToast.success(ctx, 'changePasswordSuccess'.tr());
+      Navigator.pop(ctx);
     } else {
-      AppToast.error(context, error);
+      AppToast.error(ctx, error);
     }
   }
 }

@@ -81,7 +81,6 @@ class _SalesBody extends StatelessWidget {
         final filtered = state.filtered;
         return Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          floatingActionButton: _AddFab(onTap: () => _goToAddSale(context)),
           body: RefreshIndicator(
             color: AppTheme.primaryColor,
             onRefresh: () async => cubit.bootstrap(),
@@ -128,21 +127,3 @@ class _SalesBody extends StatelessWidget {
   }
 }
 
-/// زرار "بيع جديد" العائم.
-class _AddFab extends StatelessWidget {
-  final VoidCallback onTap;
-  const _AddFab({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return FloatingActionButton.extended(
-      heroTag: 'sales_fab',
-      onPressed: onTap,
-      elevation: 0,
-      backgroundColor: AppTheme.primaryColor,
-      foregroundColor: Colors.white,
-      icon: const Icon(Icons.add_rounded),
-      label: Text('بيع جديد', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800)),
-    );
-  }
-}
