@@ -5,8 +5,14 @@ import 'package:image_picker/image_picker.dart';
 
 import '../services/cloudinary_image_service.dart';
 
-/// Shows the shared gallery/camera chooser for a shop photo.
-Future<ImageSource?> pickShopImageSource(BuildContext context) {
+/// Shows the shared gallery/camera chooser.
+///
+/// [titleKey] only changes the sheet's heading, so receipts can reuse the same
+/// picker without asking for it again.
+Future<ImageSource?> pickShopImageSource(
+  BuildContext context, {
+  String titleKey = 'shopImageSource',
+}) {
   final supportsCamera =
       !kIsWeb &&
       (defaultTargetPlatform == TargetPlatform.android ||
@@ -20,7 +26,7 @@ Future<ImageSource?> pickShopImageSource(BuildContext context) {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Text('shopImageSource'.tr(), style: const TextStyle(fontWeight: FontWeight.w700)),
+            child: Text(titleKey.tr(), style: const TextStyle(fontWeight: FontWeight.w700)),
           ),
           ListTile(
             leading: const Icon(Icons.photo_library_outlined),

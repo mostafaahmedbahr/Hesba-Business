@@ -11,6 +11,7 @@ import '../../features/returns/presentation/views/add_return_view.dart';
 import '../../features/returns/presentation/views/returns_view.dart';
 import '../../features/expenses/presentation/views/expenses_view.dart';
 import '../../features/expenses/presentation/views/add_expense_view.dart';
+import '../../features/subscription/presentation/views/subscription_view.dart';
 
 /// Root navigator used to route the user when they tap a notification while
 /// the app is in the background or was terminated.
@@ -74,6 +75,9 @@ class AppRouter {
           ),
           settings,
         );
+      case AppRoutes.subscription:
+        return _buildRoute(const SubscriptionView(), settings);
+
       // case AppRoutes.resetPassword:
       //   return _buildRoute(const ResetPasswordScreen(), settings);
 

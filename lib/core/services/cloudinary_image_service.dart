@@ -69,7 +69,34 @@ Transformation get shopImageTransformation =>
         ..delivery(Delivery.format(Format.auto))
         ..delivery(Delivery.quality(Quality.auto()));
 
-  Future<String?> uploadShopImage({required ImageSource source}) async {
+  Future<String?> uploadShopImage({required ImageSource source}) {
+    return _upload(
+      source: source,
+      folder: AppConstants.cloudinaryShopImageFolder,
+      preset: AppConstants.cloudinaryUploadPreset,
+      verify: true,
+    );
+  }
+
+  /// Uploads a payment receipt image.
+  ///
+  /// Same service and preset as the shop photo, but into its own folder and
+  /// without the shop's eager transformation so the screenshot stays readable.
+  Future<String?> uploadPaymentReceipt({required ImageSource source}) {
+    return _upload(
+      source: source,
+      folder: AppConstants.cloudinaryPaymentProofFolder,
+      preset: AppConstants.cloudinaryReceiptUploadPreset,
+      verify: false,
+    );
+  }
+
+  Future<String?> _upload({
+    required ImageSource source,
+    required String folder,
+    required String preset,
+    required bool verify,
+  }) async {
     if (!AppConstants.isCloudinaryConfigured) {
       throw CloudinaryUploadException(
         missingConfiguration,
@@ -96,11 +123,11 @@ Transformation get shopImageTransformation =>
         'api.cloudinary.com',
         '/v1_1/${AppConstants.cloudinaryCloudName}/image/upload',
       );
-      // Unsigned uploads reject the transformation parameter, so the crop and
+      // Unsigned uploads reject the transformation parameter, so any crop and
       // effects come from the fixed transformation of the upload preset.
       final request = http.MultipartRequest('POST', uri)
-        ..fields['upload_preset'] = AppConstants.cloudinaryUploadPreset
-        ..fields['folder'] = AppConstants.cloudinaryShopImageFolder
+        ..fields['upload_preset'] = preset
+        ..fields['folder'] = folder
         ..files.add(
           http.MultipartFile.fromBytes('file', bytes, filename: picked.name),
         );
@@ -126,7 +153,9 @@ Transformation get shopImageTransformation =>
           !parsed.isScheme('https')) {
         throw const CloudinaryUploadException(invalidResponse);
       }
-      _verifyTransformation(data, secureUrl);
+      if (verify) {
+        _verifyTransformation(data, secureUrl);
+      }
       return secureUrl;
     } on CloudinaryUploadException {
       rethrow;

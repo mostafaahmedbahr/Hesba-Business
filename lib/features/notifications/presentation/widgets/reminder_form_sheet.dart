@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
  import '../../data/models/local_reminder.dart';
 import '../../../../core/utils/reminder_labels.dart';
 import '../view_model/notification_cubit.dart';
+import '../../../subscription/presentation/subscription_gate.dart';
 
 /// شيت إضافة / تعديل تذكير.
 class ReminderFormSheet extends StatefulWidget {
@@ -74,6 +75,7 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
   /// يحفظ (إضافة أو تعديل) — يطلب الإذن الأول لو مقفول.
   Future<void> _save() async {
     if (_saving) return;
+    if (!await SubscriptionGate.ensureCanModify(context)) return;
     // العنوان فاضي: خطأ تحت الخانة + تنبيه (مش رجوع صامت).
     if (_title.text.trim().isEmpty) {
       setState(() => _titleError = true);

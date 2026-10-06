@@ -16,6 +16,7 @@ import '../../../../core/utils/toast.dart';
 import '../../../categories/data/repos/category_repo.dart';
 import '../../../categories/presentation/views/category_management_view.dart';
 import '../cubit/products_cubit.dart';
+import '../../../subscription/presentation/subscription_gate.dart';
 
 class ProductFormView extends StatefulWidget {
   final ProductsCubit cubit;
@@ -148,6 +149,7 @@ class _ProductFormViewState extends State<ProductFormView> {
   void _regenerateCode() => setState(() => _codeController.text = _generateCode(widget.cubit.state.products));
 
   Future<void> _save() async {
+    if (!await SubscriptionGate.ensureCanModify(context)) return;
     if (!_formKey.currentState!.validate()) return;
     setState(() => _saving = true);
     final category = _customCategory ? _customCategoryController.text.trim() : (_category ?? '');
@@ -170,6 +172,7 @@ class _ProductFormViewState extends State<ProductFormView> {
   }
 
   Future<void> _delete() async {
+    if (!await SubscriptionGate.ensureCanModify(context)) return;
     final ok = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => Dialog(

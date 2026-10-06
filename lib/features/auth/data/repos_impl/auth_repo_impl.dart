@@ -2,16 +2,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../../core/extensions/log_util.dart';
+import '../../../subscription/data/repos/subscription_repo.dart';
 import '../models/register_model.dart';
 import '../repos/auth_repo.dart';
 
 class AuthRepoImpl implements AuthRepo {
   final FirebaseAuth firebaseAuth;
   final FirebaseFirestore firestore;
+  final SubscriptionRepo? subscriptionRepo;
 
   AuthRepoImpl({
     FirebaseAuth? firebaseAuth,
     FirebaseFirestore? firestore,
+    this.subscriptionRepo,
   })  : firebaseAuth =
       firebaseAuth ?? FirebaseAuth.instance,
         firestore =
@@ -92,6 +95,17 @@ class AuthRepoImpl implements AuthRepo {
         .doc(user.uid)
         .set(registerModel.toJson());
     print('[AuthRepoImpl] owner data saved successfully');
+
+    // 4b. Hand out the free trial. Best effort: the first read of the
+    // subscription still creates it, so registration never fails because of it.
+    try {
+      await subscriptionRepo?.startTrialForNewUser(
+        userId: user.uid,
+        createdAt: now,
+      );
+    } catch (e) {
+      logWarning('[AuthRepoImpl] trial could not be created now: $e');
+    }
 
     // 5. Save shop data
     print('[AuthRepoImpl] saving shop data to shops/${shopRef.id}...');

@@ -14,6 +14,7 @@ import '../cubit/expenses_cubit.dart';
 import '../cubit/expenses_state.dart';
 import '../../data/models/expense_model.dart';
 import '../widgets/expense_category_meta.dart';
+import '../../../subscription/presentation/subscription_gate.dart';
 
 /// شاشة إضافة/تعديل مصروف (هيدر حي + شريط حفظ ثابت).
 class AddExpenseView extends StatefulWidget {
@@ -70,6 +71,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
   double get _amount => double.tryParse(_toLatin(_amountController.text.trim())) ?? 0;
 
   Future<void> _submit(BuildContext innerContext) async {
+    if (!await SubscriptionGate.ensureCanModify(innerContext)) return;
     if (!_formKey.currentState!.validate()) return;
     if (_category.isEmpty) {
       AppToast.error(innerContext, 'اختر تصنيف المصروف');

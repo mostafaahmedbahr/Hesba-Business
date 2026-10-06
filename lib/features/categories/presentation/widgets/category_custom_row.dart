@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../common_imports.dart';
 import '../cubit/category_cubit.dart';
 import 'category_delete_dialog.dart';
+import '../../../subscription/presentation/subscription_gate.dart';
 
 /// صف قسم مخصص (سحب للحذف + زرار حذف).
 class CategoryCustomRow extends StatelessWidget {
@@ -13,6 +14,7 @@ class CategoryCustomRow extends StatelessWidget {
 
   /// يفتح التأكيد ثم يحذف.
   Future<void> _askDelete(BuildContext context) async {
+    if (!await SubscriptionGate.ensureCanModify(context)) return;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => CategoryDeleteDialog(name: name),

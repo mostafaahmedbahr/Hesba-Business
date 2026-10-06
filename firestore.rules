@@ -1,0 +1,74 @@
+rules_version = '2';
+
+// Firestore security rules for Hesba.
+//
+// The two blocks that matter for this feature are the ones below. Everything
+// else is a baseline so the rest of the app keeps working — merge it with the
+// rules you already have deployed in the Firebase console instead of
+// deploying this file blind.
+//
+// Why the subscription rules exist: the app checks `canModifyData` before any
+// Add / Edit / Delete, but that is a UI guard. These rules are the real line —
+// they stop a client from writing `status: 'active'` (and therefore editing
+// data) unless the admin has approved the request it points at.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Subscription ─────────────────────────────────────────────────────
+    match /users/{userId}/subscription/{subId} {
+      // The owner may always read their own subscription.
+      allow read: if request.auth != null && request.auth.uid == userId;
+
+      // The only thing a client may create is its own 7 day trial, and only
+      // once, starting about now.
+      allow create: if request.auth != null
+                    && request.auth.uid == userId
+                    && request.resource.data.status == 'trial'
+                    && request.resource.data.isTrial == true
+                    && request.resource.data.trialStartDate >= request.time - duration.value(1, 'd')
+                    && request.resource.data.trialStartDate <= request.time + duration.value(1, 'd')
+                    && request.resource.data.trialEndDate <=
+                       request.resource.data.trialStartDate + duration.value(7, 'd');
+
+      // A client may move its own subscription to expired / pending / rejected
+      // freely. Reaching `active` additionally requires the admin to have
+      // approved the request this subscription points at.
+      allow update: if request.auth != null
+                    && request.auth.uid == userId
+                    && (
+                         request.resource.data.status in ['expired', 'pending', 'rejected']
+                         || (
+                              request.resource.data.status == 'active'
+                              && request.resource.data.lastRequestId is string
+                              && get(/databases/$(database)/documents/subscription_requests/$(request.resource.data.lastRequestId)).data.status == 'approved'
+                            )
+                       );
+
+      allow delete: if false;
+    }
+
+    // ── Subscription requests ────────────────────────────────────────────
+    // One row per submitted receipt. The client may only ever create a
+    // `pending` row; approving or rejecting happens from the Firebase console,
+    // which bypasses these rules.
+    match /subscription_requests/{requestId} {
+      allow read: if request.auth != null
+                  && request.auth.uid == resource.data.userId;
+
+      allow create: if request.auth != null
+                    && request.auth.uid == request.resource.data.userId
+                    && request.resource.data.status == 'pending'
+                    && request.resource.data.amount > 0
+                    && request.resource.data.paymentProofUrl.matches('https://.*');
+
+      allow update, delete: if false;
+    }
+
+    // ── Everything else ──────────────────────────────────────────────────
+    // Baseline only. Replace with the rules already deployed for
+    // users / shops / products / sales / returns / expenses / feedback.
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

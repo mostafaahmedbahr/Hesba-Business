@@ -20,6 +20,7 @@ import '../widgets/add_sale_button.dart';
 import '../widgets/payment_method_selector.dart';
 import '../widgets/sale_product_card.dart';
 import '../widgets/sale_summary.dart';
+import '../../../subscription/presentation/subscription_gate.dart';
 
 /// شاشة بيع جديد (فورم + ملخص live + شريط حفظ ثابت).
 class AddSaleView extends StatefulWidget {
@@ -158,7 +159,8 @@ class _AddSaleViewState extends State<AddSaleView> {
     return res < 0 ? 0 : res;
   }
 
-  void _submit(BuildContext innerContext) {
+  Future<void> _submit(BuildContext innerContext) async {
+    if (!await SubscriptionGate.ensureCanModify(innerContext)) return;
     if (!_formKey.currentState!.validate()) {
       AppToast.warning(innerContext, 'راجع بيانات المنتجات');
       return;

@@ -25,6 +25,14 @@ class AppConstants {
   static const String cloudinaryShopImageFolder = 'hesba/shop-images';
   static const int cloudinaryShopImageSize = 250;
 
+  // Payment receipts live apart from shop photos so the shop's 250px/sepia
+  // preset never shrinks a screenshot the admin has to read.
+  static const String cloudinaryPaymentProofFolder = 'hesba/payment-proofs';
+  static const String cloudinaryReceiptUploadPreset = String.fromEnvironment(
+    'CLOUDINARY_RECEIPT_PRESET',
+    defaultValue: 'hesba_images',
+  );
+
   static bool get isCloudinaryConfigured {
     return !cloudinaryCloudName.startsWith('REPLACE_') &&
         !cloudinaryUploadPreset.startsWith('REPLACE_');

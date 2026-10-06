@@ -20,6 +20,7 @@ import '../widgets/return_invoice_picker.dart';
 import '../widgets/return_item_card.dart';
 import '../widgets/return_reason_chips.dart';
 import '../widgets/return_summary.dart';
+import '../../../subscription/presentation/subscription_gate.dart';
 
 /// شاشة إضافة مرتجع (اختيار فاتورة + أصناف + ملخص حي + شريط حفظ ثابت).
 class AddReturnView extends StatefulWidget {
@@ -286,7 +287,8 @@ class _AddReturnViewState extends State<AddReturnView> {
     return list;
   }
 
-  void _submit(BuildContext innerContext) {
+  Future<void> _submit(BuildContext innerContext) async {
+    if (!await SubscriptionGate.ensureCanModify(innerContext)) return;
     if (_selectedSale == null) {
       AppToast.warning(innerContext, 'اختر فاتورة أولاً');
       return;

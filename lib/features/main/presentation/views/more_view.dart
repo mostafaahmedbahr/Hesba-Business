@@ -51,6 +51,12 @@ class MoreView extends StatelessWidget {
                 color: const Color(0xFF7C4DFF),
                 onTap: () => _navigateTo(context, const ChangePasswordView()),
               ),
+              MoreItem(
+                icon: Icons.workspace_premium_rounded,
+                label: 'subscriptionTitle'.tr(),
+                color: const Color(0xFF22C55E),
+                onTap: () => Navigator.pushNamed(context, AppRoutes.subscription),
+              ),
             ]),
             SizedBox(height: 20.h),
             _SectionCard('moreNotifications'.tr(), [

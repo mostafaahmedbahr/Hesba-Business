@@ -7,6 +7,7 @@ import '../../data/repos/activity_repo.dart';
 import '../../data/repos/notification_repo.dart';
 import '../widgets/reminder_delete_dialog.dart';
 import '../widgets/reminder_form_sheet.dart';
+import '../../../subscription/presentation/subscription_gate.dart';
 import 'notification_state.dart';
 
 /// فيو موديل التذكيرات (كل لوجيك الشاشة هنا).
@@ -195,6 +196,7 @@ class NotificationCubit extends Cubit<NotificationState> {
 
   /// تأكيد ثم حذف.
   Future<void> confirmDelete(BuildContext context, LocalReminder r) async {
+    if (!await SubscriptionGate.ensureCanModify(context)) return;
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => const ReminderDeleteDialog(),

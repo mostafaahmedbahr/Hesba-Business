@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../common_imports.dart';
 import '../cubit/category_cubit.dart';
 import '../cubit/category_state.dart';
+import '../../../subscription/presentation/subscription_gate.dart';
 
 /// كارت الإضافة (خانة + زرار).
 class CategoryAddCard extends StatefulWidget {
@@ -25,6 +26,7 @@ class _CategoryAddCardState extends State<CategoryAddCard> {
 
   /// يبعت الاسم للـ Cubit ويمسح الخانة لو نجح.
   Future<void> _submit() async {
+    if (!await SubscriptionGate.ensureCanModify(context)) return;
     HapticFeedback.lightImpact();
     final ok = await context.read<CategoryCubit>().addCategory(_controller.text);
     if (ok && mounted) {

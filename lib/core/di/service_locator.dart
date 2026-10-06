@@ -33,6 +33,8 @@ import '../../features/notifications/data/repos/activity_repo.dart';
 import '../../features/notifications/data/repos_impl/activity_repo_impl.dart';
 import '../../features/categories/data/repos/category_repo.dart';
 import '../../features/categories/data/repos_impl/category_repo_impl.dart';
+import '../../features/subscription/data/repos/subscription_repo.dart';
+import '../../features/subscription/data/repos_impl/subscription_repo_impl.dart';
 
 final sl = GetIt.instance;
 
@@ -40,6 +42,7 @@ Future<void> initDependencies() async {
   final prefs = await SharedPreferences.getInstance();
   sl.registerLazySingleton<SharedPreferences>(() => prefs);
 
+  _initSubscription();
   _initAuth();
   _initSettings();
   _initMedia();
@@ -55,6 +58,16 @@ Future<void> initDependencies() async {
   _initCategories();
 }
 
+void _initSubscription() {
+  sl.registerLazySingleton<SubscriptionRepo>(
+    () => SubscriptionRepoImpl(
+      auth: sl<FirebaseAuth>(),
+      firestore: sl<FirebaseFirestore>(),
+      cloudinary: sl<CloudinaryImageService>(),
+    ),
+  );
+}
+
 void _initAuth() {
   sl.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
   sl.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
@@ -63,6 +76,7 @@ void _initAuth() {
     () => AuthRepoImpl(
       firebaseAuth: sl(),
       firestore: sl(),
+      subscriptionRepo: sl(),
     ),
   );
 }

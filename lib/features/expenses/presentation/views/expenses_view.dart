@@ -10,6 +10,7 @@ import '../widgets/expense_list_header.dart';
 import '../widgets/expense_list_placeholders.dart';
 import '../widgets/expense_list_search.dart';
 import 'add_expense_view.dart';
+import '../../../subscription/presentation/subscription_gate.dart';
 
 /// شاشة المصروفات (عرض بس — اللوجيك في Cubit).
 class ExpensesView extends StatelessWidget {
@@ -46,6 +47,7 @@ class _ExpensesBody extends StatelessWidget {
 
   /// تأكيد ثم حذف.
   Future<void> _confirmDelete(BuildContext context, ExpenseModel expense) async {
+    if (!await SubscriptionGate.ensureCanModify(context)) return;
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => ExpenseDeleteDialog(title: expense.title),
