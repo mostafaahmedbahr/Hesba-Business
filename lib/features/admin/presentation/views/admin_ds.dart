@@ -201,11 +201,14 @@ class AdminCard extends StatelessWidget {
       ),
       child: child,
     );
-    if (onTap == null) return body;
+    // Transparent Material ancestor so descendants like TextField/InkWell
+    // always work — even when the card is shown in a bare dialog.
     return Material(
       color: Colors.transparent,
       borderRadius: BorderRadius.circular(AdminRadius.card),
-      child: InkWell(borderRadius: BorderRadius.circular(AdminRadius.card), onTap: onTap, child: body),
+      child: onTap == null
+          ? body
+          : InkWell(borderRadius: BorderRadius.circular(AdminRadius.card), onTap: onTap, child: body),
     );
   }
 }

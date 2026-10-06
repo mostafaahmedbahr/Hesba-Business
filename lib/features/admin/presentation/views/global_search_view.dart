@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hesba/core/theme/app_theme.dart';
 import 'package:hesba/features/admin/presentation/cubit/global_search_cubit.dart';
-import 'package:hesba/features/admin/presentation/cubit/admin_nav_cubit.dart';
 import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
 import 'package:hesba/features/admin/presentation/views/product_details_view.dart';
 import 'package:hesba/features/admin/presentation/views/shop_details_view.dart';
+import 'package:hesba/features/admin/presentation/views/subscription_requests_view.dart';
+import 'package:hesba/features/subscription/data/models/subscription_request_model.dart';
 
 class GlobalSearchView extends StatelessWidget {
   const GlobalSearchView({super.key});
@@ -89,9 +90,7 @@ class GlobalSearchView extends StatelessWidget {
                                           const SizedBox(height: 2),
                                           Row(
                                             children: [
-                                              Text(hit.kind,
-                                                  style: TextStyle(
-                                                      color: AdminColors.textSecondary(context), fontSize: 11.5)),
+                                              AdminStatusBadge(label: hit.kind, color: _colorFor(hit.kind)),
                                               const SizedBox(width: 6),
                                               CopyableId(id: hit.id),
                                             ],
@@ -138,32 +137,58 @@ class GlobalSearchView extends StatelessWidget {
       };
 
   Future<void> _openHit(BuildContext context, SearchHit hit) async {
-    final nav = context.read<AdminNavCubit>();
-    Navigator.of(context).pop();
-    if (!context.mounted) return;
+    // Details open ON TOP of the search dialog (no pop first):
+    // going back returns to the results, and the context stays valid.
+    final messenger = ScaffoldMessenger.of(context);
     try {
-      if (hit.kind == 'محل') {
+      final kind = hit.kind.trim();
+      if (kind == 'محل') {
         final snap = await FirebaseFirestore.instance.collection('shops').doc(hit.id).get();
         if (!context.mounted) return;
+        if (!snap.exists) {
+          messenger.showSnackBar(
+            const SnackBar(content: Text('المحل غير موجود'), behavior: SnackBarBehavior.floating),
+          );
+          return;
+        }
         final data = snap.data() ?? {};
         await Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => ShopDetailsView(shopId: hit.id, ownerId: data['ownerId'] as String? ?? ''),
           ),
         );
-      } else if (hit.kind == 'منتج') {
+      } else if (kind == 'منتج') {
         final snap = await FirebaseFirestore.instance.collection('products').doc(hit.id).get();
         if (!context.mounted) return;
         final data = snap.data();
-        if (data == null) return;
+        if (data == null) {
+          messenger.showSnackBar(
+            const SnackBar(content: Text('المنتج غير موجود'), behavior: SnackBarBehavior.floating),
+          );
+          return;
+        }
         await Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => ProductDetailsView(data: data, id: hit.id)),
         );
       } else {
-        nav.select(3);
+        // طلب اشتراك: افتح حوار مراجعة الطلب نفسه بدل الذهاب للقائمة.
+        final snap =
+            await FirebaseFirestore.instance.collection('subscription_requests').doc(hit.id).get();
+        if (!context.mounted) return;
+        final data = snap.data();
+        if (data == null) {
+          messenger.showSnackBar(
+            const SnackBar(content: Text('الطلب غير موجود'), behavior: SnackBarBehavior.floating),
+          );
+          return;
+        }
+        final request = SubscriptionRequestModel.fromJson(hit.id, data);
+        await RequestDetailsDialog.show(context, request);
       }
-    } catch (_) {
-      // Silently ignore navigation failures (e.g. deleted document).
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('تعذر فتح التفاصيل: $e'), behavior: SnackBarBehavior.floating),
+      );
     }
   }
 }

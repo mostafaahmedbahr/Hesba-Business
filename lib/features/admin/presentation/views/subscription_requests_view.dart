@@ -242,10 +242,7 @@ class _RequestCard extends StatelessWidget {
   }
 
   Future<void> _openDetails(BuildContext context, SubscriptionRequestModel request) async {
-    await showDialog(
-      context: context,
-      builder: (_) => _RequestDialog(request: request),
-    );
+    await RequestDetailsDialog.show(context, request);
     if (context.mounted) context.read<AdminListCubit>().firstPage();
   }
 }
@@ -261,16 +258,21 @@ String _planLabel(String id) {
 }
 
 // ── Details dialog (receipt + details) ──────────────────
+// Public + reusable: the global search opens the same dialog directly.
 
-class _RequestDialog extends StatefulWidget {
-  const _RequestDialog({required this.request});
+class RequestDetailsDialog extends StatefulWidget {
+  const RequestDetailsDialog({super.key, required this.request});
   final SubscriptionRequestModel request;
 
+  static Future<void> show(BuildContext context, SubscriptionRequestModel request) {
+    return showDialog(context: context, builder: (_) => RequestDetailsDialog(request: request));
+  }
+
   @override
-  State<_RequestDialog> createState() => _RequestDialogState();
+  State<RequestDetailsDialog> createState() => _RequestDetailsDialogState();
 }
 
-class _RequestDialogState extends State<_RequestDialog> {
+class _RequestDetailsDialogState extends State<RequestDetailsDialog> {
   final _reason = TextEditingController();
 
   @override
