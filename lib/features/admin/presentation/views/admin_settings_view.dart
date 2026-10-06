@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hesba/core/di/service_locator.dart';
-
+import 'package:hesba/core/theme/app_theme.dart';
 import 'package:hesba/core/utils/toast.dart';
 import 'package:hesba/features/admin/data/models/admin_settings.dart';
 import 'package:hesba/features/admin/data/repos/admin_repo.dart';
@@ -99,27 +99,99 @@ class _SettingsFormState extends State<_SettingsForm> {
 
   @override
   Widget build(BuildContext context) {
+    InputDecoration deco(String label) => InputDecoration(
+          labelText: label,
+          filled: true,
+          fillColor: Colors.grey.withValues(alpha: 0.08),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+          isDense: true,
+        );
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Text('الأسعار', style: Theme.of(context).textTheme.titleMedium),
-        TextFormField(controller: _monthly, decoration: const InputDecoration(labelText: 'شهري')),
-        TextFormField(controller: _three, decoration: const InputDecoration(labelText: '3 شهور')),
-        TextFormField(controller: _six, decoration: const InputDecoration(labelText: '6 شهور')),
-        TextFormField(controller: _yearly, decoration: const InputDecoration(labelText: 'سنوي')),
+        _card(
+          context,
+          title: 'أسعار الباقات',
+          icon: Icons.sell_outlined,
+          children: [
+            _field(_monthly, 'شهري (ج)', deco('الباقة الشهرية')),
+            _field(_three, '3 شهور (ج)', deco('3 شهور')),
+            _field(_six, '6 شهور (ج)', deco('6 شهور')),
+            _field(_yearly, 'سنوي (ج)', deco('السنوي')),
+          ],
+        ),
         const SizedBox(height: 16),
-        Text('الفترة المجانية', style: Theme.of(context).textTheme.titleMedium),
-        TextFormField(controller: _trial, decoration: const InputDecoration(labelText: 'عدد الأيام')),
+        _card(
+          context,
+          title: 'الفترة التجريبية',
+          icon: Icons.access_time,
+          children: [_field(_trial, 'عدد الأيام', deco('الأيام'))],
+        ),
         const SizedBox(height: 16),
-        Text('طرق الدفع', style: Theme.of(context).textTheme.titleMedium),
-        for (var i = 0; i < widget.settings.paymentMethods.length; i++)
-          TextFormField(controller: _numbers[i], decoration: InputDecoration(labelText: widget.settings.paymentMethods[i].label)),
+        _card(
+          context,
+          title: 'طرق الدفع',
+          icon: Icons.account_balance_wallet_outlined,
+          children: [
+            for (var i = 0; i < widget.settings.paymentMethods.length; i++)
+              _field(_numbers[i], widget.settings.paymentMethods[i].label, deco('الرقم')),
+          ],
+        ),
         const SizedBox(height: 24),
         ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size(double.infinity, 48),
+            backgroundColor: AppTheme.primaryColor,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
           onPressed: widget.saving ? null : _save,
-          child: widget.saving ? const CircularProgressIndicator() : const Text('حفظ'),
+          child: widget.saving
+              ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+              : const Text('حفظ', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
         ),
       ],
+    );
+  }
+
+  Widget _card(BuildContext context, {required String title, required IconData icon, required List<Widget> children}) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 8, offset: const Offset(0, 2))],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(color: AppTheme.primarySoft, borderRadius: BorderRadius.circular(10)),
+                child: Icon(icon, color: AppTheme.primaryColor, size: 20),
+              ),
+              const SizedBox(width: 10),
+              Text(title, style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ...children,
+        ],
+      ),
+    );
+  }
+
+  Widget _field(TextEditingController controller, String suffixHint, InputDecoration deco) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: TextInputType.number,
+        decoration: deco.copyWith(suffixText: suffixHint, hintText: suffixHint),
+      ),
     );
   }
 }
