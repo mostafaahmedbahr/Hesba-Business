@@ -66,6 +66,10 @@ class HomeView extends StatelessWidget {
                           .animate()
                           .fadeIn(delay: 140.ms, duration: 420.ms)
                           .slideY(begin: 0.06, end: 0),
+                      _SubscriptionBanner()
+                          .animate()
+                          .fadeIn(delay: 160.ms, duration: 420.ms)
+                          .slideY(begin: 0.06, end: 0),
                       if (state.status == DashboardStatus.failure) ...[
                         SizedBox(height: 12.h),
                         _ErrorHint(state: state),
@@ -859,6 +863,86 @@ class _QA extends StatelessWidget {
 }
 
 /* ───────────────────── آخر الحركات: مبيع / مرتجع / مصروف ───────────────────── */
+
+/// Opens the subscription screen. Always visible so the trial countdown and
+/// the plans are one tap away.
+class _SubscriptionBanner extends StatelessWidget {
+  const _SubscriptionBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18.r),
+        onTap: () => Navigator.pushNamed(context, AppRoutes.subscription),
+        child: Ink(
+          padding: EdgeInsets.all(14.w),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppTheme.primaryColor, AppTheme.primaryLight],
+              begin: AlignmentDirectional.centerStart,
+              end: AlignmentDirectional.centerEnd,
+            ),
+            borderRadius: BorderRadius.circular(18.r),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.primaryColor.withValues(alpha: 0.3),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(9.w),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Icon(
+                  Icons.workspace_premium_rounded,
+                  color: Colors.white,
+                  size: 22.sp,
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'subscriptionTitle'.tr(),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14.5.sp,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      'subscriptionHomeHint'.tr(),
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.88),
+                        fontSize: 11.5.sp,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_left_rounded,
+                color: Colors.white,
+                size: 26.sp,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class _RecentMovementsSection extends StatefulWidget {
   final void Function(int index)? onNavigateTab;

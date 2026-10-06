@@ -412,5 +412,6 @@
   "planSaveAmount": "Save {0} EGP",
   "payInstapay": "InstaPay",
   "payVodafoneCash": "Vodafone Cash",
-  "payEtisalatCash": "Etisalat Cash"
+  "payEtisalatCash": "Etisalat Cash",
+  "subscriptionHomeHint": "Try 7 free days - plans from 99 EGP"
 }
