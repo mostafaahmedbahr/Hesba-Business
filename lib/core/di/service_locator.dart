@@ -35,6 +35,8 @@ import '../../features/categories/data/repos/category_repo.dart';
 import '../../features/categories/data/repos_impl/category_repo_impl.dart';
 import '../../features/subscription/data/repos/subscription_repo.dart';
 import '../../features/subscription/data/repos_impl/subscription_repo_impl.dart';
+import '../../features/admin/data/repos/admin_repo.dart';
+import '../../features/admin/data/repos_impl/admin_repo_impl.dart';
 
 final sl = GetIt.instance;
 
@@ -44,6 +46,7 @@ Future<void> initDependencies() async {
 
   _initSubscription();
   _initAuth();
+  _initAdmin();
   _initSettings();
   _initMedia();
   _initProfile();
@@ -65,6 +68,12 @@ void _initSubscription() {
       firestore: sl<FirebaseFirestore>(),
       cloudinary: sl<CloudinaryImageService>(),
     ),
+  );
+}
+
+void _initAdmin() {
+  sl.registerLazySingleton<AdminRepo>(
+    () => AdminRepoImpl(auth: sl(), firestore: sl()),
   );
 }
 

@@ -6,6 +6,7 @@ import '../../../notifications/presentation/views/notifications_view.dart';
 import '../../../profile/presentation/views/change_password_view.dart';
 import '../../../profile/presentation/views/profile_view.dart';
 import '../../../profile/presentation/views/update_profile_view.dart';
+import 'package:hesba/admin_main.dart' show AdminHome;
 import 'drawer_language_tile.dart';
 import 'drawer_theme_tile.dart';
 import 'drawer_tile.dart';
@@ -103,6 +104,16 @@ class DrawerItemsList extends StatelessWidget {
             label: 'moreContactUs'.tr(),
             color: const Color(0xFF00ACC1),
             onTap: () => _open(context, const ContactUsView()),
+          ),
+          SizedBox(height: 10.h),
+          Divider(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB), height: 1),
+          SizedBox(height: 10.h),
+          SectionLabel('لوحة التحكم', isDark),
+          CustomDrawerTile(
+            icon: Icons.admin_panel_settings_rounded,
+            label: 'لوحة التحكم',
+            color: const Color(0xFF1A4FD6),
+            onTap: () => _open(context, const AdminHome()),
           ),
         ],
       ),
