@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hesba/core/di/service_locator.dart';
-import 'package:hesba/features/admin/presentation/views/admin_ui.dart';
+import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
 import 'package:hesba/core/theme/app_theme.dart';
 import 'package:hesba/features/admin/data/repos/admin_repo.dart';
 import 'package:hesba/features/admin/presentation/cubit/admin_list_cubit.dart';
@@ -42,15 +42,12 @@ class _ShopsBodyState extends State<_ShopsBody> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     return BlocBuilder<AdminListCubit, AdminListState>(
       builder: (context, state) {
         if (state.loading && state.docs.isEmpty) {
           return Column(
             children: [
-              _buildSearchBar(context, enabled: false),
+              AdminSearchField(controller: _searchCtrl, hint: 'ابحث بالاسم، المدينة، الهاتف...', enabled: false),
               Expanded(child: adminSkeletonList(context)),
             ],
           );
@@ -61,72 +58,75 @@ class _ShopsBodyState extends State<_ShopsBody> {
         if (state.docs.isEmpty) {
           return Column(
             children: [
-              _buildSearchBar(context, enabled: false),
-              Expanded(child: adminEmpty(Icons.storefront_outlined, 'لا توجد محلات بعد')),
+              AdminSearchField(controller: _searchCtrl, hint: 'ابحث بالاسم، المدينة، الهاتف...', enabled: false),
+              Expanded(
+                  child: adminEmpty(Icons.storefront_outlined, 'لا توجد محلات بعد', 'عند تسجيل أول محل سيظهر هنا')),
             ],
           );
         }
 
         final types = _extractTypes(state.docs);
         final filtered = _applyFilter(state.docs);
+        final filtering = _query.isNotEmpty || _selectedType != 'الكل';
 
         return RefreshIndicator(
           onRefresh: () => context.read<AdminListCubit>().firstPage(),
           child: Column(
             children: [
-              _buildSummaryHeader(context, total: state.docs.length, shown: filtered.length, loading: state.loading),
-              _buildSearchBar(context, enabled: true),
-              if (types.length > 1) _buildTypeChips(types),
-              if (_query.isNotEmpty || _selectedType != 'الكل')
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  child: Row(
-                    children: [
-                      Text(
-                        'نتائج البحث: ${filtered.length}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: isDark ? AppTheme.darkTextSecondary : Colors.grey[600],
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const Spacer(),
-                      TextButton.icon(
-                        onPressed: () => setState(() {
-                          _query = '';
-                          _searchCtrl.clear();
-                          _selectedType = 'الكل';
-                        }),
-                        icon: const Icon(Icons.clear, size: 16),
-                        label: const Text('مسح الفلتر', style: TextStyle(fontSize: 12)),
-                      ),
-                    ],
-                  ),
+              const AdminPageHeader(title: 'المحلات', description: 'إدارة ومراجعة جميع المحلات المسجلة في النظام'),
+              AdminSummaryHeader(
+                icon: Icons.storefront_outlined,
+                title: 'إجمالي المحلات',
+                total: state.docs.length,
+                unit: 'محل',
+                stats: [if (!filtering) 'الكل معروض' else 'عرض ${filtered.length} من ${state.docs.length}'],
+                loading: state.loading,
+                onRefresh: () => context.read<AdminListCubit>().firstPage(),
+              ),
+              AdminSearchField(
+                controller: _searchCtrl,
+                hint: 'ابحث بالاسم، المدينة، الهاتف...',
+                onChanged: (v) => setState(() => _query = v),
+              ),
+              AdminFilterChips(
+                selected: _selectedType,
+                onSelect: (k) => setState(() => _selectedType = k),
+                items: [for (final t in types) AdminChipItem(t, t)],
+              ),
+              if (filtering)
+                AdminResultCount(
+                  count: filtered.length,
+                  onClear: () => setState(() {
+                    _query = '';
+                    _searchCtrl.clear();
+                    _selectedType = 'الكل';
+                  }),
                 ),
               Expanded(
                 child: filtered.isEmpty
-                    ? adminEmpty(Icons.search_off_outlined, 'لا توجد نتائج مطابقة لبحثك')
+                    ? adminEmpty(Icons.search_off_outlined, 'لا توجد نتائج مطابقة لبحثك', 'جرّب كلمة مختلفة أو امسح الفلتر')
                     : LayoutBuilder(
                         builder: (context, constraints) {
                           final wide = constraints.maxWidth >= 760;
                           if (wide) {
                             return GridView.builder(
-                              padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                              padding: const EdgeInsets.fromLTRB(AdminSpace.lg, AdminSpace.xs, AdminSpace.lg, AdminSpace.lg),
                               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: constraints.maxWidth >= 1100 ? 3 : 2,
-                                crossAxisSpacing: 12,
-                                mainAxisSpacing: 12,
-                                mainAxisExtent: 132,
+                                crossAxisSpacing: AdminSpace.md,
+                                mainAxisSpacing: AdminSpace.md,
+                                mainAxisExtent: 138,
                               ),
                               itemCount: filtered.length,
                               itemBuilder: (context, i) => _ShopCard(doc: filtered[i]),
                             );
                           }
                           return ListView.separated(
-                            padding: const EdgeInsets.fromLTRB(0, 4, 0, 16),
+                            padding: const EdgeInsets.fromLTRB(0, AdminSpace.xs, 0, AdminSpace.lg),
                             itemCount: filtered.length,
-                            separatorBuilder: (_, _) => const SizedBox(height: 10),
+                            separatorBuilder: (_, _) => const SizedBox(height: AdminSpace.sm),
                             itemBuilder: (context, i) => Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              padding: const EdgeInsets.symmetric(horizontal: AdminSpace.md),
                               child: _ShopCard(doc: filtered[i]),
                             ),
                           );
@@ -134,25 +134,10 @@ class _ShopsBodyState extends State<_ShopsBody> {
                       ),
               ),
               if (state.hasMore)
-                SafeArea(
-                  top: false,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 13),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                        ),
-                        onPressed: state.loading ? null : () => context.read<AdminListCubit>().nextPage(),
-                        icon: state.loading
-                            ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                            : const Icon(Icons.expand_more, size: 20),
-                        label: Text(state.loading ? 'جاري التحميل...' : 'تحميل المزيد (${state.docs.length} معروض)'),
-                      ),
-                    ),
-                  ),
+                AdminLoadMore(
+                  loading: state.loading,
+                  label: 'تحميل المزيد (${state.docs.length} معروض)',
+                  onLoad: () => context.read<AdminListCubit>().nextPage(),
                 ),
             ],
           ),
@@ -177,9 +162,7 @@ class _ShopsBodyState extends State<_ShopsBody> {
     final q = _query.trim();
     return docs.where((d) {
       final data = d.data();
-      if (_selectedType != 'الكل' && (data['businessType'] as String? ?? '') != _selectedType) {
-        return false;
-      }
+      if (_selectedType != 'الكل' && (data['businessType'] as String? ?? '') != _selectedType) return false;
       if (q.isEmpty) return true;
       final haystack = [
         data['shopName'],
@@ -193,142 +176,6 @@ class _ShopsBodyState extends State<_ShopsBody> {
       return haystack.contains(q);
     }).toList();
   }
-
-  Widget _buildSummaryHeader(BuildContext context, {required int total, required int shown, required bool loading}) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          gradient: AppTheme.primaryGradient,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: AppTheme.cardShadow(context),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.18),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: const Icon(Icons.storefront_outlined, color: Colors.white, size: 26),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('إجمالي المحلات', style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 2),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text('$total', style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900, height: 1)),
-                      const SizedBox(width: 6),
-                      const Padding(
-                        padding: EdgeInsets.only(bottom: 3),
-                        child: Text('محل', style: TextStyle(color: Colors.white70, fontSize: 12)),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            if (!isDark)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  shown == total ? 'الكل معروض' : 'عرض $shown من $total',
-                  style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700),
-                ),
-              ),
-            const SizedBox(width: 8),
-            Material(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: loading ? null : () => context.read<AdminListCubit>().firstPage(),
-                child: const Padding(
-                  padding: EdgeInsets.all(10),
-                  child: Icon(Icons.refresh, color: AppTheme.primaryColor, size: 20),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSearchBar(BuildContext context, {required bool enabled}) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-      child: TextField(
-        controller: _searchCtrl,
-        enabled: enabled,
-        onChanged: (v) => setState(() => _query = v),
-        decoration: InputDecoration(
-          hintText: 'ابحث بالاسم، المدينة، الهاتف...',
-          prefixIcon: const Icon(Icons.search, size: 22),
-          suffixIcon: _query.isEmpty
-              ? null
-              : IconButton(
-                  icon: const Icon(Icons.clear, size: 18),
-                  onPressed: () => setState(() {
-                    _query = '';
-                    _searchCtrl.clear();
-                  }),
-                ),
-          filled: true,
-          fillColor: isDark ? AppTheme.darkSurface : Colors.white,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(color: isDark ? AppTheme.darkBorder : Colors.grey.shade200),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(color: isDark ? AppTheme.darkBorder : Colors.grey.shade200),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTypeChips(List<String> types) {
-    return SizedBox(
-      height: 44,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        itemCount: types.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 8),
-        itemBuilder: (context, i) {
-          final t = types[i];
-          final selected = t == _selectedType;
-          return ChoiceChip(
-            label: Text(t, style: TextStyle(fontSize: 12, fontWeight: selected ? FontWeight.w800 : FontWeight.w600)),
-            selected: selected,
-            onSelected: (_) => setState(() => _selectedType = t),
-            selectedColor: AppTheme.primaryColor,
-            labelStyle: TextStyle(color: selected ? Colors.white : null),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          );
-        },
-      ),
-    );
-  }
 }
 
 class _ShopCard extends StatelessWidget {
@@ -339,153 +186,97 @@ class _ShopCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final data = doc.data();
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
-    final name = (data['shopName'] as String?)?.trim().ifEmpty ?? 'بدون اسم';
+    final name = (data['shopName'] as String?)?.trim();
     final phone = (data['shopPhone'] as String?)?.trim() ?? (data['phone'] as String?)?.trim() ?? '';
     final city = (data['city'] as String?)?.trim() ?? '';
     final address = (data['address'] as String?)?.trim() ?? '';
     final type = (data['businessType'] as String?)?.trim() ?? '';
     final imageUrl = (data['shopImageUrl'] as String?)?.trim() ?? '';
     final isActive = (data['isActive'] as bool?) ?? true;
-    final createdAt = _formatDate(data['createdAt']);
-    final shortId = doc.id.length > 8 ? doc.id.substring(0, 8) : doc.id;
+    final sub = AdminColors.textSecondary(context);
 
-    final cardColor = isDark ? AppTheme.darkSurface : Colors.white;
-    final borderColor = isDark ? AppTheme.darkBorder : Colors.black.withValues(alpha: 0.06);
-    final subColor = isDark ? AppTheme.darkTextSecondary : Colors.grey[600];
-
-    return Material(
-      color: cardColor,
-      borderRadius: BorderRadius.circular(18),
-      elevation: 0,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => ShopDetailsView(
-              shopId: doc.id,
-              ownerId: data['ownerId'] as String? ?? '',
-            ),
-          ),
+    return AdminCard(
+      padding: const EdgeInsets.all(AdminSpace.md),
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => ShopDetailsView(shopId: doc.id, ownerId: data['ownerId'] as String? ?? ''),
         ),
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: borderColor),
-            boxShadow: isDark ? null : AppTheme.cardShadow(context),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Stack(
             children: [
-              Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(14),
-                    child: imageUrl.isEmpty
-                        ? Container(
-                            width: 62,
-                            height: 62,
-                            color: AppTheme.primarySoft,
-                            child: const Icon(Icons.storefront_outlined, color: AppTheme.primaryColor, size: 30),
-                          )
-                        : Image.network(
-                            imageUrl,
-                            width: 62,
-                            height: 62,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, _, _) => Container(
-                              width: 62,
-                              height: 62,
-                              color: AppTheme.primarySoft,
-                              child: const Icon(Icons.storefront_outlined, color: AppTheme.primaryColor, size: 30),
-                            ),
-                          ),
+              AdminThumbnail(url: imageUrl, size: 62, icon: Icons.storefront_outlined),
+              Positioned(
+                bottom: 2,
+                right: 2,
+                child: Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: isActive ? AdminColors.success : Colors.grey,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AdminColors.surface(context), width: 2),
                   ),
-                  Positioned(
-                    bottom: 2,
-                    right: 2,
-                    child: Container(
-                      width: 12,
-                      height: 12,
-                      decoration: BoxDecoration(
-                        color: isActive ? AppTheme.successColor : Colors.grey,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: cardColor, width: 2),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800, fontSize: 14.5),
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          '#$shortId',
-                          style: TextStyle(fontSize: 10.5, color: isDark ? AppTheme.darkTextSecondary : Colors.grey[400], fontWeight: FontWeight.w600),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    if (phone.isNotEmpty)
-                      _metaRow(Icons.phone_outlined, phone, subColor),
-                    if (city.isNotEmpty || address.isNotEmpty)
-                      _metaRow(
-                        Icons.location_on_outlined,
-                        [city, address].where((e) => e.isNotEmpty).join(' • '),
-                        subColor,
-                      ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        if (type.isNotEmpty)
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: AppTheme.primaryColor.withValues(alpha: isDark ? 0.18 : 0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              type,
-                              style: const TextStyle(fontSize: 11, color: AppTheme.primaryColor, fontWeight: FontWeight.w700),
-                            ),
-                          ),
-                        if (type.isNotEmpty) const SizedBox(width: 6),
-                        if (createdAt.isNotEmpty)
-                          Text(
-                            createdAt,
-                            style: TextStyle(fontSize: 11, color: subColor),
-                          ),
-                      ],
-                    ),
-                  ],
                 ),
               ),
-              const SizedBox(width: 4),
-              Icon(Icons.chevron_left_rounded, color: isDark ? AppTheme.darkTextSecondary : Colors.black26, size: 24),
             ],
           ),
-        ),
+          const SizedBox(width: AdminSpace.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        (name == null || name.isEmpty) ? 'بدون اسم' : name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800, fontSize: 14.5),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    CopyableId(id: doc.id),
+                  ],
+                ),
+                const SizedBox(height: AdminSpace.xs),
+                if (phone.isNotEmpty) _meta(Icons.phone_outlined, phone, sub),
+                if (city.isNotEmpty || address.isNotEmpty)
+                  _meta(Icons.location_on_outlined, [city, address].where((e) => e.isNotEmpty).join(' • '), sub),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    if (type.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(AdminRadius.pill),
+                        ),
+                        child: Text(type,
+                            style: const TextStyle(
+                                fontSize: 11, color: AppTheme.primaryColor, fontWeight: FontWeight.w700)),
+                      ),
+                    if (type.isNotEmpty) const SizedBox(width: 6),
+                    Text(AdminFmt.dateNum(data['createdAt']), style: TextStyle(fontSize: 11, color: sub)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AdminSpace.xs),
+          Icon(Icons.chevron_left_rounded, color: AdminColors.textMuted(context), size: 24),
+        ],
       ),
     );
   }
 
-  Widget _metaRow(IconData icon, String text, Color? color) {
+  Widget _meta(IconData icon, String text, Color? color) {
     return Padding(
       padding: const EdgeInsets.only(top: 1),
       child: Row(
@@ -493,32 +284,10 @@ class _ShopCard extends StatelessWidget {
           Icon(icon, size: 13, color: color),
           const SizedBox(width: 4),
           Flexible(
-            child: Text(
-              text,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 12, color: color),
-            ),
+            child: Text(text, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12, color: color)),
           ),
         ],
       ),
     );
   }
-
-  String _formatDate(dynamic v) {
-    try {
-      if (v == null) return '';
-      if (v is Timestamp) {
-        final d = v.toDate();
-        return '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
-      }
-      return '';
-    } catch (_) {
-      return '';
-    }
-  }
-}
-
-extension _StrX on String {
-  String? get ifEmpty => trim().isEmpty ? null : trim();
 }

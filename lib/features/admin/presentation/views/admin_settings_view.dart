@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hesba/core/di/service_locator.dart';
-import 'package:hesba/core/theme/app_theme.dart';
 import 'package:hesba/core/utils/toast.dart';
 import 'package:hesba/features/admin/data/models/admin_settings.dart';
 import 'package:hesba/features/admin/data/repos/admin_repo.dart';
 import 'package:hesba/features/admin/presentation/cubit/admin_settings_cubit.dart';
+import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
 
 class AdminSettingsView extends StatelessWidget {
   const AdminSettingsView({super.key});
@@ -17,20 +17,22 @@ class AdminSettingsView extends StatelessWidget {
       child: BlocConsumer<AdminSettingsCubit, AdminSettingsState>(
         listener: (context, state) {
           if (state is SettingsSaved) {
-            AppToast.success(context, 'تم الحفظ');
+            AppToast.success(context, 'تم حفظ الإعدادات');
           } else if (state is SettingsError) {
             AppToast.error(context, state.message);
           }
         },
         builder: (context, state) {
-        if (state is SettingsLoading) return const Center(child: CircularProgressIndicator());
-        if (state is SettingsError) return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
-        final settings = state is SettingsLoaded
-            ? state.settings
-            : state is SettingsSaved
-                ? state.settings
-                : AdminSettings.defaults;
-        return _SettingsForm(settings: settings, saving: state is SettingsSaving);
+          if (state is SettingsLoading) return adminSkeletonList(context, count: 4);
+          if (state is SettingsError) {
+            return adminError(state.message, () => context.read<AdminSettingsCubit>().load());
+          }
+          final settings = state is SettingsLoaded
+              ? state.settings
+              : state is SettingsSaved
+                  ? state.settings
+                  : AdminSettings.defaults;
+          return _SettingsForm(settings: settings, saving: state is SettingsSaving);
         },
       ),
     );
@@ -90,7 +92,7 @@ class _SettingsFormState extends State<_SettingsForm> {
           AdminPaymentMethod(
             id: widget.settings.paymentMethods[i].id,
             label: widget.settings.paymentMethods[i].label,
-            number: _numbers[i].text.trim(),
+            number: i < _numbers.length ? _numbers[i].text.trim() : widget.settings.paymentMethods[i].number,
           ),
       ],
     );
@@ -99,98 +101,68 @@ class _SettingsFormState extends State<_SettingsForm> {
 
   @override
   Widget build(BuildContext context) {
-    InputDecoration deco(String label) => InputDecoration(
-          labelText: label,
-          filled: true,
-          fillColor: Colors.grey.withValues(alpha: 0.08),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-          isDense: true,
-        );
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(AdminSpace.md, 0, AdminSpace.md, AdminSpace.xxl),
       children: [
-        _card(
-          context,
-          title: 'أسعار الباقات',
+        const AdminPageHeader(title: 'الإعدادات', description: 'أسعار الباقات والفترة التجريبية وطرق الدفع'),
+        AdminSection(
+          title: 'أسعار الباقات (بالجنيه)',
           icon: Icons.sell_outlined,
-          children: [
-            _field(_monthly, 'شهري (ج)', deco('الباقة الشهرية')),
-            _field(_three, '3 شهور (ج)', deco('3 شهور')),
-            _field(_six, '6 شهور (ج)', deco('6 شهور')),
-            _field(_yearly, 'سنوي (ج)', deco('السنوي')),
-          ],
+          child: Column(
+            children: [
+              _field(_monthly, 'الباقة الشهرية'),
+              _field(_three, 'باقة 3 شهور'),
+              _field(_six, 'باقة 6 شهور'),
+              _field(_yearly, 'الباقة السنوية', last: true),
+            ],
+          ),
         ),
-        const SizedBox(height: 16),
-        _card(
-          context,
+        const SizedBox(height: AdminSpace.md),
+        AdminSection(
           title: 'الفترة التجريبية',
-          icon: Icons.access_time,
-          children: [_field(_trial, 'عدد الأيام', deco('الأيام'))],
+          icon: Icons.access_time_outlined,
+          child: _field(_trial, 'عدد أيام التجربة المجانية', last: true),
         ),
-        const SizedBox(height: 16),
-        _card(
-          context,
+        const SizedBox(height: AdminSpace.md),
+        AdminSection(
           title: 'طرق الدفع',
           icon: Icons.account_balance_wallet_outlined,
-          children: [
-            for (var i = 0; i < widget.settings.paymentMethods.length; i++)
-              _field(_numbers[i], widget.settings.paymentMethods[i].label, deco('الرقم')),
-          ],
-        ),
-        const SizedBox(height: 24),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            minimumSize: const Size(double.infinity, 48),
-            backgroundColor: AppTheme.primaryColor,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Column(
+            children: [
+              for (var i = 0; i < widget.settings.paymentMethods.length; i++)
+                _field(_numbers[i], widget.settings.paymentMethods[i].label,
+                    last: i == widget.settings.paymentMethods.length - 1,
+                    keyboard: TextInputType.phone),
+            ],
           ),
-          onPressed: widget.saving ? null : _save,
-          child: widget.saving
-              ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-              : const Text('حفظ', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+        ),
+        const SizedBox(height: AdminSpace.xxl),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 50),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AdminRadius.button)),
+            ),
+            onPressed: widget.saving ? null : _save,
+            icon: widget.saving
+                ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                : const Icon(Icons.save_outlined, size: 20),
+            label: Text(widget.saving ? 'جاري الحفظ...' : 'حفظ الإعدادات'),
+          ),
         ),
       ],
     );
   }
 
-  Widget _card(BuildContext context, {required String title, required IconData icon, required List<Widget> children}) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 8, offset: const Offset(0, 2))],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(color: AppTheme.primarySoft, borderRadius: BorderRadius.circular(10)),
-                child: Icon(icon, color: AppTheme.primaryColor, size: 20),
-              ),
-              const SizedBox(width: 10),
-              Text(title, style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
-            ],
-          ),
-          const SizedBox(height: 12),
-          ...children,
-        ],
-      ),
-    );
-  }
-
-  Widget _field(TextEditingController controller, String suffixHint, InputDecoration deco) {
+  Widget _field(TextEditingController controller, String label,
+      {bool last = false, TextInputType keyboard = TextInputType.number}) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: EdgeInsets.only(bottom: last ? 0 : AdminSpace.sm),
       child: TextFormField(
         controller: controller,
-        keyboardType: TextInputType.number,
-        decoration: deco.copyWith(suffixText: suffixHint, hintText: suffixHint),
+        keyboardType: keyboard,
+        decoration: InputDecoration(labelText: label),
       ),
     );
   }

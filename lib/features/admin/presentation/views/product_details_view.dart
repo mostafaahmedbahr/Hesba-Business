@@ -1,5 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
+import 'package:hesba/core/theme/app_theme.dart';
 
 class ProductDetailsView extends StatelessWidget {
   const ProductDetailsView({super.key, required this.data, required this.id});
@@ -7,70 +8,96 @@ class ProductDetailsView extends StatelessWidget {
   final Map<String, dynamic> data;
   final String id;
 
-  String _date(dynamic v) {
-    if (v == null) return '-';
-    if (v is Timestamp) return v.toDate().toString().substring(0, 16);
-    return v.toString();
-  }
-
   @override
   Widget build(BuildContext context) {
-    final imageUrl = data['imageUrl'] as String? ?? '';
+    final name = (data['name'] as String?) ?? 'تفاصيل المنتج';
+    final imageUrl = (data['imageUrl'] as String?) ?? '';
     return Scaffold(
-      appBar: AppBar(title: Text(data['name'] as String? ?? 'تفاصيل المنتج')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          if (imageUrl.isNotEmpty)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Image.network(imageUrl, height: 200, fit: BoxFit.cover),
-            )
-          else
-            Container(
-              height: 140,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(color: const Color(0xFFEBEEFF), borderRadius: BorderRadius.circular(16)),
-              child: const Icon(Icons.inventory_2_outlined, size: 56, color: Color(0xFF1A4FD6)),
-            ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
-              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 8, offset: const Offset(0, 2))],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(data['name'] as String? ?? '-', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
-                const SizedBox(height: 12),
-                _row('المحل (ID)', data['shopId']),
-                _row('التصنيف', data['category']),
-                _row('السعر', '${data['price'] ?? 0} ج'),
-                _row('الكمية', '${data['stock'] ?? 0}'),
-                _row('تاريخ الإضافة', _date(data['createdAt'])),
-                _row('آخر تحديث', _date(data['updatedAt'])),
-              ],
-            ),
+      appBar: AppBar(
+        title: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis),
+        actions: [
+          IconButton(
+            tooltip: 'نسخ معرف المنتج',
+            icon: const Icon(Icons.copy_outlined, size: 20),
+            onPressed: () => CopyableId.copy(context, id),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _row(String label, dynamic value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
+      body: ListView(
+        padding: const EdgeInsets.all(AdminSpace.lg),
         children: [
-          SizedBox(
-            width: 120,
-            child: Text('$label: ', style: const TextStyle(fontWeight: FontWeight.bold)),
+          Container(
+            padding: const EdgeInsets.all(AdminSpace.lg),
+            decoration: BoxDecoration(
+              gradient: AppTheme.primaryGradient,
+              borderRadius: BorderRadius.circular(AdminRadius.header),
+              boxShadow: AppTheme.cardShadow(context),
+            ),
+            child: Row(
+              children: [
+                AdminThumbnail(url: imageUrl, size: 76, icon: Icons.inventory_2_outlined, radius: 16),
+                const SizedBox(width: AdminSpace.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 17)),
+                      const SizedBox(height: 4),
+                      Text((data['category'] as String?) ?? '-',
+                          style: const TextStyle(color: Colors.white70, fontSize: 12.5)),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(AdminRadius.badge)),
+                        child: Text(AdminFmt.money((data['price'] as num?) ?? 0),
+                            style: const TextStyle(
+                                color: AppTheme.primaryColor, fontWeight: FontWeight.w900, fontSize: 13)),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-          Expanded(child: Text(value?.toString() ?? '-')),
+          const SizedBox(height: AdminSpace.md),
+          AdminSection(
+            title: 'المعرفات',
+            icon: Icons.badge_outlined,
+            child: Column(
+              children: [
+                CopyableId(id: id, full: true, label: 'معرف المنتج'),
+                const Divider(height: 20),
+                if (((data['shopId'] as String?) ?? '').isNotEmpty)
+                  CopyableId(id: data['shopId'] as String, full: true, label: 'معرف المحل')
+                else
+                  const AdminInfoRow(icon: Icons.storefront_outlined, label: 'معرف المحل', value: '-'),
+              ],
+            ),
+          ),
+          const SizedBox(height: AdminSpace.md),
+          AdminSection(
+            title: 'بيانات المنتج',
+            icon: Icons.inventory_2_outlined,
+            child: Column(
+              children: [
+                AdminInfoRow(icon: Icons.category_outlined, label: 'التصنيف', value: (data['category'] as String?) ?? '-'),
+                const Divider(height: 14),
+                AdminInfoRow(
+                    icon: Icons.payments_outlined, label: 'السعر', value: AdminFmt.money((data['price'] as num?) ?? 0)),
+                const Divider(height: 14),
+                AdminInfoRow(
+                    icon: Icons.inventory_outlined, label: 'الكمية بالمخزون', value: '${data['stock'] ?? 0}'),
+                const Divider(height: 14),
+                AdminInfoRow(
+                    icon: Icons.calendar_month_outlined, label: 'تاريخ الإضافة', value: AdminFmt.date(data['createdAt'])),
+                const Divider(height: 14),
+                AdminInfoRow(icon: Icons.update_outlined, label: 'آخر تحديث', value: AdminFmt.date(data['updatedAt'])),
+              ],
+            ),
+          ),
         ],
       ),
     );
