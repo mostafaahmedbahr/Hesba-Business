@@ -72,10 +72,18 @@ enum SubscriptionPaymentMethod {
         SubscriptionPaymentMethod.etisalatCash => 'payEtisalatCash',
       };
 
-  IconData get icon => switch (this) {
-        SubscriptionPaymentMethod.instapay => Icons.account_balance_outlined,
-        SubscriptionPaymentMethod.vodafoneCash => Icons.phone_iphone_outlined,
-        SubscriptionPaymentMethod.etisalatCash => Icons.sim_card_outlined,
+  /// Short mark drawn inside the channel badge instead of a stock icon.
+  String get brandMark => switch (this) {
+        SubscriptionPaymentMethod.instapay => 'IP',
+        SubscriptionPaymentMethod.vodafoneCash => 'V',
+        SubscriptionPaymentMethod.etisalatCash => 'e',
+      };
+
+  /// Brand colour behind [brandMark], so the channel reads at a glance.
+  Color get brandColor => switch (this) {
+        SubscriptionPaymentMethod.instapay => const Color(0xFF1B3C87),
+        SubscriptionPaymentMethod.vodafoneCash => const Color(0xFFE60000),
+        SubscriptionPaymentMethod.etisalatCash => const Color(0xFF00A651),
       };
 
   static SubscriptionPaymentMethod? fromId(String? id) {

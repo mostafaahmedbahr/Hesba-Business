@@ -88,7 +88,7 @@ class SubscriptionPlanCard extends StatelessWidget {
                         Text(
                           '${plan.price}',
                           style: TextStyle(
-                            fontSize: 20.sp,
+                            fontSize: 21.sp,
                             fontWeight: FontWeight.w900,
                             color: AppTheme.primaryColor,
                           ),
@@ -112,6 +112,7 @@ class SubscriptionPlanCard extends StatelessWidget {
                             '${plan.normalPrice}',
                             style: TextStyle(
                               fontSize: 11.5.sp,
+                              fontWeight: FontWeight.w700,
                               decoration: TextDecoration.lineThrough,
                               color: theme.hintColor,
                             ),
@@ -119,21 +120,20 @@ class SubscriptionPlanCard extends StatelessWidget {
                           SizedBox(width: 5.w),
                           Container(
                             padding: EdgeInsets.symmetric(
-                              horizontal: 6.w,
-                              vertical: 2.h,
+                              horizontal: 7.w,
+                              vertical: 3.h,
                             ),
                             decoration: BoxDecoration(
-                              color: AppTheme.successColor
-                                  .withValues(alpha: 0.15),
+                              color: AppTheme.successColor,
                               borderRadius: BorderRadius.circular(6.r),
                             ),
                             child: Text(
                               'planSaveAmount'
                                   .tr(args: ['${plan.savedAmount}']),
                               style: TextStyle(
-                                fontSize: 10.5.sp,
-                                fontWeight: FontWeight.w800,
-                                color: AppTheme.successColor,
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
                               ),
                             ),
                           ),

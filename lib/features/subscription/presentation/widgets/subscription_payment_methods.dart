@@ -63,6 +63,7 @@ class _MethodTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final bodyColor = theme.textTheme.bodyMedium?.color ?? Colors.black87;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(14.r),
@@ -82,20 +83,24 @@ class _MethodTile extends StatelessWidget {
           ),
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              padding: EdgeInsets.all(8.w),
+              width: 42.w,
+              height: 42.w,
+              alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: (selected
-                        ? AppTheme.primaryColor
-                        : theme.hintColor)
-                    .withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(10.r),
+                color: method.brandColor,
+                borderRadius: BorderRadius.circular(12.r),
               ),
-              child: Icon(
-                method.icon,
-                size: 18.sp,
-                color: selected ? AppTheme.primaryColor : theme.hintColor,
+              child: Text(
+                method.brandMark,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.5,
+                ),
               ),
             ),
             SizedBox(width: 10.w),
@@ -110,32 +115,64 @@ class _MethodTile extends StatelessWidget {
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  SizedBox(height: 2.h),
-                  Text(
-                    method.number,
-                    style: TextStyle(
-                      fontSize: 13.sp,
-                      letterSpacing: 0.6,
-                      fontWeight: FontWeight.w700,
-                      color: theme.hintColor,
+                  SizedBox(height: 6.h),
+                  InkWell(
+                    onTap: () => _copyNumber(context),
+                    borderRadius: BorderRadius.circular(9.r),
+                    child: Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10.w,
+                        vertical: 7.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: selected
+                            ? Colors.white
+                            : bodyColor.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(9.r),
+                        border: Border.all(
+                          color: selected
+                              ? AppTheme.primaryColor.withValues(alpha: 0.35)
+                              : theme.colorScheme.outlineVariant
+                                  .withValues(alpha: 0.6),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              method.number,
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                letterSpacing: 1.2,
+                                fontWeight: FontWeight.w900,
+                                color: AppTheme.primaryColor,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 6.w),
+                          Icon(
+                            Icons.copy_rounded,
+                            size: 16.sp,
+                            color: theme.hintColor,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-            IconButton(
-              tooltip: 'paymentCopy'.tr(),
-              onPressed: () async {
-                await Clipboard.setData(ClipboardData(text: method.number));
-                if (context.mounted) {
-                  AppToast.success(context, 'paymentCopied'.tr());
-                }
-              },
-              icon: Icon(Icons.copy_rounded, size: 18.sp),
-            ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _copyNumber(BuildContext context) async {
+    await Clipboard.setData(ClipboardData(text: method.number));
+    if (context.mounted) {
+      AppToast.success(context, 'paymentCopied'.tr());
+    }
   }
 }
