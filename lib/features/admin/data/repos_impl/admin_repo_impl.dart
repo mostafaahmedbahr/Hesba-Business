@@ -164,26 +164,51 @@ class AdminRepoImpl implements AdminRepo {
   Future<QuerySnapshot<Map<String, dynamic>>> getSubscriptionsPage({
     DocumentSnapshot? startAfter,
     String? status,
-  }) {
-    var query = firestore.collection(_subscriptions).orderBy('updatedAt', descending: true);
-    if (status != null && status.isNotEmpty && status != 'all') {
-      query = query.where('status', isEqualTo: status);
+  }) async {
+    final hasFilter = status != null && status.isNotEmpty && status != 'all';
+    // where('status') + orderBy('updatedAt') يحتاج composite index يدوي.
+    // عشان اللوحة تشتغل من غير إنشاء index: مع الفلترة بنعمل where فقط
+    // والترتيب بيتعمل في الذاكرة داخل الـ View.
+    try {
+      Query<Map<String, dynamic>> query = firestore.collection(_subscriptions);
+      if (hasFilter) {
+        query = query.where('status', isEqualTo: status);
+      } else {
+        query = query.orderBy('updatedAt', descending: true);
+      }
+      if (startAfter != null) query = query.startAfterDocument(startAfter);
+      return await query.limit(_page).get();
+    } on FirebaseException catch (e) {
+      if (e.code != 'failed-precondition') rethrow;
+      // Fallback أخير: where فقط بدون أي ترتيب سيرفر.
+      Query<Map<String, dynamic>> fallback = firestore.collection(_subscriptions);
+      if (hasFilter) fallback = fallback.where('status', isEqualTo: status);
+      return fallback.limit(_page).get();
     }
-    if (startAfter != null) query = query.startAfterDocument(startAfter);
-    return query.limit(_page).get();
   }
 
   @override
   Future<QuerySnapshot<Map<String, dynamic>>> getRequestsPage({
     DocumentSnapshot? startAfter,
     String? status,
-  }) {
-    var query = firestore.collection(_requests).orderBy('createdAt', descending: true);
-    if (status != null && status.isNotEmpty && status != 'all') {
-      query = query.where('status', isEqualTo: status);
+  }) async {
+    final hasFilter = status != null && status.isNotEmpty && status != 'all';
+    // نفس السبب: where('status') + orderBy('createdAt') يحتاج composite index.
+    try {
+      Query<Map<String, dynamic>> query = firestore.collection(_requests);
+      if (hasFilter) {
+        query = query.where('status', isEqualTo: status);
+      } else {
+        query = query.orderBy('createdAt', descending: true);
+      }
+      if (startAfter != null) query = query.startAfterDocument(startAfter);
+      return await query.limit(_page).get();
+    } on FirebaseException catch (e) {
+      if (e.code != 'failed-precondition') rethrow;
+      Query<Map<String, dynamic>> fallback = firestore.collection(_requests);
+      if (hasFilter) fallback = fallback.where('status', isEqualTo: status);
+      return fallback.limit(_page).get();
     }
-    if (startAfter != null) query = query.startAfterDocument(startAfter);
-    return query.limit(_page).get();
   }
 
   @override

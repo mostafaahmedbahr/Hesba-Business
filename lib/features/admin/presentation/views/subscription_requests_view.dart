@@ -1,4 +1,5 @@
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hesba/core/di/service_locator.dart';
@@ -33,12 +34,15 @@ class _RequestsBody extends StatelessWidget {
         if (state.loading && state.docs.isEmpty) return adminSkeletonList(context);
         if (state.error != null && state.docs.isEmpty) return adminError(state.error!, () => context.read<AdminListCubit>().firstPage());
         if (state.docs.isEmpty) return adminEmpty(Icons.receipt_long, 'لا توجد طلبات معلقة');
+        // ترتيب في الذاكرة حسب createdAt (الأحدث أولاً) لأن الاستعلام
+        // المفلتر لا يستخدم orderBy في السيرفر (تجنباً لطلب composite index).
+        final ordered = [...state.docs]..sort((a, b) => _tsCmp(b.data()['createdAt'], a.data()['createdAt']));
         return ListView.separated(
-          itemCount: state.docs.length,
+          itemCount: ordered.length,
           separatorBuilder: (_, _) => const Divider(height: 1),
           itemBuilder: (context, i) {
-            final d = state.docs[i].data();
-            final request = SubscriptionRequestModel.fromJson(state.docs[i].id, d);
+            final d = ordered[i].data();
+            final request = SubscriptionRequestModel.fromJson(ordered[i].id, d);
             return ListTile(
               title: Text(request.shopName),
               subtitle: Text('${request.ownerName} • ${request.phone} • ${request.plan.id} • ${request.amount}ج'),
@@ -58,6 +62,22 @@ class _RequestsBody extends StatelessWidget {
     );
     if (context.mounted) context.read<AdminListCubit>().firstPage();
   }
+}
+
+int _tsCmp(dynamic a, dynamic b) {
+  DateTime? toDate(dynamic v) {
+    if (v is Timestamp) return v.toDate();
+    if (v is DateTime) return v;
+    if (v is String) return DateTime.tryParse(v);
+    return null;
+  }
+
+  final da = toDate(a);
+  final db = toDate(b);
+  if (da == null && db == null) return 0;
+  if (da == null) return 1;
+  if (db == null) return -1;
+  return da.compareTo(db);
 }
 
 class _RequestDialog extends StatefulWidget {

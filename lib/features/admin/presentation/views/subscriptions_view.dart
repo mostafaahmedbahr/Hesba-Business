@@ -68,7 +68,7 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
             );
           }
 
-          final filtered = _applySearch(state.docs);
+          final filtered = _applySearch(_ordered(state.docs));
 
           return RefreshIndicator(
             onRefresh: () => context.read<AdminListCubit>().firstPage(),
@@ -160,6 +160,25 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
         },
       ),
     );
+  }
+
+  List<QueryDocumentSnapshot<Map<String, dynamic>>> _ordered(
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> docs,
+  ) {
+    // الترتيب حسب updatedAt (الأحدث أولاً) في الذاكرة، لأن الاستعلام
+    // المفلتر لا يستخدم orderBy في السيرفر (تجنباً لطلب composite index).
+    final list = [...docs];
+    list.sort((a, b) => _tsCmp(b.data()['updatedAt'], a.data()['updatedAt']));
+    return list;
+  }
+
+  static int _tsCmp(dynamic a, dynamic b) {
+    final da = _toDate(a);
+    final db = _toDate(b);
+    if (da == null && db == null) return 0;
+    if (da == null) return 1;
+    if (db == null) return -1;
+    return da.compareTo(db);
   }
 
   List<QueryDocumentSnapshot<Map<String, dynamic>>> _applySearch(
