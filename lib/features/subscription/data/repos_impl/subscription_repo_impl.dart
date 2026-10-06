@@ -77,6 +77,7 @@ class SubscriptionRepoImpl implements SubscriptionRepo {
   }) async {
     final trial = SubscriptionModel.trialFor(createdAt: createdAt);
     await _subscriptionRef(userId).set(trial.toJson());
+    await _mirrorSubscription(userId, trial);
     if (userId == _auth.currentUser?.uid) {
       _cache = trial;
       _cachedAt = DateTime.now();
@@ -124,6 +125,12 @@ class SubscriptionRepoImpl implements SubscriptionRepo {
       'updatedAt': Timestamp.fromDate(now),
     });
     await batch.commit();
+    await _mirrorSubscription(uid, subscription.copyWith(
+      status: SubscriptionStatus.pending,
+      lastRequestId: requestRef.id,
+      updatedAt: now,
+      cachedAt: now,
+    ));
 
     _cache = subscription.copyWith(
       status: SubscriptionStatus.pending,
@@ -154,6 +161,7 @@ class SubscriptionRepoImpl implements SubscriptionRepo {
     // A brand new or pre-subscription account: hand out the free week.
     final trial = SubscriptionModel.trialFor(createdAt: DateTime.now());
     await _subscriptionRef(uid).set(trial.toJson());
+    await _mirrorSubscription(uid, trial);
     logSuccess('[Subscription] trial created on first read for $uid');
     return trial;
   }
@@ -184,6 +192,7 @@ class SubscriptionRepoImpl implements SubscriptionRepo {
           );
 
     await _subscriptionRef(uid).set(next.toJson(), SetOptions(merge: true));
+    await _mirrorSubscription(uid, next);
     _cache = next.copyWith(cachedAt: now);
     _cachedAt = now;
     logSuccess('[Subscription] request $requestId -> ${request.status}');
@@ -236,6 +245,7 @@ class SubscriptionRepoImpl implements SubscriptionRepo {
     );
     try {
       await _subscriptionRef(uid).set(expired.toJson(), SetOptions(merge: true));
+      await _mirrorSubscription(uid, expired);
       logSuccess('[Subscription] $stored rolled over to expired');
     } catch (error) {
       // The read still answers correctly, only the stored flag lags behind.
@@ -257,6 +267,25 @@ class SubscriptionRepoImpl implements SubscriptionRepo {
       // The request must still go through with whatever we know.
       logWarning('[Subscription] profile lookup failed: $error');
       return const _ProfileFields(ownerName: '', shopName: '', phone: '');
+    }
+  }
+
+  /// Denormalised copy at `subscriptions/{userId}` so the admin dashboard can
+  /// list/filter by status without reading every user's subcollection.
+  Future<void> _mirrorSubscription(String uid, SubscriptionModel model) async {
+    try {
+      await _firestore.collection('subscriptions').doc(uid).set({
+        'userId': uid,
+        'status': model.status.id,
+        'plan': model.plan?.id,
+        'isTrial': model.isTrial,
+        'startDate':
+            model.startDate == null ? null : Timestamp.fromDate(model.startDate!),
+        'endDate': model.endDate == null ? null : Timestamp.fromDate(model.endDate!),
+        'updatedAt': Timestamp.fromDate(model.updatedAt ?? DateTime.now()),
+      }, SetOptions(merge: true));
+    } catch (error) {
+      logWarning('[Subscription] mirror write failed: $error');
     }
   }
 

@@ -1,0 +1,145 @@
+
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hesba/core/di/service_locator.dart';
+import 'package:hesba/core/utils/toast.dart';
+import 'package:hesba/features/admin/data/repos/admin_repo.dart';
+import 'package:hesba/features/admin/presentation/cubit/admin_list_cubit.dart';
+import 'package:hesba/features/admin/presentation/cubit/request_review_cubit.dart';
+import 'package:hesba/features/subscription/data/models/subscription_request_model.dart';
+
+class SubscriptionRequestsView extends StatelessWidget {
+  const SubscriptionRequestsView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => AdminListCubit(
+        fetch: (startAfter) => sl<AdminRepo>().getRequestsPage(startAfter: startAfter, status: 'pending'),
+      )..firstPage(),
+      child: const _RequestsBody(),
+    );
+  }
+}
+
+class _RequestsBody extends StatelessWidget {
+  const _RequestsBody();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<AdminListCubit, AdminListState>(
+      builder: (context, state) {
+        if (state.loading && state.docs.isEmpty) return const Center(child: CircularProgressIndicator());
+        if (state.error != null && state.docs.isEmpty) return Center(child: Text(state.error!, style: const TextStyle(color: Colors.red)));
+        if (state.docs.isEmpty) return const Center(child: Text('لا توجد طلبات معلقة'));
+        return ListView.separated(
+          itemCount: state.docs.length,
+          separatorBuilder: (_, _) => const Divider(height: 1),
+          itemBuilder: (context, i) {
+            final d = state.docs[i].data();
+            final request = SubscriptionRequestModel.fromJson(state.docs[i].id, d);
+            return ListTile(
+              title: Text(request.shopName),
+              subtitle: Text('${request.ownerName} • ${request.phone} • ${request.plan.id} • ${request.amount}ج'),
+              trailing: const Icon(Icons.chevron_left),
+              onTap: () => _openDetails(context, request),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _openDetails(BuildContext context, SubscriptionRequestModel request) async {
+    await showDialog(
+      context: context,
+      builder: (context) => _RequestDialog(request: request),
+    );
+    if (context.mounted) context.read<AdminListCubit>().firstPage();
+  }
+}
+
+class _RequestDialog extends StatefulWidget {
+  const _RequestDialog({required this.request});
+  final SubscriptionRequestModel request;
+
+  @override
+  State<_RequestDialog> createState() => _RequestDialogState();
+}
+
+class _RequestDialogState extends State<_RequestDialog> {
+  final _reason = TextEditingController();
+
+  @override
+  void dispose() {
+    _reason.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final r = widget.request;
+    return BlocProvider(
+      create: (_) => RequestReviewCubit(repo: sl<AdminRepo>()),
+      child: Dialog(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: BlocConsumer<RequestReviewCubit, RequestReviewState>(
+              listener: (context, state) {
+                if (state is ReviewDone) {
+                  AppToast.success(context, state.approved ? 'تمت الموافقة' : 'تم الرفض');
+                  Navigator.of(context).pop();
+                } else if (state is ReviewError) {
+                  AppToast.error(context, state.message);
+                }
+              },
+              builder: (context, state) {
+                final loading = state is ReviewLoading;
+                return SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('تفاصيل الطلب', style: Theme.of(context).textTheme.titleLarge),
+                      const SizedBox(height: 12),
+                      Text('${r.shopName} - ${r.ownerName}'),
+                      Text('الهاتف: ${r.phone}'),
+                      Text('الباقة: ${r.plan.id} • المبلغ: ${r.amount} ج'),
+                      Text('طريقة الدفع: ${r.paymentMethod}'),
+                      const SizedBox(height: 12),
+                      if (r.paymentProofUrl.isNotEmpty) ...[
+                        const Text('إيصال الدفع:', style: TextStyle(fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 8),
+                        Image.network(r.paymentProofUrl, height: 260, fit: BoxFit.contain),
+                        const SizedBox(height: 12),
+                      ],
+                      TextField(controller: _reason, decoration: const InputDecoration(labelText: 'سبب الرفض (اختياري)')),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          ElevatedButton(
+                            onPressed: loading ? null : () => context.read<RequestReviewCubit>().approve(r),
+                            child: const Text('موافقة'),
+                          ),
+                          const SizedBox(width: 12),
+                          OutlinedButton(
+                            onPressed: loading ? null : () => context.read<RequestReviewCubit>().reject(r, _reason.text.trim()),
+                            child: const Text('رفض'),
+                          ),
+                          const Spacer(),
+                          TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('إغلاق')),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
