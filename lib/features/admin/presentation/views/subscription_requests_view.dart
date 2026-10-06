@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hesba/core/di/service_locator.dart';
+import 'package:hesba/features/admin/presentation/views/admin_ui.dart';
 import 'package:hesba/core/utils/toast.dart';
 import 'package:hesba/features/admin/data/repos/admin_repo.dart';
 import 'package:hesba/features/admin/presentation/cubit/admin_list_cubit.dart';
@@ -29,9 +30,9 @@ class _RequestsBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<AdminListCubit, AdminListState>(
       builder: (context, state) {
-        if (state.loading && state.docs.isEmpty) return const Center(child: CircularProgressIndicator());
-        if (state.error != null && state.docs.isEmpty) return Center(child: Text(state.error!, style: const TextStyle(color: Colors.red)));
-        if (state.docs.isEmpty) return const Center(child: Text('لا توجد طلبات معلقة'));
+        if (state.loading && state.docs.isEmpty) return adminSkeletonList(context);
+        if (state.error != null && state.docs.isEmpty) return adminError(state.error!, () => context.read<AdminListCubit>().firstPage());
+        if (state.docs.isEmpty) return adminEmpty(Icons.receipt_long, 'لا توجد طلبات معلقة');
         return ListView.separated(
           itemCount: state.docs.length,
           separatorBuilder: (_, _) => const Divider(height: 1),
@@ -112,7 +113,21 @@ class _RequestDialogState extends State<_RequestDialog> {
                       if (r.paymentProofUrl.isNotEmpty) ...[
                         const Text('إيصال الدفع:', style: TextStyle(fontWeight: FontWeight.bold)),
                         const SizedBox(height: 8),
-                        Image.network(r.paymentProofUrl, height: 260, fit: BoxFit.contain),
+                        InkWell(
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => Scaffold(
+                                appBar: AppBar(title: const Text('إيصال الدفع')),
+                                body: InteractiveViewer(
+                                  minScale: 0.5,
+                                  maxScale: 4,
+                                  child: Center(child: Image.network(r.paymentProofUrl)),
+                                ),
+                              ),
+                            ),
+                          ),
+                          child: Image.network(r.paymentProofUrl, height: 260, fit: BoxFit.contain),
+                        ),
                         const SizedBox(height: 12),
                       ],
                       TextField(controller: _reason, decoration: const InputDecoration(labelText: 'سبب الرفض (اختياري)')),

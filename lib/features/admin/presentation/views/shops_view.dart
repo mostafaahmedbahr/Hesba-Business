@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hesba/core/di/service_locator.dart';
+import 'package:hesba/features/admin/presentation/views/admin_ui.dart';
 import 'package:hesba/core/theme/app_theme.dart';
 import 'package:hesba/features/admin/data/repos/admin_repo.dart';
 import 'package:hesba/features/admin/presentation/cubit/admin_list_cubit.dart';
@@ -33,7 +34,7 @@ class _ShopsBody extends StatelessWidget {
         if (state.error != null && state.docs.isEmpty) {
           return Center(child: Text(state.error!, style: const TextStyle(color: Colors.red)));
         }
-        if (state.docs.isEmpty) return const Center(child: Text('لا توجد محلات'));
+        if (state.docs.isEmpty) return adminEmpty(Icons.storefront, 'لا توجد محلات');
         return Column(
           children: [
             Expanded(

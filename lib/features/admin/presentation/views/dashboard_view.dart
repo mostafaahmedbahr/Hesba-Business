@@ -1,3 +1,4 @@
+import 'package:hesba/features/admin/presentation/views/admin_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -12,7 +13,7 @@ class DashboardView extends StatelessWidget {
     return BlocBuilder<AdminDashboardCubit, AdminDashboardState>(
       builder: (context, state) {
         if (state is AdminDashboardLoading || state is AdminDashboardEmpty) {
-          return const Center(child: CircularProgressIndicator());
+          return adminSkeletonList(context);
         }
         if (state is AdminDashboardError) {
           return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));

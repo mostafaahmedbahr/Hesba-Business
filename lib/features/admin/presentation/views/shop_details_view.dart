@@ -22,49 +22,71 @@ class ShopDetailsView extends StatelessWidget {
           return const Scaffold(body: Center(child: Text('المحل غير موجود')));
         }
         final shopName = shop['shopName'] as String? ?? 'تفاصيل المحل';
-        return Scaffold(
-          appBar: AppBar(title: Text(shopName)),
-          body: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              _Section(
-                title: 'بيانات المحل',
-                children: [
-                  _Row('المالك', shop['ownerName']),
-                  _Row('الهاتف', shop['phone'] ?? shop['shopPhone']),
-                  _Row('النوع', shop['businessType']),
-                  _Row('المدينة', shop['city']),
-                  _Row('العنوان', shop['address']),
-                ],
+        return DefaultTabController(
+          length: 3,
+          child: Scaffold(
+            appBar: AppBar(
+              title: Text(shopName),
+              bottom: const TabBar(
+                tabs: [Tab(text: 'بيانات'), Tab(text: 'الاشتراك'), Tab(text: 'الإحصائيات')],
               ),
-              FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-                future: sl<AdminRepo>().getUserSubscription(ownerId),
-                builder: (context, subSnap) {
-                  final sub = subSnap.data?.data();
-                  return _Section(
-                    title: 'الاشتراك',
-                    children: [
-                      _Row('الحالة', sub?['status']),
-                      _Row('الباقة', sub?['plan']),
-                      _Row('تاريخ البدء', _date(sub?['startDate'])),
-                      _Row('تاريخ الانتهاء', _date(sub?['endDate'])),
-                    ],
-                  );
-                },
-              ),
-              _CountSection(
-                title: 'المنتجات',
-                query: FirebaseFirestore.instance.collection('products').where('shopId', isEqualTo: shopId),
-              ),
-              _CountSection(
-                title: 'المبيعات',
-                query: FirebaseFirestore.instance.collection('sales').where('shopId', isEqualTo: shopId),
-              ),
-              _CountSection(
-                title: 'المصروفات',
-                query: FirebaseFirestore.instance.collection('expenses').where('shopId', isEqualTo: shopId),
-              ),
-            ],
+            ),
+            body: TabBarView(
+              children: [
+                ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    _Section(
+                      title: 'بيانات المحل',
+                      children: [
+                        _Row('المالك', shop['ownerName']),
+                        _Row('الهاتف', shop['phone'] ?? shop['shopPhone']),
+                        _Row('النوع', shop['businessType']),
+                        _Row('المدينة', shop['city']),
+                        _Row('العنوان', shop['address']),
+                      ],
+                    ),
+                  ],
+                ),
+                ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                      future: sl<AdminRepo>().getUserSubscription(ownerId),
+                      builder: (context, subSnap) {
+                        final sub = subSnap.data?.data();
+                        return _Section(
+                          title: 'الاشتراك',
+                          children: [
+                            _Row('الحالة', sub?['status']),
+                            _Row('الباقة', sub?['plan']),
+                            _Row('تاريخ البدء', _date(sub?['startDate'])),
+                            _Row('تاريخ الانتهاء', _date(sub?['endDate'])),
+                          ],
+                        );
+                      },
+                    ),
+                  ],
+                ),
+                ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    _CountSection(
+                      title: 'المنتجات',
+                      query: FirebaseFirestore.instance.collection('products').where('shopId', isEqualTo: shopId),
+                    ),
+                    _CountSection(
+                      title: 'المبيعات',
+                      query: FirebaseFirestore.instance.collection('sales').where('shopId', isEqualTo: shopId),
+                    ),
+                    _CountSection(
+                      title: 'المصروفات',
+                      query: FirebaseFirestore.instance.collection('expenses').where('shopId', isEqualTo: shopId),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
