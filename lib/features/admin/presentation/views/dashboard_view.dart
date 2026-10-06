@@ -33,20 +33,23 @@ class DashboardView extends StatelessWidget {
         return ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: [for (final c in cards) SizedBox(width: 170, child: _StatCard(stat: c))],
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final wide = constraints.maxWidth >= 900;
+                final cols = wide ? 3 : 2;
+                final spacing = 12.0;
+                final width = (constraints.maxWidth - spacing * (cols - 1)) / cols;
+                return Wrap(
+                  spacing: spacing,
+                  runSpacing: spacing,
+                  children: [
+                    for (final c in cards) SizedBox(width: width, child: _StatCard(stat: c)),
+                  ],
+                );
+              },
             ),
             const SizedBox(height: 24),
-            Text('الاشتراكات خلال 12 شهر', style: Theme.of(context).textTheme.titleMedium),
-            SizedBox(height: 220, child: _BarCard(data: s.subscriptionsByMonth)),
-            const SizedBox(height: 24),
-            Text('المحلات الجديدة شهريًا', style: Theme.of(context).textTheme.titleMedium),
-            SizedBox(height: 220, child: _BarCard(data: s.shopsByMonth)),
-            const SizedBox(height: 24),
-            Text('إيرادات الاشتراكات', style: Theme.of(context).textTheme.titleMedium),
-            SizedBox(height: 220, child: _BarCard(data: s.revenueByMonth)),
+            _ChartsGrid(s: s),
           ],
         );
       },
@@ -69,16 +72,29 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Colors.black.withValues(alpha: 0.06)),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(stat.icon, color: stat.color ?? AppTheme.primaryColor),
-            const SizedBox(height: 8),
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: (stat.color ?? AppTheme.primaryColor).withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(stat.icon, color: stat.color ?? AppTheme.primaryColor, size: 22),
+            ),
+            const SizedBox(height: 12),
             Text('${stat.value}', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 4),
-            Text(stat.label, style: Theme.of(context).textTheme.bodySmall),
+            Text(stat.label, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.black54)),
           ],
         ),
       ),
@@ -86,41 +102,123 @@ class _StatCard extends StatelessWidget {
   }
 }
 
+class _ChartsGrid extends StatelessWidget {
+  const _ChartsGrid({required this.s});
+  final AdminDashboardLoaded s;
+
+  @override
+  Widget build(BuildContext context) {
+    final charts = [
+      (title: 'الاشتراكات خلال 12 شهر', data: s.subscriptionsByMonth, color: AppTheme.primaryColor),
+      (title: 'المحلات الجديدة شهريًا', data: s.shopsByMonth, color: AppTheme.secondaryColor),
+      (title: 'إيرادات الاشتراكات', data: s.revenueByMonth, color: AppTheme.successColor),
+    ];
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final wide = constraints.maxWidth >= 880;
+        final cols = wide ? 2 : 1;
+        final spacing = 12.0;
+        final width = (constraints.maxWidth - spacing * (cols - 1)) / cols;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Wrap(
+              spacing: spacing,
+              runSpacing: spacing,
+              children: [
+                for (final c in charts)
+                  SizedBox(
+                    width: cols == 1 ? double.infinity : width,
+                    height: 250,
+                    child: _BarCard(title: c.title, data: c.data, color: c.color),
+                  ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
 class _BarCard extends StatelessWidget {
-  const _BarCard({required this.data});
+  const _BarCard({required this.title, required this.data, required this.color});
+  final String title;
   final Map<String, int> data;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
     final keys = data.keys.toList()..sort();
     final last = keys.take(12).toList();
     return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Colors.black.withValues(alpha: 0.06)),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: last.isEmpty
-            ? const Center(child: Text('لا توجد بيانات'))
-            : BarChart(
-                BarChartData(
-                  barGroups: [
-                    for (var i = 0; i < last.length; i++)
-                      BarChartGroupData(x: i, barRods: [BarChartRodData(toY: (data[last[i]] ?? 0).toDouble(), color: AppTheme.primaryColor)]),
-                  ],
-                  titlesData: FlTitlesData(
-                    leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 30)),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 20,
-                        getTitlesWidget: (value, _) {
-                          final idx = value.toInt();
-                          return Text(idx % 2 == 0 && idx < last.length ? last[idx].substring(5) : '', style: const TextStyle(fontSize: 10));
-                        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(3)),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(title, style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: last.isEmpty
+                  ? const Center(child: Text('لا توجد بيانات'))
+                  : BarChart(
+                      BarChartData(
+                        barGroups: [
+                          for (var i = 0; i < last.length; i++)
+                            BarChartGroupData(
+                              x: i,
+                              barRods: [
+                                BarChartRodData(
+                                  toY: (data[last[i]] ?? 0).toDouble(),
+                                  color: color,
+                                  width: 14,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                              ],
+                            ),
+                        ],
+                        gridData: FlGridData(
+                          show: true,
+                          drawVerticalLine: false,
+                          getDrawingHorizontalLine: (_) => FlLine(color: Colors.black.withValues(alpha: 0.05)),
+                        ),
+                        titlesData: FlTitlesData(
+                          leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 30)),
+                          bottomTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              reservedSize: 20,
+                              getTitlesWidget: (value, _) {
+                                final idx = value.toInt();
+                                return Text(idx % 2 == 0 && idx < last.length ? last[idx].substring(5) : '', style: const TextStyle(fontSize: 10));
+                              },
+                            ),
+                          ),
+                          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                        ),
                       ),
                     ),
-                    topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  ),
-                ),
-              ),
+            ),
+          ],
+        ),
       ),
     );
   }
