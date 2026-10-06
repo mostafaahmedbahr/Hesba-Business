@@ -39,6 +39,7 @@ class ShopDetailsView extends StatelessWidget {
                     _Section(
                       title: 'بيانات المحل',
                       children: [
+                        _Row('المعرف', shopId),
                         _Row('المالك', shop['ownerName']),
                         _Row('الهاتف', shop['phone'] ?? shop['shopPhone']),
                         _Row('النوع', shop['businessType']),

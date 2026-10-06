@@ -46,6 +46,7 @@ class _ShopsBody extends StatelessWidget {
                   final data = d.data();
                   return _ShopTile(
                     data: data,
+                    id: d.id,
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) => ShopDetailsView(
@@ -74,8 +75,9 @@ class _ShopsBody extends StatelessWidget {
 }
 
 class _ShopTile extends StatelessWidget {
-  const _ShopTile({required this.data, required this.onTap});
+  const _ShopTile({required this.data, required this.id, required this.onTap});
   final Map<String, dynamic> data;
+  final String id;
   final VoidCallback onTap;
 
   @override
@@ -115,9 +117,22 @@ class _ShopTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      data['shopName'] as String? ?? '-',
-                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            data['shopName'] as String? ?? '-',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '#${id.length > 8 ? id.substring(0, 8) : id}',
+                          style: TextStyle(fontSize: 11, color: Colors.grey[400], fontWeight: FontWeight.w600),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 2),
                     Text(
