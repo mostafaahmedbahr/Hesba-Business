@@ -22,19 +22,40 @@ class ProductDetailsView extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           if (imageUrl.isNotEmpty)
-            SizedBox(
-              height: 220,
-              child: Image.network(imageUrl, fit: BoxFit.cover),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.network(imageUrl, height: 200, fit: BoxFit.cover),
             )
           else
-            const Icon(Icons.inventory_2_outlined, size: 80),
+            Container(
+              height: 140,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(color: const Color(0xFFEBEEFF), borderRadius: BorderRadius.circular(16)),
+              child: const Icon(Icons.inventory_2_outlined, size: 56, color: Color(0xFF1A4FD6)),
+            ),
           const SizedBox(height: 16),
-          _row('المحل', data['shopId']),
-          _row('التصنيف', data['category']),
-          _row('السعر', '${data['price'] ?? 0} ج'),
-          _row('الكمية', '${data['stock'] ?? 0}'),
-          _row('تاريخ الإضافة', _date(data['createdAt'])),
-          _row('آخر تحديث', _date(data['updatedAt'])),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
+              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 8, offset: const Offset(0, 2))],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(data['name'] as String? ?? '-', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
+                const SizedBox(height: 12),
+                _row('المحل (ID)', data['shopId']),
+                _row('التصنيف', data['category']),
+                _row('السعر', '${data['price'] ?? 0} ج'),
+                _row('الكمية', '${data['stock'] ?? 0}'),
+                _row('تاريخ الإضافة', _date(data['createdAt'])),
+                _row('آخر تحديث', _date(data['updatedAt'])),
+              ],
+            ),
+          ),
         ],
       ),
     );
