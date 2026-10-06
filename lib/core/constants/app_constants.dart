@@ -13,13 +13,13 @@ class AppConstants {
 
   // Cloudinary unsigned uploads. Only the returned secure URL is stored.
   // Each value can be overridden at build time without touching this file:
-  // flutter run --dart-define=CLOUDINARY_UPLOAD_PRESET=my_preset
+  // flutter run --dart-define=CLOUDINARY_CLOUD_NAME=xxx --dart-define=CLOUDINARY_UPLOAD_PRESET=yyy
   static const String cloudinaryCloudName = String.fromEnvironment(
-    'qavqsavd',
+    'CLOUDINARY_CLOUD_NAME',
     defaultValue: 'qavqsavd',
   );
   static const String cloudinaryUploadPreset = String.fromEnvironment(
-    'hesba_images',
+    'CLOUDINARY_UPLOAD_PRESET',
     defaultValue: 'hesba_images',
   );
   static const String cloudinaryShopImageFolder = 'hesba/shop-images';

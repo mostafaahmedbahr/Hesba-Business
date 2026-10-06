@@ -88,12 +88,19 @@ class AuthRepoImpl implements AuthRepo {
       isActive: true,
     );
 
-    // 4. Save owner data
+    // 4. Save owner data. Any Firestore failure below rolls the freshly
+    // created Auth account back, so we never leave an orphan login with
+    // no / incomplete profile documents.
     print('[AuthRepoImpl] saving owner data to users/${user.uid}...');
-    await firestore
-        .collection('users')
-        .doc(user.uid)
-        .set(registerModel.toJson());
+    try {
+      await firestore
+          .collection('users')
+          .doc(user.uid)
+          .set(_ownerJson(registerModel));
+    } catch (e) {
+      await _rollbackAccount(user);
+      rethrow;
+    }
     print('[AuthRepoImpl] owner data saved successfully');
 
     // 4b. Hand out the free trial. Best effort: the first read of the
@@ -107,27 +114,53 @@ class AuthRepoImpl implements AuthRepo {
       logWarning('[AuthRepoImpl] trial could not be created now: $e');
     }
 
-    // 5. Save shop data
+    // 5. Save shop data (same rollback guarantee as the owner doc).
     print('[AuthRepoImpl] saving shop data to shops/${shopRef.id}...');
-    await shopRef.set({
-      'shopId': shopRef.id,
-      'ownerId': user.uid,
-      'shopName': registerModel.shopName,
-      'businessType': registerModel.businessType,
-      'shopPhone': registerModel.shopPhone,
-      'locationUrl': registerModel.locationUrl,
-      'shopImageUrl': registerModel.shopImageUrl,
-      'address': registerModel.address,
-      'city': registerModel.city,
-      'state': registerModel.state,
-      'createdAt': Timestamp.fromDate(now),
-      'updatedAt': Timestamp.fromDate(now),
-      'isActive': true,
-    });
+    try {
+      await shopRef.set({
+        'shopId': shopRef.id,
+        'ownerId': user.uid,
+        'shopName': registerModel.shopName,
+        'businessType': registerModel.businessType,
+        'shopPhone': registerModel.shopPhone,
+        'locationUrl': registerModel.locationUrl,
+        'shopImageUrl': registerModel.shopImageUrl,
+        'address': registerModel.address,
+        'city': registerModel.city,
+        'state': registerModel.state,
+        'createdAt': Timestamp.fromDate(now),
+        'updatedAt': Timestamp.fromDate(now),
+        'isActive': true,
+      });
+    } catch (e) {
+      await _rollbackAccount(user);
+      rethrow;
+    }
     print('[AuthRepoImpl] shop data saved successfully');
 
     print('[AuthRepoImpl] register() completed successfully');
     return registerModel;
+  }
+
+  /// Owner doc payload with Firestore-native date types (Timestamp, not raw
+  /// DateTime) so sorting/filtering matches the shops collection.
+  Map<String, dynamic> _ownerJson(RegisterModel m) {
+    final json = m.toJson();
+    json['createdAt'] = Timestamp.fromDate(m.createdAt);
+    json['updatedAt'] = Timestamp.fromDate(m.updatedAt);
+    return json;
+  }
+
+  /// Best-effort rollback of a half-registered account.
+  Future<void> _rollbackAccount(User user) async {
+    try {
+      await firestore.collection('users').doc(user.uid).delete();
+    } catch (_) {}
+    try {
+      await user.delete();
+    } catch (e) {
+      logWarning('[AuthRepoImpl] rollback incomplete (manual cleanup needed): $e');
+    }
   }
 
   @override

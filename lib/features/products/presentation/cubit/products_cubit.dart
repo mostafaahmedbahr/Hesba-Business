@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/extensions/log_util.dart';
 import '../../../../core/models/product.dart';
 import '../../../../core/services/app_events.dart';
 import '../../data/repos/products_repo.dart';
@@ -55,7 +56,8 @@ class ProductsCubit extends Cubit<ProductsState> {
       AppEvents.instance.productAdded();
       AppEvents.instance.productChanged();
       return true;
-    } catch (_) {
+    } catch (e) {
+      logWarning('[ProductsCubit] addProduct failed: $e');
       return false;
     }
   }
@@ -66,7 +68,8 @@ class ProductsCubit extends Cubit<ProductsState> {
       AppEvents.instance.productUpdated();
       AppEvents.instance.productChanged();
       return true;
-    } catch (_) {
+    } catch (e) {
+      logWarning('[ProductsCubit] updateProduct failed: $e');
       return false;
     }
   }
@@ -77,7 +80,8 @@ class ProductsCubit extends Cubit<ProductsState> {
       AppEvents.instance.productDeleted();
       AppEvents.instance.productChanged();
       return true;
-    } catch (_) {
+    } catch (e) {
+      logWarning('[ProductsCubit] deleteProduct failed: $e');
       return false;
     }
   }

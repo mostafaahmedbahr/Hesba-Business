@@ -65,6 +65,9 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
   }
 
   Future<void> submit() async {
+    // Re-entrancy guard: the submit button also checks `canSubmit`, but a
+    // second call must never create a duplicate request.
+    if (state.phase == SubscriptionRequestPhase.submitting) return;
     final plan = state.selectedPlan;
     final method = state.selectedPaymentMethod;
     final receiptUrl = state.receiptUrl;

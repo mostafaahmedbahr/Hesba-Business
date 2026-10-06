@@ -82,6 +82,10 @@ class ExpensesRepoImpl implements ExpensesRepo {
     required String note,
     required DateTime date,
   }) async {
+    if (title.trim().isEmpty) throw Exception('عنوان المصروف مطلوب');
+    if (amount <= 0) throw Exception('المبلغ يجب أن يكون أكبر من صفر');
+    if (category.isEmpty) throw Exception('اختر تصنيف المصروف');
+
     final resolvedShopId = await _resolveShopId(shopId);
     final resolvedOwnerId = await _resolveOwnerId(ownerId);
 
@@ -94,7 +98,14 @@ class ExpensesRepoImpl implements ExpensesRepo {
 
     final docRef = firestore.collection(AppConstants.expensesCollection).doc(expenseId);
     final existingSnap = await docRef.get();
-    final existingData = existingSnap.data()!;
+    final existingData = existingSnap.data();
+    if (!existingSnap.exists || existingData == null) {
+      throw Exception('المصروف غير موجود');
+    }
+    // Ownership check: never touch another shop's document by ID.
+    if (existingData['shopId'] != resolvedShopId || existingData['ownerId'] != resolvedOwnerId) {
+      throw Exception('غير مصرح بتعديل هذا المصروف');
+    }
     final existingCreatedAt = (existingData['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
 
     final updated = ExpenseModel(
@@ -124,37 +135,35 @@ class ExpensesRepoImpl implements ExpensesRepo {
       } else if (_uid != null) {
         query = query.where('ownerId', isEqualTo: _uid);
       }
-      final snap = await query.orderBy('createdAt', descending: true).get();
+      final snap = await query.orderBy('createdAt', descending: true).limit(500).get();
       return snap.docs.map((d) => ExpenseModel.fromJson(d.data())).toList();
     } catch (_) {
-      // fallback بدون index — حمّل الكل وفلتر محلياً
-      final snap = await firestore.collection(AppConstants.expensesCollection).orderBy('createdAt', descending: true).get();
+      // fallback بدون index — حمّل الكل وفلتر محلياً (للمالك فقط، أبداً الكل).
+      if (_uid == null) throw Exception('يجب تسجيل الدخول أولاً');
+      final snap = await firestore.collection(AppConstants.expensesCollection).orderBy('createdAt', descending: true).limit(500).get();
       final all = snap.docs.map((d) => ExpenseModel.fromJson(d.data())).toList();
       if (resolvedShopId != null && resolvedShopId.isNotEmpty) {
-        return all.where((e) => e.shopId == resolvedShopId).toList();
+        return all.where((e) => e.shopId == resolvedShopId || e.shopId.isEmpty).toList();
       }
-      if (_uid != null) return all.where((e) => e.ownerId == _uid).toList();
-      return all;
+      return all.where((e) => e.ownerId == _uid || e.shopId.isEmpty).toList();
     }
   }
 
   /// يحول الـ snapshot لقائمة مع فلترة محلية حسب المحل.
+  /// لا تعرض أبداً بيانات محل آخر: عند غياب التطابق ترجع قائمة فارغة
+  /// (مستندات shopId فارغ القديمة تُعرض لصاحبها فقط كتوافق).
   List<ExpenseModel> _toFiltered(
     QuerySnapshot<Map<String, dynamic>> snap,
     String? resolvedShopId,
   ) {
     final all = snap.docs.map((d) => ExpenseModel.fromJson(d.data())).toList();
     if (resolvedShopId != null && resolvedShopId.isNotEmpty) {
-      final filtered = all.where((e) => e.shopId == resolvedShopId).toList();
-      // لو الفلترة رجعت فاضية بس فيه داتا، اعرض الكل (يضمن يبان حتى لو shopId مختلف)
-      if (filtered.isEmpty && all.isNotEmpty && all.any((e) => e.shopId.isEmpty)) return all;
-      return filtered.isEmpty ? all : filtered;
+      return all.where((e) => e.shopId == resolvedShopId || e.shopId.isEmpty).toList();
     }
     if (_uid != null) {
-      final byOwner = all.where((e) => e.ownerId == _uid).toList();
-      return byOwner.isEmpty ? all : byOwner;
+      return all.where((e) => e.ownerId == _uid || e.shopId.isEmpty).toList();
     }
-    return all;
+    return const [];
   }
 
   @override
@@ -169,7 +178,7 @@ class ExpensesRepoImpl implements ExpensesRepo {
     try {
       // المحاولة الأساسية (تحتاج composite index).
       await for (final snap
-          in query.orderBy('createdAt', descending: true).snapshots()) {
+          in query.orderBy('createdAt', descending: true).limit(500).snapshots()) {
         yield _toFiltered(snap, resolvedShopId);
       }
     } catch (_) {
@@ -177,6 +186,7 @@ class ExpensesRepoImpl implements ExpensesRepo {
       await for (final snap in firestore
           .collection(AppConstants.expensesCollection)
           .orderBy('createdAt', descending: true)
+          .limit(500)
           .snapshots()) {
         yield _toFiltered(snap, resolvedShopId);
       }
@@ -187,9 +197,13 @@ class ExpensesRepoImpl implements ExpensesRepo {
   Future<void> deleteExpense({required String expenseId, required String shopId}) async {
     final resolvedShopId = await _resolveShopId(shopId);
     if (resolvedShopId == null) throw Exception('لم يتم العثور على المتجر');
-    await firestore
-        .collection(AppConstants.expensesCollection)
-        .doc(expenseId)
-        .delete();
+    final docRef = firestore.collection(AppConstants.expensesCollection).doc(expenseId);
+    final snap = await docRef.get();
+    final data = snap.data();
+    if (!snap.exists || data == null) throw Exception('المصروف غير موجود');
+    if (data['shopId'] != resolvedShopId || (data['ownerId'] as String?) != _uid) {
+      throw Exception('غير مصرح بحذف هذا المصروف');
+    }
+    await docRef.delete();
   }
 }

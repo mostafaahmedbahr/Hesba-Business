@@ -102,6 +102,10 @@ class SalesRepoImpl implements SalesRepo {
             throw Exception('المنتج غير موجود: ${item.productName}');
           }
           final data = snap.data()!;
+          // The product must belong to the same shop as the sale.
+          if ((data['shopId'] as String?) != resolvedShopId) {
+            throw Exception('المنتج لا يتبع هذا المحل: ${item.productName}');
+          }
           final currentStock = (data['stock'] as num?)?.toInt() ?? 0;
           final isActive = data['isActive'] as bool? ?? true;
           if (!isActive) {
@@ -133,6 +137,7 @@ class SalesRepoImpl implements SalesRepo {
         .collection(AppConstants.salesCollection)
         .where('shopId', isEqualTo: resolvedShopId)
         .orderBy('createdAt', descending: true)
+        .limit(500)
         .get();
     return snap.docs
         .map((d) => SaleModel.fromJson(d.data()))
@@ -149,6 +154,7 @@ class SalesRepoImpl implements SalesRepo {
         .collection(AppConstants.salesCollection)
         .where('shopId', isEqualTo: shopId)
         .orderBy('createdAt', descending: true)
+        .limit(500)
         .snapshots()
         .map((snap) =>
             snap.docs.map((d) => SaleModel.fromJson(d.data())).toList());

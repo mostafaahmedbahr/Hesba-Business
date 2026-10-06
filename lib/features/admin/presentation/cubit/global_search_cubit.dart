@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -29,12 +31,26 @@ class SearchHit {
 class GlobalSearchCubit extends Cubit<GlobalSearchState> {
   GlobalSearchCubit() : super(SearchIdle());
 
+  Timer? _debounce;
+
+  @override
+  Future<void> close() {
+    _debounce?.cancel();
+    return super.close();
+  }
+
   Future<void> search(String query) async {
+    _debounce?.cancel();
     final q = query.trim().toLowerCase();
     if (q.isEmpty) {
       emit(SearchIdle());
       return;
     }
+    // Debounced: one Firestore round-trip per pause in typing, not per keystroke.
+    _debounce = Timer(const Duration(milliseconds: 400), () => _run(q));
+  }
+
+  Future<void> _run(String q) async {
     emit(SearchLoading());
     final hits = <SearchHit>[];
     bool matches(dynamic v) => v != null && v.toString().toLowerCase().contains(q);

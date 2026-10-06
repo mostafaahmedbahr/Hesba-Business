@@ -91,7 +91,11 @@ class ProfileCubit extends Cubit<ProfileState> {
     if (msg.contains('requires-recent-login')) {
       return 'يرجى تسجيل الدخول مجدداً ثم المحاولة';
     }
+    if (msg.contains('too-many-requests')) return 'محاولات كثيرة، حاول مرة أخرى لاحقاً';
+    if (msg.contains('user-not-found') || msg.contains('invalid-email')) {
+      return 'تعذر التحقق من الحساب، سجل الدخول مجدداً';
+    }
     if (msg.contains('network-request-failed')) return 'تحقق من اتصال الإنترنت';
-    return msg;
+    return 'تعذر تغيير كلمة المرور، حاول مرة أخرى';
   }
 }

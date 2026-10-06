@@ -193,6 +193,7 @@ class ReturnsRepoImpl implements ReturnsRepo {
         .collection(AppConstants.returnsCollection)
         .where('shopId', isEqualTo: resolvedShopId)
         .orderBy('createdAt', descending: true)
+        .limit(500)
         .get();
     return snap.docs.map((d) => ReturnModel.fromJson(d.data())).toList();
   }
@@ -207,6 +208,7 @@ class ReturnsRepoImpl implements ReturnsRepo {
         .collection(AppConstants.returnsCollection)
         .where('shopId', isEqualTo: shopId)
         .orderBy('createdAt', descending: true)
+        .limit(500)
         .snapshots()
         .map((snap) => snap.docs.map((d) => ReturnModel.fromJson(d.data())).toList());
   }

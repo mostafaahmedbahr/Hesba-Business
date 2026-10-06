@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'package:hesba/core/router/app_routes.dart';
@@ -19,6 +20,12 @@ final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
 
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
+    // Route guard: protected screens require a signed-in user. Without this,
+    // back-gesture/deep-link/notification taps could open them after logout
+    // or with an expired token.
+    if (_requiresAuth(settings.name) && FirebaseAuth.instance.currentUser == null) {
+      return _buildRoute(const LoginView(), settings);
+    }
     switch (settings.name) {
       case AppRoutes.splash:
         return _buildRoute(const SplashView(), settings);
@@ -83,6 +90,21 @@ class AppRouter {
 
       default:
         return _buildRoute(const SplashView(), settings);
+    }
+  }
+
+  static bool _requiresAuth(String? name) {
+    switch (name) {
+      case AppRoutes.dashboard:
+      case AppRoutes.addSaleView:
+      case AppRoutes.returnsView:
+      case AppRoutes.addReturnView:
+      case AppRoutes.expensesView:
+      case AppRoutes.addExpenseView:
+      case AppRoutes.subscription:
+        return true;
+      default:
+        return false;
     }
   }
 

@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -830,12 +831,17 @@ class AdminThumbnail extends StatelessWidget {
     }
     return ClipRRect(
       borderRadius: BorderRadius.circular(r),
-      child: Image.network(
-        url,
+      child: CachedNetworkImage(
+        imageUrl: url,
         width: size,
         height: size,
         fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => Container(
+        placeholder: (_, _) => Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(color: AppTheme.primarySoft, borderRadius: BorderRadius.circular(r)),
+        ),
+        errorWidget: (_, _, _) => Container(
           width: size,
           height: size,
           decoration: BoxDecoration(color: AppTheme.primarySoft, borderRadius: BorderRadius.circular(r)),

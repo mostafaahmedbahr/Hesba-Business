@@ -22,6 +22,8 @@ class SalesCubit extends Cubit<SalesState> {
     required String paymentMethod,
     required String note,
   }) async {
+    // Re-entrancy guard: rapid double-taps must not create duplicate sales.
+    if (state.status == SalesStatus.loading) return;
     // Client-side validation for better UX before hitting repo
     if (items.isEmpty) {
       emit(

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 import '../models/user_profile.dart';
 import '../repos/account_repo.dart';
@@ -112,6 +113,11 @@ class AccountRepoImpl implements AccountRepo {
 
   @override
   Future<void> logout() async {
+    // Drop the device token first so the next account on this device does
+    // not receive the previous owner's pushes. Best effort only.
+    try {
+      await FirebaseMessaging.instance.deleteToken();
+    } catch (_) {}
     await _auth.signOut();
   }
 }

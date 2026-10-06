@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart';
 
@@ -135,7 +136,14 @@ class ProductThumb extends StatelessWidget {
     if (product.imageUrl.isEmpty) return placeholder;
     return ClipRRect(
       borderRadius: BorderRadius.circular(16.r),
-      child: Image.network(product.imageUrl, width: 66.w, height: 66.w, fit: BoxFit.cover, errorBuilder: (_, __, ___) => placeholder, loadingBuilder: (context, child, progress) => progress == null ? child : placeholder),
+      child: CachedNetworkImage(
+        imageUrl: product.imageUrl,
+        width: 66.w,
+        height: 66.w,
+        fit: BoxFit.cover,
+        placeholder: (_, __) => placeholder,
+        errorWidget: (_, __, ___) => placeholder,
+      ),
     );
   }
 }

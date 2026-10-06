@@ -59,7 +59,14 @@ class _ExpensesBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ExpensesCubit, ExpensesState>(
+    // Delete/update failures on a non-empty list would otherwise be silent:
+    // the body below only renders errors when the list itself is empty.
+    return BlocConsumer<ExpensesCubit, ExpensesState>(
+      listener: (context, state) {
+        if (state.status == ExpensesStatus.error && state.expenses.isNotEmpty) {
+          AppToast.error(context, state.errorMessage ?? 'حدث خطأ');
+        }
+      },
       builder: (context, state) {
         // بيحمل.
         if (state.status == ExpensesStatus.loading && state.expenses.isEmpty) {
@@ -93,7 +100,7 @@ class _ExpensesBody extends StatelessWidget {
           return Scaffold(
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             body: CustomScrollView(slivers: [
-              const ExpenseListHeader(count: 0, totalValue: 0, todayCount: 0, todayValue: 0),
+              ExpenseListHeader(count: 0, totalValue: 0, todayCount: 0, todayValue: 0, onAdd: () => _openAdd(context)),
               SliverFillRemaining(
                 hasScrollBody: false,
                 child: ExpenseListEmpty(onAdd: () => _openAdd(context)),

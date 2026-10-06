@@ -47,7 +47,7 @@ class LoginCubit extends Cubit<LoginState> {
     if (msg.contains('too-many-requests')) return 'محاولات كثيرة، حاول مرة أخرى لاحقاً';
     if (msg.contains('invalid-credential')) return 'بيانات الدخول غير صحيحة';
     if (msg.contains('network-request-failed')) return 'تحقق من اتصال الإنترنت';
-    print('[LoginCubit] _mapError() returning UNMATCHED error: $msg');
-    return 'حدث خطأ: $msg';
+    print('[LoginCubit] _mapError() returning generic error');
+    return 'تعذر تسجيل الدخول، حاول مرة أخرى';
   }
 }

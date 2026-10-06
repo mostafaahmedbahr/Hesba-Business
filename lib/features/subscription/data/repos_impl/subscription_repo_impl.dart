@@ -97,6 +97,17 @@ class SubscriptionRepoImpl implements SubscriptionRepo {
     required String paymentProofUrl,
   }) async {
     final uid = _requireUid();
+    // One pending request at a time: a second submit while the first is
+    // still under review is rejected instead of orphaning the old row.
+    // (Single equality filter — no composite index required.)
+    final existing = await _firestore
+        .collection(_requests)
+        .where('userId', isEqualTo: uid)
+        .limit(10)
+        .get();
+    if (existing.docs.any((d) => d.data()['status'] == SubscriptionRequestModel.statusPending)) {
+      throw Exception('لديك طلب معلق بالفعل قيد المراجعة');
+    }
     // Guarantees the subscription document exists before it is flagged.
     final subscription = await getSubscription(refresh: true);
     final profile = await _readProfile(uid);

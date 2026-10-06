@@ -76,7 +76,11 @@ class AdminRepoImpl implements AdminRepo {
 
   @override
   Future<Map<String, int>> subscriptionCountsByMonth({required int months}) async {
-    final snap = await firestore.collection(_subscriptions).limit(5000).get();
+    final snap = await firestore
+        .collection(_subscriptions)
+        .where('startDate', isGreaterThanOrEqualTo: Timestamp.fromDate(_monthCutoff(months)))
+        .limit(2000)
+        .get();
     final counts = <String, int>{};
     for (final doc in snap.docs) {
       final data = doc.data();
@@ -92,7 +96,11 @@ class AdminRepoImpl implements AdminRepo {
 
   @override
   Future<Map<String, int>> shopsByMonth({required int months}) async {
-    final snap = await firestore.collection('shops').limit(5000).get();
+    final snap = await firestore
+        .collection('shops')
+        .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(_monthCutoff(months)))
+        .limit(2000)
+        .get();
     final counts = <String, int>{};
     for (final doc in snap.docs) {
       final data = doc.data();
@@ -108,14 +116,17 @@ class AdminRepoImpl implements AdminRepo {
 
   @override
   Future<Map<String, int>> revenueByMonth({required int months}) async {
+    // Single range filter only (status is filtered client-side) so no
+    // composite index is required.
     final snap = await firestore
         .collection(_requests)
-        .where('status', isEqualTo: 'approved')
-        .limit(5000)
+        .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(_monthCutoff(months)))
+        .limit(2000)
         .get();
     final counts = <String, int>{};
     for (final doc in snap.docs) {
       final data = doc.data();
+      if (data['status'] != 'approved') continue;
       DateTime? created;
       final c = data['createdAt'];
       if (c is Timestamp) created = c.toDate();
@@ -125,6 +136,13 @@ class AdminRepoImpl implements AdminRepo {
       counts[key] = (counts[key] ?? 0) + amount;
     }
     return counts;
+  }
+
+  /// First day of the month, [months] months ago. Honors the `months`
+  /// window server-side instead of downloading whole collections.
+  DateTime _monthCutoff(int months) {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month - months + 1, 1);
   }
 
   static const int _page = 20;

@@ -60,6 +60,10 @@ class _AddReturnViewState extends State<AddReturnView> {
   // Already returned qty per productId
   final Map<String, double> _alreadyReturned = {};
 
+  // True when the previous-returns lookup failed: maxQty is then
+  // overestimated, so submitting must be blocked until it succeeds.
+  bool _historyFailed = false;
+
   String? _reason;
   List<String> _availableReasons = AppConstants.genericReturnReasons;
 
@@ -183,6 +187,7 @@ class _AddReturnViewState extends State<AddReturnView> {
   }
 
   Future<void> _loadAlreadyReturned(String saleId) async {
+    _historyFailed = false;
     try {
       final snap = await FirebaseFirestore.instance
           .collection(AppConstants.returnsCollection)
@@ -210,7 +215,10 @@ class _AddReturnViewState extends State<AddReturnView> {
       }
       _alreadyReturned.clear();
       _alreadyReturned.addAll(map);
-    } catch (_) {}
+    } catch (_) {
+      // Fail closed: without history the editable max is unreliable.
+      _historyFailed = true;
+    }
   }
 
   void _updateReasons() {
@@ -289,8 +297,16 @@ class _AddReturnViewState extends State<AddReturnView> {
 
   Future<void> _submit(BuildContext innerContext) async {
     if (!await SubscriptionGate.ensureCanModify(innerContext)) return;
+    if (!(_formKey.currentState?.validate() ?? true)) {
+      AppToast.warning(innerContext, 'راجع بيانات المرتجع');
+      return;
+    }
     if (_selectedSale == null) {
       AppToast.warning(innerContext, 'اختر فاتورة أولاً');
+      return;
+    }
+    if (_historyFailed) {
+      AppToast.error(innerContext, 'تعذر التحقق من المرتجعات السابقة — تحقق من الاتصال وأعد اختيار الفاتورة');
       return;
     }
     final items = _buildReturnItems();

@@ -177,13 +177,27 @@ final channel = AndroidNotificationChannel(
   }
 
   /// Requests notification permission on the current platform.
+  /// Includes FirebaseMessaging permission so iOS APNS tokens can be issued
+  /// (local-notifications permission alone leaves getToken() null on iOS).
   Future<bool> requestPermissions() async {
     bool granted = false;
+
+    try {
+      final fcmSettings = await _messaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+      if (fcmSettings.authorizationStatus == AuthorizationStatus.authorized ||
+          fcmSettings.authorizationStatus == AuthorizationStatus.provisional) {
+        granted = true;
+      }
+    } catch (_) {}
 
     final android = _local.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
     if (android != null) {
-      granted = await android.requestNotificationsPermission() ?? false;
+      granted = await android.requestNotificationsPermission() ?? granted;
     }
 
     final darwin = _local.resolvePlatformSpecificImplementation<
@@ -194,7 +208,7 @@ final channel = AndroidNotificationChannel(
             badge: true,
             sound: true,
           ) ??
-          false;
+          granted;
     }
 
     return granted;

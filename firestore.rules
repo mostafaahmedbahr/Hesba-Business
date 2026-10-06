@@ -1,74 +1,220 @@
 rules_version = '2';
 
-// Firestore security rules for Hesba.
+// Firestore security rules for Hesba — PRODUCTION version.
 //
-// The two blocks that matter for this feature are the ones below. Everything
-// else is a baseline so the rest of the app keeps working — merge it with the
-// rules you already have deployed in the Firebase console instead of
-// deploying this file blind.
+// Deploy with:  firebase deploy --only firestore:rules
+// (or paste into Firebase console > Firestore > Rules)
 //
-// Why the subscription rules exist: the app checks `canModifyData` before any
-// Add / Edit / Delete, but that is a UI guard. These rules are the real line —
-// they stop a client from writing `status: 'active'` (and therefore editing
-// data) unless the admin has approved the request it points at.
+// Principles:
+//  1. No catch-all: every collection is scoped explicitly. Default deny.
+//  2. Shop isolation: a signed-in user touches only docs of their own shop
+//     (ownerId match) or a shop they belong to (users/{uid}.shopId match,
+//     so manager/cashier accounts of the same shop keep working).
+//  3. Subscription enforcement is server-side, not just UI: creating,
+//     updating or deleting business data (products/sales/expenses/returns)
+//     requires a live trial/active subscription whose endDate is in the
+//     future. Reads stay open (expired users can still VIEW their data).
+//  4. Roles cannot be self-granted: `role` on users/{uid} can only change
+//     via an existing admin (console). Owners keep `role` untouched.
+//  5. Admin writes (approve/reject, dashboard mirrors, settings, activity)
+//     are allowed through the `isAdmin()` check, so the Admin app works
+//     with these rules deployed (the old draft blocked admin updates).
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ── Subscription ─────────────────────────────────────────────────────
+    // ── helpers ──────────────────────────────────────────────
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function myUid() {
+      return request.auth.uid;
+    }
+
+    function myUserDoc() {
+      return get(/databases/$(database)/documents/users/$(myUid())).data;
+    }
+
+    function isAdmin() {
+      return signedIn() && myUserDoc().get('role', '') == 'admin';
+    }
+
+    function myShopId() {
+      return myUserDoc().get('shopId', '');
+    }
+
+    // Same shop: owner match, or a coworker account of the same shop.
+    function sameShop(shopId) {
+      return shopId != null && shopId != '' &&
+        (myShopId() == shopId);
+    }
+
+    function unchangedRole() {
+      return request.resource.data.get('role', null) ==
+        resource.data.get('role', null);
+    }
+
+    // Live subscription required for WRITES on business data.
+    function subscriptionLive() {
+      let sub = get(/databases/$(database)/documents/users/$(myUid())/subscription/current).data;
+      return sub != null
+        && sub.get('status', '') in ['trial', 'active']
+        && sub.get('endDate', null) != null
+        && sub.endDate > request.time;
+    }
+
+    function mayWriteShopData(shopId) {
+      return isAdmin() || (sameShop(shopId) && subscriptionLive());
+    }
+
+    // ── users ────────────────────────────────────────────────
+    match /users/{userId} {
+      allow read: if signedIn() && (myUid() == userId || isAdmin());
+      // Registration creates the owner doc (no role field on create).
+      allow create: if signedIn() && myUid() == userId
+        && request.resource.data.get('role', 'owner') == 'owner';
+      // Owner edits own doc but can never touch `role`; admin can do all.
+      allow update: if isAdmin()
+        || (signedIn() && myUid() == userId && unchangedRole());
+      allow delete: if false;
+    }
+
+    // ── users/{uid}/subscription/current ─────────────────────
     match /users/{userId}/subscription/{subId} {
-      // The owner may always read their own subscription.
-      allow read: if request.auth != null && request.auth.uid == userId;
+      allow read: if signedIn() && (myUid() == userId || isAdmin());
 
-      // The only thing a client may create is its own 7 day trial, and only
-      // once, starting about now.
-      allow create: if request.auth != null
-                    && request.auth.uid == userId
-                    && request.resource.data.status == 'trial'
-                    && request.resource.data.isTrial == true
-                    && request.resource.data.trialStartDate >= request.time - duration.value(1, 'd')
-                    && request.resource.data.trialStartDate <= request.time + duration.value(1, 'd')
-                    && request.resource.data.trialEndDate <=
-                       request.resource.data.trialStartDate + duration.value(7, 'd');
+      // The only thing a client may create is its own 7 day trial, once,
+      // starting about now.
+      allow create: if signedIn()
+        && myUid() == userId
+        && request.resource.data.status == 'trial'
+        && request.resource.data.isTrial == true
+        && request.resource.data.trialStartDate >= request.time - duration.value(1, 'd')
+        && request.resource.data.trialStartDate <= request.time + duration.value(1, 'd')
+        && request.resource.data.trialEndDate <=
+           request.resource.data.trialStartDate + duration.value(7, 'd');
 
-      // A client may move its own subscription to expired / pending / rejected
-      // freely. Reaching `active` additionally requires the admin to have
-      // approved the request this subscription points at.
-      allow update: if request.auth != null
-                    && request.auth.uid == userId
-                    && (
-                         request.resource.data.status in ['expired', 'pending', 'rejected']
-                         || (
-                              request.resource.data.status == 'active'
-                              && request.resource.data.lastRequestId is string
-                              && get(/databases/$(database)/documents/subscription_requests/$(request.resource.data.lastRequestId)).data.status == 'approved'
-                            )
-                       );
+      // Owner may move to expired / pending / rejected freely. Reaching
+      // `active` requires the admin-approved request it points at.
+      // Admin may write anything (approve / reject flows).
+      allow update: if isAdmin() || (signedIn()
+        && myUid() == userId
+        && (
+             request.resource.data.status in ['expired', 'pending', 'rejected']
+             || (
+                  request.resource.data.status == 'active'
+                  && request.resource.data.lastRequestId is string
+                  && get(/databases/$(database)/documents/subscription_requests/$(request.resource.data.lastRequestId)).data.status == 'approved'
+                )
+           ));
 
       allow delete: if false;
     }
 
-    // ── Subscription requests ────────────────────────────────────────────
-    // One row per submitted receipt. The client may only ever create a
-    // `pending` row; approving or rejecting happens from the Firebase console,
-    // which bypasses these rules.
+    // ── subscriptions mirror (admin dashboard reads) ─────────
+    match /subscriptions/{userId} {
+      allow read: if signedIn() && (myUid() == userId || isAdmin());
+      allow create, update: if isAdmin() || (signedIn() && myUid() == userId);
+      allow delete: if isAdmin();
+    }
+
+    // ── subscription requests ────────────────────────────────
     match /subscription_requests/{requestId} {
-      allow read: if request.auth != null
-                  && request.auth.uid == resource.data.userId;
+      allow read: if signedIn()
+        && (resource.data.userId == myUid() || isAdmin());
 
-      allow create: if request.auth != null
-                    && request.auth.uid == request.resource.data.userId
-                    && request.resource.data.status == 'pending'
-                    && request.resource.data.amount > 0
-                    && request.resource.data.paymentProofUrl.matches('https://.*');
+      allow create: if signedIn()
+        && request.resource.data.userId == myUid()
+        && request.resource.data.status == 'pending'
+        && request.resource.data.amount > 0
+        && request.resource.data.paymentProofUrl.matches('https://.*');
 
+      // Clients can never approve/reject their own rows — admin only.
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // ── shops ────────────────────────────────────────────────
+    match /shops/{shopId} {
+      allow read: if signedIn() && (isAdmin()
+        || resource.data.ownerId == myUid()
+        || sameShop(resource.data.shopId));
+      allow create: if signedIn() && request.resource.data.ownerId == myUid();
+      allow update: if isAdmin() || (signedIn()
+        && resource.data.ownerId == myUid()
+        && request.resource.data.ownerId == myUid());
+      allow delete: if false;
+    }
+
+    // ── business data (subscription-gated writes) ────────────
+    match /products/{docId} {
+      allow read: if signedIn() && (isAdmin()
+        || resource.data.ownerId == myUid()
+        || sameShop(resource.data.shopId));
+      allow create: if signedIn()
+        && request.resource.data.ownerId == myUid()
+        && mayWriteShopData(request.resource.data.shopId);
+      allow update: if isAdmin() || (signedIn()
+        && resource.data.ownerId == myUid()
+        && request.resource.data.ownerId == myUid()
+        && mayWriteShopData(resource.data.shopId));
+      allow delete: if isAdmin() || (signedIn()
+        && resource.data.ownerId == myUid()
+        && mayWriteShopData(resource.data.shopId));
+    }
+
+    match /sales/{docId} {
+      allow read: if signedIn() && (isAdmin()
+        || resource.data.ownerId == myUid()
+        || sameShop(resource.data.shopId));
+      allow create: if signedIn()
+        && request.resource.data.ownerId == myUid()
+        && mayWriteShopData(request.resource.data.shopId);
+      // Sales are immutable from clients (returns are separate docs).
+      allow update, delete: if isAdmin();
+    }
+
+    match /expenses/{docId} {
+      allow read: if signedIn() && (isAdmin()
+        || resource.data.ownerId == myUid()
+        || sameShop(resource.data.shopId));
+      allow create: if signedIn()
+        && request.resource.data.ownerId == myUid()
+        && mayWriteShopData(request.resource.data.shopId);
+      allow update: if isAdmin() || (signedIn()
+        && resource.data.ownerId == myUid()
+        && request.resource.data.ownerId == myUid()
+        && mayWriteShopData(resource.data.shopId));
+      allow delete: if isAdmin() || (signedIn()
+        && resource.data.ownerId == myUid()
+        && mayWriteShopData(resource.data.shopId));
+    }
+
+    match /returns/{docId} {
+      allow read: if signedIn() && (isAdmin()
+        || resource.data.ownerId == myUid()
+        || sameShop(resource.data.shopId));
+      allow create: if signedIn()
+        && request.resource.data.ownerId == myUid()
+        && mayWriteShopData(request.resource.data.shopId);
+      allow update, delete: if isAdmin();
+    }
+
+    // ── feedback (contact us) ────────────────────────────────
+    match /feedback/{docId} {
+      allow create: if signedIn();
+      allow read: if isAdmin();
       allow update, delete: if false;
     }
 
-    // ── Everything else ──────────────────────────────────────────────────
-    // Baseline only. Replace with the rules already deployed for
-    // users / shops / products / sales / returns / expenses / feedback.
-    match /{document=**} {
-      allow read, write: if request.auth != null;
+    // ── admin-only ───────────────────────────────────────────
+    match /activity_logs/{docId} {
+      allow read, create: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    match /admin_settings/{docId} {
+      allow read, write: if isAdmin();
     }
   }
 }
