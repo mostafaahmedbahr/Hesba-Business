@@ -5,12 +5,15 @@
          "تحديد موقع المحل" GPS flow (geolocator). -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <!-- Shop/product/receipt photos: camera capture via image_picker.
+         Gallery needs no permission (system photo picker). -->
+    <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <!-- NOTE: exact-alarm permissions intentionally omitted: scheduling uses
          AndroidScheduleMode.inexactAllowWhileIdle, and USE_EXACT_ALARM is a
          Play-restricted permission that needs a review justification. -->
     <application
-        android:label="hesba"
+        android:label="Hesba"
         android:name="${applicationName}"
         android:enableOnBackInvokedCallback="true"
         android:icon="@mipmap/ic_launcher">

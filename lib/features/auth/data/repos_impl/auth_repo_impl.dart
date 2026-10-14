@@ -25,16 +25,12 @@ class AuthRepoImpl implements AuthRepo {
     required String email,
     required String password,
   }) async {
-    print('[AuthRepoImpl] login() called with email: ${email.trim()}');
     try {
-      print('[AuthRepoImpl] calling firebaseAuth.signInWithEmailAndPassword...');
       await firebaseAuth.signInWithEmailAndPassword(
         email: email.trim(),
         password: password,
       );
-      print('[AuthRepoImpl] login success! User: ${firebaseAuth.currentUser?.uid}');
     } catch (e) {
-      print('[AuthRepoImpl] login FAILED: $e');
       rethrow;
     }
   }
@@ -44,9 +40,7 @@ class AuthRepoImpl implements AuthRepo {
     required RegisterModel model,
     required String password,
   }) async {
-    print('[AuthRepoImpl] register() called with email: ${model.email}');
     // 1. Create Firebase Authentication account
-    print('[AuthRepoImpl] creating Firebase Auth account...');
     final credential =
     await firebaseAuth.createUserWithEmailAndPassword(
       email: model.email.trim(),
@@ -56,15 +50,12 @@ class AuthRepoImpl implements AuthRepo {
     final user = credential.user;
 
     if (user == null) {
-      print('[AuthRepoImpl] register FAILED: user is null after creation');
       throw Exception('فشل إنشاء الحساب');
     }
-    print('[AuthRepoImpl] Firebase Auth account created. UID: ${user.uid}');
 
     // 2. Generate shop ID
     final shopRef =
     firestore.collection('shops').doc();
-    print('[AuthRepoImpl] generated shopId: ${shopRef.id}');
 
     final now = DateTime.now();
 
@@ -94,7 +85,6 @@ class AuthRepoImpl implements AuthRepo {
     // 4. Save owner data. Any Firestore failure below rolls the freshly
     // created Auth account back, so we never leave an orphan login with
     // no / incomplete profile documents.
-    print('[AuthRepoImpl] saving owner data to users/${user.uid}...');
     try {
       await firestore
           .collection('users')
@@ -104,7 +94,6 @@ class AuthRepoImpl implements AuthRepo {
       await _rollbackAccount(user);
       rethrow;
     }
-    print('[AuthRepoImpl] owner data saved successfully');
 
     // 4b. Hand out the free trial. Best effort: the first read of the
     // subscription still creates it, so registration never fails because of it.
@@ -118,7 +107,6 @@ class AuthRepoImpl implements AuthRepo {
     }
 
     // 5. Save shop data (same rollback guarantee as the owner doc).
-    print('[AuthRepoImpl] saving shop data to shops/${shopRef.id}...');
     try {
       await shopRef.set({
         'shopId': shopRef.id,
@@ -142,9 +130,7 @@ class AuthRepoImpl implements AuthRepo {
       await _rollbackAccount(user);
       rethrow;
     }
-    print('[AuthRepoImpl] shop data saved successfully');
 
-    print('[AuthRepoImpl] register() completed successfully');
     return registerModel;
   }
 

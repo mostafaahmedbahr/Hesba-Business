@@ -83,7 +83,6 @@ class ProfileCubit extends Cubit<ProfileState> {
       await _repo.logout();
       return true;
     } catch (e) {
-      print('[ProfileCubit] logout failed: $e');
       return false;
     }
   }

@@ -134,7 +134,6 @@ class RegisterNavigation extends StatelessWidget {
   }
 
   void _onPressed(BuildContext context, bool isLastStep) {
-    print('[RegisterNavigation] _onPressed() called. isLastStep: $isLastStep');
     if (isLastStep) {
       _submit(context);
     } else {
@@ -143,28 +142,21 @@ class RegisterNavigation extends StatelessWidget {
   }
 
   void _nextStep(BuildContext context) {
-    print('[RegisterNavigation] _nextStep() called');
     if (!formKey.currentState!.validate()) {
-      print('[RegisterNavigation] Form validation FAILED — stopping');
       return;
     }
-    print('[RegisterNavigation] Form validation PASSED — calling cubit.nextStep()');
     context.read<RegisterCubit>().nextStep();
   }
 
   void _submit(BuildContext context) {
-    print('[RegisterNavigation] _submit() called');
     if (!formKey.currentState!.validate()) {
-      print('[RegisterNavigation] Form validation FAILED — stopping');
       return;
     }
-    print('[RegisterNavigation] Form validation PASSED');
 
     // الموقع بيتحدد من ShopLocationCubit (GPS / خريطة / عنوان يدوي) —
     // مفيش حقل رابط يدوي بقى، والـ locationUrl بيتبني من الإحداثيات.
     final location = context.read<ShopLocationCubit>().state.location;
     if (location == null || !location.hasAnyData) {
-      print('[RegisterNavigation] No shop location picked — blocking submit');
       AppToast.error(context, 'locationRequired'.tr());
       return;
     }
@@ -192,23 +184,7 @@ class RegisterNavigation extends StatelessWidget {
       isActive: true,
     );
 
-    print('[RegisterNavigation] RegisterModel created:');
-    print('  ownerName: ${model.ownerName}');
-    print('  email: ${model.email}');
-    print('  phone: ${model.phone}');
-    print('  shopName: ${model.shopName}');
-    print('  businessType: ${model.businessType}');
-    print('  shopPhone: ${model.shopPhone}');
-    print('  locationUrl: ${model.locationUrl}');
-    print('  latitude: ${model.latitude}');
-    print('  longitude: ${model.longitude}');
-    print('  locationAddress: ${model.locationAddress}');
-    print('  shopImageUrl: ${model.shopImageUrl}');
-    print('  address: ${model.address}');
-    print('  city: ${model.city}');
-    print('  state: ${model.state}');
 
-    print('[RegisterNavigation] calling cubit.register()...');
     context.read<RegisterCubit>().register(
           model: model,
           password: passwordController.text,

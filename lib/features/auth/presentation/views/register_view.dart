@@ -116,9 +116,7 @@ class _RegisterBodyState extends State<_RegisterBody> {
   }
 
   void _handleState(BuildContext context, RegisterState state) {
-    print('[RegisterView] _handleState() called. Status: ${state.status}');
     if (state.status == RegisterStatus.success) {
-      print('[RegisterView] Register SUCCESS — showing toast & navigating to login');
       AppToast.success(context, 'registerSuccess'.tr());
       Navigator.pushNamedAndRemoveUntil(
         context,
@@ -126,7 +124,6 @@ class _RegisterBodyState extends State<_RegisterBody> {
         (_) => false,
       );
     } else if (state.status == RegisterStatus.failure) {
-      print('[RegisterView] Register FAILURE — showing error toast: ${state.errorMessage}');
       AppToast.error(context, state.errorMessage ?? 'registerError'.tr());
     }
   }

@@ -398,10 +398,30 @@ class _ShopLocationRow extends StatelessWidget {
     return (shop['locationAddress'] as String? ?? '').trim();
   }
 
+  /// Opens a shop location link on the admin device.
+  ///
+  /// `url` originates from a shop document the owner can write, so it is
+  /// never launched blindly: only https links on known map hosts go through.
+  static bool _isSafeMapUrl(String url) {
+    final uri = Uri.tryParse(url.trim());
+    if (uri == null || !uri.isScheme('https') || !uri.hasAuthority) {
+      return false;
+    }
+    final host = uri.host.toLowerCase();
+    return host == 'google.com' ||
+        host.endsWith('.google.com') ||
+        host == 'maps.app.goo.gl' ||
+        host == 'openstreetmap.org' ||
+        host.endsWith('.openstreetmap.org');
+  }
+
   Future<void> _openMaps(BuildContext context, String url) async {
     var opened = false;
     try {
-      opened = await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+      final uri = Uri.tryParse(url.trim());
+      if (uri != null && _isSafeMapUrl(url) && await canLaunchUrl(uri)) {
+        opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
     } catch (_) {
       opened = false;
     }

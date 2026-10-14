@@ -202,13 +202,9 @@ class _LoginFormState extends State<LoginForm> {
   }
 
   void _onLogin() {
-    print('[LoginForm] _onLogin() called');
     if (!widget.formKey.currentState!.validate()) {
-      print('[LoginForm] Form validation FAILED — stopping');
       return;
     }
-    print('[LoginForm] Form validation PASSED — calling cubit.login()');
-    print('[LoginForm] Email: ${widget.emailController.text}');
     context.read<LoginCubit>().login(
           email: widget.emailController.text,
           password: widget.passwordController.text,

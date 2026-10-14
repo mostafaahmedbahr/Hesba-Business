@@ -1,0 +1,11 @@
+# Upload keystore for Google Play releases.
+# 1. Generate once (keep the file + passwords safe, never commit):
+#    keytool -genkeypair -v -keystore hesba-upload-key.keystore -alias hesba-upload -keyalg RSA -keysize 2048 -validity 10000
+# 2. Move hesba-upload-key.keystore into android/app/ (storeFile below is
+#    resolved relative to android/app/).
+# 3. Copy this file to android/key.properties (gitignored) and fill it in.
+# 4. CI must provide android/key.properties as a secret file.
+storeFile=hesba-upload-key.keystore
+storePassword=REPLACE_ME
+keyAlias=hesba-upload
+keyPassword=REPLACE_ME
