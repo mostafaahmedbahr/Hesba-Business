@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,12 +18,21 @@ import 'shop_location_picker_sheet.dart';
 /// picks the coordinates, with a map pin and a typed address as alternatives.
 /// Requires a [ShopLocationCubit] above it in the tree.
 class ShopLocationField extends StatelessWidget {
-  const ShopLocationField({super.key, this.isDark = false, this.accentColor});
+  const ShopLocationField({
+    super.key,
+    this.isDark = false,
+    this.accentColor,
+    this.embedded = false,
+  });
 
   final bool isDark;
 
   /// Button/section accent — registration uses its own blue.
   final Color? accentColor;
+
+  /// Renders only the controls: the caller supplies the outer card and its
+  /// header (used by the registration step so both cards match).
+  final bool embedded;
 
   Color get _accent => accentColor ?? AppTheme.primaryColor;
 
@@ -43,19 +54,10 @@ class ShopLocationField extends StatelessWidget {
     final cubit = context.read<ShopLocationCubit>();
     final location = state.location;
 
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF7FAFF),
-        borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(
-          color: isDark ? AppTheme.darkBorder : const Color(0xFFE4ECF7),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (!embedded) ...[
           Row(
             children: [
               Icon(Icons.location_on_outlined, size: 19, color: _accent),
@@ -71,18 +73,34 @@ class ShopLocationField extends StatelessWidget {
             ],
           ),
           SizedBox(height: 12.h),
-          if (state.isBusy)
-            _busy(state)
-          else if (state.hasLocation && location != null)
-            _picked(context, cubit, state, location)
-          else
-            _empty(context, cubit, state),
-          if (_notice(state) != null) ...[
-            SizedBox(height: 10.h),
-            _notice(state)!,
-          ],
         ],
+        if (state.isBusy)
+          _busy(state)
+        else if (state.hasLocation && location != null)
+          _picked(context, cubit, state, location)
+        else
+          _empty(context, cubit, state),
+        if (_notice(state) != null) ...[
+          SizedBox(height: 10.h),
+          _notice(state)!,
+        ],
+      ],
+    );
+
+    // The host card already draws the shell and the header.
+    if (embedded) return content;
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF7FAFF),
+        borderRadius: BorderRadius.circular(18.r),
+        border: Border.all(
+          color: isDark ? AppTheme.darkBorder : const Color(0xFFE4ECF7),
+        ),
       ),
+      child: content,
     );
   }
 
@@ -152,9 +170,9 @@ class ShopLocationField extends StatelessWidget {
               onPressed: () => _openMap(context, cubit, state),
             ),
             _alternativeButton(
-              icon: Icons.edit_location_alt_outlined,
-              label: 'locationManualAddress'.tr(),
-              onPressed: () => _askAddress(context, cubit, state),
+              icon: Icons.link_rounded,
+              label: 'locationManualLink'.tr(),
+              onPressed: () => _askMapLink(context, cubit, state),
             ),
           ],
         ),
@@ -169,9 +187,6 @@ class ShopLocationField extends StatelessWidget {
     ShopLocation location,
   ) {
     final hasAddress = location.address.trim().isNotEmpty;
-    final coordinates = location.hasCoordinates
-        ? '${location.latitude!.toStringAsFixed(5)}, ${location.longitude!.toStringAsFixed(5)}'
-        : null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -186,53 +201,23 @@ class ShopLocationField extends StatelessWidget {
               color: AppTheme.successColor.withValues(alpha: 0.35),
             ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Row(
-                children: [
-                  const Icon(
-                    Icons.check_circle_outline,
-                    size: 17,
-                    color: AppTheme.successColor,
-                  ),
-                  SizedBox(width: 6.w),
-                  Expanded(
-                    child: Text(
-                      hasAddress ? location.address : 'locationPicked'.tr(),
-                      style: TextStyle(
-                        fontSize: 12.5.sp,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
+              const Icon(
+                Icons.check_circle_outline,
+                size: 17,
+                color: AppTheme.successColor,
               ),
-              if (coordinates != null) ...[
-                SizedBox(height: 6.h),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.gps_fixed_outlined,
-                      size: 14,
-                      color: isDark
-                          ? AppTheme.darkTextSecondary
-                          : AppTheme.textSecondary,
-                    ),
-                    SizedBox(width: 6.w),
-                    Text(
-                      coordinates,
-                      style: TextStyle(
-                        fontSize: 11.5.sp,
-                        fontWeight: FontWeight.w600,
-                        color: isDark
-                            ? AppTheme.darkTextSecondary
-                            : AppTheme.textSecondary,
-                      ),
-                    ),
-                  ],
+              SizedBox(width: 6.w),
+              Expanded(
+                child: Text(
+                  hasAddress ? location.address : 'locationPicked'.tr(),
+                  style: TextStyle(
+                    fontSize: 12.5.sp,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-              ],
+              ),
             ],
           ),
         ),
@@ -252,9 +237,9 @@ class ShopLocationField extends StatelessWidget {
               onPressed: () => _openMap(context, cubit, state),
             ),
             _alternativeButton(
-              icon: Icons.edit_location_alt_outlined,
-              label: 'locationManualAddress'.tr(),
-              onPressed: () => _askAddress(context, cubit, state),
+              icon: Icons.link_rounded,
+              label: 'locationManualLink'.tr(),
+              onPressed: () => _askMapLink(context, cubit, state),
             ),
           ],
         ),
@@ -362,20 +347,20 @@ class ShopLocationField extends StatelessWidget {
     await cubit.setFromCoordinates(picked.latitude!, picked.longitude!);
   }
 
-  Future<void> _askAddress(
+  Future<void> _askMapLink(
     BuildContext context,
     ShopLocationCubit cubit,
     ShopLocationState state,
   ) async {
-    final address = await showDialog<String>(
+    final link = await showDialog<String>(
       context: context,
-      builder: (_) => _AddressDialog(
-        initialAddress: state.location?.address ?? '',
+      builder: (_) => _MapLinkDialog(
+        initialLink: state.location?.locationUrl ?? '',
         accentColor: _accent,
       ),
     );
-    if (address == null) return;
-    await cubit.setFromAddress(address);
+    if (link == null) return;
+    await cubit.setFromMapLink(link);
   }
 
   void _showMessage(BuildContext context, ShopLocationState state) {
@@ -391,33 +376,34 @@ class ShopLocationField extends StatelessWidget {
   }
 }
 
-/// Dialog for typing the shop address manually.
+/// Dialog for pasting the location link the owner copied from Google Maps —
+/// the manual alternative to the GPS button and the map pin.
 ///
 /// The controller lives in the State so it is released when the route is
 /// finally torn down (not while the exit animation is still building the
 /// `TextField`), and every close path settles focus/the keyboard before the
 /// route is popped — popping with a focused `autofocus` field in flight is
 /// what triggered "Tried to build dirty widget in the wrong build scope".
-class _AddressDialog extends StatefulWidget {
-  const _AddressDialog({
-    required this.initialAddress,
+class _MapLinkDialog extends StatefulWidget {
+  const _MapLinkDialog({
+    required this.initialLink,
     required this.accentColor,
   });
 
-  final String initialAddress;
+  final String initialLink;
   final Color accentColor;
 
   @override
-  State<_AddressDialog> createState() => _AddressDialogState();
+  State<_MapLinkDialog> createState() => _MapLinkDialogState();
 }
 
-class _AddressDialogState extends State<_AddressDialog> {
+class _MapLinkDialogState extends State<_MapLinkDialog> {
   late final TextEditingController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(text: widget.initialAddress);
+    _controller = TextEditingController(text: widget.initialLink);
   }
 
   @override
@@ -439,22 +425,63 @@ class _AddressDialogState extends State<_AddressDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(
-        'locationDialogTitle'.tr(),
-        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
-      ),
-      content: TextField(
-        controller: _controller,
-        autofocus: true,
-        maxLines: 2,
-        textInputAction: TextInputAction.done,
-        onSubmitted: _dismiss,
-        decoration: InputDecoration(
-          hintText: 'locationDialogHint'.tr(),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12.r),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+      title: Row(
+        children: [
+          Container(
+            width: 36.w,
+            height: 36.w,
+            decoration: BoxDecoration(
+              color: AppTheme.primarySoft,
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            child: const Icon(
+              Icons.link_rounded,
+              size: 18,
+              color: AppTheme.primaryColor,
+            ),
           ),
-        ),
+          SizedBox(width: 10.w),
+          Expanded(
+            child: Text(
+              'locationLinkTitle'.tr(),
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15.sp),
+            ),
+          ),
+        ],
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            controller: _controller,
+            autofocus: true,
+            maxLines: 1,
+            keyboardType: TextInputType.url,
+            textInputAction: TextInputAction.done,
+            textDirection: ui.TextDirection.ltr,
+            onSubmitted: _dismiss,
+            decoration: InputDecoration(
+              hintText: 'locationLinkHint'.tr(),
+              prefixIcon: const Icon(Icons.paste_rounded, size: 18),
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            'locationLinkHelp'.tr(),
+            style: TextStyle(
+              fontSize: 11.sp,
+              height: 1.4,
+              color: Colors.grey.shade500,
+            ),
+          ),
+        ],
       ),
       actions: [
         TextButton(
@@ -464,7 +491,7 @@ class _AddressDialogState extends State<_AddressDialog> {
         FilledButton(
           onPressed: () => _dismiss(_controller.text),
           style: FilledButton.styleFrom(backgroundColor: widget.accentColor),
-          child: Text('locationAddressConfirm'.tr()),
+          child: Text('locationLinkConfirm'.tr()),
         ),
       ],
     );

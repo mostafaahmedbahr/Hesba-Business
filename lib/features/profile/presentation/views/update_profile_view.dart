@@ -286,20 +286,23 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
     );
   }
 
-  /// يفتح اختيار مصدر صورة المحل.
+  /// يفتح اختيار مصدر الصورة، وما بيظهرش تحميل غير بعد ما الصورة نفسها تتجهز.
   Future<void> _chooseShopImage() async {
     if (_uploadingImage) return;
     final source = await pickShopImageSource(context);
     if (source == null || !mounted) return;
-    await _uploadShopImage(source);
+    final file =
+        await sl<CloudinaryImageService>().pickShopImage(source: source);
+    if (file == null || !mounted) return;
+    await _uploadShopImage(file);
   }
 
   /// يرفع الصورة إلى Cloudinary ويحتفظ بالرابط الآمن فقط.
-  Future<void> _uploadShopImage(ImageSource source) async {
+  Future<void> _uploadShopImage(XFile file) async {
     setState(() => _uploadingImage = true);
     String? imageUrl;
     try {
-      imageUrl = await sl<CloudinaryImageService>().uploadShopImage(source: source);
+      imageUrl = await sl<CloudinaryImageService>().uploadShopImage(file: file);
     } on CloudinaryUploadException catch (error) {
       if (!mounted) return;
       AppToast.error(context, shopImageUploadErrorMessage(error));

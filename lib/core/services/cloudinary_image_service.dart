@@ -69,9 +69,24 @@ Transformation get shopImageTransformation =>
         ..delivery(Delivery.format(Format.auto))
         ..delivery(Delivery.quality(Quality.auto()));
 
-  Future<String?> uploadShopImage({required ImageSource source}) {
+  /// Opens the native picker and returns the resized/compressed file.
+  ///
+  /// Callers pick *first* and only then show the uploading state, so no
+  /// spinner ever appears while the gallery/camera UI is still open.
+  Future<XFile?> pickShopImage({required ImageSource source}) {
+    return _picker.pickImage(
+      source: source,
+      maxWidth: 1600,
+      maxHeight: 1600,
+      imageQuality: 82,
+    );
+  }
+
+  /// Uploads an already-picked [file], or picks one from [source] first.
+  Future<String?> uploadShopImage({ImageSource? source, XFile? file}) {
     return _upload(
       source: source,
+      file: file,
       folder: AppConstants.cloudinaryShopImageFolder,
       preset: AppConstants.cloudinaryUploadPreset,
       verify: true,
@@ -82,9 +97,10 @@ Transformation get shopImageTransformation =>
   ///
   /// Same service and preset as the shop photo, but into its own folder and
   /// without the shop's eager transformation so the screenshot stays readable.
-  Future<String?> uploadPaymentReceipt({required ImageSource source}) {
+  Future<String?> uploadPaymentReceipt({ImageSource? source, XFile? file}) {
     return _upload(
       source: source,
+      file: file,
       folder: AppConstants.cloudinaryPaymentProofFolder,
       preset: AppConstants.cloudinaryReceiptUploadPreset,
       verify: false,
@@ -92,7 +108,8 @@ Transformation get shopImageTransformation =>
   }
 
   Future<String?> _upload({
-    required ImageSource source,
+    ImageSource? source,
+    XFile? file,
     required String folder,
     required String preset,
     required bool verify,
@@ -106,12 +123,8 @@ Transformation get shopImageTransformation =>
     }
 
     try {
-      final picked = await _picker.pickImage(
-        source: source,
-        maxWidth: 1600,
-        maxHeight: 1600,
-        imageQuality: 82,
-      );
+      final picked =
+          file ?? (source == null ? null : await pickShopImage(source: source));
       if (picked == null) return null;
 
       final bytes = await picked.readAsBytes();

@@ -103,6 +103,69 @@ void main() {
     });
   });
 
+  group('ShopLocation.fromMapLink', () {
+    test('pulls coordinates out of a Google Maps share link', () {
+      final location = ShopLocation.fromMapLink(
+        'https://www.google.com/maps/@30.04442,31.23571,17z?entry=tts',
+      );
+
+      expect(location?.latitude, 30.04442);
+      expect(location?.longitude, 31.23571);
+      expect(location?.hasCoordinates, isTrue);
+      expect(location?.locationUrl,
+          'https://www.google.com/maps/search/?api=1&query=30.04442,31.23571');
+    });
+
+    test('pulls coordinates out of a ?q= link', () {
+      final location = ShopLocation.fromMapLink(
+        'https://maps.google.com/?q=24.7136,46.6753',
+      );
+
+      expect(location?.latitude, 24.7136);
+      expect(location?.longitude, 46.6753);
+    });
+
+    test('accepts a geo: URI', () {
+      final location = ShopLocation.fromMapLink('geo:30.1,31.2');
+
+      expect(location?.latitude, 30.1);
+      expect(location?.longitude, 31.2);
+    });
+
+    test('keeps a short link without coordinates as a plain link', () {
+      final location =
+          ShopLocation.fromMapLink('https://maps.app.goo.gl/abc123');
+
+      expect(location?.hasCoordinates, isFalse);
+      expect(location?.locationUrl, 'https://maps.app.goo.gl/abc123');
+      expect(location?.hasAnyData, isTrue);
+    });
+
+    test('trims surrounding whitespace', () {
+      final location =
+          ShopLocation.fromMapLink('  https://maps.app.goo.gl/abc123  ');
+
+      expect(location?.locationUrl, 'https://maps.app.goo.gl/abc123');
+    });
+
+    test('rejects empty and non-link text', () {
+      expect(ShopLocation.fromMapLink(''), isNull);
+      expect(ShopLocation.fromMapLink('   '), isNull);
+      expect(ShopLocation.fromMapLink('الدقي، الجيزة'), isNull);
+    });
+
+    test('ignores out-of-range coordinates', () {
+      // No coordinates extracted, but a valid link is still kept as-is.
+      final kept = ShopLocation.fromMapLink(
+          'https://maps.google.com/@999.0,31.0');
+      expect(kept?.hasCoordinates, isFalse);
+      expect(kept?.locationUrl, 'https://maps.google.com/@999.0,31.0');
+
+      // Plain text with impossible coordinates is not a usable link.
+      expect(ShopLocation.fromMapLink('@999.0,31.0'), isNull);
+    });
+  });
+
   group('ShopLocation.resolveMapUrl', () {
     test('prefers a valid stored link', () {
       expect(

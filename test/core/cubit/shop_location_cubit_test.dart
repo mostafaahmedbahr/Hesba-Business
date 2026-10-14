@@ -188,6 +188,47 @@ void main() {
     });
   });
 
+  group('setFromMapLink', () {
+    test('rejects an empty link', () async {
+      await cubit.setFromMapLink('   ');
+
+      expect(cubit.state.status, ShopLocationStatus.failure);
+      expect(cubit.state.messageKey, 'locationLinkEmpty');
+      expect(cubit.state.hasLocation, isFalse);
+    });
+
+    test('rejects text that is not a usable link', () async {
+      await cubit.setFromMapLink('not a link');
+
+      expect(cubit.state.status, ShopLocationStatus.failure);
+      expect(cubit.state.messageKey, 'locationLinkInvalid');
+      expect(cubit.state.hasLocation, isFalse);
+    });
+
+    test('resolves a share link with coordinates', () async {
+      await cubit.setFromMapLink(
+        'https://www.google.com/maps/@30.04442,31.23571,17z',
+      );
+
+      expect(cubit.state.status, ShopLocationStatus.success);
+      expect(cubit.state.hasLocation, isTrue);
+      expect(cubit.state.location?.hasCoordinates, isTrue);
+      expect(cubit.state.location?.latitude, 30.04442);
+      expect(cubit.state.location?.longitude, 31.23571);
+      expect(cubit.state.messageKey, 'locationPicked');
+      expect(cubit.state.messageSeverity, ShopLocationMessageSeverity.success);
+    });
+
+    test('keeps a short link without coordinates', () async {
+      await cubit.setFromMapLink('https://maps.app.goo.gl/abc123');
+
+      expect(cubit.state.status, ShopLocationStatus.success);
+      expect(cubit.state.hasLocation, isTrue);
+      expect(cubit.state.location?.hasCoordinates, isFalse);
+      expect(cubit.state.location?.locationUrl, 'https://maps.app.goo.gl/abc123');
+    });
+  });
+
   group('restore and clear', () {
     test('restores a stored location silently', () {
       const stored = ShopLocation(

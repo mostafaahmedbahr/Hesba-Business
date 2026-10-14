@@ -134,10 +134,10 @@ class _ShopLocationPickerSheetState extends State<ShopLocationPickerSheet> {
                                     'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                                 userAgentPackageName: 'com.zerobugs.hesba',
                               ),
-                              const SimpleAttributionWidget(
-                                source: Text('OpenStreetMap'),
-                                alignment: Alignment.bottomLeft,
-                              ),
+                              // const SimpleAttributionWidget(
+                              //   source: Text('OpenSadfdstreetMap'),
+                              //   alignment: Alignment.bottomLeft,
+                              // ),
                             ],
                           ),
                         ),

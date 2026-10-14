@@ -60,6 +60,30 @@ class ShopLocationCubit extends Cubit<ShopLocationState> {
     )));
   }
 
+  /// A Google Maps link pasted by the owner: coordinates when the link
+  /// carries them, otherwise the link itself (still openable by the admin).
+  Future<void> setFromMapLink(String raw) async {
+    final link = raw.trim();
+    if (link.isEmpty) {
+      emit(state.copyWith(
+        status: ShopLocationStatus.failure,
+        messageKey: 'locationLinkEmpty',
+        messageSeverity: ShopLocationMessageSeverity.error,
+      ));
+      return;
+    }
+    final location = ShopLocation.fromMapLink(link);
+    if (location == null) {
+      emit(state.copyWith(
+        status: ShopLocationStatus.failure,
+        messageKey: 'locationLinkInvalid',
+        messageSeverity: ShopLocationMessageSeverity.error,
+      ));
+      return;
+    }
+    emit(_success(location));
+  }
+
   /// Address typed by the owner: converted into coordinates when possible,
   /// otherwise kept as text only (still valid for legacy readers).
   Future<void> setFromAddress(String address) async {

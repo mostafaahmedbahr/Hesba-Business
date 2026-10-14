@@ -106,6 +106,42 @@ class ShopLocation extends Equatable {
     return uri.isScheme('http') || uri.isScheme('https');
   }
 
+  /// First `lat,lng` pair inside a pasted link (`/@30.1,31.2,17z`,
+  /// `?q=30.1,31.2`, `ll=30.1,31.2`, `geo:30.1,31.2`, …).
+  static final RegExp _coordinatePair = RegExp(
+    r'([-+]?\d{1,3}\.\d+)\s*,\s*([-+]?\d{1,3}\.\d+)',
+  );
+
+  /// Parses a location link the owner copied from Google Maps.
+  ///
+  /// * Link with coordinates → real coordinates (+ the canonical map link).
+  /// * Short/human links (`maps.app.goo.gl/…`) → kept as [locationUrl] only,
+  ///   the admin's "open on Google Maps" button still works.
+  /// * Anything else → `null` (not a usable link).
+  static ShopLocation? fromMapLink(String raw) {
+    final link = raw.trim();
+    if (link.isEmpty) return null;
+
+    final match = _coordinatePair.firstMatch(link);
+    if (match != null) {
+      final latitude = double.tryParse(match.group(1)!);
+      final longitude = double.tryParse(match.group(2)!);
+      if (latitude != null &&
+          longitude != null &&
+          latitude >= -90 &&
+          latitude <= 90 &&
+          longitude >= -180 &&
+          longitude <= 180) {
+        return ShopLocation.fromCoordinates(latitude, longitude);
+      }
+    }
+
+    if (isValidWebUrl(link)) {
+      return ShopLocation(locationUrl: link);
+    }
+    return null;
+  }
+
   ShopLocation copyWith({
     double? latitude,
     double? longitude,
