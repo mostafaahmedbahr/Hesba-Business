@@ -11,6 +11,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/models/product.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/number_parser.dart';
 import '../../../../core/utils/toast.dart';
 import '../../../products/data/repos/products_repo.dart';
 import '../../data/models/sale_model.dart';
@@ -134,22 +135,22 @@ class _AddSaleViewState extends State<AddSaleView> {
       return SaleItemModel(
         productId: e.selectedProduct?.id ?? '',
         productName: e.name.text.trim(),
-        quantity: double.tryParse(e.quantity.text.trim()) ?? 0,
-        unitPrice: double.tryParse(e.price.text.trim()) ?? 0,
+        quantity: NumberParser.parseDouble(e.quantity.text),
+        unitPrice: NumberParser.parseDouble(e.price.text),
       );
     }).toList();
   }
 
   double get _subtotal {
     return _items.fold(0, (sum, e) {
-      final q = double.tryParse(e.quantity.text) ?? 0;
-      final p = double.tryParse(e.price.text) ?? 0;
+      final q = NumberParser.parseDouble(e.quantity.text);
+      final p = NumberParser.parseDouble(e.price.text);
       return sum + (q * p);
     });
   }
 
   double get _discount {
-    return double.tryParse(_discountController.text) ?? 0;
+    return NumberParser.parseDouble(_discountController.text);
   }
 
   double get _total {
@@ -173,13 +174,13 @@ class _AddSaleViewState extends State<AddSaleView> {
         AppToast.warning(innerContext, 'اسم المنتج مطلوب في السطر ${i + 1}');
         return;
       }
-      final q = double.tryParse(e.quantity.text.trim());
-      final p = double.tryParse(e.price.text.trim());
-      if (q == null || q <= 0) {
+      final q = NumberParser.parseDouble(e.quantity.text.trim());
+      final p = NumberParser.parseDouble(e.price.text.trim());
+      if (q <= 0) {
         AppToast.warning(innerContext, 'الكمية غير صحيحة في السطر ${i + 1}');
         return;
       }
-      if (p == null || p <= 0) {
+      if (p <= 0) {
         AppToast.warning(innerContext, 'السعر غير صحيح في السطر ${i + 1}');
         return;
       }

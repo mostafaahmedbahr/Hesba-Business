@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -70,12 +71,13 @@ class SubscriptionReceiptUpload extends StatelessWidget {
                   if (done) ...[
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8.r),
-                      child: Image.network(
-                        receiptUrl!,
+                      child: CachedNetworkImage(
+                        imageUrl: receiptUrl!,
                         width: 46.w,
                         height: 46.w,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => Icon(
+                        memCacheWidth: 200,
+                        errorWidget: (_, _, _) => Icon(
                           Icons.receipt_long_rounded,
                           size: 26.sp,
                           color: AppTheme.successColor,

@@ -54,6 +54,35 @@ service cloud.firestore {
         resource.data.get('role', null);
     }
 
+    // Owner-editable profile fields (updateProfile + FCM token only).
+    // Anything else on users/{uid} (shopId, email, createdAt, …) is
+    // admin-only, so a compromised client cannot escalate or reassign shops.
+    function onlyOwnerFields() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['ownerName', 'phone', 'shopName', 'businessType',
+          'shopPhone', 'address', 'state', 'city', 'shopImageUrl',
+          'updatedAt', 'locationUrl', 'latitude', 'longitude',
+          'locationAddress', 'fcmTokens', 'fcmTokensUpdatedAt']);
+    }
+
+    // Optional numeric field that, when present, must be a number >= 0.
+    // Tolerant of partial updates; blocks negative-money injection.
+    function nonNegative(field) {
+      return !(field in request.resource.data)
+        || (request.resource.data[field] is number
+          && request.resource.data[field] >= 0);
+    }
+
+    // Products: price is required and positive; everything else numeric
+    // must stay >= 0 (stock 0 = out of stock is legitimate).
+    function validProduct() {
+      return request.resource.data.price is number
+        && request.resource.data.price > 0
+        && nonNegative('costPrice')
+        && nonNegative('stock')
+        && nonNegative('lowStockThreshold');
+    }
+
     // Live subscription required for WRITES on business data.
     function subscriptionLive() {
       let sub = get(/databases/$(database)/documents/users/$(myUid())/subscription/current).data;
@@ -73,9 +102,11 @@ service cloud.firestore {
       // Registration creates the owner doc (no role field on create).
       allow create: if signedIn() && myUid() == userId
         && request.resource.data.get('role', 'owner') == 'owner';
-      // Owner edits own doc but can never touch `role`; admin can do all.
+      // Owner edits own doc but can never touch `role` or any field
+      // outside the profile allowlist; admin can do all.
       allow update: if isAdmin()
-        || (signedIn() && myUid() == userId && unchangedRole());
+        || (signedIn() && myUid() == userId && unchangedRole()
+          && onlyOwnerFields());
       allow delete: if false;
     }
 
@@ -112,9 +143,15 @@ service cloud.firestore {
     }
 
     // ── subscriptions mirror (admin dashboard reads) ─────────
+    // Clients may only ever write non-active statuses (trial signup,
+    // pending request, expiry). `active` comes exclusively from the admin
+    // approval transaction — a user can no longer spoof an active plan.
     match /subscriptions/{userId} {
       allow read: if signedIn() && (myUid() == userId || isAdmin());
-      allow create, update: if isAdmin() || (signedIn() && myUid() == userId);
+      allow create, update: if isAdmin() || (signedIn()
+        && myUid() == userId
+        && request.resource.data.get('status', '') in
+          ['trial', 'pending', 'expired', 'rejected']);
       allow delete: if isAdmin();
     }
 
@@ -126,7 +163,16 @@ service cloud.firestore {
       allow create: if signedIn()
         && request.resource.data.userId == myUid()
         && request.resource.data.status == 'pending'
-        && request.resource.data.amount > 0
+        // Amount is bound to the plan price — a tampered amount (e.g.
+        // amount: 1 for the yearly plan) is rejected before review.
+        && (
+             (request.resource.data.selectedPlan == 'monthly' && request.resource.data.amount == 99)
+             || (request.resource.data.selectedPlan == 'threeMonths' && request.resource.data.amount == 249)
+             || (request.resource.data.selectedPlan == 'sixMonths' && request.resource.data.amount == 449)
+             || (request.resource.data.selectedPlan == 'yearly' && request.resource.data.amount == 799)
+           )
+        && request.resource.data.paymentMethod in
+          ['instapay', 'vodafone_cash', 'etisalat_cash']
         && request.resource.data.paymentProofUrl.matches('https://.*');
 
       // Clients can never approve/reject their own rows — admin only.
@@ -153,10 +199,12 @@ service cloud.firestore {
         || sameShop(resource.data.shopId));
       allow create: if signedIn()
         && request.resource.data.ownerId == myUid()
+        && validProduct()
         && mayWriteShopData(request.resource.data.shopId);
       allow update: if isAdmin() || (signedIn()
         && resource.data.ownerId == myUid()
         && request.resource.data.ownerId == myUid()
+        && validProduct()
         && mayWriteShopData(resource.data.shopId));
       allow delete: if isAdmin() || (signedIn()
         && resource.data.ownerId == myUid()
@@ -169,6 +217,9 @@ service cloud.firestore {
         || sameShop(resource.data.shopId));
       allow create: if signedIn()
         && request.resource.data.ownerId == myUid()
+        && nonNegative('subtotal')
+        && nonNegative('discount')
+        && nonNegative('total')
         && mayWriteShopData(request.resource.data.shopId);
       // Sales are immutable from clients (returns are separate docs).
       allow update, delete: if isAdmin();
@@ -180,10 +231,12 @@ service cloud.firestore {
         || sameShop(resource.data.shopId));
       allow create: if signedIn()
         && request.resource.data.ownerId == myUid()
+        && nonNegative('amount')
         && mayWriteShopData(request.resource.data.shopId);
       allow update: if isAdmin() || (signedIn()
         && resource.data.ownerId == myUid()
         && request.resource.data.ownerId == myUid()
+        && nonNegative('amount')
         && mayWriteShopData(resource.data.shopId));
       allow delete: if isAdmin() || (signedIn()
         && resource.data.ownerId == myUid()
@@ -196,13 +249,18 @@ service cloud.firestore {
         || sameShop(resource.data.shopId));
       allow create: if signedIn()
         && request.resource.data.ownerId == myUid()
+        && nonNegative('total')
         && mayWriteShopData(request.resource.data.shopId);
       allow update, delete: if isAdmin();
     }
 
     // ── feedback (contact us) ────────────────────────────────
     match /feedback/{docId} {
-      allow create: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.title is string
+        && request.resource.data.title.size() <= 200
+        && request.resource.data.description is string
+        && request.resource.data.description.size() <= 2000;
       allow read: if isAdmin();
       allow update, delete: if false;
     }

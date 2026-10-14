@@ -12,6 +12,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/models/product.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/number_parser.dart';
 import '../../../../core/utils/toast.dart';
 import '../../../categories/data/repos/category_repo.dart';
 import '../../../categories/presentation/views/category_management_view.dart';
@@ -155,10 +156,13 @@ class _ProductFormViewState extends State<ProductFormView> {
     final category = _customCategory ? _customCategoryController.text.trim() : (_category ?? '');
     final size = _customSize ? _customSizeController.text.trim() : (_size ?? '');
     final code = _codeController.text.trim();
-    final costPrice = double.parse(_toLatin(_costPriceController.text));
-    final price = double.parse(_toLatin(_priceController.text));
-    final stock = int.parse(_toLatin(_stockController.text));
-    final lowStock = int.tryParse(_toLatin(_lowStockController.text)) ?? 5;
+    final costPrice = NumberParser.parseDouble(_costPriceController.text);
+    final price = NumberParser.parseDouble(_priceController.text);
+    final stock = NumberParser.parseInt(_stockController.text);
+    // Empty threshold keeps the historical default of 5.
+    final lowStock = _lowStockController.text.trim().isEmpty
+        ? 5
+        : NumberParser.parseInt(_lowStockController.text);
     final base = widget.product;
     final bool ok;
     if (_isEdit) {
@@ -258,9 +262,9 @@ class _ProductFormViewState extends State<ProductFormView> {
               ]),
               SizedBox(height: 12.h),
               Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Expanded(child: _field(controller: _stockController, label: 'productFormStock'.tr(), icon: Icons.numbers_rounded, keyboard: _numberKeyboard(), required: true, validator: (v) { if (v == null || v.trim().isEmpty) return 'validatorRequired'.tr(); final n = int.tryParse(_toLatin(v)); if (n == null || n < 0) return 'productsInvalidNumber'.tr(); return null; })),
+                Expanded(child: _field(controller: _stockController, label: 'productFormStock'.tr(), icon: Icons.numbers_rounded, keyboard: _numberKeyboard(), required: true, validator: (v) { if (v == null || v.trim().isEmpty) return 'validatorRequired'.tr(); final n = int.tryParse(NumberParser.toLatin(v)); if (n == null || n < 0) return 'productsInvalidNumber'.tr(); return null; })),
                 SizedBox(width: 10.w),
-                Expanded(child: _field(controller: _lowStockController, label: 'productFormLowStock'.tr(), icon: Icons.low_priority_rounded, keyboard: _numberKeyboard(), validator: (v) { if (v == null || v.trim().isEmpty) return null; final n = int.tryParse(_toLatin(v)); if (n == null || n < 0) return 'productsInvalidNumber'.tr(); return null; })),
+                Expanded(child: _field(controller: _lowStockController, label: 'productFormLowStock'.tr(), icon: Icons.low_priority_rounded, keyboard: _numberKeyboard(), validator: (v) { if (v == null || v.trim().isEmpty) return null; final n = int.tryParse(NumberParser.toLatin(v)); if (n == null || n < 0) return 'productsInvalidNumber'.tr(); return null; })),
               ]),
               SizedBox(height: 12.h),
               _profitPreview(),
@@ -302,62 +306,9 @@ class _ProductFormViewState extends State<ProductFormView> {
     );
   }
 
-  Widget _imagePreviewCard(bool isDark) {
-    final url = _imageUrlController.text.trim();
-    final hasImage = url.isNotEmpty && (url.startsWith('http://') || url.startsWith('https://'));
-    return Container(
-      height: 160.h,
-      decoration: BoxDecoration(
-        color: isDark ? AppTheme.darkSurface : Colors.white,
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB)),
-        boxShadow: AppTheme.cardShadow(context),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20.r),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            if (hasImage)
-              Image.network(url, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _placeholderPreview(isDark), loadingBuilder: (c, child, p) => p == null ? child : _placeholderPreview(isDark))
-            else
-              _placeholderPreview(isDark),
-            Positioned(
-              top: 10.h, right: 10.w,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-                decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.45), borderRadius: BorderRadius.circular(20.r)),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  Icon(Icons.image_rounded, size: 12.sp, color: Colors.white),
-                  SizedBox(width: 6.w),
-                  Text(hasImage ? 'معاينة الصورة' : 'بدون صورة', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w700, color: Colors.white)),
-                ]),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _placeholderPreview(bool isDark) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [AppTheme.primaryColor.withValues(alpha: 0.10), const Color(0xFF7C4DFF).withValues(alpha: 0.10)]),
-      ),
-      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Container(width: 56.w, height: 56.w, decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 12, offset: const Offset(0, 4))]), child: Icon(Icons.inventory_2_rounded, size: 26.sp, color: AppTheme.primaryColor)),
-        SizedBox(height: 10.h),
-        Text('صورة المنتج', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: isDark ? AppTheme.darkTextSecondary : const Color(0xFF64748B))),
-        SizedBox(height: 2.h),
-        Text('أضف رابط الصورة لمعاينتها هنا', style: TextStyle(fontSize: 11.sp, color: const Color(0xFF94A3B8))),
-      ]),
-    );
-  }
-
   Widget _profitPreview() {
-    final cost = double.tryParse(_toLatin(_costPriceController.text));
-    final price = double.tryParse(_toLatin(_priceController.text));
+    final cost = double.tryParse(NumberParser.toLatin(_costPriceController.text));
+    final price = double.tryParse(NumberParser.toLatin(_priceController.text));
     if (cost == null || price == null || cost <= 0 || price <= 0) return const SizedBox.shrink();
     final profit = price - cost;
     final margin = price > 0 ? (profit / price * 100) : 0;
@@ -452,7 +403,7 @@ class _ProductFormViewState extends State<ProductFormView> {
 
   String? _positiveNumber(String? v) {
     if (v == null || v.trim().isEmpty) return 'validatorRequired'.tr();
-    final n = double.tryParse(_toLatin(v));
+    final n = double.tryParse(NumberParser.toLatin(v));
     if (n == null) return 'validatorNumber'.tr();
     if (n <= 0) return 'validatorPositiveNumber'.tr();
     return null;
@@ -461,5 +412,4 @@ class _ProductFormViewState extends State<ProductFormView> {
   static TextInputType _numberKeyboard({bool decimal = false}) => TextInputType.numberWithOptions(decimal: decimal);
 }
 
-String _toLatin(String input) => input.replaceAll('٠', '0').replaceAll('١', '1').replaceAll('٢', '2').replaceAll('٣', '3').replaceAll('٤', '4').replaceAll('٥', '5').replaceAll('٦', '6').replaceAll('٧', '7').replaceAll('٨', '8').replaceAll('٩', '9').replaceAll('۰', '0').replaceAll('۱', '1').replaceAll('۲', '2').replaceAll('۳', '3').replaceAll('۴', '4').replaceAll('۵', '5').replaceAll('۶', '6').replaceAll('۷', '7').replaceAll('۸', '8').replaceAll('۹', '9');
 String _num(double value) => value == value.roundToDouble() ? value.toStringAsFixed(0) : value.toStringAsFixed(2);

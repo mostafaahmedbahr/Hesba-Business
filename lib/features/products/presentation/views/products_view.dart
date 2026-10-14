@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../common_imports.dart';

@@ -223,8 +223,9 @@ class _RegisterExtraStepState extends State<RegisterExtraStep> {
     if (value == null || value.trim().isEmpty) {
       return 'extraFieldEmpty'.tr();
     }
+    // https only: cleartext http is blocked on Android 9+ / iOS ATS anyway.
     final url = value.trim();
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    if (!url.startsWith('https://')) {
       return 'extraUrlInvalid'.tr();
     }
     try {

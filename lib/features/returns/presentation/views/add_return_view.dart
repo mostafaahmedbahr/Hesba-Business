@@ -10,6 +10,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/models/product.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/number_parser.dart';
 import '../../../../core/utils/toast.dart';
 import '../../../products/data/repos/products_repo.dart';
 import '../../../sales/data/models/sale_model.dart';
@@ -259,7 +260,7 @@ class _AddReturnViewState extends State<AddReturnView> {
     double sum = 0;
     for (final e in _entries.values) {
       if (!e.selected) continue;
-      final qty = double.tryParse(e.qtyController.text) ?? 0;
+      final qty = NumberParser.parseDouble(e.qtyController.text);
       sum += qty * e.saleItem.unitPrice;
     }
     return sum;
@@ -283,7 +284,7 @@ class _AddReturnViewState extends State<AddReturnView> {
     final list = <ReturnItemModel>[];
     for (final e in _entries.values) {
       if (!e.selected) continue;
-      final qty = double.tryParse(e.qtyController.text) ?? 0;
+      final qty = NumberParser.parseDouble(e.qtyController.text);
       if (qty <= 0) continue;
       list.add(ReturnItemModel(
         productId: e.saleItem.productId,
@@ -321,7 +322,7 @@ class _AddReturnViewState extends State<AddReturnView> {
     // Validate qty not exceed max
     for (final e in _entries.values) {
       if (!e.selected) continue;
-      final qty = double.tryParse(e.qtyController.text) ?? 0;
+      final qty = NumberParser.parseDouble(e.qtyController.text);
       if (qty > e.maxQty + 0.001) {
         AppToast.warning(innerContext, 'الكمية للإرجاع أكبر من المتاح لـ ${e.saleItem.productName} (المتاح: ${e.maxQty})');
         return;

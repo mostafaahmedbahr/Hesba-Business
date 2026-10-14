@@ -283,7 +283,12 @@ class SubscriptionRepoImpl implements SubscriptionRepo {
 
   /// Denormalised copy at `subscriptions/{userId}` so the admin dashboard can
   /// list/filter by status without reading every user's subcollection.
+  ///
+  /// Security rules let clients write every status *except* `active` — the
+  /// active stamp is written by the admin approval transaction only — so an
+  /// active mirror is skipped here instead of attempting a denied write.
   Future<void> _mirrorSubscription(String uid, SubscriptionModel model) async {
+    if (model.status == SubscriptionStatus.active) return;
     try {
       await _firestore.collection('subscriptions').doc(uid).set({
         'userId': uid,

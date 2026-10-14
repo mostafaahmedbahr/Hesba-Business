@@ -11,9 +11,20 @@ class Validators {
     return null;
   }
 
+  /// Same policy as change-password: 8+ chars with upper, lower and digit.
+  /// (Login never validates strength, so existing 6-char passwords keep working.)
   static String? password(String? value) {
     if (value == null || value.isEmpty) return 'أدخل كلمة المرور';
-    if (value.length < 6) return 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
+    if (value.length < 8) return 'كلمة المرور يجب أن تكون 8 أحرف على الأقل';
+    if (!RegExp(r'[A-Z]').hasMatch(value)) {
+      return 'كلمة المرور يجب أن تحتوي على حرف كبير (A-Z)';
+    }
+    if (!RegExp(r'[a-z]').hasMatch(value)) {
+      return 'كلمة المرور يجب أن تحتوي على حرف صغير (a-z)';
+    }
+    if (!RegExp(r'[0-9]').hasMatch(value)) {
+      return 'كلمة المرور يجب أن تحتوي على رقم';
+    }
     return null;
   }
 

@@ -5,7 +5,6 @@ import 'package:hesba/features/notifications/presentation/widgets/reminder_empty
 import 'package:hesba/features/notifications/presentation/widgets/reminder_enable_banner.dart';
 import 'package:hesba/features/notifications/presentation/widgets/reminder_header.dart';
 import '../../../../common_imports.dart';
-import '../../data/models/local_reminder.dart';
 import '../view_model/activity_cubit.dart';
 import '../view_model/activity_state.dart';
 import '../view_model/notification_state.dart';

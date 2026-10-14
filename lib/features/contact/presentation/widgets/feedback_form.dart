@@ -66,7 +66,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
             _label(theme, 'contactFormType'.tr()),
             SizedBox(height: 8.h),
             DropdownButtonFormField<String>(
-              value: _selectedType,
+              initialValue: _selectedType,
               autovalidateMode: AutovalidateMode.onUserInteraction,
               icon: const Icon(Icons.keyboard_arrow_down_rounded),
               borderRadius: BorderRadius.circular(14.r),

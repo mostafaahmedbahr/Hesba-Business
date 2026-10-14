@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -437,8 +438,9 @@ class _ReceiptPane extends StatelessWidget {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(AdminRadius.card),
-                  child: Image.network(url, height: 300, fit: BoxFit.contain,
-                      errorBuilder: (_, _, _) => adminEmpty(Icons.broken_image_outlined, 'تعذر تحميل الإيصال')),
+                  child: CachedNetworkImage(imageUrl: url, height: 300, fit: BoxFit.contain, memCacheHeight: 600,
+                      placeholder: (_, _) => const Center(child: CircularProgressIndicator()),
+                      errorWidget: (_, _, _) => adminEmpty(Icons.broken_image_outlined, 'تعذر تحميل الإيصال')),
                 ),
               ),
             ),
@@ -459,7 +461,15 @@ class _ReceiptFullScreen extends StatelessWidget {
       body: InteractiveViewer(
         minScale: 0.5,
         maxScale: 4,
-        child: Center(child: Image.network(url)),
+        child: Center(
+            child: CachedNetworkImage(
+          imageUrl: url,
+          memCacheHeight: 1600,
+          placeholder: (_, _) =>
+              const Center(child: CircularProgressIndicator()),
+          errorWidget: (_, _, _) =>
+              const Icon(Icons.broken_image_outlined, size: 48),
+        )),
       ),
     );
   }

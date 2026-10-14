@@ -269,7 +269,7 @@ class _ThemeItem extends StatelessWidget {
           color: const Color(0xFF2E7D32),
           trailing: Switch(
             value: isDark,
-            activeColor: const Color(0xFF1A4FD6),
+            activeThumbColor: const Color(0xFF1A4FD6),
             onChanged: (_) => context.read<SettingsCubit>().toggleTheme(),
           ),
         );
@@ -300,7 +300,7 @@ class _LanguageItem extends StatelessWidget {
           ),
           Switch(
             value: isEnglish,
-            activeColor: const Color(0xFF1A4FD6),
+            activeThumbColor: const Color(0xFF1A4FD6),
             onChanged: (_) {
               context.setLocale(
                 Locale(isEnglish ? 'ar' : 'en'),

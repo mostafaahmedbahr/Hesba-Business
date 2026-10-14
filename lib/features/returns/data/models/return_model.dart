@@ -97,13 +97,8 @@ class ReturnModel {
 
     final sub = (json['subtotal'] as num?)?.toDouble() ?? 0;
     final disc = (json['discount'] as num?)?.toDouble() ?? 0;
-    var tot = (json['total'] as num?)?.toDouble();
-    // Backward compat: old docs had total == subtotal (no discount field)
-    tot ??= sub - disc;
-    if (tot == 0 && disc == 0 && sub > 0) {
-      // old doc without discount: total == subtotal
-      tot = (json['total'] as num?)?.toDouble() ?? sub;
-    }
+    // Backward compat: old docs had total == subtotal (no discount field).
+    final tot = (json['total'] as num?)?.toDouble() ?? (sub - disc);
 
     return ReturnModel(
       returnId: json['returnId'] ?? '',
@@ -113,7 +108,7 @@ class ReturnModel {
       items: items,
       subtotal: sub,
       discount: disc,
-      total: tot ?? sub,
+      total: tot,
       reason: json['reason'] ?? '',
       note: json['note'] ?? '',
       createdAt: _parseDate(json['createdAt']),
