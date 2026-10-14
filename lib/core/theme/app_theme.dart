@@ -39,6 +39,7 @@ class AppTheme {
   static const Color mintLight = Color(0xFF34D399); // Light mint green
   static const Color violetDeep = Color(0xFF7C3AED); // Deep violet
   static const Color violetSoft = Color(0xFFA78BFA); // Soft violet
+  static const Color paleSlate = Color(0xFFCBD5E1); // Pale slate chevrons/dividers
 
   // ── Dark ─────────────────────────────────────────────
   static const Color darkBackground = Color(0xFF0B1120);
