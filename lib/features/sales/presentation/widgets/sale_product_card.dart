@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../core/models/product.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -84,7 +85,7 @@ class SaleProductCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20.r),
                   ),
                   child: Text(
-                    selectedProduct!.isOutOfStock ? 'خلصان' : 'متاح: ${selectedProduct!.stock}',
+                    selectedProduct!.isOutOfStock ? 'productOutOfStock'.tr() : 'productAvailableColon'.tr(namedArgs: {'stock': '${selectedProduct!.stock}'}),
                     style: TextStyle(
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w800,
@@ -152,7 +153,7 @@ class SaleProductCard extends StatelessWidget {
                           ),
                           title: Text(p.name, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700)),
                           subtitle: Text(
-                            '${p.price.toStringAsFixed(0)} ج.م • مخزون: ${p.stock}',
+                            'productPriceStock'.tr(namedArgs: {'price': p.price.toStringAsFixed(0), 'currency': 'currencyEGP'.tr(), 'stock': '${p.stock}'}),
                             style: TextStyle(fontSize: 11.sp, color: AppTheme.slateGray),
                           ),
                           trailing: p.isLowStock
@@ -181,7 +182,7 @@ class SaleProductCard extends StatelessWidget {
                 focusNode: focusNode,
                 style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w600),
                 decoration: InputDecoration(
-                  hintText: 'ابحث بالاسم أو الكود...',
+                  hintText: 'productSearchHint'.tr(),
                   hintStyle: TextStyle(fontSize: 12.5.sp, color: AppTheme.mutedGray),
                   prefixIcon: Container(
                     margin: EdgeInsets.all(8.w),
@@ -205,7 +206,7 @@ class SaleProductCard extends StatelessWidget {
                         )
                       : null,
                   filled: true,
-                  fillColor: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF6F8FC),
+                  fillColor: isDark ? AppTheme.darkSurfaceAlt : AppTheme.slatePale,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide.none),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14.r),
@@ -217,7 +218,7 @@ class SaleProductCard extends StatelessWidget {
                   ),
                   contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 13.h),
                 ),
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'اختار المنتج' : null,
+                validator: (v) => (v == null || v.trim().isEmpty) ? 'saleChooseProduct'.tr() : null,
               );
             },
             onSelected: (product) {
@@ -248,7 +249,7 @@ class SaleProductCard extends StatelessWidget {
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
                   decoration: BoxDecoration(
-                    color: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF6F8FC),
+                    color: isDark ? AppTheme.darkSurfaceAlt : AppTheme.slatePale,
                     borderRadius: BorderRadius.circular(14.r),
                     border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft),
                   ),
@@ -267,7 +268,7 @@ class SaleProductCard extends StatelessWidget {
                             final q = double.tryParse(v ?? '');
                             if (q == null || q <= 0) return '!';
                             if (selectedProduct != null && q > selectedProduct!.stock) {
-                              return 'المتاح ${selectedProduct!.stock}';
+                              return 'productAvailable'.tr(namedArgs: {'stock': '${selectedProduct!.stock}'});
                             }
                             return null;
                           },
@@ -285,11 +286,11 @@ class SaleProductCard extends StatelessWidget {
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w700),
                   decoration: InputDecoration(
-                    labelText: 'السعر',
-                    suffixText: 'ج.م',
+                    labelText: 'productPrice'.tr(),
+                    suffixText: 'currencyEGP'.tr(),
                     prefixIcon: Icon(Icons.payments_outlined, size: 18.sp, color: AppTheme.primaryColor),
                     filled: true,
-                    fillColor: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF6F8FC),
+                    fillColor: isDark ? AppTheme.darkSurfaceAlt : AppTheme.slatePale,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide.none),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14.r),
@@ -330,7 +331,7 @@ class SaleProductCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20.r),
                     ),
                     child: Text(
-                      '= ${lineTotal.toStringAsFixed(2)} ج.م',
+                      'productLineTotal'.tr(namedArgs: {'total': lineTotal.toStringAsFixed(2), 'currency': 'currencyEGP'.tr()}),
                       style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w800, color: AppTheme.successDark),
                     ),
                   ),

@@ -9,10 +9,14 @@ class ReturnsState extends Equatable {
   final ReturnModel? ret;
   final String? errorMessage;
 
+  /// Interpolation args when [errorMessage] is a translation key.
+  final Map<String, String>? errorArgs;
+
   const ReturnsState({
     this.status = ReturnsStatus.initial,
     this.ret,
     this.errorMessage,
+    this.errorArgs,
   });
 
   static const _sentinel = Object();
@@ -21,14 +25,16 @@ class ReturnsState extends Equatable {
     ReturnsStatus? status,
     ReturnModel? ret,
     Object? errorMessage = _sentinel,
+    Object? errorArgs = _sentinel,
   }) {
     return ReturnsState(
       status: status ?? this.status,
       ret: ret ?? this.ret,
       errorMessage: identical(errorMessage, _sentinel) ? this.errorMessage : errorMessage as String?,
+      errorArgs: identical(errorArgs, _sentinel) ? this.errorArgs : errorArgs as Map<String, String>?,
     );
   }
 
   @override
-  List<Object?> get props => [status, ret, errorMessage];
+  List<Object?> get props => [status, ret, errorMessage, errorArgs];
 }

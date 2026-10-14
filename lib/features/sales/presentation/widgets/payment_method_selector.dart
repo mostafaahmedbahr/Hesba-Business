@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../common_imports.dart';
 
@@ -22,9 +23,9 @@ class PaymentMethodSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final methods = [
-      _Method(AppConstants.paymentCash, 'نقدي', Icons.money_rounded, const [AppTheme.successDark, Color(0xFF34D399)]),
-      _Method(AppConstants.paymentCard, 'بطاقة', Icons.credit_card_rounded, const [AppTheme.primaryColor, AppTheme.brightBlue]),
-      _Method(AppConstants.paymentMobileWallet, 'محفظة', Icons.account_balance_wallet_rounded, const [Color(0xFF7C3AED), Color(0xFFA78BFA)]),
+      _Method(AppConstants.paymentCash, 'payCash', Icons.money_rounded, const [AppTheme.successDark, AppTheme.mintLight]),
+      _Method(AppConstants.paymentCard, 'payCard', Icons.credit_card_rounded, const [AppTheme.primaryColor, AppTheme.brightBlue]),
+      _Method(AppConstants.paymentMobileWallet, 'payWallet', Icons.account_balance_wallet_rounded, const [AppTheme.violetDeep, AppTheme.violetSoft]),
     ];
     return Row(
       children: [
@@ -75,7 +76,7 @@ class _PayCard extends StatelessWidget {
         padding: EdgeInsets.symmetric(vertical: 13.h),
         decoration: BoxDecoration(
           gradient: selected ? LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: method.gradient) : null,
-          color: selected ? null : (isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF6F8FC)),
+          color: selected ? null : (isDark ? AppTheme.darkSurfaceAlt : AppTheme.slatePale),
           borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
             color: selected ? Colors.transparent : (isDark ? AppTheme.darkBorder : AppTheme.borderSoft),
@@ -94,11 +95,11 @@ class _PayCard extends StatelessWidget {
             ),
             SizedBox(height: 6.h),
             Text(
-              method.label,
+              method.label.tr(),
               style: TextStyle(
                 fontSize: 12.sp,
                 fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
-                color: selected ? Colors.white : (isDark ? AppTheme.darkTextSecondary : const Color(0xFF475569)),
+                color: selected ? Colors.white : (isDark ? AppTheme.darkTextSecondary : AppTheme.slateDark),
               ),
             ),
           ],

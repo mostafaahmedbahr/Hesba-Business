@@ -1,4 +1,5 @@
 import 'package:hesba/core/widgets/loading_widget.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../common_imports.dart';
 
@@ -8,7 +9,7 @@ class SalesListLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const LoadingWidget(message: 'جاري تحميل المبيعات...');
+    return LoadingWidget(message: 'salesLoading'.tr());
   }
 }
 
@@ -28,9 +29,9 @@ class SalesListEmpty extends StatelessWidget {
           children: [
             Container(width: 96.w, height: 96.w, decoration: BoxDecoration(color: AppTheme.primaryColor.withValues(alpha: 0.10), shape: BoxShape.circle), child: Icon(Icons.receipt_long_rounded, size: 44.sp, color: AppTheme.primaryColor)),
             SizedBox(height: 16.h),
-            Text('لا توجد مبيعات بعد', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
+            Text('salesEmpty'.tr(), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
             SizedBox(height: 8.h),
-            Text('ابدأ بتسجيل أول عملية بيع وتابع أرباحك', textAlign: TextAlign.center, style: TextStyle(fontSize: 12.sp, color: AppTheme.slateGray, height: 1.5)),
+            Text('salesEmptyHint'.tr(), textAlign: TextAlign.center, style: TextStyle(fontSize: 12.sp, color: AppTheme.slateGray, height: 1.5)),
             SizedBox(height: 20.h),
             SizedBox(
               width: double.infinity,
@@ -39,7 +40,7 @@ class SalesListEmpty extends StatelessWidget {
                 onPressed: onAdd,
                 style: FilledButton.styleFrom(backgroundColor: AppTheme.primaryColor, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r))),
                 icon: const Icon(Icons.add_rounded),
-                label: Text('إضافة بيع جديد', style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w800)),
+                label: Text('salesAddNew'.tr(), style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w800)),
               ),
             ),
           ],
@@ -63,9 +64,9 @@ class SalesListNoResults extends StatelessWidget {
       child: Column(children: [
         Container(width: 56.w, height: 56.w, decoration: BoxDecoration(color: const Color(0xFFEEF2FF), shape: BoxShape.circle), child: Icon(Icons.search_off_rounded, size: 28.sp, color: AppTheme.primaryColor)),
         SizedBox(height: 12.h),
-        Text('لا توجد نتائج', style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : AppTheme.ink)),
+        Text('searchEmpty'.tr(), style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : AppTheme.ink)),
         SizedBox(height: 6.h),
-        Text('جرّب كلمة بحث أخرى أو غيّر الفلتر', style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray)),
+        Text('searchNoResults'.tr(), style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray)),
       ]),
     );
   }
@@ -90,7 +91,7 @@ class SalesListError extends StatelessWidget {
             children: [
               Container(width: 56.w, height: 56.w, decoration: BoxDecoration(color: AppTheme.dangerSoft, shape: BoxShape.circle), child: Icon(Icons.error_outline_rounded, size: 28.sp, color: AppTheme.danger)),
               SizedBox(height: 12.h),
-              Text('حدث خطأ: $message', textAlign: TextAlign.center, style: TextStyle(fontSize: 12.5.sp, color: isDark ? Colors.white : AppTheme.ink)),
+              Text('errorWithMessage'.tr(namedArgs: {'message': message}), textAlign: TextAlign.center, style: TextStyle(fontSize: 12.5.sp, color: isDark ? Colors.white : AppTheme.ink)),
             ],
           ),
         ),
@@ -110,7 +111,7 @@ class SalesListNoShop extends StatelessWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
         child: Text(
-          'لم يتم العثور على المتجر',
+          'shopNotFound'.tr(),
           style: TextStyle(
             fontSize: 14.sp,
             fontWeight: FontWeight.w800,

@@ -1,4 +1,5 @@
 import '../../../../common_imports.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// بحث + فلاتر الأسباب.
 class ReturnsListSearch extends StatefulWidget {
@@ -43,9 +44,9 @@ class _ReturnsListSearchState extends State<ReturnsListSearch> {
           textInputAction: TextInputAction.search,
           style: TextStyle(fontSize: 13.5.sp),
           decoration: InputDecoration(
-            hintText: 'ابحث بكود المرتجع أو المنتج أو السبب',
+            hintText: 'retSearchHint'.tr(),
             hintStyle: TextStyle(fontSize: 12.5.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
-            prefixIcon: Container(margin: EdgeInsets.all(8.w), width: 36.w, height: 36.w, decoration: BoxDecoration(color: AppTheme.warningAmber.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10.r)), child: Icon(Icons.search_rounded, size: 18.sp, color: const Color(0xFFD97706))),
+            prefixIcon: Container(margin: EdgeInsets.all(8.w), width: 36.w, height: 36.w, decoration: BoxDecoration(color: AppTheme.warningAmber.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10.r)), child: Icon(Icons.search_rounded, size: 18.sp, color: AppTheme.amberDeep)),
             suffixIcon: widget.query.isEmpty
                 ? null
                 : IconButton(

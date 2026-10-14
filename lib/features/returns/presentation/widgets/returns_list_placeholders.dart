@@ -1,4 +1,5 @@
 import 'package:hesba/core/widgets/loading_widget.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../common_imports.dart';
 
@@ -8,7 +9,7 @@ class ReturnsListLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const LoadingWidget(message: 'جاري تحميل المرتجعات...');
+    return LoadingWidget(message: 'retLoading'.tr());
   }
 }
 
@@ -30,12 +31,12 @@ class ReturnsListEmpty extends StatelessWidget {
               width: 96.w,
               height: 96.w,
               decoration: BoxDecoration(gradient: LinearGradient(colors: [AppTheme.warningAmber.withValues(alpha: 0.16), AppTheme.goldLight.withValues(alpha: 0.16)]), shape: BoxShape.circle),
-              child: Icon(Icons.assignment_return_rounded, size: 44.sp, color: const Color(0xFFD97706)),
+              child: Icon(Icons.assignment_return_rounded, size: 44.sp, color: AppTheme.amberDeep),
             ),
             SizedBox(height: 16.h),
-            Text('لا توجد مرتجعات بعد', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
+            Text('retEmpty'.tr(), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
             SizedBox(height: 8.h),
-            Text('سجل أول مرتجع وسيتم تحديث المخزون تلقائياً', textAlign: TextAlign.center, style: TextStyle(fontSize: 12.sp, color: AppTheme.slateGray, height: 1.5)),
+            Text('retEmptyHint'.tr(), textAlign: TextAlign.center, style: TextStyle(fontSize: 12.sp, color: AppTheme.slateGray, height: 1.5)),
             SizedBox(height: 20.h),
             SizedBox(
               width: double.infinity,
@@ -44,7 +45,7 @@ class ReturnsListEmpty extends StatelessWidget {
                 onPressed: onAdd,
                 style: FilledButton.styleFrom(backgroundColor: AppTheme.warningAmber, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r))),
                 icon: const Icon(Icons.add_rounded),
-                label: Text('إضافة مرتجع', style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w800)),
+                label: Text('retAddNew'.tr(), style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w800)),
               ),
             ),
           ],
@@ -68,9 +69,9 @@ class ReturnsListNoResults extends StatelessWidget {
       child: Column(children: [
         Container(width: 56.w, height: 56.w, decoration: BoxDecoration(color: const Color(0xFFFFF7ED), shape: BoxShape.circle), child: Icon(Icons.search_off_rounded, size: 28.sp, color: const Color(0xFFFB923C))),
         SizedBox(height: 12.h),
-        Text('لا توجد نتائج', style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : AppTheme.ink)),
+        Text('searchEmpty'.tr(), style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : AppTheme.ink)),
         SizedBox(height: 6.h),
-        Text('جرّب كلمة بحث أخرى أو غيّر الفلتر', style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray)),
+        Text('searchNoResults'.tr(), style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray)),
       ]),
     );
   }
@@ -95,7 +96,7 @@ class ReturnsListError extends StatelessWidget {
             children: [
               Container(width: 56.w, height: 56.w, decoration: BoxDecoration(color: AppTheme.dangerSoft, shape: BoxShape.circle), child: Icon(Icons.error_outline_rounded, size: 28.sp, color: AppTheme.danger)),
               SizedBox(height: 12.h),
-              Text('حدث خطأ: $message', textAlign: TextAlign.center, style: TextStyle(fontSize: 12.5.sp, color: isDark ? Colors.white : AppTheme.ink)),
+              Text('errorWithMessage'.tr(namedArgs: {'message': message}), textAlign: TextAlign.center, style: TextStyle(fontSize: 12.5.sp, color: isDark ? Colors.white : AppTheme.ink)),
             ],
           ),
         ),
@@ -113,10 +114,10 @@ class ReturnsListNoShop extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(title: const Text('المرتجعات'), centerTitle: true),
+      appBar: AppBar(title: Text('retTitle'.tr()), centerTitle: true),
       body: Center(
         child: Text(
-          'لم يتم العثور على المتجر',
+          'shopNotFound'.tr(),
           style: TextStyle(
             fontSize: 14.sp,
             fontWeight: FontWeight.w800,

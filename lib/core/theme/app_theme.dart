@@ -40,6 +40,13 @@ class AppTheme {
   static const Color violetDeep = Color(0xFF7C3AED); // Deep violet
   static const Color violetSoft = Color(0xFFA78BFA); // Soft violet
   static const Color paleSlate = Color(0xFFCBD5E1); // Pale slate chevrons/dividers
+  static const Color amberDark = Color(0xFFB45309); // Deep amber accents
+  static const Color amberDeep = Color(0xFFD97706); // Dark amber badges
+  static const Color blueBright = Color(0xFF2563EB); // Bright link blue
+  static const Color rosePale = Color(0xFFFFD1D1); // Pale rose highlights
+  static const Color goldSoft = Color(0xFFFFD54F); // Soft gold highlights
+  static const Color slatePale = Color(0xFFF6F8FC); // Pale slate surfaces
+  static const Color slateDark = Color(0xFF475569); // Dark slate text
 
   // ── Dark ─────────────────────────────────────────────
   static const Color darkBackground = Color(0xFF0B1120);

@@ -29,7 +29,7 @@ class SalesCubit extends Cubit<SalesState> {
       emit(
         state.copyWith(
           status: SalesStatus.error,
-          errorMessage: 'أضف منتج واحد على الأقل',
+          errorMessage: 'saleErrMinOne',
         ),
       );
       return;
@@ -39,21 +39,23 @@ class SalesCubit extends Cubit<SalesState> {
       if (item.productName.trim().isEmpty) {
         emit(state.copyWith(
           status: SalesStatus.error,
-          errorMessage: 'اسم المنتج مطلوب في أحد الأسطر',
+          errorMessage: 'saleErrNameRequired',
         ));
         return;
       }
       if (item.quantity <= 0) {
         emit(state.copyWith(
           status: SalesStatus.error,
-          errorMessage: 'الكمية يجب أن تكون أكبر من صفر: ${item.productName}',
+          errorMessage: 'saleErrQtyPositive',
+          errorArgs: {'name': item.productName},
         ));
         return;
       }
       if (item.unitPrice <= 0) {
         emit(state.copyWith(
           status: SalesStatus.error,
-          errorMessage: 'السعر يجب أن يكون أكبر من صفر: ${item.productName}',
+          errorMessage: 'saleErrPricePositive',
+          errorArgs: {'name': item.productName},
         ));
         return;
       }
@@ -62,7 +64,7 @@ class SalesCubit extends Cubit<SalesState> {
     if (discount < 0) {
       emit(state.copyWith(
         status: SalesStatus.error,
-        errorMessage: 'الخصم لا يمكن أن يكون سالباً',
+        errorMessage: 'saleErrDiscountNegative',
       ));
       return;
     }

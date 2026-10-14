@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,6 +11,7 @@ import '../../../../core/di/service_locator.dart';
 import '../../../../core/models/product.dart';
 import '../../../../core/services/shop_resolver.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/error_message.dart';
 import '../../../../core/utils/number_parser.dart';
 import '../../../../core/utils/toast.dart';
 import '../../../products/data/repos/products_repo.dart';
@@ -155,7 +157,7 @@ class _AddSaleViewState extends State<AddSaleView> {
     if (!await SubscriptionGate.ensureCanModify(innerContext)) return;
     if (!innerContext.mounted) return;
     if (!_formKey.currentState!.validate()) {
-      AppToast.warning(innerContext, 'راجع بيانات المنتجات');
+      AppToast.warning(innerContext, 'saleReviewData'.tr());
       return;
     }
 
@@ -163,27 +165,27 @@ class _AddSaleViewState extends State<AddSaleView> {
     for (int i = 0; i < _items.length; i++) {
       final e = _items[i];
       if (e.name.text.trim().isEmpty) {
-        AppToast.warning(innerContext, 'اسم المنتج مطلوب في السطر ${i + 1}');
+        AppToast.warning(innerContext, 'saleNameRequiredRow'.tr(namedArgs: {'i': '${i + 1}'}));
         return;
       }
       final q = NumberParser.parseDouble(e.quantity.text.trim());
       final p = NumberParser.parseDouble(e.price.text.trim());
       if (q <= 0) {
-        AppToast.warning(innerContext, 'الكمية غير صحيحة في السطر ${i + 1}');
+        AppToast.warning(innerContext, 'saleQtyInvalidRow'.tr(namedArgs: {'i': '${i + 1}'}));
         return;
       }
       if (p <= 0) {
-        AppToast.warning(innerContext, 'السعر غير صحيح في السطر ${i + 1}');
+        AppToast.warning(innerContext, 'salePriceInvalidRow'.tr(namedArgs: {'i': '${i + 1}'}));
         return;
       }
       if (e.selectedProduct != null && q > e.selectedProduct!.stock) {
-        AppToast.warning(innerContext, 'الكمية أكبر من المتاح (${e.selectedProduct!.stock}) في ${e.name.text}');
+        AppToast.warning(innerContext, 'saleQtyExceeds'.tr(namedArgs: {'stock': '${e.selectedProduct!.stock}', 'name': e.name.text}));
         return;
       }
     }
 
     if (_resolvedShopId == null || _resolvedShopId!.isEmpty) {
-      AppToast.error(innerContext, 'لم يتم العثور على بيانات المتجر');
+      AppToast.error(innerContext, 'noShopData'.tr());
       return;
     }
 
@@ -221,11 +223,11 @@ class _AddSaleViewState extends State<AddSaleView> {
           return BlocListener<SalesCubit, SalesState>(
             listener: (ctx, state) {
               if (state.status == SalesStatus.success) {
-                AppToast.success(ctx, 'تم حفظ عملية البيع بنجاح');
+                AppToast.success(ctx, 'saleSaved'.tr());
                 Navigator.pop(ctx, true);
               }
               if (state.status == SalesStatus.error) {
-                AppToast.error(ctx, state.errorMessage ?? 'حدث خطأ');
+                AppToast.error(ctx, translateError(state.errorMessage, state.errorArgs));
               }
             },
             child: Scaffold(
@@ -251,7 +253,7 @@ class _AddSaleViewState extends State<AddSaleView> {
                               // عنوان الأصناف + المتاح.
                               Row(
                                 children: [
-                                  Text('الأصناف', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
+                                  Text('saleItemsTitle'.tr(), style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
                                   SizedBox(width: 8.w),
                                   Container(
                                     padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 4.h),
@@ -262,11 +264,11 @@ class _AddSaleViewState extends State<AddSaleView> {
                                   if (_loadingProducts)
                                     SizedBox(width: 16.w, height: 16.w, child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primaryColor))
                                   else
-                                    Text('${_availableProducts.length} متاح بالمخزون', style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600)),
+                                    Text('saleAvailableStock'.tr(namedArgs: {'n': '${_availableProducts.length}'}), style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600)),
                                 ],
                               ),
                               SizedBox(height: 4.h),
-                              Text('ابحث واختار من المخزون أو اكتب صنف يدوياً', style: TextStyle(fontSize: 11.5.sp, color: AppTheme.mutedGray)),
+                              Text('saleSearchHint'.tr(), style: TextStyle(fontSize: 11.5.sp, color: AppTheme.mutedGray)),
                               SizedBox(height: 12.h),
 
                               // كروت الأصناف.
@@ -287,7 +289,7 @@ class _AddSaleViewState extends State<AddSaleView> {
                                     onChanged: _onRecalc,
                                     onDelete: () {
                                       if (_items.length == 1) {
-                                        AppToast.warning(innerContext, 'يجب أن يبقى صنف واحد على الأقل');
+                                        AppToast.warning(innerContext, 'saleMinOneRow'.tr());
                                         return;
                                       }
                                       _removeItem(index);
@@ -313,7 +315,7 @@ class _AddSaleViewState extends State<AddSaleView> {
                                     children: [
                                       Icon(Icons.add_circle_outline_rounded, size: 19.sp, color: AppTheme.primaryColor),
                                       SizedBox(width: 8.w),
-                                      Text('إضافة صنف آخر', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: AppTheme.primaryColor)),
+                                      Text('saleAddAnother'.tr(), style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: AppTheme.primaryColor)),
                                     ],
                                   ),
                                 ),
@@ -321,7 +323,7 @@ class _AddSaleViewState extends State<AddSaleView> {
                               SizedBox(height: 20.h),
 
                               // الدفع.
-                              Text('طريقة الدفع', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
+                              Text('salePaymentMethod'.tr(), style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
                               SizedBox(height: 10.h),
                               PaymentMethodSelector(
                                 value: _paymentMethod,
@@ -330,7 +332,7 @@ class _AddSaleViewState extends State<AddSaleView> {
                               SizedBox(height: 20.h),
 
                               // الخصم + ملاحظة.
-                              Text('إضافات', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
+                              Text('saleExtras'.tr(), style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
                               SizedBox(height: 10.h),
                               Container(
                                 padding: EdgeInsets.all(14.w),
@@ -346,9 +348,9 @@ class _AddSaleViewState extends State<AddSaleView> {
                                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                     style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w700),
                                     decoration: InputDecoration(
-                                      labelText: 'الخصم',
+                                      labelText: 'saleDiscountLabel'.tr(),
                                       hintText: '0',
-                                      suffixText: 'ج.م',
+                                      suffixText: 'currencyEGP'.tr(),
                                       prefixIcon: Container(
                                         margin: EdgeInsets.all(8.w),
                                         width: 34.w,
@@ -366,8 +368,8 @@ class _AddSaleViewState extends State<AddSaleView> {
                                     validator: (v) {
                                       if (v == null || v.isEmpty) return null;
                                       final d = double.tryParse(v);
-                                      if (d == null) return 'رقم غير صحيح';
-                                      if (d < 0) return 'لا يمكن أن يكون سالباً';
+                                      if (d == null) return 'saleDiscountInvalid'.tr();
+                                      if (d < 0) return 'saleDiscountNegative'.tr();
                                       return null;
                                     },
                                     onChanged: (_) => _onRecalc(),
@@ -378,8 +380,8 @@ class _AddSaleViewState extends State<AddSaleView> {
                                     maxLines: 2,
                                     style: TextStyle(fontSize: 13.sp),
                                     decoration: InputDecoration(
-                                      labelText: 'ملاحظة (اختياري)',
-                                      hintText: 'مثال: بيع لعميل دائم...',
+                                      labelText: 'saleNoteLabel'.tr(),
+                                      hintText: 'saleNoteHint'.tr(),
                                       hintStyle: TextStyle(fontSize: 12.sp, color: AppTheme.mutedGray),
                                       prefixIcon: Container(
                                         margin: EdgeInsets.all(8.w),
@@ -435,12 +437,12 @@ class _AddSaleViewState extends State<AddSaleView> {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('الإجمالي', style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600)),
+                            Text('saleTotalLabel'.tr(), style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600)),
                             FittedBox(
                               fit: BoxFit.scaleDown,
                               alignment: AlignmentDirectional.centerStart,
                               child: Text(
-                                '${_total.toStringAsFixed(_total == _total.roundToDouble() ? 0 : 2)} ج.م',
+                                'saleTotalAmount'.tr(namedArgs: {'total': _total.toStringAsFixed(_total == _total.roundToDouble() ? 0 : 2), 'currency': 'currencyEGP'.tr()}),
                                 style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w900, color: AppTheme.successDark, height: 1.1),
                               ),
                             ),
@@ -498,7 +500,7 @@ class _AddHeader extends StatelessWidget {
         ),
         onPressed: () => Navigator.pop(context),
       ),
-      title: Text('بيع جديد', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w800, color: Colors.white)),
+      title: Text('saleNewTitle'.tr(), style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w800, color: Colors.white)),
       flexibleSpace: FlexibleSpaceBar(
         collapseMode: CollapseMode.parallax,
         background: Container(
@@ -518,7 +520,7 @@ class _AddHeader extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('إجمالي الفاتورة', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600, color: Colors.white.withValues(alpha: 0.85))),
+                          Text('saleInvoiceTotal'.tr(), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600, color: Colors.white.withValues(alpha: 0.85))),
                           SizedBox(height: 4.h),
                           FittedBox(
                             fit: BoxFit.scaleDown,
@@ -533,7 +535,7 @@ class _AddHeader extends StatelessWidget {
                                 SizedBox(width: 7.w),
                                 Padding(
                                   padding: EdgeInsets.only(bottom: 5.h),
-                                  child: Text('ج.م', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.88))),
+                                  child: Text('currencyEGP'.tr(), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.88))),
                                 ),
                               ],
                             ),
@@ -546,7 +548,7 @@ class _AddHeader extends StatelessWidget {
                       decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.16), borderRadius: BorderRadius.circular(12.r), border: Border.all(color: Colors.white.withValues(alpha: 0.22))),
                       child: Column(children: [
                         Text('$itemsCount', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: Colors.white, height: 1)),
-                        Text('أصناف', style: TextStyle(fontSize: 10.sp, color: Colors.white.withValues(alpha: 0.85))),
+                        Text('saleItemsUnit'.tr(), style: TextStyle(fontSize: 10.sp, color: Colors.white.withValues(alpha: 0.85))),
                       ]),
                     ),
                   ],

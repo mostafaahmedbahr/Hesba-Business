@@ -48,7 +48,13 @@ class CloudinaryImageService {
   static const String uploadFailed = 'upload-failed';
   static const String presetNotFound = 'preset-not-found';
   static const String uploadRejected = 'upload-rejected';
+  static const String invalidFileType = 'invalid-file-type';
   static const int maxImageBytes = 10 * 1024 * 1024;
+
+  /// Extensions the app accepts (anything else is rejected before upload).
+  static const _allowedExtensions = {
+    'jpg', 'jpeg', 'png', 'webp', 'gif', 'heic', 'heif',
+  };
   static final RegExp _assetVersion = RegExp(r'^v\d+$');
 
   final ImagePicker _picker;
@@ -131,6 +137,9 @@ Transformation get shopImageTransformation =>
       if (bytes.isEmpty || bytes.lengthInBytes > maxImageBytes) {
         throw const CloudinaryUploadException(fileTooLarge);
       }
+      if (!_isSupportedImage(picked.name, bytes)) {
+        throw const CloudinaryUploadException(invalidFileType);
+      }
 
       final uri = Uri.https(
         'api.cloudinary.com',
@@ -210,6 +219,50 @@ CloudinaryUploadException _uploadError(http.Response response) {
         'preset "${AppConstants.cloudinaryUploadPreset}" to apply it on upload.',
       );
     }
+  }
+
+  /// Extension allowlist + magic-byte sniffing, so a renamed binary can
+  /// never be uploaded (and billed) as an image.
+  bool _isSupportedImage(String name, List<int> bytes) {
+    final dot = name.lastIndexOf('.');
+    final ext = dot == -1 ? '' : name.substring(dot + 1).toLowerCase();
+    if (ext.isNotEmpty && !_allowedExtensions.contains(ext)) return false;
+    if (bytes.length < 12) return false;
+    // JPEG: FF D8
+    if (bytes[0] == 0xFF && bytes[1] == 0xD8) return true;
+    // PNG: 89 50 4E 47
+    if (bytes[0] == 0x89 &&
+        bytes[1] == 0x50 &&
+        bytes[2] == 0x4E &&
+        bytes[3] == 0x47) {
+      return true;
+    }
+    // GIF: GIF87a / GIF89a
+    if (bytes[0] == 0x47 &&
+        bytes[1] == 0x49 &&
+        bytes[2] == 0x46 &&
+        bytes[3] == 0x38) {
+      return true;
+    }
+    // WEBP: RIFF....WEBP
+    if (bytes[0] == 0x52 &&
+        bytes[1] == 0x49 &&
+        bytes[2] == 0x46 &&
+        bytes[3] == 0x46 &&
+        bytes[8] == 0x57 &&
+        bytes[9] == 0x45 &&
+        bytes[10] == 0x42 &&
+        bytes[11] == 0x50) {
+      return true;
+    }
+    // HEIC/HEIF: ....ftyp
+    if (bytes[4] == 0x66 &&
+        bytes[5] == 0x74 &&
+        bytes[6] == 0x79 &&
+        bytes[7] == 0x70) {
+      return true;
+    }
+    return false;
   }
 
   /// Drops the SDK analytics query and the asset version segment so a built

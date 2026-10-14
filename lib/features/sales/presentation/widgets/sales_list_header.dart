@@ -108,7 +108,7 @@ class SalesListHeader extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 3.h),
-                  Text('إجمالي المبيعات', style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w600, color: Colors.white.withValues(alpha: 0.80))),
+                  Text('salesHeaderTotal'.tr(), style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w600, color: Colors.white.withValues(alpha: 0.80))),
                   SizedBox(height: 10.h),
                   // شارة النهاردة.
                   Container(
@@ -119,7 +119,7 @@ class SalesListHeader extends StatelessWidget {
                       SizedBox(width: 8.w),
                       Flexible(
                         child: Text(
-                          todayCount == 0 ? 'مفيش مبيعات النهاردة لسه' : 'النهاردة: $todayCount ${todayCount == 1 ? 'فاتورة' : 'فواتير'} • ${fmtPrice(todayValue)} ج.م',
+                          todayCount == 0 ? 'salesNoneToday'.tr() : 'salesTodayLine'.tr(namedArgs: {'count': '$todayCount', 'unit': todayCount == 1 ? 'salesUnitOne'.tr() : 'salesUnitMany'.tr(), 'total': fmtPrice(todayValue), 'currency': 'currencyEGP'.tr()}),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: Colors.white),

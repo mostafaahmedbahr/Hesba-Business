@@ -1,5 +1,6 @@
 import '../../../../common_imports.dart';
 import '../cubit/sales_list_state.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// بحث + فلاتر الدفع.
 class SalesListSearch extends StatefulWidget {
@@ -42,7 +43,7 @@ class _SalesListSearchState extends State<SalesListSearch> {
           textInputAction: TextInputAction.search,
           style: TextStyle(fontSize: 13.5.sp),
           decoration: InputDecoration(
-            hintText: 'ابحث برقم الفاتورة أو المنتج أو الملاحظة',
+            hintText: 'salesSearchHint'.tr(),
             hintStyle: TextStyle(fontSize: 12.5.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
             prefixIcon: Container(margin: EdgeInsets.all(8.w), width: 36.w, height: 36.w, decoration: BoxDecoration(color: AppTheme.primaryColor.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(10.r)), child: Icon(Icons.search_rounded, size: 18.sp, color: AppTheme.primaryColor)),
             suffixIcon: widget.query.isEmpty

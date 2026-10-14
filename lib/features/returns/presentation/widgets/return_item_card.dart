@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../common_imports.dart';
 import '../../../sales/data/models/sale_model.dart';
@@ -99,13 +100,13 @@ class ReturnItemCard extends StatelessWidget {
                     Text(item.productName, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : AppTheme.ink)),
                     SizedBox(height: 3.h),
                     Text(
-                      'مباع: ${item.quantity.toStringAsFixed(item.quantity % 1 == 0 ? 0 : 1)} • مرتجع قبل كده: ${alreadyReturned.toStringAsFixed(alreadyReturned % 1 == 0 ? 0 : 1)} • متاح: ${maxQty.toStringAsFixed(maxQty % 1 == 0 ? 0 : 1)}',
+                      'retSoldLine'.tr(namedArgs: {'sold': item.quantity.toStringAsFixed(item.quantity % 1 == 0 ? 0 : 1), 'returned': alreadyReturned.toStringAsFixed(alreadyReturned % 1 == 0 ? 0 : 1), 'max': maxQty.toStringAsFixed(maxQty % 1 == 0 ? 0 : 1)}),
                       style: TextStyle(fontSize: 10.5.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600),
                     ),
                     if (!returnable)
                       Padding(
                         padding: EdgeInsets.only(top: 3.h),
-                        child: Text('تم إرجاع كل الكمية بالفعل', style: TextStyle(fontSize: 11.sp, color: AppTheme.danger, fontWeight: FontWeight.w700)),
+                        child: Text('retFullyReturned'.tr(), style: TextStyle(fontSize: 11.sp, color: AppTheme.danger, fontWeight: FontWeight.w700)),
                       ),
                   ],
                 ),
@@ -113,7 +114,7 @@ class ReturnItemCard extends StatelessWidget {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 5.h),
                 decoration: BoxDecoration(color: AppTheme.primaryColor.withValues(alpha: 0.07), borderRadius: BorderRadius.circular(10.r)),
-                child: Text('${item.unitPrice.toStringAsFixed(item.unitPrice % 1 == 0 ? 0 : 2)} ج.م', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: AppTheme.primaryColor)),
+                child: Text('moneyAmount'.tr(namedArgs: {'total': item.unitPrice.toStringAsFixed(item.unitPrice % 1 == 0 ? 0 : 2), 'currency': 'currencyEGP'.tr()}), style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: AppTheme.primaryColor)),
               ),
             ],
           ),
@@ -140,7 +141,7 @@ class ReturnItemCard extends StatelessWidget {
                         if (!selected) return null;
                         final q = double.tryParse(v ?? '');
                         if (q == null || q <= 0) return '!';
-                        if (q > maxQty) return 'الحد $maxQty';
+                        if (q > maxQty) return 'retMaxLimit'.tr(namedArgs: {'max': '$maxQty'});
                         return null;
                       },
                       onChanged: (_) => onQtyChanged(),
@@ -152,7 +153,7 @@ class ReturnItemCard extends StatelessWidget {
                     padding: EdgeInsets.symmetric(horizontal: 11.w, vertical: 7.h),
                     decoration: BoxDecoration(color: AppTheme.warningAmber.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20.r)),
                     child: Text(
-                      '${lineNet.toStringAsFixed(2)} ج.م',
+                      'moneyAmount'.tr(namedArgs: {'total': lineNet.toStringAsFixed(2), 'currency': 'currencyEGP'.tr()}),
                       style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w900, color: const Color(0xFFB45309)),
                     ),
                   ),
@@ -184,7 +185,7 @@ class _StepBtn extends StatelessWidget {
           color: AppTheme.warningAmber.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(9.r),
         ),
-        child: Icon(icon, size: 16.sp, color: const Color(0xFFD97706)),
+        child: Icon(icon, size: 16.sp, color: AppTheme.amberDeep),
       ),
     );
   }

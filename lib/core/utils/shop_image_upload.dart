@@ -160,6 +160,7 @@ String shopImageUploadErrorMessage(CloudinaryUploadException error) {
     CloudinaryImageService.invalidResponse => 'shopImageInvalid'.tr(),
     CloudinaryImageService.presetNotFound => 'shopImagePresetNotFound'.tr(),
     CloudinaryImageService.uploadRejected => 'shopImageUploadRejected'.tr(),
+    CloudinaryImageService.invalidFileType => 'shopImageInvalidType'.tr(),
     _ => 'shopImageFailed'.tr(),
   };
 }

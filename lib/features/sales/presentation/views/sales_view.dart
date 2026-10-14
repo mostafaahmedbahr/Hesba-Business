@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../common_imports.dart';
 import '../../../dashboard/presentation/cubit/dashboard_cubit.dart';
@@ -54,7 +55,7 @@ class _SalesBody extends StatelessWidget {
         }
         // خطأ.
         if (state.status == SalesListStatus.failure && state.sales.isEmpty) {
-          return Scaffold(body: SalesListError(message: state.errorMessage ?? 'حدث خطأ'));
+          return Scaffold(body: SalesListError(message: state.errorMessage ?? 'errorGeneric'.tr()));
         }
         final cubit = context.read<SalesListCubit>();
         // فاضي خالص: زرار واحد بس (بتاع الـ empty).

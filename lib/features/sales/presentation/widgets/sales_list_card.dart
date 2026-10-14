@@ -25,7 +25,7 @@ class _SalesListCardState extends State<SalesListCard> {
     final dateStr = DateFormat('dd/MM/yyyy  •  hh:mm a', 'ar').format(sale.createdAt);
     final idShort = sale.saleId.length >= 6 ? sale.saleId.substring(0, 6) : sale.saleId;
     final itemsLabel = sale.items.isEmpty
-        ? 'فاتورة'
+        ? 'salesInvoice'.tr()
         : sale.items.length == 1
             ? sale.items.first.productName
             : '${sale.items.first.productName} +${sale.items.length - 1}';
@@ -76,13 +76,13 @@ class _SalesListCardState extends State<SalesListCard> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(children: [
-                          Flexible(child: Text('فاتورة #$idShort', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink))),
+                          Flexible(child: Text('salesInvoiceNumber'.tr(namedArgs: {'id': idShort}), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink))),
                           if (sale.discount > 0) ...[
                             SizedBox(width: 6.w),
                             Container(
                               padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.h),
                               decoration: BoxDecoration(color: AppTheme.danger.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(8.r)),
-                              child: Text('خصم', style: TextStyle(fontSize: 9.5.sp, fontWeight: FontWeight.w800, color: AppTheme.danger)),
+                              child: Text('salesDiscount'.tr(), style: TextStyle(fontSize: 9.5.sp, fontWeight: FontWeight.w800, color: AppTheme.danger)),
                             ),
                           ],
                         ]),
@@ -139,7 +139,7 @@ class _Details extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
-          color: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF6F8FC),
+          color: isDark ? AppTheme.darkSurfaceAlt : AppTheme.slatePale,
           borderRadius: BorderRadius.circular(15.r),
           border: Border.all(color: isDark ? AppTheme.darkBorder : const Color(0xFFE6EAF2)),
         ),
@@ -160,7 +160,7 @@ class _Details extends StatelessWidget {
                           style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w600, color: isDark ? Colors.white : const Color(0xFF1E293B)),
                         ),
                       ),
-                      Text('${it.total.toStringAsFixed(2)} ج.م', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: AppTheme.slateGray)),
+                      Text('moneyAmount'.tr(namedArgs: {'total': it.total.toStringAsFixed(2), 'currency': 'currencyEGP'.tr()}), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: AppTheme.slateGray)),
                     ],
                   ),
                 )),
@@ -171,8 +171,8 @@ class _Details extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('بعد خصم ${sale.discount.toStringAsFixed(0)} ج.م', style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w700, color: AppTheme.danger)),
-                    Text('${sale.total.toStringAsFixed(2)} ج.م', style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w900, color: AppTheme.successDark)),
+                    Text('salesAfterDiscount'.tr(namedArgs: {'discount': sale.discount.toStringAsFixed(0), 'currency': 'currencyEGP'.tr()}), style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w700, color: AppTheme.danger)),
+                    Text('moneyAmount'.tr(namedArgs: {'total': sale.total.toStringAsFixed(2), 'currency': 'currencyEGP'.tr()}), style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w900, color: AppTheme.successDark)),
                   ],
                 ),
               ),
@@ -200,8 +200,8 @@ class _Details extends StatelessWidget {
                   HapticFeedback.mediumImpact();
                   Navigator.pushNamed(context, AppRoutes.addReturnView, arguments: {'originalSaleId': sale.saleId});
                 },
-                icon: Icon(Icons.assignment_return_rounded, size: 17.sp, color: const Color(0xFFD97706)),
-                label: Text('مرتجع من الفاتورة', style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w800, color: const Color(0xFFD97706))),
+                icon: Icon(Icons.assignment_return_rounded, size: 17.sp, color: AppTheme.amberDeep),
+                label: Text('salesReturnLinked'.tr(), style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w800, color: AppTheme.amberDeep)),
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: AppTheme.warningAmber.withValues(alpha: 0.35)),
                   backgroundColor: AppTheme.warningAmber.withValues(alpha: 0.07),
@@ -222,10 +222,10 @@ String dateTimeLabel(DateTime dt) {
   final today = DateTime(now.year, now.month, now.day);
   final day = DateTime(dt.year, dt.month, dt.day);
   final diff = today.difference(day).inDays;
-  final time = DateFormat('hh:mm a', 'ar').format(dt);
-  if (diff == 0) return 'اليوم • $time';
-  if (diff == 1) return 'أمس • $time';
-  return '${DateFormat('dd/MM', 'ar').format(dt)} • $time';
+  final time = DateFormat('hh:mm a').format(dt);
+  if (diff == 0) return 'dayToday'.tr(namedArgs: {'time': time});
+  if (diff == 1) return 'dayYesterday'.tr(namedArgs: {'time': time});
+  return '${DateFormat('dd/MM').format(dt)} • $time';
 }
 
 /// شارة طريقة الدفع.

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -9,6 +10,7 @@ import '../../../../core/di/service_locator.dart';
 import '../../../../core/models/product.dart';
 import '../../../../core/services/shop_resolver.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/error_message.dart';
 import '../../../../core/utils/number_parser.dart';
 import '../../../../core/utils/toast.dart';
 import '../../../products/data/repos/products_repo.dart';
@@ -266,24 +268,24 @@ class _AddReturnViewState extends State<AddReturnView> {
     if (!await SubscriptionGate.ensureCanModify(innerContext)) return;
     if (!innerContext.mounted) return;
     if (!(_formKey.currentState?.validate() ?? true)) {
-      AppToast.warning(innerContext, 'راجع بيانات المرتجع');
+      AppToast.warning(innerContext, 'retReviewData'.tr());
       return;
     }
     if (_selectedSale == null) {
-      AppToast.warning(innerContext, 'اختر فاتورة أولاً');
+      AppToast.warning(innerContext, 'retChooseInvoice'.tr());
       return;
     }
     if (_historyFailed) {
-      AppToast.error(innerContext, 'تعذر التحقق من المرتجعات السابقة — تحقق من الاتصال وأعد اختيار الفاتورة');
+      AppToast.error(innerContext, 'retHistoryFailed'.tr());
       return;
     }
     final items = _buildReturnItems();
     if (items.isEmpty) {
-      AppToast.warning(innerContext, 'حدد منتج واحد على الأقل للإرجاع');
+      AppToast.warning(innerContext, 'retMinOne'.tr());
       return;
     }
     if (_reason == null || _reason!.trim().isEmpty) {
-      AppToast.warning(innerContext, 'اختر سبب المرتجع');
+      AppToast.warning(innerContext, 'retChooseReason'.tr());
       return;
     }
     // Validate qty not exceed max
@@ -291,12 +293,12 @@ class _AddReturnViewState extends State<AddReturnView> {
       if (!e.selected) continue;
       final qty = NumberParser.parseDouble(e.qtyController.text);
       if (qty > e.maxQty + 0.001) {
-        AppToast.warning(innerContext, 'الكمية للإرجاع أكبر من المتاح لـ ${e.saleItem.productName} (المتاح: ${e.maxQty})');
+        AppToast.warning(innerContext, 'retQtyExceeds'.tr(namedArgs: {'name': e.saleItem.productName, 'max': '${e.maxQty}'}));
         return;
       }
     }
     if (_resolvedShopId == null || _resolvedShopId!.isEmpty) {
-      AppToast.error(innerContext, 'لم يتم العثور على بيانات المتجر');
+      AppToast.error(innerContext, 'noShopData'.tr());
       return;
     }
     innerContext.read<ReturnsCubit>().addReturn(
@@ -330,11 +332,11 @@ class _AddReturnViewState extends State<AddReturnView> {
           return BlocListener<ReturnsCubit, ReturnsState>(
             listener: (ctx, state) {
               if (state.status == ReturnsStatus.success) {
-                AppToast.success(ctx, 'تم حفظ المرتجع وزيادة المخزون بنجاح');
+                AppToast.success(ctx, 'retSaved'.tr());
                 Navigator.pop(ctx, true);
               }
               if (state.status == ReturnsStatus.error) {
-                AppToast.error(ctx, state.errorMessage ?? 'حدث خطأ');
+                AppToast.error(ctx, translateError(state.errorMessage, state.errorArgs));
               }
             },
             child: Scaffold(
@@ -353,7 +355,7 @@ class _AddReturnViewState extends State<AddReturnView> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _SectionTitle('الفاتورة'),
+                              _SectionTitle('retInvoiceSection'.tr()),
                               SizedBox(height: 8.h),
                               ReturnInvoicePicker(
                                 sales: _sales,
@@ -368,16 +370,16 @@ class _AddReturnViewState extends State<AddReturnView> {
                                 _SaleStrip(sale: _selectedSale!),
                                 SizedBox(height: 18.h),
                                 Row(children: [
-                                  _SectionTitle('الأصناف للإرجاع'),
+                                  _SectionTitle('retItemsSection'.tr()),
                                   SizedBox(width: 8.w),
                                   Container(
                                     padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 4.h),
                                     decoration: BoxDecoration(color: AppTheme.warningAmber.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20.r)),
-                                    child: Text('$_selectedCount محدد', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: const Color(0xFFB45309))),
+                                    child: Text('retSelectedCount'.tr(namedArgs: {'n': '$_selectedCount'}), style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: AppTheme.amberDark)),
                                   ),
                                 ]),
                                 SizedBox(height: 4.h),
-                                Text('بنفس سعر البيع الأصلي — الخصم محفوظ في الفاتورة', style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray)),
+                                Text('retOriginalPriceNote'.tr(), style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray)),
                                 SizedBox(height: 10.h),
                                 ..._entries.values.map((e) => Padding(
                                       padding: EdgeInsets.only(bottom: 10.h),
@@ -394,10 +396,10 @@ class _AddReturnViewState extends State<AddReturnView> {
                                       ),
                                     )),
                                 SizedBox(height: 18.h),
-                                _SectionTitle('سبب المرتجع'),
+                                _SectionTitle('retReasonSection'.tr()),
                                 if (_shopBusinessType != null) ...[
                                   SizedBox(height: 4.h),
-                                  Text('حسب نشاط: $_shopBusinessType', style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray)),
+                                  Text('retBusinessLine'.tr(namedArgs: {'type': '$_shopBusinessType'}), style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray)),
                                 ],
                                 SizedBox(height: 10.h),
                                 ReturnReasonChips(
@@ -406,7 +408,7 @@ class _AddReturnViewState extends State<AddReturnView> {
                                   onSelected: (v) => setState(() => _reason = v),
                                 ),
                                 SizedBox(height: 18.h),
-                                _SectionTitle('ملاحظة'),
+                                _SectionTitle('retNoteSection'.tr()),
                                 SizedBox(height: 8.h),
                                 Container(
                                   padding: EdgeInsets.all(4.w),
@@ -420,7 +422,7 @@ class _AddReturnViewState extends State<AddReturnView> {
                                     maxLines: 2,
                                     style: TextStyle(fontSize: 13.sp),
                                     decoration: InputDecoration(
-                                      hintText: 'مثال: عيب مصنعي واضح...',
+                                      hintText: 'retNoteHint'.tr(),
                                       hintStyle: TextStyle(fontSize: 12.sp, color: AppTheme.mutedGray),
                                       border: InputBorder.none,
                                       contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
@@ -463,13 +465,13 @@ class _AddReturnViewState extends State<AddReturnView> {
                                 mainAxisSize: MainAxisSize.min,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('المسترد', style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600)),
+                                  Text('retRefundLabel'.tr(), style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600)),
                                   FittedBox(
                                     fit: BoxFit.scaleDown,
                                     alignment: AlignmentDirectional.centerStart,
                                     child: Text(
-                                      '${_netReturn.toStringAsFixed(_netReturn == _netReturn.roundToDouble() ? 0 : 2)} ج.م',
-                                      style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w900, color: const Color(0xFFB45309), height: 1.1),
+                                      'retNetAmount'.tr(namedArgs: {'total': _netReturn.toStringAsFixed(_netReturn == _netReturn.roundToDouble() ? 0 : 2), 'currency': 'currencyEGP'.tr()}),
+                                      style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w900, color: AppTheme.amberDark, height: 1.1),
                                     ),
                                   ),
                                 ],
@@ -503,7 +505,7 @@ class _AddReturnViewState extends State<AddReturnView> {
                                                 children: [
                                                   Icon(Icons.check_circle_rounded, size: 20.sp, color: Colors.white),
                                                   SizedBox(width: 8.w),
-                                                  Text('حفظ المرتجع', style: TextStyle(fontSize: 14.5.sp, fontWeight: FontWeight.w900, color: Colors.white)),
+                                                  Text('retSave'.tr(), style: TextStyle(fontSize: 14.5.sp, fontWeight: FontWeight.w900, color: Colors.white)),
                                                 ],
                                               ),
                                       ),
@@ -564,7 +566,7 @@ class _ReturnHeader extends StatelessWidget {
         ),
         onPressed: () => Navigator.pop(context),
       ),
-      title: Text('مرتجع جديد', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w800, color: Colors.white)),
+      title: Text('retNewTitle'.tr(), style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w800, color: Colors.white)),
       flexibleSpace: FlexibleSpaceBar(
         collapseMode: CollapseMode.parallax,
         background: Container(
@@ -584,7 +586,7 @@ class _ReturnHeader extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('المبلغ المسترد', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600, color: Colors.white.withValues(alpha: 0.88))),
+                          Text('retRefundAmount'.tr(), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600, color: Colors.white.withValues(alpha: 0.88))),
                           SizedBox(height: 4.h),
                           FittedBox(
                             fit: BoxFit.scaleDown,
@@ -599,7 +601,7 @@ class _ReturnHeader extends StatelessWidget {
                                 SizedBox(width: 7.w),
                                 Padding(
                                   padding: EdgeInsets.only(bottom: 5.h),
-                                  child: Text('ج.م', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.90))),
+                                  child: Text('currencyEGP'.tr(), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.90))),
                                 ),
                               ],
                             ),
@@ -612,7 +614,7 @@ class _ReturnHeader extends StatelessWidget {
                       decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.18), borderRadius: BorderRadius.circular(12.r), border: Border.all(color: Colors.white.withValues(alpha: 0.25))),
                       child: Column(children: [
                         Text('$count', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: Colors.white, height: 1)),
-                        Text('محدد', style: TextStyle(fontSize: 10.sp, color: Colors.white.withValues(alpha: 0.88))),
+                        Text('retSelectedUnit'.tr(), style: TextStyle(fontSize: 10.sp, color: Colors.white.withValues(alpha: 0.88))),
                       ]),
                     ),
                   ],
@@ -654,8 +656,8 @@ class _SaleStrip extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('فاتورة #$idShort • ${sale.items.length} ${sale.items.length == 1 ? 'صنف' : 'أصناف'}', style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : AppTheme.ink)),
-              Text('إجماليها ${sale.total.toStringAsFixed(2)} ج.م • خصم ${sale.discount.toStringAsFixed(0)}', style: TextStyle(fontSize: 11.sp, color: AppTheme.slateGray)),
+              Text('retInvoiceLine'.tr(namedArgs: {'id': idShort, 'count': '${sale.items.length}', 'unit': sale.items.length == 1 ? 'retUnitOne'.tr() : 'retUnitMany'.tr()}), style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : AppTheme.ink)),
+              Text('retInvoiceTotals'.tr(namedArgs: {'total': sale.total.toStringAsFixed(2), 'currency': 'currencyEGP'.tr(), 'discount': sale.discount.toStringAsFixed(0)}), style: TextStyle(fontSize: 11.sp, color: AppTheme.slateGray)),
             ],
           ),
         ),

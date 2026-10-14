@@ -53,7 +53,7 @@ class ReturnsListHeader extends StatelessWidget {
                   Row(children: [
                     Expanded(
                       child: Text(
-                        count == 0 ? 'لا توجد مرتجعات' : '$count مرتجع',
+                        count == 0 ? 'retEmptyShort'.tr() : 'retCount'.tr(namedArgs: {'n': '$count'}),
                         style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.90)),
                       ),
                     ),
@@ -67,7 +67,7 @@ class ReturnsListHeader extends StatelessWidget {
                           child: Row(mainAxisSize: MainAxisSize.min, children: [
                             Icon(Icons.add_rounded, size: 16.sp, color: const Color(0xFFB45309)),
                             SizedBox(width: 4.w),
-                            Text('مرتجع جديد', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: const Color(0xFFB45309))),
+                            Text('retNewTitle'.tr(), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: const Color(0xFFB45309))),
                           ]),
                         ),
                       ),
@@ -86,7 +86,7 @@ class ReturnsListHeader extends StatelessWidget {
                         SizedBox(width: 8.w),
                         Padding(
                           padding: EdgeInsets.only(bottom: 6.h),
-                          child: Text('ج.م • الإجمالي', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600, color: Colors.white.withValues(alpha: 0.88))),
+                          child: Text('retTotalSuffix'.tr(namedArgs: {'currency': 'currencyEGP'.tr()}), style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600, color: Colors.white.withValues(alpha: 0.88))),
                         ),
                       ],
                     ),
@@ -100,7 +100,7 @@ class ReturnsListHeader extends StatelessWidget {
                       SizedBox(width: 8.w),
                       Flexible(
                         child: Text(
-                          todayCount == 0 ? 'مفيش مرتجعات النهاردة' : 'النهاردة: $todayCount • ${fmtReturn(todayValue)} ج.م',
+                          todayCount == 0 ? 'retNoneToday'.tr() : 'retTodayLine'.tr(namedArgs: {'count': '$todayCount', 'total': fmtReturn(todayValue), 'currency': 'currencyEGP'.tr()}),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: Colors.white),

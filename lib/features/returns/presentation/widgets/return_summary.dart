@@ -1,4 +1,5 @@
 import '../../../../common_imports.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// ملخص المرتجع (hero برتقالي بالمسترد).
 class ReturnSummary extends StatelessWidget {
@@ -40,7 +41,7 @@ class ReturnSummary extends StatelessWidget {
               Row(children: [
                 Icon(Icons.assignment_return_rounded, size: 15.sp, color: Colors.white.withValues(alpha: 0.9)),
                 SizedBox(width: 6.w),
-                Text('المبلغ المسترد', style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.90))),
+                Text('retRefundAmount'.tr(), style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.90))),
               ]),
               SizedBox(height: 8.h),
               FittedBox(
@@ -56,7 +57,7 @@ class ReturnSummary extends StatelessWidget {
                     SizedBox(width: 8.w),
                     Padding(
                       padding: EdgeInsets.only(bottom: 5.h),
-                      child: Text('ج.م', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.90))),
+                      child: Text('currencyEGP'.tr(), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.90))),
                     ),
                   ],
                 ),
@@ -68,9 +69,9 @@ class ReturnSummary extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('قبل الخصم ${gross.toStringAsFixed(2)}', style: TextStyle(fontSize: 11.sp, color: Colors.white.withValues(alpha: 0.90), fontWeight: FontWeight.w600)),
+                    Text('retBeforeDiscount'.tr(namedArgs: {'amount': gross.toStringAsFixed(2)}), style: TextStyle(fontSize: 11.sp, color: Colors.white.withValues(alpha: 0.90), fontWeight: FontWeight.w600)),
                     if (discountRatio > 0)
-                      Text('خصم الفاتورة ${(discountRatio * 100).toStringAsFixed(0)}%', style: TextStyle(fontSize: 11.sp, color: Colors.white, fontWeight: FontWeight.w800)),
+                      Text('retInvoiceDiscount'.tr(namedArgs: {'pct': (discountRatio * 100).toStringAsFixed(0)}), style: TextStyle(fontSize: 11.sp, color: Colors.white, fontWeight: FontWeight.w800)),
                   ],
                 ),
               ),

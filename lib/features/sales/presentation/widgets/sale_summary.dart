@@ -1,4 +1,5 @@
 import '../../../../common_imports.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// ملخص الفاتورة (كارت gradient بالإجمالي الكبير).
 class SaleSummary extends StatelessWidget {
@@ -40,13 +41,13 @@ class SaleSummary extends StatelessWidget {
               Row(children: [
                 Icon(Icons.receipt_long_rounded, size: 15.sp, color: Colors.white.withValues(alpha: 0.85)),
                 SizedBox(width: 6.w),
-                Text('ملخص الفاتورة', style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.88))),
+                Text('salesSummaryTitle'.tr(), style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.88))),
                 const Spacer(),
                 if (itemsCount > 0)
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                     decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.18), borderRadius: BorderRadius.circular(20.r)),
-                    child: Text('$itemsCount ${itemsCount == 1 ? 'صنف' : 'أصناف'}', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: Colors.white)),
+                    child: Text('$itemsCount ${itemsCount == 1 ? 'saleItemOne'.tr() : 'saleItemsUnit'.tr()}', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: Colors.white)),
                   ),
               ]),
               SizedBox(height: 10.h),
@@ -63,7 +64,7 @@ class SaleSummary extends StatelessWidget {
                     SizedBox(width: 8.w),
                     Padding(
                       padding: EdgeInsets.only(bottom: 5.h),
-                      child: Text('ج.م', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.88))),
+                      child: Text('currencyEGP'.tr(), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.88))),
                     ),
                   ],
                 ),
@@ -75,17 +76,17 @@ class SaleSummary extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('المجموع ${subtotal.toStringAsFixed(2)}', style: TextStyle(fontSize: 11.sp, color: Colors.white.withValues(alpha: 0.88), fontWeight: FontWeight.w600)),
-                    Text('الخصم -${discount.toStringAsFixed(2)}', style: TextStyle(fontSize: 11.sp, color: discount > 0 ? const Color(0xFFFFD1D1) : Colors.white.withValues(alpha: 0.88), fontWeight: FontWeight.w700)),
+                    Text('salesSubtotal'.tr(namedArgs: {'amount': subtotal.toStringAsFixed(2)}), style: TextStyle(fontSize: 11.sp, color: Colors.white.withValues(alpha: 0.88), fontWeight: FontWeight.w600)),
+                    Text('salesSummaryDiscount'.tr(namedArgs: {'amount': '-${discount.toStringAsFixed(2)}'}), style: TextStyle(fontSize: 11.sp, color: discount > 0 ? AppTheme.rosePale : Colors.white.withValues(alpha: 0.88), fontWeight: FontWeight.w700)),
                   ],
                 ),
               ),
               if (discount > subtotal) ...[
                 SizedBox(height: 8.h),
                 Row(children: [
-                  Icon(Icons.info_outline_rounded, size: 13.sp, color: const Color(0xFFFFD54F)),
+                  Icon(Icons.info_outline_rounded, size: 13.sp, color: AppTheme.goldSoft),
                   SizedBox(width: 6.w),
-                  Expanded(child: Text('الخصم أكبر من المجموع، هيتحسب مساوياً ليه', style: TextStyle(fontSize: 11.sp, color: const Color(0xFFFFD54F), fontWeight: FontWeight.w600))),
+                  Expanded(child: Text('salesDiscountCapped'.tr(), style: TextStyle(fontSize: 11.sp, color: AppTheme.goldSoft, fontWeight: FontWeight.w600))),
                 ]),
               ],
             ],

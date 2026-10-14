@@ -47,15 +47,18 @@ class ReturnInvoicePicker extends StatelessWidget {
             width: 42.w,
             height: 42.w,
             decoration: BoxDecoration(color: AppTheme.warningAmber.withValues(alpha: 0.14), borderRadius: BorderRadius.circular(12.r)),
-            child: Icon(Icons.receipt_long_rounded, size: 20.sp, color: const Color(0xFFD97706)),
+            child: Icon(Icons.receipt_long_rounded, size: 20.sp, color: AppTheme.amberDeep),
           ),
           SizedBox(width: 12.w),
-          Expanded(child: Text('لا توجد فواتير — المرتجع لازم يكون من عملية بيع سابقة', style: TextStyle(fontSize: 12.sp, height: 1.5, color: isDark ? AppTheme.darkTextSecondary : AppTheme.slateGray))),
+          Expanded(child: Text('retNoInvoices'.tr(), style: TextStyle(fontSize: 12.sp, height: 1.5, color: isDark ? AppTheme.darkTextSecondary : AppTheme.slateGray))),
         ]),
       );
     }
     return Autocomplete<SaleModel>(
-      displayStringForOption: (s) => 'فاتورة #${s.saleId.substring(0, 6)} - ${DateFormat('dd/MM').format(s.createdAt)} - ${s.total.toStringAsFixed(0)} ج.م',
+      displayStringForOption: (s) {
+            final id = s.saleId.length > 6 ? s.saleId.substring(0, 6) : s.saleId;
+            return 'retPickerOption'.tr(namedArgs: {'id': id, 'date': DateFormat('dd/MM').format(s.createdAt), 'total': s.total.toStringAsFixed(0), 'currency': 'currencyEGP'.tr()});
+          },
       optionsBuilder: (textEditingValue) {
         if (textEditingValue.text.isEmpty) return sales.take(8);
         final q = textEditingValue.text.toLowerCase();
@@ -93,8 +96,8 @@ class ReturnInvoicePicker extends StatelessWidget {
                       ),
                       child: Icon(Icons.receipt_long_rounded, size: 18.sp, color: Colors.white),
                     ),
-                    title: Text('فاتورة #${s.saleId.substring(0, 6)} • ${s.total.toStringAsFixed(0)} ج.م', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800)),
-                    subtitle: Text('$date • ${s.items.length} ${s.items.length == 1 ? 'صنف' : 'أصناف'}', style: TextStyle(fontSize: 11.sp, color: AppTheme.slateGray)),
+                    title: Text('retPickerLine'.tr(namedArgs: {'id': s.saleId.length > 6 ? s.saleId.substring(0, 6) : s.saleId, 'total': s.total.toStringAsFixed(0), 'currency': 'currencyEGP'.tr()}), style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800)),
+                    subtitle: Text('$date • ${s.items.length} ${s.items.length == 1 ? 'saleItemOne'.tr() : 'saleItemsUnit'.tr()}', style: TextStyle(fontSize: 11.sp, color: AppTheme.slateGray)),
                     trailing: isSel ? Icon(Icons.check_circle_rounded, color: AppTheme.successDark, size: 20.sp) : null,
                     onTap: () => onSelected(s),
                   );
@@ -106,21 +109,21 @@ class ReturnInvoicePicker extends StatelessWidget {
       },
       fieldViewBuilder: (context, textController, focusNode, onFieldSubmitted) {
         if (selected != null && textController.text.isEmpty) {
-          textController.text = 'فاتورة #${selected!.saleId.substring(0, 6)}';
+          textController.text = 'retInvoiceNumber'.tr(namedArgs: {'id': selected!.saleId.length > 6 ? selected!.saleId.substring(0, 6) : selected!.saleId});
         }
         return TextFormField(
           controller: textController,
           focusNode: focusNode,
           style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w600),
           decoration: InputDecoration(
-            hintText: 'ابحث برقم الفاتورة أو اسم المنتج',
+            hintText: 'retInvoiceSearchHint'.tr(),
             hintStyle: TextStyle(fontSize: 12.5.sp, color: AppTheme.mutedGray),
             prefixIcon: Container(
               margin: EdgeInsets.all(8.w),
               width: 34.w,
               height: 34.w,
               decoration: BoxDecoration(color: AppTheme.warningAmber.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10.r)),
-              child: Icon(Icons.search_rounded, size: 17.sp, color: const Color(0xFFD97706)),
+              child: Icon(Icons.search_rounded, size: 17.sp, color: AppTheme.amberDeep),
             ),
             suffixIcon: selected != null
                 ? IconButton(icon: Icon(Icons.clear_rounded, size: 17.sp), onPressed: onClear)
@@ -138,7 +141,7 @@ class ReturnInvoicePicker extends StatelessWidget {
             ),
             contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 13.h),
           ),
-          validator: (v) => selected == null ? 'اختار الفاتورة' : null,
+          validator: (v) => selected == null ? 'retPickInvoice'.tr() : null,
         );
       },
       onSelected: onSelected,

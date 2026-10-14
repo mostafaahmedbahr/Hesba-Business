@@ -65,7 +65,7 @@ class _ReturnsListCardState extends State<ReturnsListCard> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('مرتجع #$idShort', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
+                        Text('retReturnNumber'.tr(namedArgs: {'id': idShort}), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
                         SizedBox(height: 3.h),
                         Text('$itemsLabel • $dateStr', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600)),
                       ],
@@ -144,9 +144,9 @@ class _Details extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
                 decoration: BoxDecoration(color: const Color(0xFFFFF7ED), borderRadius: BorderRadius.circular(20.r), border: Border.all(color: const Color(0xFFFDBA74))),
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  Icon(Icons.info_outline_rounded, size: 12.sp, color: const Color(0xFFD97706)),
+                  Icon(Icons.info_outline_rounded, size: 12.sp, color: AppTheme.amberDeep),
                   SizedBox(width: 5.w),
-                  Text(ret.reason.isEmpty ? 'بدون سبب' : ret.reason, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w700, color: const Color(0xFFD97706))),
+                  Text(ret.reason.isEmpty ? 'retNoReason'.tr() : ret.reason, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w700, color: AppTheme.amberDeep)),
                 ]),
               ),
               if (ret.originalSaleId != null) ...[
@@ -154,7 +154,7 @@ class _Details extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
                   decoration: BoxDecoration(color: const Color(0xFFEFF6FF), borderRadius: BorderRadius.circular(20.r), border: Border.all(color: const Color(0xFFBFDBFE))),
-                  child: Text('مرتبط بفاتورة', style: TextStyle(fontSize: 10.sp, color: const Color(0xFF2563EB), fontWeight: FontWeight.w700)),
+                  child: Text('retLinkedInvoice'.tr(), style: TextStyle(fontSize: 10.sp, color: AppTheme.blueBright, fontWeight: FontWeight.w700)),
                 ),
               ],
               const Spacer(),
@@ -177,8 +177,8 @@ String dateTimeLabel(DateTime dt) {
   final today = DateTime(now.year, now.month, now.day);
   final day = DateTime(dt.year, dt.month, dt.day);
   final diff = today.difference(day).inDays;
-  final time = DateFormat('hh:mm a', 'ar').format(dt);
-  if (diff == 0) return 'اليوم • $time';
-  if (diff == 1) return 'أمس • $time';
-  return '${DateFormat('dd/MM', 'ar').format(dt)} • $time';
+  final time = DateFormat('hh:mm a').format(dt);
+  if (diff == 0) return 'dayToday'.tr(namedArgs: {'time': time});
+  if (diff == 1) return 'dayYesterday'.tr(namedArgs: {'time': time});
+  return '${DateFormat('dd/MM').format(dt)} • $time';
 }

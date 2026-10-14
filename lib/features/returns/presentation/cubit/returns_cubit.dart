@@ -21,21 +21,21 @@ class ReturnsCubit extends Cubit<ReturnsState> {
     required String note,
   }) async {
     if (items.isEmpty) {
-      emit(state.copyWith(status: ReturnsStatus.error, errorMessage: 'أضف منتج واحد على الأقل'));
+      emit(state.copyWith(status: ReturnsStatus.error, errorMessage: 'retErrMinOne'));
       return;
     }
     for (final item in items) {
       if (item.productName.trim().isEmpty) {
-        emit(state.copyWith(status: ReturnsStatus.error, errorMessage: 'اسم المنتج مطلوب'));
+        emit(state.copyWith(status: ReturnsStatus.error, errorMessage: 'retErrNameRequired'));
         return;
       }
       if (item.quantity <= 0) {
-        emit(state.copyWith(status: ReturnsStatus.error, errorMessage: 'الكمية يجب أن تكون أكبر من صفر: ${item.productName}'));
+        emit(state.copyWith(status: ReturnsStatus.error, errorMessage: 'retErrQtyPositive', errorArgs: {'name': item.productName}));
         return;
       }
     }
     if (reason.trim().isEmpty) {
-      emit(state.copyWith(status: ReturnsStatus.error, errorMessage: 'اختر سبب المرتجع'));
+      emit(state.copyWith(status: ReturnsStatus.error, errorMessage: 'retErrReasonRequired'));
       return;
     }
 
