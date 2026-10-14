@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/theme/app_theme.dart';
 
 class RegisterHeader extends StatelessWidget {
   const RegisterHeader({super.key});
@@ -23,7 +24,7 @@ class RegisterHeader extends StatelessWidget {
             errorBuilder: (context, error, stackTrace) => Icon(
               Icons.calculate_rounded,
               size: 28.sp,
-              color: const Color(0xFF0B4D9C),
+              color: AppTheme.deepBlue,
             ),
           ),
         ),

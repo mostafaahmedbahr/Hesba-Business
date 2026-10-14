@@ -23,8 +23,8 @@ class ExpenseDeleteDialog extends StatelessWidget {
             Container(
               width: 56.w,
               height: 56.w,
-              decoration: const BoxDecoration(color: Color(0xFFFEF2F2), shape: BoxShape.circle),
-              child: Icon(Icons.delete_rounded, size: 26.sp, color: const Color(0xFFE11D48)),
+              decoration: const BoxDecoration(color: AppTheme.dangerSoft, shape: BoxShape.circle),
+              child: Icon(Icons.delete_rounded, size: 26.sp, color: AppTheme.danger),
             ),
             SizedBox(height: 12.h),
             Text('حذف المصروف؟', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900)),
@@ -32,7 +32,7 @@ class ExpenseDeleteDialog extends StatelessWidget {
             Text(
               'هل أنت متأكد من حذف "$title"؟ لا يمكن التراجع.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12.5.sp, color: const Color(0xFF64748B), height: 1.5),
+              style: TextStyle(fontSize: 12.5.sp, color: AppTheme.slateGray, height: 1.5),
             ),
             SizedBox(height: 18.h),
             Row(children: [
@@ -51,7 +51,7 @@ class ExpenseDeleteDialog extends StatelessWidget {
                 child: FilledButton(
                   onPressed: () => Navigator.pop(context, true),
                   style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFFE11D48),
+                    backgroundColor: AppTheme.danger,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                     padding: EdgeInsets.symmetric(vertical: 12.h),
                   ),

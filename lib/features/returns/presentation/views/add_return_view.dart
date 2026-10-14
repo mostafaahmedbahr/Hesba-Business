@@ -403,12 +403,12 @@ class _AddReturnViewState extends State<AddReturnView> {
                                   SizedBox(width: 8.w),
                                   Container(
                                     padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 4.h),
-                                    decoration: BoxDecoration(color: const Color(0xFFF59E0B).withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20.r)),
+                                    decoration: BoxDecoration(color: AppTheme.warningAmber.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20.r)),
                                     child: Text('$_selectedCount محدد', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: const Color(0xFFB45309))),
                                   ),
                                 ]),
                                 SizedBox(height: 4.h),
-                                Text('بنفس سعر البيع الأصلي — الخصم محفوظ في الفاتورة', style: TextStyle(fontSize: 11.sp, color: const Color(0xFF94A3B8))),
+                                Text('بنفس سعر البيع الأصلي — الخصم محفوظ في الفاتورة', style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray)),
                                 SizedBox(height: 10.h),
                                 ..._entries.values.map((e) => Padding(
                                       padding: EdgeInsets.only(bottom: 10.h),
@@ -428,7 +428,7 @@ class _AddReturnViewState extends State<AddReturnView> {
                                 _SectionTitle('سبب المرتجع'),
                                 if (_shopBusinessType != null) ...[
                                   SizedBox(height: 4.h),
-                                  Text('حسب نشاط: $_shopBusinessType', style: TextStyle(fontSize: 11.sp, color: const Color(0xFF94A3B8))),
+                                  Text('حسب نشاط: $_shopBusinessType', style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray)),
                                 ],
                                 SizedBox(height: 10.h),
                                 ReturnReasonChips(
@@ -444,7 +444,7 @@ class _AddReturnViewState extends State<AddReturnView> {
                                   decoration: BoxDecoration(
                                     color: isDark ? AppTheme.darkSurface : Colors.white,
                                     borderRadius: BorderRadius.circular(16.r),
-                                    border: Border.all(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB)),
+                                    border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.hairline),
                                   ),
                                   child: TextFormField(
                                     controller: _noteController,
@@ -452,7 +452,7 @@ class _AddReturnViewState extends State<AddReturnView> {
                                     style: TextStyle(fontSize: 13.sp),
                                     decoration: InputDecoration(
                                       hintText: 'مثال: عيب مصنعي واضح...',
-                                      hintStyle: TextStyle(fontSize: 12.sp, color: const Color(0xFF94A3B8)),
+                                      hintStyle: TextStyle(fontSize: 12.sp, color: AppTheme.mutedGray),
                                       border: InputBorder.none,
                                       contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
                                     ),
@@ -482,7 +482,7 @@ class _AddReturnViewState extends State<AddReturnView> {
                       padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 16.h),
                       decoration: BoxDecoration(
                         color: isDark ? AppTheme.darkSurface : Colors.white,
-                        border: Border(top: BorderSide(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB))),
+                        border: Border(top: BorderSide(color: isDark ? AppTheme.darkBorder : AppTheme.hairline)),
                         boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 20, offset: const Offset(0, -6))],
                       ),
                       child: SafeArea(
@@ -494,7 +494,7 @@ class _AddReturnViewState extends State<AddReturnView> {
                                 mainAxisSize: MainAxisSize.min,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('المسترد', style: TextStyle(fontSize: 11.sp, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w600)),
+                                  Text('المسترد', style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600)),
                                   FittedBox(
                                     fit: BoxFit.scaleDown,
                                     alignment: AlignmentDirectional.centerStart,
@@ -516,9 +516,9 @@ class _AddReturnViewState extends State<AddReturnView> {
                                     height: 52.h,
                                     child: DecoratedBox(
                                       decoration: BoxDecoration(
-                                        gradient: const LinearGradient(colors: [Color(0xFFF59E0B), Color(0xFFFBBF24)]),
+                                        gradient: const LinearGradient(colors: [AppTheme.warningAmber, AppTheme.goldLight]),
                                         borderRadius: BorderRadius.circular(16.r),
-                                        boxShadow: [BoxShadow(color: const Color(0xFFF59E0B).withValues(alpha: 0.35), blurRadius: 16, offset: const Offset(0, 7))],
+                                        boxShadow: [BoxShadow(color: AppTheme.warningAmber.withValues(alpha: 0.35), blurRadius: 16, offset: const Offset(0, 7))],
                                       ),
                                       child: FilledButton(
                                         onPressed: loading ? null : () => _submit(innerContext),
@@ -565,7 +565,7 @@ class _SectionTitle extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Text(
       text,
-      style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : const Color(0xFF0F172A)),
+      style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink),
     );
   }
 }
@@ -581,7 +581,7 @@ class _ReturnHeader extends StatelessWidget {
     return SliverAppBar(
       pinned: true,
       expandedHeight: 178.h,
-      backgroundColor: const Color(0xFFF59E0B),
+      backgroundColor: AppTheme.warningAmber,
       foregroundColor: Colors.white,
       elevation: 0,
       stretch: true,
@@ -599,7 +599,7 @@ class _ReturnHeader extends StatelessWidget {
       flexibleSpace: FlexibleSpaceBar(
         collapseMode: CollapseMode.parallax,
         background: Container(
-          decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topRight, end: Alignment.bottomLeft, colors: [Color(0xFF92400E), Color(0xFFF59E0B), Color(0xFFFBBF24)])),
+          decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topRight, end: Alignment.bottomLeft, colors: [Color(0xFF92400E), AppTheme.warningAmber, AppTheme.goldLight])),
           child: Stack(children: [
             Positioned(top: -50.h, left: -30.w, child: Container(width: 150.w, height: 150.w, decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.10)))),
             Positioned(bottom: -60.h, right: -40.w, child: Container(width: 170.w, height: 170.w, decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.08)))),
@@ -669,9 +669,9 @@ class _SaleStrip extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A4FD6).withValues(alpha: 0.06),
+        color: AppTheme.primaryColor.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: const Color(0xFF1A4FD6).withValues(alpha: 0.16)),
+        border: Border.all(color: AppTheme.primaryColor.withValues(alpha: 0.16)),
       ),
       child: Row(children: [
         Container(
@@ -685,8 +685,8 @@ class _SaleStrip extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('فاتورة #$idShort • ${sale.items.length} ${sale.items.length == 1 ? 'صنف' : 'أصناف'}', style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : const Color(0xFF0F172A))),
-              Text('إجماليها ${sale.total.toStringAsFixed(2)} ج.م • خصم ${sale.discount.toStringAsFixed(0)}', style: TextStyle(fontSize: 11.sp, color: const Color(0xFF64748B))),
+              Text('فاتورة #$idShort • ${sale.items.length} ${sale.items.length == 1 ? 'صنف' : 'أصناف'}', style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : AppTheme.ink)),
+              Text('إجماليها ${sale.total.toStringAsFixed(2)} ج.م • خصم ${sale.discount.toStringAsFixed(0)}', style: TextStyle(fontSize: 11.sp, color: AppTheme.slateGray)),
             ],
           ),
         ),

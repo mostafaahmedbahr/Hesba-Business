@@ -26,7 +26,7 @@ class RegisterExtraStep extends StatefulWidget {
 class _RegisterExtraStepState extends State<RegisterExtraStep> {
   bool _uploading = false;
 
-  static const _accent = Color(0xFF0B4D9C);
+  static const _accent = AppTheme.deepBlue;
 
   @override
   Widget build(BuildContext context) {
@@ -113,7 +113,7 @@ class _RegisterExtraStepState extends State<RegisterExtraStep> {
                     style: TextStyle(
                       fontSize: 11.5.sp,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFFE11D48),
+                      color: AppTheme.danger,
                     ),
                   ),
                 ),

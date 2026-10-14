@@ -77,7 +77,7 @@ class _ExpenseListCardState extends State<ExpenseListCard> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(expense.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : const Color(0xFF0F172A))),
+                        Text(expense.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
                         SizedBox(height: 3.h),
                         Row(children: [
                           Container(
@@ -88,7 +88,7 @@ class _ExpenseListCardState extends State<ExpenseListCard> {
                           SizedBox(width: 6.w),
                           Text(
                             DateFormat('d MMM', 'ar').format(expense.date),
-                            style: TextStyle(fontSize: 11.sp, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w600),
+                            style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600),
                           ),
                         ]),
                       ],
@@ -97,15 +97,15 @@ class _ExpenseListCardState extends State<ExpenseListCard> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text('-${expense.amount.toStringAsFixed(expense.amount % 1 == 0 ? 0 : 2)}', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: const Color(0xFFE11D48), height: 1)),
-                      Text('ج.م', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w700, color: const Color(0xFF94A3B8))),
+                      Text('-${expense.amount.toStringAsFixed(expense.amount % 1 == 0 ? 0 : 2)}', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: AppTheme.danger, height: 1)),
+                      Text('ج.م', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w700, color: AppTheme.mutedGray)),
                     ],
                   ),
                   SizedBox(width: 4.w),
                   AnimatedRotation(
                     turns: _expanded ? 0.5 : 0,
                     duration: const Duration(milliseconds: 250),
-                    child: Icon(Icons.keyboard_arrow_down_rounded, size: 22.sp, color: const Color(0xFF94A3B8)),
+                    child: Icon(Icons.keyboard_arrow_down_rounded, size: 22.sp, color: AppTheme.mutedGray),
                   ),
                 ]),
                 // التفاصيل (تظهر بالضغطة).
@@ -154,9 +154,9 @@ class _Details extends StatelessWidget {
                 border: Border.all(color: isDark ? AppTheme.darkBorder : const Color(0xFFE6EAF2)),
               ),
               child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Icon(Icons.notes_rounded, size: 14.sp, color: const Color(0xFF94A3B8)),
+                Icon(Icons.notes_rounded, size: 14.sp, color: AppTheme.mutedGray),
                 SizedBox(width: 6.w),
-                Expanded(child: Text(expense.note, style: TextStyle(fontSize: 12.sp, height: 1.5, color: isDark ? AppTheme.darkTextSecondary : const Color(0xFF64748B)))),
+                Expanded(child: Text(expense.note, style: TextStyle(fontSize: 12.sp, height: 1.5, color: isDark ? AppTheme.darkTextSecondary : AppTheme.slateGray))),
               ]),
             ),
             SizedBox(height: 10.h),
@@ -166,7 +166,7 @@ class _Details extends StatelessWidget {
               child: _RowBtn(
                 icon: Icons.edit_outlined,
                 label: 'تعديل',
-                color: const Color(0xFF1A4FD6),
+                color: AppTheme.primaryColor,
                 onTap: () {
                   HapticFeedback.lightImpact();
                   onEdit();
@@ -178,7 +178,7 @@ class _Details extends StatelessWidget {
               child: _RowBtn(
                 icon: Icons.delete_outline_rounded,
                 label: 'حذف',
-                color: const Color(0xFFE11D48),
+                color: AppTheme.danger,
                 onTap: () {
                   HapticFeedback.lightImpact();
                   onDelete();

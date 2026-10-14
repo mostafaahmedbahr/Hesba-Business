@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:hesba/core/theme/app_theme.dart';
 
 class LoginTextField extends StatelessWidget {
   final TextEditingController controller;
@@ -44,7 +45,7 @@ class LoginTextField extends StatelessWidget {
         ),
         border: _border(),
         enabledBorder: _border(),
-        focusedBorder: _border(color: const Color(0xFF0B4D9C)),
+        focusedBorder: _border(color: AppTheme.deepBlue),
         errorBorder: _border(color: Colors.redAccent),
         focusedErrorBorder: _border(color: Colors.redAccent),
       ),

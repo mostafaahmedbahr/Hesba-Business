@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:hesba/core/theme/app_theme.dart';
 
 import '../cubit/shop_location_cubit.dart';
 import '../cubit/shop_location_state.dart';
@@ -147,7 +148,7 @@ class _ShopLocationPickerSheetState extends State<ShopLocationPickerSheet> {
                             child: const Icon(
                               Icons.location_pin,
                               size: 44,
-                              color: Color(0xFFE11D48),
+                              color: AppTheme.danger,
                               shadows: [
                                 Shadow(
                                   color: Colors.black45,
@@ -177,7 +178,7 @@ class _ShopLocationPickerSheetState extends State<ShopLocationPickerSheet> {
                   child: FilledButton.icon(
                     onPressed: _confirm,
                     style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFF0B4D9C),
+                      backgroundColor: AppTheme.deepBlue,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14.r),
                       ),
@@ -209,7 +210,7 @@ class _Header extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(16.w, 14.h, 8.w, 12.h),
       child: Row(
         children: [
-          const Icon(Icons.map_outlined, size: 20, color: Color(0xFF0B4D9C)),
+          const Icon(Icons.map_outlined, size: 20, color: AppTheme.deepBlue),
           SizedBox(width: 8.w),
           Expanded(
             child: Text(
@@ -217,7 +218,7 @@ class _Header extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w800,
-                color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A),
+                color: isDark ? AppTheme.mist : AppTheme.ink,
               ),
             ),
           ),

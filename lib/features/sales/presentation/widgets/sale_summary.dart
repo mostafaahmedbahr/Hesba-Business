@@ -24,11 +24,11 @@ class SaleSummary extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
-          colors: [Color(0xFF0A1F5C), Color(0xFF1A4FD6), Color(0xFF4A7BFF)],
+          colors: [Color(0xFF0A1F5C), AppTheme.primaryColor, AppTheme.brightBlue],
         ),
         borderRadius: BorderRadius.circular(22.r),
         boxShadow: [
-          BoxShadow(color: const Color(0xFF1A4FD6).withValues(alpha: 0.30), blurRadius: 22, offset: const Offset(0, 10)),
+          BoxShadow(color: AppTheme.primaryColor.withValues(alpha: 0.30), blurRadius: 22, offset: const Offset(0, 10)),
         ],
       ),
       child: Stack(

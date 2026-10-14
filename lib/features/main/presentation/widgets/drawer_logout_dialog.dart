@@ -26,7 +26,7 @@ class DrawerLogoutDialog extends StatelessWidget {
             SizedBox(height: 16.h),
             Text('moreLogoutTitle'.tr(), style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900)),
             SizedBox(height: 8.h),
-            Text('moreLogoutMessage'.tr(), textAlign: TextAlign.center, style: TextStyle(fontSize: 12.5.sp, color: const Color(0xFF64748B), height: 1.5)),
+            Text('moreLogoutMessage'.tr(), textAlign: TextAlign.center, style: TextStyle(fontSize: 12.5.sp, color: AppTheme.slateGray, height: 1.5)),
             SizedBox(height: 20.h),
             Row(children: [
               Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(context, false), child: Text('dialogCancel'.tr()))),

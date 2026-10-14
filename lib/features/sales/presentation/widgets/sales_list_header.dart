@@ -41,7 +41,7 @@ class SalesListHeader extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topRight,
               end: Alignment.bottomLeft,
-              colors: [Color(0xFF0A1F5C), Color(0xFF1A4FD6), Color(0xFF6D9BFF)],
+              colors: [Color(0xFF0A1F5C), AppTheme.primaryColor, Color(0xFF6D9BFF)],
             ),
           ),
           child: Stack(children: [

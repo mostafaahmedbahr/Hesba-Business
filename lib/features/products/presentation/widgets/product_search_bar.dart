@@ -43,7 +43,7 @@ class _ProductSearchBarState extends State<ProductSearchBar> {
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(16.r),
-            border: Border.all(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB)),
+            border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.hairline),
             boxShadow: AppTheme.cardShadow(context),
           ),
           child: TextField(
@@ -93,7 +93,7 @@ class _ProductSearchBarState extends State<ProductSearchBar> {
                 onSelected: (_) => widget.onFilterChanged(cat),
                 selectedColor: AppTheme.primaryColor,
                 backgroundColor: Theme.of(context).colorScheme.surface,
-                side: BorderSide(color: selected ? AppTheme.primaryColor : const Color(0xFFE5E7EB)),
+                side: BorderSide(color: selected ? AppTheme.primaryColor : AppTheme.hairline),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
                 showCheckmark: false,
                 padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 0),

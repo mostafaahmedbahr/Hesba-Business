@@ -16,12 +16,12 @@ class ActivityCard extends StatelessWidget {
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: activity.isRead
-            ? (isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF8FAFC))
+            ? (isDark ? AppTheme.darkSurfaceAlt : AppTheme.canvasLight)
             : (isDark ? const Color(0xFF1E2A44) : const Color(0xFFEFF6FF)),
         borderRadius: BorderRadius.circular(14.r),
         border: Border.all(
           color: activity.isRead
-              ? (isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0))
+              ? (isDark ? AppTheme.darkBorder : AppTheme.borderSoft)
               : AppTheme.primaryColor.withValues(alpha: 0.16),
         ),
       ),
@@ -48,24 +48,24 @@ class ActivityCard extends StatelessWidget {
                       activity.title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : const Color(0xFF0F172A)),
+                      style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : AppTheme.ink),
                     ),
                   ),
                   if (!activity.isRead)
-                    Container(width: 8.w, height: 8.w, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFFE11D48))),
+                    Container(width: 8.w, height: 8.w, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppTheme.danger)),
                 ]),
                 SizedBox(height: 2.h),
                 Text(
                   activity.body,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 11.sp, height: 1.4, color: isDark ? AppTheme.darkTextSecondary : const Color(0xFF64748B)),
+                  style: TextStyle(fontSize: 11.sp, height: 1.4, color: isDark ? AppTheme.darkTextSecondary : AppTheme.slateGray),
                 ),
                 SizedBox(height: 6.h),
                 Row(children: [
-                  Icon(Icons.access_time_rounded, size: 11.sp, color: const Color(0xFF94A3B8)),
+                  Icon(Icons.access_time_rounded, size: 11.sp, color: AppTheme.mutedGray),
                   SizedBox(width: 4.w),
-                  Text(_timeAgo(activity.createdAt), style: TextStyle(fontSize: 10.5.sp, color: const Color(0xFF94A3B8))),
+                  Text(_timeAgo(activity.createdAt), style: TextStyle(fontSize: 10.5.sp, color: AppTheme.mutedGray)),
                 ]),
               ],
             ),
@@ -108,19 +108,19 @@ IconData _iconFor(ActivityType t) {
 List<Color> _gradFor(ActivityType t) {
   switch (t) {
     case ActivityType.sale:
-      return const [Color(0xFF1A4FD6), Color(0xFF4A7BFF)];
+      return const [AppTheme.primaryColor, AppTheme.brightBlue];
     case ActivityType.productAdd:
-      return const [Color(0xFFF59E0B), Color(0xFFFBBF24)];
+      return const [AppTheme.warningAmber, AppTheme.goldLight];
     case ActivityType.productDelete:
-      return const [Color(0xFFE11D48), Color(0xFFFB7185)];
+      return const [AppTheme.danger, AppTheme.roseLight];
     case ActivityType.returnAdd:
-      return const [Color(0xFFF59E0B), Color(0xFFFF8F3D)];
+      return const [AppTheme.warningAmber, Color(0xFFFF8F3D)];
     case ActivityType.expenseAdd:
-      return const [Color(0xFFE11D48), Color(0xFFFB7185)];
+      return const [AppTheme.danger, AppTheme.roseLight];
     case ActivityType.expenseUpdate:
       return const [Color(0xFF06B6D4), Color(0xFF22D3EE)];
     default:
-      return const [Color(0xFF1A4FD6), Color(0xFF7C4DFF)];
+      return const [AppTheme.primaryColor, Color(0xFF7C4DFF)];
   }
 }
 

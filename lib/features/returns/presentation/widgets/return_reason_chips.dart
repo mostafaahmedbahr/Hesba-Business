@@ -34,12 +34,12 @@ class ReturnReasonChips extends StatelessWidget {
             ),
             selected: selected == r,
             onSelected: (_) => onSelected(r),
-            selectedColor: const Color(0xFFF59E0B),
-            backgroundColor: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF1F5F9),
+            selectedColor: AppTheme.warningAmber,
+            backgroundColor: isDark ? AppTheme.darkSurfaceAlt : AppTheme.mist,
             side: BorderSide(
               color: selected == r
-                  ? const Color(0xFFF59E0B)
-                  : (isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0)),
+                  ? AppTheme.warningAmber
+                  : (isDark ? AppTheme.darkBorder : AppTheme.borderSoft),
             ),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
             showCheckmark: false,

@@ -47,7 +47,7 @@ class CustomDrawerTile extends StatelessWidget {
           fontWeight: FontWeight.w700,
           color: darkMode
               ? Colors.white
-              : const Color(0xFF0F172A),
+              : AppTheme.ink,
         ),
       ),
       trailing: Icon(

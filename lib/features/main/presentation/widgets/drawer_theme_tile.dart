@@ -22,10 +22,10 @@ class DrawerThemeTile extends StatelessWidget {
             decoration: BoxDecoration(color: const Color(0xFF2E7D32).withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10.r)),
             child: Icon(darkMode ? Icons.dark_mode_rounded : Icons.light_mode_rounded, color: const Color(0xFF2E7D32), size: 18.sp),
           ),
-          title: Text('moreDarkMode'.tr(), style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: isDark ? Colors.white : const Color(0xFF0F172A))),
+          title: Text('moreDarkMode'.tr(), style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: isDark ? Colors.white : AppTheme.ink)),
           trailing: Switch(
             value: darkMode,
-            activeThumbColor: const Color(0xFF1A4FD6),
+            activeThumbColor: AppTheme.primaryColor,
             onChanged: (_) => context.read<SettingsCubit>().toggleTheme(),
           ),
           contentPadding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),

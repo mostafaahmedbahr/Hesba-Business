@@ -37,7 +37,7 @@ class DrawerItemsList extends StatelessWidget {
           CustomDrawerTile(
             icon: Icons.assignment_return_rounded,
             label: 'navReturns'.tr(),
-            color: const Color(0xFFF59E0B),
+            color: AppTheme.warningAmber,
             onTap: () {
               Navigator.pop(context);
               onOpenReturns?.call();
@@ -46,20 +46,20 @@ class DrawerItemsList extends StatelessWidget {
           CustomDrawerTile(
             icon: Icons.savings_rounded,
             label: 'navExpenses'.tr(),
-            color: const Color(0xFFE11D48),
+            color: AppTheme.danger,
             onTap: () {
               Navigator.pop(context);
               onOpenExpenses?.call();
             },
           ),
           SizedBox(height: 10.h),
-          Divider(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB), height: 1),
+          Divider(color: isDark ? AppTheme.darkBorder : AppTheme.hairline, height: 1),
           SizedBox(height: 10.h),
           SectionLabel('إدارة المتجر', isDark),
           CustomDrawerTile(
             icon: Icons.category_rounded,
             label: 'إدارة الأقسام',
-            color: const Color(0xFF059669),
+            color: AppTheme.successDark,
             onTap: () => _open(context, const CategoryManagementView()),
           ),
           CustomDrawerTile(
@@ -69,13 +69,13 @@ class DrawerItemsList extends StatelessWidget {
             onTap: () => _open(context, const NotificationsView()),
           ),
           SizedBox(height: 10.h),
-          Divider(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB), height: 1),
+          Divider(color: isDark ? AppTheme.darkBorder : AppTheme.hairline, height: 1),
           SizedBox(height: 10.h),
           SectionLabel('moreAccount'.tr(), isDark),
           CustomDrawerTile(
             icon: Icons.person_rounded,
             label: 'moreProfile'.tr(),
-            color: const Color(0xFF1A4FD6),
+            color: AppTheme.primaryColor,
             onTap: () => _open(context, const ProfileView()),
           ),
           CustomDrawerTile(
@@ -91,13 +91,13 @@ class DrawerItemsList extends StatelessWidget {
             onTap: () => _open(context, const ChangePasswordView()),
           ),
           SizedBox(height: 10.h),
-          Divider(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB), height: 1),
+          Divider(color: isDark ? AppTheme.darkBorder : AppTheme.hairline, height: 1),
           SizedBox(height: 10.h),
           SectionLabel('morePreferences'.tr(), isDark),
           DrawerThemeTile(isDark: isDark),
           DrawerLanguageTile(isDark: isDark),
           SizedBox(height: 10.h),
-          Divider(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB), height: 1),
+          Divider(color: isDark ? AppTheme.darkBorder : AppTheme.hairline, height: 1),
           SizedBox(height: 10.h),
           CustomDrawerTile(
             icon: Icons.headset_mic_rounded,
@@ -106,13 +106,13 @@ class DrawerItemsList extends StatelessWidget {
             onTap: () => _open(context, const ContactUsView()),
           ),
           SizedBox(height: 10.h),
-          Divider(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB), height: 1),
+          Divider(color: isDark ? AppTheme.darkBorder : AppTheme.hairline, height: 1),
           SizedBox(height: 10.h),
           SectionLabel('لوحة التحكم', isDark),
           CustomDrawerTile(
             icon: Icons.admin_panel_settings_rounded,
             label: 'لوحة التحكم',
-            color: const Color(0xFF1A4FD6),
+            color: AppTheme.primaryColor,
             onTap: () => _open(context, const AdminHome()),
           ),
         ],

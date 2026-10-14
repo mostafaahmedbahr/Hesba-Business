@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/theme/app_theme.dart';
 
 import '../../cubit/register_cubit.dart';
 import '../../states/register_state.dart';
@@ -93,7 +94,7 @@ class RegisterNavigation extends StatelessWidget {
           ? OutlinedButton(
               onPressed: onPressed,
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Color(0xFF0B4D9C)),
+                side: const BorderSide(color: AppTheme.deepBlue),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14.r),
                 ),
@@ -101,7 +102,7 @@ class RegisterNavigation extends StatelessWidget {
               child: Text(
                 label,
                 style: const TextStyle(
-                  color: Color(0xFF0B4D9C),
+                  color: AppTheme.deepBlue,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -109,7 +110,7 @@ class RegisterNavigation extends StatelessWidget {
           : ElevatedButton(
               onPressed: onPressed,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0B4D9C),
+                backgroundColor: AppTheme.deepBlue,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14.r),

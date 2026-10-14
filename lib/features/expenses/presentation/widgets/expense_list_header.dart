@@ -25,7 +25,7 @@ class ExpenseListHeader extends StatelessWidget {
     return SliverAppBar(
       pinned: true,
       expandedHeight: 216.h,
-      backgroundColor: const Color(0xFFE11D48),
+      backgroundColor: AppTheme.danger,
       foregroundColor: Colors.white,
       elevation: 0,
       scrolledUnderElevation: 0,
@@ -44,7 +44,7 @@ class ExpenseListHeader extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topRight,
               end: Alignment.bottomLeft,
-              colors: [Color(0xFF5F0A22), Color(0xFFE11D48), Color(0xFFFF7A93)],
+              colors: [Color(0xFF5F0A22), AppTheme.danger, Color(0xFFFF7A93)],
             ),
           ),
           child: Stack(children: [

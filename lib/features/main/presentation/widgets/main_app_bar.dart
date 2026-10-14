@@ -27,7 +27,7 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppTheme.darkSurface : Colors.white;
-    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final titleColor = isDark ? Colors.white : AppTheme.ink;
 
     return AppBar(
       backgroundColor: bg,
@@ -79,7 +79,7 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
         preferredSize: const Size.fromHeight(1),
         child: Container(
           height: 1,
-          color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB),
+          color: isDark ? AppTheme.darkBorder : AppTheme.hairline,
         ),
       ),
     );

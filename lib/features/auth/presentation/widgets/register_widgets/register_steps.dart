@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/theme/app_theme.dart';
 
 import '../../cubit/register_cubit.dart';
 import '../../states/register_state.dart';
@@ -53,7 +54,7 @@ class RegisterSteps extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: active
-                ? const Color(0xFF0B4D9C)
+                ? AppTheme.deepBlue
                 : const Color(0xFFF1F3F6),
           ),
           child: Center(
@@ -89,7 +90,7 @@ class RegisterSteps extends StatelessWidget {
         margin:
         EdgeInsets.symmetric(horizontal: 8.w),
         color: active
-            ? const Color(0xFF0B4D9C)
+            ? AppTheme.deepBlue
             : const Color(0xFFE8EBEF),
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:hesba/core/theme/app_theme.dart';
 
 /// تأكيد حذف تذكير.
 class ReminderDeleteDialog extends StatelessWidget {
@@ -24,10 +25,10 @@ class ReminderDeleteDialog extends StatelessWidget {
               width: 56.w,
               height: 56.w,
               decoration: const BoxDecoration(
-                color: Color(0xFFFEF2F2),
+                color: AppTheme.dangerSoft,
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.delete_rounded, size: 26.sp, color: const Color(0xFFE11D48)),
+              child: Icon(Icons.delete_rounded, size: 26.sp, color: AppTheme.danger),
             ),
             SizedBox(height: 12.h),
             Text(
@@ -38,7 +39,7 @@ class ReminderDeleteDialog extends StatelessWidget {
             Text(
               'reminderDeleteConfirmBody'.tr(),
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12.5.sp, color: const Color(0xFF64748B)),
+              style: TextStyle(fontSize: 12.5.sp, color: AppTheme.slateGray),
             ),
             SizedBox(height: 18.h),
             Row(
@@ -60,7 +61,7 @@ class ReminderDeleteDialog extends StatelessWidget {
                   child: FilledButton(
                     onPressed: () => Navigator.pop(context, true),
                     style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFFE11D48),
+                      backgroundColor: AppTheme.danger,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12.r),
                       ),

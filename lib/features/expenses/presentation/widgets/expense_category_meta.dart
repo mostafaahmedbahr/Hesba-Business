@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hesba/core/theme/app_theme.dart';
 
 /// لون تصنيف المصروف.
 Color expenseCatColor(String cat) {
@@ -8,11 +9,11 @@ Color expenseCatColor(String cat) {
     case 'رواتب':
       return const Color(0xFF7C3AED);
     case 'مرافق':
-      return const Color(0xFFF59E0B);
+      return AppTheme.warningAmber;
     case 'مستلزمات':
-      return const Color(0xFF059669);
+      return AppTheme.successDark;
     default:
-      return const Color(0xFFE11D48);
+      return AppTheme.danger;
   }
 }
 

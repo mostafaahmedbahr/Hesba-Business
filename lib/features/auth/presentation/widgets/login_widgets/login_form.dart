@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/theme/app_theme.dart';
 
 import '../../cubit/login_cubit.dart';
 import '../../states/login_state.dart';
@@ -126,7 +127,7 @@ class _LoginFormState extends State<LoginForm> {
           'loginForgotPassword'.tr(),
           style: TextStyle(
             fontSize: 12.sp,
-            color: const Color(0xFF0B4D9C),
+            color: AppTheme.deepBlue,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -145,9 +146,9 @@ class _LoginFormState extends State<LoginForm> {
           child: ElevatedButton(
             onPressed: isLoading ? null : _onLogin,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF0B4D9C),
+              backgroundColor: AppTheme.deepBlue,
               foregroundColor: Colors.white,
-              disabledBackgroundColor: const Color(0xFF0B4D9C).withValues(alpha: 0.5),
+              disabledBackgroundColor: AppTheme.deepBlue.withValues(alpha: 0.5),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14.r),
               ),
@@ -193,7 +194,7 @@ class _LoginFormState extends State<LoginForm> {
             style: TextStyle(
               fontSize: 13.sp,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF0B4D9C),
+              color: AppTheme.deepBlue,
             ),
           ),
         ),

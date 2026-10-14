@@ -26,7 +26,7 @@ class ReturnsListHeader extends StatelessWidget {
     return SliverAppBar(
       pinned: true,
       expandedHeight: 210.h,
-      backgroundColor: const Color(0xFFF59E0B),
+      backgroundColor: AppTheme.warningAmber,
       foregroundColor: Colors.white,
       elevation: 0,
       scrolledUnderElevation: 0,
@@ -41,7 +41,7 @@ class ReturnsListHeader extends StatelessWidget {
       flexibleSpace: FlexibleSpaceBar(
         collapseMode: CollapseMode.parallax,
         background: Container(
-          decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFFB45309), Color(0xFFF59E0B), Color(0xFFFBBF24)])),
+          decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFFB45309), AppTheme.warningAmber, AppTheme.goldLight])),
           child: Stack(children: [
             Positioned(top: -50.h, left: -40.w, child: Container(width: 150.w, height: 150.w, decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.08)))),
             Positioned(bottom: -40.h, right: -30.w, child: Container(width: 170.w, height: 170.w, decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.06)))),

@@ -54,7 +54,7 @@ class SaleProductCard extends StatelessWidget {
         border: Border.all(
           color: selectedProduct != null
               ? AppTheme.primaryColor.withValues(alpha: 0.25)
-              : (isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB)),
+              : (isDark ? AppTheme.darkBorder : AppTheme.hairline),
         ),
         boxShadow: AppTheme.cardShadow(context),
       ),
@@ -80,7 +80,7 @@ class SaleProductCard extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
                   decoration: BoxDecoration(
-                    color: (selectedProduct!.isOutOfStock ? const Color(0xFFE11D48) : const Color(0xFF059669)).withValues(alpha: 0.10),
+                    color: (selectedProduct!.isOutOfStock ? AppTheme.danger : AppTheme.successDark).withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(20.r),
                   ),
                   child: Text(
@@ -88,7 +88,7 @@ class SaleProductCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w800,
-                      color: selectedProduct!.isOutOfStock ? const Color(0xFFE11D48) : const Color(0xFF059669),
+                      color: selectedProduct!.isOutOfStock ? AppTheme.danger : AppTheme.successDark,
                     ),
                   ),
                 ),
@@ -100,10 +100,10 @@ class SaleProductCard extends StatelessWidget {
                   width: 34.w,
                   height: 34.w,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE11D48).withValues(alpha: 0.08),
+                    color: AppTheme.danger.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(10.r),
                   ),
-                  child: Icon(Icons.delete_outline_rounded, size: 17.sp, color: const Color(0xFFE11D48)),
+                  child: Icon(Icons.delete_outline_rounded, size: 17.sp, color: AppTheme.danger),
                 ),
               ),
             ],
@@ -153,7 +153,7 @@ class SaleProductCard extends StatelessWidget {
                           title: Text(p.name, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700)),
                           subtitle: Text(
                             '${p.price.toStringAsFixed(0)} ج.م • مخزون: ${p.stock}',
-                            style: TextStyle(fontSize: 11.sp, color: const Color(0xFF64748B)),
+                            style: TextStyle(fontSize: 11.sp, color: AppTheme.slateGray),
                           ),
                           trailing: p.isLowStock
                               ? Icon(Icons.warning_amber_rounded, size: 16.sp, color: Colors.orange)
@@ -182,7 +182,7 @@ class SaleProductCard extends StatelessWidget {
                 style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w600),
                 decoration: InputDecoration(
                   hintText: 'ابحث بالاسم أو الكود...',
-                  hintStyle: TextStyle(fontSize: 12.5.sp, color: const Color(0xFF94A3B8)),
+                  hintStyle: TextStyle(fontSize: 12.5.sp, color: AppTheme.mutedGray),
                   prefixIcon: Container(
                     margin: EdgeInsets.all(8.w),
                     width: 34.w,
@@ -209,7 +209,7 @@ class SaleProductCard extends StatelessWidget {
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide.none),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14.r),
-                    borderSide: BorderSide(color: isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0)),
+                    borderSide: BorderSide(color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14.r),
@@ -236,7 +236,7 @@ class SaleProductCard extends StatelessWidget {
             SizedBox(height: 6.h),
             Text(
               selectedProduct!.category,
-              style: TextStyle(fontSize: 11.sp, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w600),
+              style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600),
             ),
           ],
           SizedBox(height: 12.h),
@@ -250,7 +250,7 @@ class SaleProductCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF6F8FC),
                     borderRadius: BorderRadius.circular(14.r),
-                    border: Border.all(color: isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0)),
+                    border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft),
                   ),
                   child: Row(
                     children: [
@@ -293,7 +293,7 @@ class SaleProductCard extends StatelessWidget {
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide.none),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14.r),
-                      borderSide: BorderSide(color: isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0)),
+                      borderSide: BorderSide(color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14.r),
@@ -326,12 +326,12 @@ class SaleProductCard extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF059669).withValues(alpha: 0.10),
+                      color: AppTheme.successDark.withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(20.r),
                     ),
                     child: Text(
                       '= ${lineTotal.toStringAsFixed(2)} ج.م',
-                      style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w800, color: const Color(0xFF059669)),
+                      style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w800, color: AppTheme.successDark),
                     ),
                   ),
                 ],

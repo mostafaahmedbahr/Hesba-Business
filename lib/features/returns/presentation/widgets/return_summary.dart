@@ -24,11 +24,11 @@ class ReturnSummary extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
-          colors: [Color(0xFF92400E), Color(0xFFF59E0B), Color(0xFFFBBF24)],
+          colors: [Color(0xFF92400E), AppTheme.warningAmber, AppTheme.goldLight],
         ),
         borderRadius: BorderRadius.circular(22.r),
         boxShadow: [
-          BoxShadow(color: const Color(0xFFF59E0B).withValues(alpha: 0.30), blurRadius: 22, offset: const Offset(0, 10)),
+          BoxShadow(color: AppTheme.warningAmber.withValues(alpha: 0.30), blurRadius: 22, offset: const Offset(0, 10)),
         ],
       ),
       child: Stack(

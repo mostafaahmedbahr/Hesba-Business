@@ -38,6 +38,8 @@ import '../../features/subscription/data/repos/subscription_repo.dart';
 import '../../features/subscription/data/repos_impl/subscription_repo_impl.dart';
 import '../../features/admin/data/repos/admin_repo.dart';
 import '../../features/admin/data/repos_impl/admin_repo_impl.dart';
+import '../../features/admin/data/repos/admin_search_repo.dart';
+import '../../features/admin/data/repos_impl/admin_search_repo_impl.dart';
 
 final sl = GetIt.instance;
 
@@ -76,6 +78,9 @@ void _initSubscription() {
 void _initAdmin() {
   sl.registerLazySingleton<AdminRepo>(
     () => AdminRepoImpl(auth: sl(), firestore: sl()),
+  );
+  sl.registerLazySingleton<AdminSearchRepo>(
+    () => AdminSearchRepoImpl(firestore: sl()),
   );
 }
 

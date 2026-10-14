@@ -18,15 +18,15 @@ class DrawerLanguageTile extends StatelessWidget {
         decoration: BoxDecoration(color: const Color(0xFF00ACC1).withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10.r)),
         child: Icon(Icons.language_rounded, color: const Color(0xFF00ACC1), size: 18.sp),
       ),
-      title: Text('moreLanguage'.tr(), style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: isDark ? Colors.white : const Color(0xFF0F172A))),
+      title: Text('moreLanguage'.tr(), style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: isDark ? Colors.white : AppTheme.ink)),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(isEnglish ? 'English' : 'العربية', style: TextStyle(fontSize: 12.sp, color: const Color(0xFF64748B), fontWeight: FontWeight.w600)),
+          Text(isEnglish ? 'English' : 'العربية', style: TextStyle(fontSize: 12.sp, color: AppTheme.slateGray, fontWeight: FontWeight.w600)),
           SizedBox(width: 6.w),
           Switch(
             value: isEnglish,
-            activeThumbColor: const Color(0xFF1A4FD6),
+            activeThumbColor: AppTheme.primaryColor,
             onChanged: (_) => context.setLocale(Locale(isEnglish ? 'ar' : 'en')),
           ),
         ],

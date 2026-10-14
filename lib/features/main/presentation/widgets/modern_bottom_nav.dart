@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/theme/app_theme.dart';
 
 /// Premium floating island bottom nav — 2026 (4 items)
 /// • Glass + soft shadow, dark-mode aware
@@ -21,7 +22,7 @@ class ModernBottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final surface = isDark ? const Color(0xFF151D2F) : Colors.white;
-    final borderColor = isDark ? const Color(0xFF243146) : const Color(0xFFE5E7EB);
+    final borderColor = isDark ? const Color(0xFF243146) : AppTheme.hairline;
 
     return SafeArea(
       top: false,
@@ -102,8 +103,8 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const active = Color(0xFF1A4FD6);
-    final inactive = isDark ? const Color(0xFF94A3B8) : const Color(0xFF94A3B8);
+    const active = AppTheme.primaryColor;
+    final inactive = isDark ? AppTheme.mutedGray : AppTheme.mutedGray;
 
     return Material(
       color: Colors.transparent,

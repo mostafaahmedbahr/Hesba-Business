@@ -28,7 +28,7 @@ class _CategorySearchFieldState extends State<CategorySearchField> {
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
-          color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB),
+          color: isDark ? AppTheme.darkBorder : AppTheme.hairline,
         ),
         boxShadow: AppTheme.cardShadow(context),
       ),

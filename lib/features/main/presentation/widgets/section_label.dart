@@ -24,7 +24,7 @@ class SectionLabel extends StatelessWidget {
           fontWeight: FontWeight.w800,
           color: isDark == true
               ? AppTheme.darkTextSecondary
-              : const Color(0xFF64748B),
+              : AppTheme.slateGray,
           letterSpacing: 0.3,
         ),
       ),

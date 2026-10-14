@@ -186,7 +186,7 @@ class _ProductFormViewState extends State<ProductFormView> {
           padding: EdgeInsets.all(20.w),
           decoration: BoxDecoration(color: Theme.of(context).colorScheme.surface, borderRadius: BorderRadius.circular(24.r)),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Container(width: 64.w, height: 64.w, decoration: BoxDecoration(color: const Color(0xFFFEF2F2), shape: BoxShape.circle), child: Icon(Icons.delete_rounded, color: const Color(0xFFE11D48), size: 28.sp)),
+            Container(width: 64.w, height: 64.w, decoration: BoxDecoration(color: AppTheme.dangerSoft, shape: BoxShape.circle), child: Icon(Icons.delete_rounded, color: AppTheme.danger, size: 28.sp)),
             SizedBox(height: 14.h),
             Text('productDeleteConfirmTitle'.tr(), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800)),
             SizedBox(height: 8.h),
@@ -195,7 +195,7 @@ class _ProductFormViewState extends State<ProductFormView> {
             Row(children: [
               Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(dialogContext, false), style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)), padding: EdgeInsets.symmetric(vertical: 12.h)), child: Text('cancel'.tr()))),
               SizedBox(width: 10.w),
-              Expanded(child: FilledButton(onPressed: () => Navigator.pop(dialogContext, true), style: FilledButton.styleFrom(backgroundColor: const Color(0xFFE11D48), foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)), padding: EdgeInsets.symmetric(vertical: 12.h)), child: Text('productDelete'.tr()))),
+              Expanded(child: FilledButton(onPressed: () => Navigator.pop(dialogContext, true), style: FilledButton.styleFrom(backgroundColor: AppTheme.danger, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)), padding: EdgeInsets.symmetric(vertical: 12.h)), child: Text('productDelete'.tr()))),
             ]),
           ]),
         ),
@@ -216,13 +216,13 @@ class _ProductFormViewState extends State<ProductFormView> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: isDark ? AppTheme.darkSurface : Colors.white,
-        foregroundColor: isDark ? Colors.white : const Color(0xFF0F172A),
+        foregroundColor: isDark ? Colors.white : AppTheme.ink,
         elevation: 0,
         scrolledUnderElevation: 0,
         title: Text(_isEdit ? 'productFormEdit'.tr() : 'productFormAdd'.tr(), style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w900)),
         centerTitle: true,
         leading: IconButton(icon: Icon(Icons.close_rounded, size: 22.sp), onPressed: () => Navigator.pop(context)),
-        bottom: PreferredSize(preferredSize: const Size.fromHeight(1), child: Container(height: 1, color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB))),
+        bottom: PreferredSize(preferredSize: const Size.fromHeight(1), child: Container(height: 1, color: isDark ? AppTheme.darkBorder : AppTheme.hairline)),
       ),
       body: Form(
         key: _formKey,
@@ -233,7 +233,7 @@ class _ProductFormViewState extends State<ProductFormView> {
             // _imagePreviewCard(isDark),
             // SizedBox(height: 14.h),
 
-            _SectionCard(icon: Icons.info_outline_rounded, title: 'المعلومات الأساسية', gradient: const [Color(0xFF1A4FD6), Color(0xFF4A7BFF)], child: Column(children: [
+            _SectionCard(icon: Icons.info_outline_rounded, title: 'المعلومات الأساسية', gradient: const [AppTheme.primaryColor, AppTheme.brightBlue], child: Column(children: [
               _field(controller: _nameController, label: 'productFormName'.tr(), hint: 'productFormNameHint'.tr(), icon: Icons.inventory_2_rounded, required: true, validator: (v) => (v == null || v.trim().isEmpty) ? 'validatorRequired'.tr() : null),
               SizedBox(height: 12.h),
               _dropdownField<String>(label: 'productFormCategory'.tr(), icon: Icons.category_rounded, value: _category, items: [for (final c in _allCategories) DropdownMenuItem(value: c, child: Text(c, style: TextStyle(fontSize: 13.sp)))], onChanged: (v) => setState(() { _category = v; _customCategory = v == _otherOption; })),
@@ -254,7 +254,7 @@ class _ProductFormViewState extends State<ProductFormView> {
             ])),
 
             SizedBox(height: 14.h),
-            _SectionCard(icon: Icons.payments_rounded, title: 'التسعير والمخزون', gradient: const [Color(0xFF059669), Color(0xFF34D399)], child: Column(children: [
+            _SectionCard(icon: Icons.payments_rounded, title: 'التسعير والمخزون', gradient: const [AppTheme.successDark, Color(0xFF34D399)], child: Column(children: [
               Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Expanded(child: _field(controller: _costPriceController, label: 'productFormCostPrice'.tr(), icon: Icons.shopping_cart_rounded, suffix: 'currencyEGP'.tr(), keyboard: _numberKeyboard(decimal: true), required: true, validator: (v) => _positiveNumber(v))),
                 SizedBox(width: 10.w),
@@ -281,7 +281,7 @@ class _ProductFormViewState extends State<ProductFormView> {
             ])),
 
             SizedBox(height: 14.h),
-            _SectionCard(icon: Icons.image_rounded, title: 'الوسائط والملاحظات', gradient: const [Color(0xFFF59E0B), Color(0xFFFBBF24)], child: Column(children: [
+            _SectionCard(icon: Icons.image_rounded, title: 'الوسائط والملاحظات', gradient: const [AppTheme.warningAmber, AppTheme.goldLight], child: Column(children: [
               // _field(controller: _imageUrlController, label: 'productFormImageUrl'.tr(), hint: 'productFormImageUrlHint'.tr(), icon: Icons.link_rounded, keyboard: TextInputType.url, onChanged: (_) => setState(() {})),
               // SizedBox(height: 12.h),
               _field(controller: _notesController, label: 'productFormNotes'.tr(), hint: 'productFormNotesHint'.tr(), icon: Icons.notes_rounded, maxLines: 3),
@@ -298,7 +298,7 @@ class _ProductFormViewState extends State<ProductFormView> {
             ),
             if (_isEdit) ...[
               SizedBox(height: 10.h),
-              SizedBox(height: 50.h, child: OutlinedButton.icon(onPressed: _saving || _deleting ? null : _delete, style: OutlinedButton.styleFrom(foregroundColor: const Color(0xFFE11D48), side: const BorderSide(color: Color(0xFFE11D48)), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r))), icon: _deleting ? SizedBox(width: 18.w, height: 18.w, child: const CircularProgressIndicator(strokeWidth: 2.2, color: Color(0xFFE11D48))) : const Icon(Icons.delete_outline_rounded, size: 18), label: Text('productDelete'.tr(), style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w700)))),
+              SizedBox(height: 50.h, child: OutlinedButton.icon(onPressed: _saving || _deleting ? null : _delete, style: OutlinedButton.styleFrom(foregroundColor: AppTheme.danger, side: const BorderSide(color: AppTheme.danger), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r))), icon: _deleting ? SizedBox(width: 18.w, height: 18.w, child: const CircularProgressIndicator(strokeWidth: 2.2, color: AppTheme.danger)) : const Icon(Icons.delete_outline_rounded, size: 18), label: Text('productDelete'.tr(), style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w700)))),
             ],
           ],
         ),
@@ -315,12 +315,12 @@ class _ProductFormViewState extends State<ProductFormView> {
     final positive = profit >= 0;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-      decoration: BoxDecoration(color: positive ? const Color(0xFFECFDF5) : const Color(0xFFFEF2F2), borderRadius: BorderRadius.circular(12.r), border: Border.all(color: positive ? const Color(0xFF059669).withValues(alpha: 0.14) : const Color(0xFFE11D48).withValues(alpha: 0.14))),
+      decoration: BoxDecoration(color: positive ? const Color(0xFFECFDF5) : AppTheme.dangerSoft, borderRadius: BorderRadius.circular(12.r), border: Border.all(color: positive ? AppTheme.successDark.withValues(alpha: 0.14) : AppTheme.danger.withValues(alpha: 0.14))),
       child: Row(children: [
-        Icon(positive ? Icons.trending_up_rounded : Icons.trending_down_rounded, size: 16.sp, color: positive ? const Color(0xFF059669) : const Color(0xFFE11D48)),
+        Icon(positive ? Icons.trending_up_rounded : Icons.trending_down_rounded, size: 16.sp, color: positive ? AppTheme.successDark : AppTheme.danger),
         SizedBox(width: 8.w),
-        Expanded(child: Text(positive ? 'ربح ${_num(profit)} ج.م • هامش ${margin.toStringAsFixed(1)}%' : 'خسارة ${_num(profit.abs())} ج.م', style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w800, color: positive ? const Color(0xFF059669) : const Color(0xFFE11D48)))),
-        Container(padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h), decoration: BoxDecoration(color: positive ? const Color(0xFF059669) : const Color(0xFFE11D48), borderRadius: BorderRadius.circular(20.r)), child: Text(positive ? 'مربح' : 'خسارة', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w700, color: Colors.white))),
+        Expanded(child: Text(positive ? 'ربح ${_num(profit)} ج.م • هامش ${margin.toStringAsFixed(1)}%' : 'خسارة ${_num(profit.abs())} ج.م', style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w800, color: positive ? AppTheme.successDark : AppTheme.danger))),
+        Container(padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h), decoration: BoxDecoration(color: positive ? AppTheme.successDark : AppTheme.danger, borderRadius: BorderRadius.circular(20.r)), child: Text(positive ? 'مربح' : 'خسارة', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w700, color: Colors.white))),
       ]),
     );
   }
@@ -340,12 +340,12 @@ class _ProductFormViewState extends State<ProductFormView> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(color: isDark ? AppTheme.darkSurface : Colors.white, borderRadius: BorderRadius.circular(20.r), border: Border.all(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB)), boxShadow: AppTheme.cardShadow(context)),
+      decoration: BoxDecoration(color: isDark ? AppTheme.darkSurface : Colors.white, borderRadius: BorderRadius.circular(20.r), border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.hairline), boxShadow: AppTheme.cardShadow(context)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           Container(width: 36.w, height: 36.w, decoration: BoxDecoration(gradient: LinearGradient(colors: gradient), borderRadius: BorderRadius.circular(10.r)), child: Icon(icon, color: Colors.white, size: 18.sp)),
           SizedBox(width: 10.w),
-          Text(title, style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : const Color(0xFF0F172A))),
+          Text(title, style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : AppTheme.ink)),
         ]),
         SizedBox(height: 14.h),
         child,
@@ -384,20 +384,20 @@ class _ProductFormViewState extends State<ProductFormView> {
     return InputDecoration(
       labelText: required ? '$label *' : label,
       hintText: hint,
-      hintStyle: TextStyle(fontSize: 12.sp, color: const Color(0xFF94A3B8)),
+      hintStyle: TextStyle(fontSize: 12.sp, color: AppTheme.mutedGray),
       labelStyle: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w600),
       prefixIcon: icon == null ? null : Container(margin: EdgeInsets.all(8.w), width: 36.w, height: 36.w, decoration: BoxDecoration(color: AppTheme.primaryColor.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(10.r)), child: Icon(icon, size: 16.sp, color: AppTheme.primaryColor)),
       suffixText: suffix,
       suffixStyle: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: AppTheme.primaryColor),
       suffixIcon: suffixIcon,
       filled: true,
-      fillColor: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF8FAFC),
+      fillColor: isDark ? AppTheme.darkSurfaceAlt : AppTheme.canvasLight,
       contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide.none),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide(color: isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0))),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide(color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft)),
       focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: const BorderSide(color: AppTheme.primaryColor, width: 1.6)),
-      errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: const BorderSide(color: Color(0xFFE11D48))),
-      focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: const BorderSide(color: Color(0xFFE11D48), width: 1.6)),
+      errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: const BorderSide(color: AppTheme.danger)),
+      focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: const BorderSide(color: AppTheme.danger, width: 1.6)),
     );
   }
 

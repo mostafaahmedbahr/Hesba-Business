@@ -64,7 +64,7 @@ class _SalesListCardState extends State<SalesListCard> {
                     width: 48.w,
                     height: 48.w,
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF1A4FD6), Color(0xFF6D9BFF)]),
+                      gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [AppTheme.primaryColor, Color(0xFF6D9BFF)]),
                       borderRadius: BorderRadius.circular(14.r),
                       boxShadow: [BoxShadow(color: AppTheme.primaryColor.withValues(alpha: 0.28), blurRadius: 10, offset: const Offset(0, 4))],
                     ),
@@ -76,26 +76,26 @@ class _SalesListCardState extends State<SalesListCard> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(children: [
-                          Flexible(child: Text('فاتورة #$idShort', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : const Color(0xFF0F172A)))),
+                          Flexible(child: Text('فاتورة #$idShort', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink))),
                           if (sale.discount > 0) ...[
                             SizedBox(width: 6.w),
                             Container(
                               padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.h),
-                              decoration: BoxDecoration(color: const Color(0xFFE11D48).withValues(alpha: 0.10), borderRadius: BorderRadius.circular(8.r)),
-                              child: Text('خصم', style: TextStyle(fontSize: 9.5.sp, fontWeight: FontWeight.w800, color: const Color(0xFFE11D48))),
+                              decoration: BoxDecoration(color: AppTheme.danger.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(8.r)),
+                              child: Text('خصم', style: TextStyle(fontSize: 9.5.sp, fontWeight: FontWeight.w800, color: AppTheme.danger)),
                             ),
                           ],
                         ]),
                         SizedBox(height: 3.h),
-                        Text('$itemsLabel • $dateStr', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.sp, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w600)),
+                        Text('$itemsLabel • $dateStr', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text(sale.total.toStringAsFixed(2), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: const Color(0xFF059669), height: 1)),
-                      Text('ج.م', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w700, color: const Color(0xFF94A3B8))),
+                      Text(sale.total.toStringAsFixed(2), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: AppTheme.successDark, height: 1)),
+                      Text('ج.م', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w700, color: AppTheme.mutedGray)),
                     ],
                   ),
                   SizedBox(width: 4.w),
@@ -106,7 +106,7 @@ class _SalesListCardState extends State<SalesListCard> {
                       width: 28.w,
                       height: 28.w,
                       decoration: BoxDecoration(color: _expanded ? AppTheme.primaryColor.withValues(alpha: 0.10) : Colors.transparent, shape: BoxShape.circle),
-                      child: Icon(Icons.keyboard_arrow_down_rounded, size: 20.sp, color: _expanded ? AppTheme.primaryColor : const Color(0xFF94A3B8)),
+                      child: Icon(Icons.keyboard_arrow_down_rounded, size: 20.sp, color: _expanded ? AppTheme.primaryColor : AppTheme.mutedGray),
                     ),
                   ),
                 ]),
@@ -150,7 +150,7 @@ class _Details extends StatelessWidget {
                   padding: EdgeInsets.only(bottom: 8.h),
                   child: Row(
                     children: [
-                      Container(width: 7.w, height: 7.w, decoration: const BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [Color(0xFF1A4FD6), Color(0xFF6D9BFF)]))),
+                      Container(width: 7.w, height: 7.w, decoration: const BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [AppTheme.primaryColor, Color(0xFF6D9BFF)]))),
                       SizedBox(width: 8.w),
                       Expanded(
                         child: Text(
@@ -160,19 +160,19 @@ class _Details extends StatelessWidget {
                           style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w600, color: isDark ? Colors.white : const Color(0xFF1E293B)),
                         ),
                       ),
-                      Text('${it.total.toStringAsFixed(2)} ج.م', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: const Color(0xFF64748B))),
+                      Text('${it.total.toStringAsFixed(2)} ج.م', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: AppTheme.slateGray)),
                     ],
                   ),
                 )),
             if (sale.discount > 0) ...[
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
-                decoration: BoxDecoration(color: const Color(0xFFE11D48).withValues(alpha: 0.07), borderRadius: BorderRadius.circular(10.r)),
+                decoration: BoxDecoration(color: AppTheme.danger.withValues(alpha: 0.07), borderRadius: BorderRadius.circular(10.r)),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('بعد خصم ${sale.discount.toStringAsFixed(0)} ج.م', style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w700, color: const Color(0xFFE11D48))),
-                    Text('${sale.total.toStringAsFixed(2)} ج.م', style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w900, color: const Color(0xFF059669))),
+                    Text('بعد خصم ${sale.discount.toStringAsFixed(0)} ج.م', style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w700, color: AppTheme.danger)),
+                    Text('${sale.total.toStringAsFixed(2)} ج.م', style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w900, color: AppTheme.successDark)),
                   ],
                 ),
               ),
@@ -181,14 +181,14 @@ class _Details extends StatelessWidget {
             Row(children: [
               SalesPaymentChip(method: sale.paymentMethod, isDark: isDark),
               const Spacer(),
-              Text(dateTimeLabel(sale.createdAt), style: TextStyle(fontSize: 10.5.sp, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w600)),
+              Text(dateTimeLabel(sale.createdAt), style: TextStyle(fontSize: 10.5.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600)),
             ]),
             if (sale.note.isNotEmpty) ...[
               SizedBox(height: 8.h),
               Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Icon(Icons.notes_rounded, size: 13.sp, color: const Color(0xFF94A3B8)),
+                Icon(Icons.notes_rounded, size: 13.sp, color: AppTheme.mutedGray),
                 SizedBox(width: 5.w),
-                Expanded(child: Text(sale.note, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.5.sp, color: isDark ? AppTheme.darkTextSecondary : const Color(0xFF64748B)))),
+                Expanded(child: Text(sale.note, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.5.sp, color: isDark ? AppTheme.darkTextSecondary : AppTheme.slateGray))),
               ]),
             ],
             SizedBox(height: 10.h),
@@ -203,8 +203,8 @@ class _Details extends StatelessWidget {
                 icon: Icon(Icons.assignment_return_rounded, size: 17.sp, color: const Color(0xFFD97706)),
                 label: Text('مرتجع من الفاتورة', style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w800, color: const Color(0xFFD97706))),
                 style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: const Color(0xFFF59E0B).withValues(alpha: 0.35)),
-                  backgroundColor: const Color(0xFFF59E0B).withValues(alpha: 0.07),
+                  side: BorderSide(color: AppTheme.warningAmber.withValues(alpha: 0.35)),
+                  backgroundColor: AppTheme.warningAmber.withValues(alpha: 0.07),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                 ),
               ),
@@ -253,11 +253,11 @@ class SalesPaymentChip extends StatelessWidget {
     }
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-      decoration: BoxDecoration(color: isDark ? AppTheme.darkSurfaceAlt : Colors.white, borderRadius: BorderRadius.circular(20.r), border: Border.all(color: isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0))),
+      decoration: BoxDecoration(color: isDark ? AppTheme.darkSurfaceAlt : Colors.white, borderRadius: BorderRadius.circular(20.r), border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft)),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Icon(icon, size: 12.sp, color: const Color(0xFF64748B)),
+        Icon(icon, size: 12.sp, color: AppTheme.slateGray),
         SizedBox(width: 5.w),
-        Text(SalesListState.paymentLabel(method), style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: const Color(0xFF64748B))),
+        Text(SalesListState.paymentLabel(method), style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: AppTheme.slateGray)),
       ]),
     );
   }

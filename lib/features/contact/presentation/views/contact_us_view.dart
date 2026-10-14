@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:hesba/core/theme/app_theme.dart';
 
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/utils/toast.dart';
@@ -39,7 +40,7 @@ class _ContactUsViewState extends State<ContactUsView> {
           SizedBox(height: 10.h),
           ContactTile(
             icon: Icons.email_rounded,
-            color: const Color(0xFF1A4FD6),
+            color: AppTheme.primaryColor,
             label: 'contactEmail'.tr(),
             value: _email,
             onTap: _openEmail,

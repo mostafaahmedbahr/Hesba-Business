@@ -99,7 +99,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
       .replaceAll('۵', '5').replaceAll('۶', '6').replaceAll('۷', '7').replaceAll('۸', '8').replaceAll('۹', '9');
 
   Future<void> _pickDate(BuildContext innerContext) async {
-    final picked = await showDatePicker(context: innerContext, initialDate: _selectedDate, firstDate: DateTime(2020), lastDate: DateTime.now().add(const Duration(days: 365)), locale: const Locale('ar'), builder: (context, child) => Theme(data: Theme.of(context).copyWith(colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFE11D48))), child: child!));
+    final picked = await showDatePicker(context: innerContext, initialDate: _selectedDate, firstDate: DateTime(2020), lastDate: DateTime.now().add(const Duration(days: 365)), locale: const Locale('ar'), builder: (context, child) => Theme(data: Theme.of(context).copyWith(colorScheme: ColorScheme.fromSeed(seedColor: AppTheme.danger)), child: child!));
     if (picked != null) setState(() => _selectedDate = picked);
   }
 
@@ -163,7 +163,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
                             if (_category.isEmpty)
                               Padding(
                                 padding: EdgeInsets.only(top: 8.h, right: 4.w),
-                                child: Text('اختار التصنيف الأول', style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w700, color: const Color(0xFFE11D48))),
+                                child: Text('اختار التصنيف الأول', style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w700, color: AppTheme.danger)),
                               ),
                             SizedBox(height: 20.h),
 
@@ -175,7 +175,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
                               decoration: BoxDecoration(
                                 color: isDark ? AppTheme.darkSurface : Colors.white,
                                 borderRadius: BorderRadius.circular(18.r),
-                                border: Border.all(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB)),
+                                border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.hairline),
                                 boxShadow: AppTheme.cardShadow(context),
                               ),
                               child: Column(children: [
@@ -210,18 +210,18 @@ class _AddExpenseViewState extends State<AddExpenseView> {
                                 decoration: BoxDecoration(
                                   color: isDark ? AppTheme.darkSurface : Colors.white,
                                   borderRadius: BorderRadius.circular(16.r),
-                                  border: Border.all(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB)),
+                                  border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.hairline),
                                   boxShadow: AppTheme.cardShadow(context),
                                 ),
                                 child: Row(children: [
-                                  Container(width: 42.w, height: 42.w, decoration: BoxDecoration(color: const Color(0xFFE11D48).withValues(alpha: 0.10), borderRadius: BorderRadius.circular(12.r)), child: Icon(Icons.calendar_today_rounded, size: 19.sp, color: const Color(0xFFE11D48))),
+                                  Container(width: 42.w, height: 42.w, decoration: BoxDecoration(color: AppTheme.danger.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(12.r)), child: Icon(Icons.calendar_today_rounded, size: 19.sp, color: AppTheme.danger)),
                                   SizedBox(width: 12.w),
                                   Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                    Text('التاريخ', style: TextStyle(fontSize: 11.sp, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w600)),
+                                    Text('التاريخ', style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600)),
                                     SizedBox(height: 2.h),
-                                    Text(DateFormat('EEEE d MMMM yyyy', 'ar').format(_selectedDate), style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : const Color(0xFF0F172A))),
+                                    Text(DateFormat('EEEE d MMMM yyyy', 'ar').format(_selectedDate), style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : AppTheme.ink)),
                                   ])),
-                                  Icon(Icons.keyboard_arrow_down_rounded, color: const Color(0xFF94A3B8)),
+                                  Icon(Icons.keyboard_arrow_down_rounded, color: AppTheme.mutedGray),
                                 ]),
                               ),
                             ),
@@ -249,7 +249,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
               padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 16.h),
               decoration: BoxDecoration(
                 color: isDark ? AppTheme.darkSurface : Colors.white,
-                border: Border(top: BorderSide(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB))),
+                border: Border(top: BorderSide(color: isDark ? AppTheme.darkBorder : AppTheme.hairline)),
                 boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 20, offset: const Offset(0, -6))],
               ),
               child: SafeArea(
@@ -261,13 +261,13 @@ class _AddExpenseViewState extends State<AddExpenseView> {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('المبلغ', style: TextStyle(fontSize: 11.sp, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w600)),
+                          Text('المبلغ', style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600)),
                           FittedBox(
                             fit: BoxFit.scaleDown,
                             alignment: AlignmentDirectional.centerStart,
                             child: Text(
                               '${_amount.toStringAsFixed(_amount % 1 == 0 ? 0 : 2)} ج.م',
-                              style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w900, color: const Color(0xFFE11D48), height: 1.1),
+                              style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w900, color: AppTheme.danger, height: 1.1),
                             ),
                           ),
                         ],
@@ -283,9 +283,9 @@ class _AddExpenseViewState extends State<AddExpenseView> {
                             height: 52.h,
                             child: DecoratedBox(
                               decoration: BoxDecoration(
-                                gradient: const LinearGradient(colors: [Color(0xFFE11D48), Color(0xFFFB7185)]),
+                                gradient: const LinearGradient(colors: [AppTheme.danger, AppTheme.roseLight]),
                                 borderRadius: BorderRadius.circular(16.r),
-                                boxShadow: [BoxShadow(color: const Color(0xFFE11D48).withValues(alpha: 0.35), blurRadius: 16, offset: const Offset(0, 7))],
+                                boxShadow: [BoxShadow(color: AppTheme.danger.withValues(alpha: 0.35), blurRadius: 16, offset: const Offset(0, 7))],
                               ),
                               child: FilledButton(
                                 onPressed: loading ? null : () => _submit(innerContext),
@@ -331,7 +331,7 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : const Color(0xFF0F172A)),
+      style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink),
     );
   }
 }
@@ -366,7 +366,7 @@ class _CatChip extends StatelessWidget {
           gradient: selected ? LinearGradient(colors: [color, color.withValues(alpha: 0.7)]) : null,
           color: selected ? null : (isDark ? AppTheme.darkSurfaceAlt : Colors.white),
           borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: selected ? Colors.transparent : (isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0))),
+          border: Border.all(color: selected ? Colors.transparent : (isDark ? AppTheme.darkBorder : AppTheme.borderSoft)),
           boxShadow: selected
               ? [BoxShadow(color: color.withValues(alpha: 0.30), blurRadius: 12, offset: const Offset(0, 5))]
               : AppTheme.cardShadow(context),
@@ -411,18 +411,18 @@ class _BigAmountField extends StatelessWidget {
       controller: controller,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       textAlign: TextAlign.center,
-      style: TextStyle(fontSize: 26.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : const Color(0xFF0F172A)),
+      style: TextStyle(fontSize: 26.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink),
       decoration: InputDecoration(
         hintText: '0',
         hintStyle: TextStyle(fontSize: 26.sp, fontWeight: FontWeight.w900, color: const Color(0xFFCBD5E1)),
         suffixText: 'ج.م',
-        suffixStyle: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: const Color(0xFFE11D48)),
+        suffixStyle: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: AppTheme.danger),
         filled: true,
-        fillColor: const Color(0xFFE11D48).withValues(alpha: 0.05),
+        fillColor: AppTheme.danger.withValues(alpha: 0.05),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r), borderSide: BorderSide.none),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r), borderSide: BorderSide(color: const Color(0xFFE11D48).withValues(alpha: 0.15))),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r), borderSide: const BorderSide(color: Color(0xFFE11D48), width: 1.8)),
-        errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r), borderSide: const BorderSide(color: Color(0xFFE11D48))),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r), borderSide: BorderSide(color: AppTheme.danger.withValues(alpha: 0.15))),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r), borderSide: const BorderSide(color: AppTheme.danger, width: 1.8)),
+        errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r), borderSide: const BorderSide(color: AppTheme.danger)),
         contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
       ),
       validator: (v) {
@@ -469,22 +469,22 @@ class _Field extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
-        hintStyle: TextStyle(fontSize: 12.sp, color: const Color(0xFF94A3B8)),
+        hintStyle: TextStyle(fontSize: 12.sp, color: AppTheme.mutedGray),
         labelStyle: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w600),
         prefixIcon: Container(
           margin: EdgeInsets.all(8.w),
           width: 36.w,
           height: 36.w,
-          decoration: BoxDecoration(color: const Color(0xFFE11D48).withValues(alpha: 0.08), borderRadius: BorderRadius.circular(10.r)),
-          child: Icon(icon, size: 16.sp, color: const Color(0xFFE11D48)),
+          decoration: BoxDecoration(color: AppTheme.danger.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(10.r)),
+          child: Icon(icon, size: 16.sp, color: AppTheme.danger),
         ),
         filled: true,
-        fillColor: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF8FAFC),
+        fillColor: isDark ? AppTheme.darkSurfaceAlt : AppTheme.canvasLight,
         contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide.none),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide(color: isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0))),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: const BorderSide(color: Color(0xFFE11D48), width: 1.6)),
-        errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: const BorderSide(color: Color(0xFFE11D48))),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide(color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft)),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: const BorderSide(color: AppTheme.danger, width: 1.6)),
+        errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: const BorderSide(color: AppTheme.danger)),
       ),
     );
   }
@@ -503,7 +503,7 @@ class _AddHeader extends StatelessWidget {
     return SliverAppBar(
       pinned: true,
       expandedHeight: 178.h,
-      backgroundColor: const Color(0xFFE11D48),
+      backgroundColor: AppTheme.danger,
       foregroundColor: Colors.white,
       elevation: 0,
       stretch: true,
@@ -521,7 +521,7 @@ class _AddHeader extends StatelessWidget {
       flexibleSpace: FlexibleSpaceBar(
         collapseMode: CollapseMode.parallax,
         background: Container(
-          decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topRight, end: Alignment.bottomLeft, colors: [Color(0xFF5F0A22), Color(0xFFE11D48), Color(0xFFFF7A93)])),
+          decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topRight, end: Alignment.bottomLeft, colors: [Color(0xFF5F0A22), AppTheme.danger, Color(0xFFFF7A93)])),
           child: Stack(children: [
             Positioned(top: -50.h, left: -30.w, child: Container(width: 150.w, height: 150.w, decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.08)))),
             Positioned(bottom: -60.h, right: -40.w, child: Container(width: 170.w, height: 170.w, decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.06)))),

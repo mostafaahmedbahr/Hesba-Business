@@ -26,31 +26,31 @@ class ReportsTrendCard extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(color: isDark ? AppTheme.darkSurface : Colors.white, borderRadius: BorderRadius.circular(20.r), border: Border.all(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB)), boxShadow: AppTheme.cardShadow(context)),
+      decoration: BoxDecoration(color: isDark ? AppTheme.darkSurface : Colors.white, borderRadius: BorderRadius.circular(20.r), border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.hairline), boxShadow: AppTheme.cardShadow(context)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
-          Container(width: 36.w, height: 36.w, decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF1A4FD6), Color(0xFF4A7BFF)]), borderRadius: BorderRadius.circular(10.r)), child: Icon(Icons.show_chart_rounded, color: Colors.white, size: 18.sp)),
+          Container(width: 36.w, height: 36.w, decoration: BoxDecoration(gradient: const LinearGradient(colors: [AppTheme.primaryColor, AppTheme.brightBlue]), borderRadius: BorderRadius.circular(10.r)), child: Icon(Icons.show_chart_rounded, color: Colors.white, size: 18.sp)),
           SizedBox(width: 10.w),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('اتجاه المبيعات', style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : const Color(0xFF0F172A))),
-            Text('آخر 7 أيام', style: TextStyle(fontSize: 11.sp, color: const Color(0xFF64748B))),
+            Text('اتجاه المبيعات', style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
+            Text('آخر 7 أيام', style: TextStyle(fontSize: 11.sp, color: AppTheme.slateGray)),
           ])),
-          Container(padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h), decoration: BoxDecoration(color: const Color(0xFFECFDF5), borderRadius: BorderRadius.circular(20.r)), child: Text('${state.sales.length} عملية', style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.w700, color: const Color(0xFF059669)))),
+          Container(padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h), decoration: BoxDecoration(color: const Color(0xFFECFDF5), borderRadius: BorderRadius.circular(20.r)), child: Text('${state.sales.length} عملية', style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.w700, color: AppTheme.successDark))),
         ]),
         SizedBox(height: 16.h),
         SizedBox(
           height: 160.h,
           child: spots.every((s) => s.y == 0)
-              ? Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.bar_chart_rounded, size: 32.sp, color: const Color(0xFFCBD5E1)), SizedBox(height: 8.h), Text('لا توجد مبيعات في هذه الفترة', style: TextStyle(fontSize: 12.sp, color: const Color(0xFF94A3B8)))]))
+              ? Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.bar_chart_rounded, size: 32.sp, color: const Color(0xFFCBD5E1)), SizedBox(height: 8.h), Text('لا توجد مبيعات في هذه الفترة', style: TextStyle(fontSize: 12.sp, color: AppTheme.mutedGray))]))
               : LineChart(
                   LineChartData(
-                    gridData: FlGridData(show: true, drawVerticalLine: true, horizontalInterval: maxY / 4, verticalInterval: 1, getDrawingHorizontalLine: (v) => FlLine(color: isDark ? AppTheme.darkBorder : const Color(0xFFF1F5F9), strokeWidth: 1), getDrawingVerticalLine: (v) => FlLine(color: isDark ? AppTheme.darkBorder.withValues(alpha: 0.5) : const Color(0xFFF8FAFC), strokeWidth: 1)),
+                    gridData: FlGridData(show: true, drawVerticalLine: true, horizontalInterval: maxY / 4, verticalInterval: 1, getDrawingHorizontalLine: (v) => FlLine(color: isDark ? AppTheme.darkBorder : AppTheme.mist, strokeWidth: 1), getDrawingVerticalLine: (v) => FlLine(color: isDark ? AppTheme.darkBorder.withValues(alpha: 0.5) : AppTheme.canvasLight, strokeWidth: 1)),
                     titlesData: FlTitlesData(
                       show: true,
                       rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                       topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                      bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 28, interval: 1, getTitlesWidget: (v, meta) { final i = v.toInt(); if (i < 0 || i >= labels.length) return const SizedBox.shrink(); return SideTitleWidget(meta: meta, child: Text(labels[i], style: TextStyle(fontSize: 9.sp, color: const Color(0xFF94A3B8)))); })),
-                      leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 44, interval: maxY / 4, getTitlesWidget: (v, meta) => Text(fmtCompact(v), style: TextStyle(fontSize: 9.sp, color: const Color(0xFF94A3B8))))),
+                      bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 28, interval: 1, getTitlesWidget: (v, meta) { final i = v.toInt(); if (i < 0 || i >= labels.length) return const SizedBox.shrink(); return SideTitleWidget(meta: meta, child: Text(labels[i], style: TextStyle(fontSize: 9.sp, color: AppTheme.mutedGray))); })),
+                      leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 44, interval: maxY / 4, getTitlesWidget: (v, meta) => Text(fmtCompact(v), style: TextStyle(fontSize: 9.sp, color: AppTheme.mutedGray)))),
                     ),
                     borderData: FlBorderData(show: false),
                     minX: 0, maxX: (labels.length - 1).toDouble(), minY: 0, maxY: maxY * 1.2,
@@ -84,23 +84,23 @@ class ReportsExpensesPie extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final byCat = state.expensesByCategory;
     final total = byCat.values.fold<double>(0, (s, v) => s + v);
-    const colors = [Color(0xFFE11D48), Color(0xFF2563EB), Color(0xFFF59E0B), Color(0xFF059669), Color(0xFF7C3AED), Color(0xFF06B6D4)];
+    const colors = [AppTheme.danger, Color(0xFF2563EB), AppTheme.warningAmber, AppTheme.successDark, Color(0xFF7C3AED), Color(0xFF06B6D4)];
 
     return Container(
       padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(color: isDark ? AppTheme.darkSurface : Colors.white, borderRadius: BorderRadius.circular(20.r), border: Border.all(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB)), boxShadow: AppTheme.cardShadow(context)),
+      decoration: BoxDecoration(color: isDark ? AppTheme.darkSurface : Colors.white, borderRadius: BorderRadius.circular(20.r), border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.hairline), boxShadow: AppTheme.cardShadow(context)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
-          Container(width: 36.w, height: 36.w, decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFFE11D48), Color(0xFFFB7185)]), borderRadius: BorderRadius.circular(10.r)), child: Icon(Icons.pie_chart_rounded, color: Colors.white, size: 18.sp)),
+          Container(width: 36.w, height: 36.w, decoration: BoxDecoration(gradient: const LinearGradient(colors: [AppTheme.danger, AppTheme.roseLight]), borderRadius: BorderRadius.circular(10.r)), child: Icon(Icons.pie_chart_rounded, color: Colors.white, size: 18.sp)),
           SizedBox(width: 10.w),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('المصروفات حسب التصنيف', style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : const Color(0xFF0F172A))),
-            Text(total == 0 ? 'لا توجد مصروفات' : 'إجمالي ${fmtReport(total)} ج.م', style: TextStyle(fontSize: 11.sp, color: const Color(0xFF64748B))),
+            Text('المصروفات حسب التصنيف', style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
+            Text(total == 0 ? 'لا توجد مصروفات' : 'إجمالي ${fmtReport(total)} ج.م', style: TextStyle(fontSize: 11.sp, color: AppTheme.slateGray)),
           ])),
         ]),
         SizedBox(height: 16.h),
         if (byCat.isEmpty)
-          Center(child: Padding(padding: EdgeInsets.symmetric(vertical: 24.h), child: Column(children: [Icon(Icons.donut_large_rounded, size: 36.sp, color: const Color(0xFFCBD5E1)), SizedBox(height: 8.h), Text('لا توجد مصروفات في هذه الفترة', style: TextStyle(fontSize: 12.sp, color: const Color(0xFF94A3B8)))])))
+          Center(child: Padding(padding: EdgeInsets.symmetric(vertical: 24.h), child: Column(children: [Icon(Icons.donut_large_rounded, size: 36.sp, color: const Color(0xFFCBD5E1)), SizedBox(height: 8.h), Text('لا توجد مصروفات في هذه الفترة', style: TextStyle(fontSize: 12.sp, color: AppTheme.mutedGray))])))
         else
           Row(children: [
             SizedBox(
@@ -133,9 +133,9 @@ class ReportsExpensesPie extends StatelessWidget {
                       Container(width: 10.w, height: 10.w, decoration: BoxDecoration(shape: BoxShape.circle, color: colors[i % colors.length])),
                       SizedBox(width: 8.w),
                       Expanded(child: Text(entry.key, style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w600, color: isDark ? Colors.white : const Color(0xFF334155)), maxLines: 1, overflow: TextOverflow.ellipsis)),
-                      Text(fmtReport(entry.value), style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : const Color(0xFF0F172A))),
+                      Text(fmtReport(entry.value), style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : AppTheme.ink)),
                       SizedBox(width: 4.w),
-                      Text('(${pct.toStringAsFixed(0)}%)', style: TextStyle(fontSize: 10.sp, color: const Color(0xFF94A3B8))),
+                      Text('(${pct.toStringAsFixed(0)}%)', style: TextStyle(fontSize: 10.sp, color: AppTheme.mutedGray)),
                     ]),
                   );
                 }),

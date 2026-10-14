@@ -32,7 +32,7 @@ class ProductListHeader extends StatelessWidget {
         collapseMode: CollapseMode.parallax,
         background: Container(
           decoration: const BoxDecoration(
-            gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF0D2A86), Color(0xFF1A4FD6), Color(0xFF4A7BFF)]),
+            gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF0D2A86), AppTheme.primaryColor, AppTheme.brightBlue]),
           ),
           child: Stack(
             children: [

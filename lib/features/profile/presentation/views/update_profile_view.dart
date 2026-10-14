@@ -120,7 +120,7 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
                         isDark: isDark,
                         icon: Icons.person_outline_rounded,
                         title: 'بياناتك',
-                        gradient: const [Color(0xFF1A4FD6), Color(0xFF4A7BFF)],
+                        gradient: const [AppTheme.primaryColor, AppTheme.brightBlue],
                         child: Column(children: [
                           _Field(
                             isDark: isDark,
@@ -153,7 +153,7 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
                         isDark: isDark,
                         icon: Icons.storefront_rounded,
                         title: 'بيانات المحل',
-                        gradient: const [Color(0xFF059669), Color(0xFF34D399)],
+                        gradient: const [AppTheme.successDark, Color(0xFF34D399)],
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -245,7 +245,7 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
                         isDark: isDark,
                         icon: Icons.map_rounded,
                         title: 'shopImageSection'.tr(),
-                        gradient: const [Color(0xFFF59E0B), Color(0xFFFBBF24)],
+                        gradient: const [AppTheme.warningAmber, AppTheme.goldLight],
                         child: Column(children: [
                               ShopImagePicker(isDark: isDark, imageUrl: _shopImageUrl, uploading: _uploadingImage, changeLabel: 'shopImageChange'.tr(), uploadingLabel: 'shopImageUploading'.tr(), onTap: _chooseShopImage),
                               SizedBox(height: 12.h),
@@ -328,12 +328,12 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
         child: Icon(icon, size: 16.sp, color: AppTheme.primaryColor),
       ),
       filled: true,
-      fillColor: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF8FAFC),
+      fillColor: isDark ? AppTheme.darkSurfaceAlt : AppTheme.canvasLight,
       contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide.none),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide(color: isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0))),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide(color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft)),
       focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: const BorderSide(color: AppTheme.primaryColor, width: 1.6)),
-      errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: const BorderSide(color: Color(0xFFE11D48))),
+      errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: const BorderSide(color: AppTheme.danger)),
     );
   }
 
@@ -387,7 +387,7 @@ class _SectionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? AppTheme.darkSurface : Colors.white,
         borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB)),
+        border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.hairline),
         boxShadow: AppTheme.cardShadow(context),
       ),
       child: Column(
@@ -401,7 +401,7 @@ class _SectionCard extends StatelessWidget {
               child: Icon(icon, color: Colors.white, size: 18.sp),
             ),
             SizedBox(width: 10.w),
-            Text(title, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : const Color(0xFF0F172A))),
+            Text(title, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
           ]),
           SizedBox(height: 14.h),
           child,
@@ -440,7 +440,7 @@ class _Field extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
-        hintStyle: TextStyle(fontSize: 12.sp, color: const Color(0xFF94A3B8)),
+        hintStyle: TextStyle(fontSize: 12.sp, color: AppTheme.mutedGray),
         labelStyle: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w600),
         prefixIcon: Container(
           margin: EdgeInsets.all(8.w),
@@ -450,12 +450,12 @@ class _Field extends StatelessWidget {
           child: Icon(icon, size: 16.sp, color: AppTheme.primaryColor),
         ),
         filled: true,
-        fillColor: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF8FAFC),
+        fillColor: isDark ? AppTheme.darkSurfaceAlt : AppTheme.canvasLight,
         contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide.none),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide(color: isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0))),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide(color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft)),
         focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: const BorderSide(color: AppTheme.primaryColor, width: 1.6)),
-        errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: const BorderSide(color: Color(0xFFE11D48))),
+        errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: const BorderSide(color: AppTheme.danger)),
       ),
     );
   }
@@ -475,24 +475,24 @@ class _ReadOnlyBox extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
       decoration: BoxDecoration(
-        color: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF1F5F9),
+        color: isDark ? AppTheme.darkSurfaceAlt : AppTheme.mist,
         borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0)),
+        border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft),
       ),
       child: Row(children: [
-        Icon(icon, size: 18.sp, color: const Color(0xFF94A3B8)),
+        Icon(icon, size: 18.sp, color: AppTheme.mutedGray),
         SizedBox(width: 10.w),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: TextStyle(fontSize: 11.sp, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w600)),
+              Text(label, style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600)),
               Text(value.isEmpty ? '—' : value, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: isDark ? AppTheme.darkTextSecondary : const Color(0xFF475569))),
-              Text(hint, style: TextStyle(fontSize: 10.5.sp, color: const Color(0xFF94A3B8))),
+              Text(hint, style: TextStyle(fontSize: 10.5.sp, color: AppTheme.mutedGray)),
             ],
           ),
         ),
-        Icon(Icons.lock_outline_rounded, size: 15.sp, color: const Color(0xFF94A3B8)),
+        Icon(Icons.lock_outline_rounded, size: 15.sp, color: AppTheme.mutedGray),
       ]),
     );
   }

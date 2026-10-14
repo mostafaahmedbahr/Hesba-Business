@@ -116,13 +116,13 @@ class _ExpensesBody extends StatelessWidget {
             heroTag: 'expenses_fab',
             onPressed: () => _openAdd(context),
             elevation: 0,
-            backgroundColor: const Color(0xFFE11D48),
+            backgroundColor: AppTheme.danger,
             foregroundColor: Colors.white,
             icon: const Icon(Icons.add_rounded),
             label: Text('إضافة مصروف', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800)),
           ),
           body: RefreshIndicator(
-            color: const Color(0xFFE11D48),
+            color: AppTheme.danger,
             onRefresh: () async => cubit.loadExpenses(shopId: shopId ?? ''),
             child: CustomScrollView(
               slivers: [
@@ -168,7 +168,7 @@ class _ExpensesBody extends StatelessWidget {
                           background: Container(
                             alignment: Alignment.centerRight,
                             padding: EdgeInsets.only(right: 20.w),
-                            decoration: BoxDecoration(color: const Color(0xFFE11D48), borderRadius: BorderRadius.circular(22.r)),
+                            decoration: BoxDecoration(color: AppTheme.danger, borderRadius: BorderRadius.circular(22.r)),
                             child: Icon(Icons.delete_rounded, color: Colors.white, size: 26.sp),
                           ),
                           confirmDismiss: (_) => _confirmDelete(itemCtx, expense).then((_) => false),

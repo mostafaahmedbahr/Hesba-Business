@@ -33,7 +33,7 @@ class ShopImagePicker extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(16.r),
       child: Material(
-        color: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF1F5F9),
+        color: isDark ? AppTheme.darkSurfaceAlt : AppTheme.mist,
         child: InkWell(
           onTap: uploading ? null : onTap,
           child: Ink(
@@ -72,7 +72,7 @@ class ShopImagePicker extends StatelessWidget {
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
         Icon(Icons.storefront_rounded, size: 34.sp, color: AppTheme.primaryColor.withValues(alpha: 0.75)),
         SizedBox(height: 8.h),
-        Padding(padding: EdgeInsets.symmetric(horizontal: 56.w), child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: const Color(0xFF64748B)))),
+        Padding(padding: EdgeInsets.symmetric(horizontal: 56.w), child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: AppTheme.slateGray))),
       ]),
     );
   }

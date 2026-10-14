@@ -64,12 +64,12 @@ class _NotificationsViewBodyState extends State<NotificationsViewBody> {
                     decoration: BoxDecoration(
                       color: Theme.of(context).brightness == Brightness.dark
                           ? AppTheme.darkSurfaceAlt
-                          : const Color(0xFFF1F5F9),
+                          : AppTheme.mist,
                       borderRadius: BorderRadius.circular(14.r),
                       border: Border.all(
                         color: Theme.of(context).brightness == Brightness.dark
                             ? AppTheme.darkBorder
-                            : const Color(0xFFE2E8F0),
+                            : AppTheme.borderSoft,
                       ),
                     ),
                     child: Row(
@@ -168,14 +168,14 @@ class _TabBtn extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 15.sp, color: selected ? Colors.white : (isDark ? AppTheme.darkTextSecondary : const Color(0xFF64748B))),
+              Icon(icon, size: 15.sp, color: selected ? Colors.white : (isDark ? AppTheme.darkTextSecondary : AppTheme.slateGray)),
               SizedBox(width: 6.w),
               Text(
                 label,
                 style: TextStyle(
                   fontSize: 12.5.sp,
                   fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
-                  color: selected ? Colors.white : (isDark ? AppTheme.darkTextSecondary : const Color(0xFF64748B)),
+                  color: selected ? Colors.white : (isDark ? AppTheme.darkTextSecondary : AppTheme.slateGray),
                 ),
               ),
             ],
@@ -235,7 +235,7 @@ class _ActivitySection extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'كل عملية بتعملها بتتسجل هنا (${list.length})',
-                    style: TextStyle(fontSize: 12.sp, color: isDark ? AppTheme.darkTextSecondary : const Color(0xFF64748B)),
+                    style: TextStyle(fontSize: 12.sp, color: isDark ? AppTheme.darkTextSecondary : AppTheme.slateGray),
                   ),
                 ),
                 if (list.isNotEmpty && state.unreadCount > 0)
@@ -252,14 +252,14 @@ class _ActivitySection extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: isDark ? AppTheme.darkSurface : Colors.white,
                     borderRadius: BorderRadius.circular(18.r),
-                    border: Border.all(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB)),
+                    border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.hairline),
                   ),
                   child: Column(children: [
-                    Icon(Icons.inbox_rounded, size: 34.sp, color: const Color(0xFF94A3B8)),
+                    Icon(Icons.inbox_rounded, size: 34.sp, color: AppTheme.mutedGray),
                     SizedBox(height: 10.h),
-                    Text('لا توجد عمليات بعد', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : const Color(0xFF0F172A))),
+                    Text('لا توجد عمليات بعد', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : AppTheme.ink)),
                     SizedBox(height: 4.h),
-                    Text('أي بيع أو منتج أو مصروف أو مرتجع هيظهر هنا', textAlign: TextAlign.center, style: TextStyle(fontSize: 11.5.sp, color: const Color(0xFF94A3B8))),
+                    Text('أي بيع أو منتج أو مصروف أو مرتجع هيظهر هنا', textAlign: TextAlign.center, style: TextStyle(fontSize: 11.5.sp, color: AppTheme.mutedGray)),
                   ]),
                 )
               else

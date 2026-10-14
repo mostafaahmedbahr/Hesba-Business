@@ -50,17 +50,17 @@ class ReturnItemCard extends StatelessWidget {
       padding: EdgeInsets.all(13.w),
       decoration: BoxDecoration(
         color: !returnable
-            ? (isDark ? AppTheme.darkSurfaceAlt.withValues(alpha: 0.5) : const Color(0xFFF1F5F9))
+            ? (isDark ? AppTheme.darkSurfaceAlt.withValues(alpha: 0.5) : AppTheme.mist)
             : (isDark ? AppTheme.darkSurface : Colors.white),
         borderRadius: BorderRadius.circular(18.r),
         border: Border.all(
           color: selected
-              ? const Color(0xFFF59E0B)
-              : (isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB)),
+              ? AppTheme.warningAmber
+              : (isDark ? AppTheme.darkBorder : AppTheme.hairline),
           width: selected ? 1.6 : 1,
         ),
         boxShadow: selected
-            ? [BoxShadow(color: const Color(0xFFF59E0B).withValues(alpha: 0.16), blurRadius: 14, offset: const Offset(0, 6))]
+            ? [BoxShadow(color: AppTheme.warningAmber.withValues(alpha: 0.16), blurRadius: 14, offset: const Offset(0, 6))]
             : AppTheme.cardShadow(context),
       ),
       child: Column(
@@ -77,7 +77,7 @@ class ReturnItemCard extends StatelessWidget {
                   height: 30.w,
                   decoration: BoxDecoration(
                     gradient: selected
-                        ? const LinearGradient(colors: [Color(0xFFF59E0B), Color(0xFFFBBF24)])
+                        ? const LinearGradient(colors: [AppTheme.warningAmber, AppTheme.goldLight])
                         : null,
                     color: selected ? null : Colors.transparent,
                     borderRadius: BorderRadius.circular(10.r),
@@ -96,16 +96,16 @@ class ReturnItemCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(item.productName, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : const Color(0xFF0F172A))),
+                    Text(item.productName, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : AppTheme.ink)),
                     SizedBox(height: 3.h),
                     Text(
                       'مباع: ${item.quantity.toStringAsFixed(item.quantity % 1 == 0 ? 0 : 1)} • مرتجع قبل كده: ${alreadyReturned.toStringAsFixed(alreadyReturned % 1 == 0 ? 0 : 1)} • متاح: ${maxQty.toStringAsFixed(maxQty % 1 == 0 ? 0 : 1)}',
-                      style: TextStyle(fontSize: 10.5.sp, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w600),
+                      style: TextStyle(fontSize: 10.5.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600),
                     ),
                     if (!returnable)
                       Padding(
                         padding: EdgeInsets.only(top: 3.h),
-                        child: Text('تم إرجاع كل الكمية بالفعل', style: TextStyle(fontSize: 11.sp, color: const Color(0xFFE11D48), fontWeight: FontWeight.w700)),
+                        child: Text('تم إرجاع كل الكمية بالفعل', style: TextStyle(fontSize: 11.sp, color: AppTheme.danger, fontWeight: FontWeight.w700)),
                       ),
                   ],
                 ),
@@ -150,7 +150,7 @@ class ReturnItemCard extends StatelessWidget {
                   SizedBox(width: 10.w),
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 11.w, vertical: 7.h),
-                    decoration: BoxDecoration(color: const Color(0xFFF59E0B).withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20.r)),
+                    decoration: BoxDecoration(color: AppTheme.warningAmber.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20.r)),
                     child: Text(
                       '${lineNet.toStringAsFixed(2)} ج.م',
                       style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w900, color: const Color(0xFFB45309)),
@@ -181,7 +181,7 @@ class _StepBtn extends StatelessWidget {
         width: 30.w,
         height: 30.w,
         decoration: BoxDecoration(
-          color: const Color(0xFFF59E0B).withValues(alpha: 0.12),
+          color: AppTheme.warningAmber.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(9.r),
         ),
         child: Icon(icon, size: 16.sp, color: const Color(0xFFD97706)),

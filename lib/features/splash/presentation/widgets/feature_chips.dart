@@ -8,9 +8,9 @@ class FeatureChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = [
-      (Icons.point_of_sale_rounded, const Color(0xFF1A4FD6)),
-      (Icons.inventory_2_rounded, const Color(0xFFF59E0B)),
-      (Icons.bar_chart_rounded, const Color(0xFF059669)),
+      (Icons.point_of_sale_rounded, AppTheme.primaryColor),
+      (Icons.inventory_2_rounded, AppTheme.warningAmber),
+      (Icons.bar_chart_rounded, AppTheme.successDark),
     ];
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,

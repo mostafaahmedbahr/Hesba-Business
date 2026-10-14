@@ -20,7 +20,7 @@ class SplashFooter extends StatelessWidget {
             border: Border.all(
               color: isDark
                   ? Colors.white.withValues(alpha: 0.10)
-                  : const Color(0xFFE2E8F0),
+                  : AppTheme.borderSoft,
             ),
           ),
           child: Row(
@@ -58,7 +58,7 @@ class SplashFooter extends StatelessWidget {
               style: TextStyle(
                 color: isDark
                     ? Colors.white.withValues(alpha: 0.35)
-                    : const Color(0xFF94A3B8),
+                    : AppTheme.mutedGray,
                 fontSize: 9.5.sp,
                 fontFamily: AppTheme.fontFamily,
               ),

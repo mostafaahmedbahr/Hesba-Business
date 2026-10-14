@@ -18,7 +18,7 @@ class ReminderEnableBanner extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xFFFFFBEB),
           borderRadius: BorderRadius.circular(14.r),
-          border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.30)),
+          border: Border.all(color: AppTheme.warningAmber.withValues(alpha: 0.30)),
         ),
         child: Row(
           children: [
@@ -45,7 +45,7 @@ class ReminderEnableBanner extends StatelessWidget {
             FilledButton(
               onPressed: onEnable,
               style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFFF59E0B),
+                backgroundColor: AppTheme.warningAmber,
                 foregroundColor: Colors.white,
                 padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),

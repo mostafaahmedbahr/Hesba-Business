@@ -59,7 +59,7 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
       initialTime: TimeOfDay(hour: _hour, minute: _minute),
       builder: (context, child) => Theme(
         data: Theme.of(context).copyWith(
-          colorScheme: Theme.of(context).colorScheme.copyWith(primary: const Color(0xFF1A4FD6)),
+          colorScheme: Theme.of(context).colorScheme.copyWith(primary: AppTheme.primaryColor),
         ),
         child: child!,
       ),
@@ -167,7 +167,7 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
                 width: 44.w,
                 height: 5.h,
                 decoration: BoxDecoration(
-                  color: isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0),
+                  color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft,
                   borderRadius: BorderRadius.circular(4.r),
                 ),
               ),
@@ -181,12 +181,12 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
                   height: 44.w,
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF1A4FD6), Color(0xFF7C4DFF)],
+                      colors: [AppTheme.primaryColor, Color(0xFF7C4DFF)],
                     ),
                     borderRadius: BorderRadius.circular(14.r),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF1A4FD6).withValues(alpha: 0.30),
+                        color: AppTheme.primaryColor.withValues(alpha: 0.30),
                         blurRadius: 14,
                         offset: const Offset(0, 6),
                       ),
@@ -208,12 +208,12 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w900,
-                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          color: isDark ? Colors.white : AppTheme.ink,
                         ),
                       ),
                       Text(
                         'اختار الوقت والتكرار وهنفكرك',
-                        style: TextStyle(fontSize: 11.sp, color: const Color(0xFF64748B)),
+                        style: TextStyle(fontSize: 11.sp, color: AppTheme.slateGray),
                       ),
                     ],
                   ),
@@ -225,10 +225,10 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
                     width: 34.w,
                     height: 34.w,
                     decoration: BoxDecoration(
-                      color: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF1F5F9),
+                      color: isDark ? AppTheme.darkSurfaceAlt : AppTheme.mist,
                       borderRadius: BorderRadius.circular(10.r),
                     ),
-                    child: Icon(Icons.close_rounded, size: 17.sp, color: const Color(0xFF64748B)),
+                    child: Icon(Icons.close_rounded, size: 17.sp, color: AppTheme.slateGray),
                   ),
                 ),
               ],
@@ -252,7 +252,7 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
                 padding: EdgeInsets.only(top: 6.h, right: 4.w),
                 child: Text(
                   'اكتب عنوان التذكير الأول',
-                  style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w700, color: const Color(0xFFE11D48)),
+                  style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w700, color: AppTheme.danger),
                 ),
               ),
             SizedBox(height: 14.h),
@@ -277,12 +277,12 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
                 padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFF0D2A86), Color(0xFF1A4FD6)],
+                    colors: [Color(0xFF0D2A86), AppTheme.primaryColor],
                   ),
                   borderRadius: BorderRadius.circular(16.r),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF1A4FD6).withValues(alpha: 0.28),
+                      color: AppTheme.primaryColor.withValues(alpha: 0.28),
                       blurRadius: 16,
                       offset: const Offset(0, 8),
                     ),
@@ -335,7 +335,7 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w800,
-                          color: Color(0xFF1A4FD6),
+                          color: AppTheme.primaryColor,
                         ),
                       ),
                     ),
@@ -377,7 +377,7 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
                 children: [
                   Text(
                     '${_days.length} ${_days.length == 1 ? 'يوم' : 'أيام'} مختارة',
-                    style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w800, color: const Color(0xFF1A4FD6)),
+                    style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w800, color: AppTheme.primaryColor),
                   ),
                   const Spacer(),
                   InkWell(
@@ -391,13 +391,13 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
                     child: Container(
                       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1A4FD6).withValues(alpha: 0.08),
+                        color: AppTheme.primaryColor.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(10.r),
-                        border: Border.all(color: const Color(0xFF1A4FD6).withValues(alpha: 0.16)),
+                        border: Border.all(color: AppTheme.primaryColor.withValues(alpha: 0.16)),
                       ),
                       child: Text(
                         _days.length >= 7 ? 'مسح الكل' : 'كل الأيام',
-                        style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w800, color: const Color(0xFF1A4FD6)),
+                        style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w800, color: AppTheme.primaryColor),
                       ),
                     ),
                   ),
@@ -426,12 +426,12 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
                         _days.contains(d) ? _days.remove(d) : _days.add(d);
                         _daysError = false;
                       }),
-                      selectedColor: const Color(0xFF1A4FD6),
-                      backgroundColor: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF1F5F9),
+                      selectedColor: AppTheme.primaryColor,
+                      backgroundColor: isDark ? AppTheme.darkSurfaceAlt : AppTheme.mist,
                       side: BorderSide(
                         color: _days.contains(d)
-                            ? const Color(0xFF1A4FD6)
-                            : (isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0)),
+                            ? AppTheme.primaryColor
+                            : (isDark ? AppTheme.darkBorder : AppTheme.borderSoft),
                       ),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
                       showCheckmark: false,
@@ -445,7 +445,7 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
                   padding: EdgeInsets.only(top: 8.h, right: 4.w),
                   child: Text(
                     'اختار يوم واحد على الأقل',
-                    style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w700, color: const Color(0xFFE11D48)),
+                    style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w700, color: AppTheme.danger),
                   ),
                 ),
             ],
@@ -457,7 +457,7 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
               child: FilledButton(
                 onPressed: _saving ? null : _save,
                 style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF1A4FD6),
+                  backgroundColor: AppTheme.primaryColor,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
                 ),
@@ -493,7 +493,7 @@ class _Label extends StatelessWidget {
       style: TextStyle(
         fontSize: 12.5.sp,
         fontWeight: FontWeight.w800,
-        color: isDark ? Colors.white : const Color(0xFF0F172A),
+        color: isDark ? Colors.white : AppTheme.ink,
       ),
     );
   }
@@ -526,18 +526,18 @@ class _Field extends StatelessWidget {
       style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w600),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(fontSize: 12.5.sp, color: const Color(0xFF94A3B8)),
-        prefixIcon: Icon(icon, size: 19.sp, color: const Color(0xFF1A4FD6)),
+        hintStyle: TextStyle(fontSize: 12.5.sp, color: AppTheme.mutedGray),
+        prefixIcon: Icon(icon, size: 19.sp, color: AppTheme.primaryColor),
         filled: true,
-        fillColor: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF8FAFC),
+        fillColor: isDark ? AppTheme.darkSurfaceAlt : AppTheme.canvasLight,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide.none),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14.r),
-          borderSide: BorderSide(color: isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0)),
+          borderSide: BorderSide(color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14.r),
-          borderSide: const BorderSide(color: Color(0xFF1A4FD6), width: 1.6),
+          borderSide: const BorderSide(color: AppTheme.primaryColor, width: 1.6),
         ),
         contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 13.h),
       ),
@@ -571,18 +571,18 @@ class _RepeatBtn extends StatelessWidget {
         padding: EdgeInsets.symmetric(vertical: 13.h),
         decoration: BoxDecoration(
           color: selected
-              ? const Color(0xFF1A4FD6)
-              : (isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF1F5F9)),
+              ? AppTheme.primaryColor
+              : (isDark ? AppTheme.darkSurfaceAlt : AppTheme.mist),
           borderRadius: BorderRadius.circular(14.r),
           border: Border.all(
             color: selected
-                ? const Color(0xFF1A4FD6)
-                : (isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0)),
+                ? AppTheme.primaryColor
+                : (isDark ? AppTheme.darkBorder : AppTheme.borderSoft),
           ),
           boxShadow: selected
               ? [
                   BoxShadow(
-                    color: const Color(0xFF1A4FD6).withValues(alpha: 0.28),
+                    color: AppTheme.primaryColor.withValues(alpha: 0.28),
                     blurRadius: 12,
                     offset: const Offset(0, 6),
                   ),
@@ -595,7 +595,7 @@ class _RepeatBtn extends StatelessWidget {
             Icon(
               icon,
               size: 17.sp,
-              color: selected ? Colors.white : const Color(0xFF64748B),
+              color: selected ? Colors.white : AppTheme.slateGray,
             ),
             SizedBox(width: 7.w),
             Text(
@@ -603,7 +603,7 @@ class _RepeatBtn extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w800,
-                color: selected ? Colors.white : const Color(0xFF64748B),
+                color: selected ? Colors.white : AppTheme.slateGray,
               ),
             ),
           ],

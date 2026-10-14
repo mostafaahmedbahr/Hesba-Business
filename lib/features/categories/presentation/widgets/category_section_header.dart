@@ -35,7 +35,7 @@ class CategorySectionHeader extends StatelessWidget {
           style: TextStyle(
             fontSize: 14.sp,
             fontWeight: FontWeight.w900,
-            color: isDark ? Colors.white : const Color(0xFF0F172A),
+            color: isDark ? Colors.white : AppTheme.ink,
           ),
         ),
         const Spacer(),

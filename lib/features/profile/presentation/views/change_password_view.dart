@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/theme/app_theme.dart';
 
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/utils/toast.dart';
@@ -104,7 +105,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                           Icon(
                             match ? Icons.check_circle_rounded : Icons.cancel_rounded,
                             size: 16.sp,
-                            color: match ? const Color(0xFF059669) : const Color(0xFFE11D48),
+                            color: match ? AppTheme.successDark : AppTheme.danger,
                           ),
                           SizedBox(width: 6.w),
                           Text(
@@ -112,7 +113,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                             style: TextStyle(
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w600,
-                              color: match ? const Color(0xFF059669) : const Color(0xFFE11D48),
+                              color: match ? AppTheme.successDark : AppTheme.danger,
                             ),
                           ),
                         ],

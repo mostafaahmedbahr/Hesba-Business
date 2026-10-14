@@ -20,10 +20,10 @@ class CategoryEmptyBox extends StatelessWidget {
       width: double.infinity,
       padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 12.w),
       decoration: BoxDecoration(
-        color: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF8FAFC),
+        color: isDark ? AppTheme.darkSurfaceAlt : AppTheme.canvasLight,
         borderRadius: BorderRadius.circular(14.r),
         border: Border.all(
-          color: isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0),
+          color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft,
         ),
       ),
       child: Column(
@@ -35,14 +35,14 @@ class CategoryEmptyBox extends StatelessWidget {
             style: TextStyle(
               fontSize: 12.sp,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF94A3B8),
+              color: AppTheme.mutedGray,
             ),
           ),
           SizedBox(height: 4.h),
           Text(
             subtitle,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 11.sp, color: const Color(0xFF94A3B8)),
+            style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray),
           ),
         ],
       ),

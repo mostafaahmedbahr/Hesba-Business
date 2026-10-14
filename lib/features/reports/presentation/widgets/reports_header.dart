@@ -16,7 +16,7 @@ class ReportsHeader extends StatelessWidget {
     return SliverAppBar(
       pinned: true,
       expandedHeight: 196.h,
-      backgroundColor: const Color(0xFF1A4FD6),
+      backgroundColor: AppTheme.primaryColor,
       foregroundColor: Colors.white,
       elevation: 0,
       scrolledUnderElevation: 0,
@@ -27,7 +27,7 @@ class ReportsHeader extends StatelessWidget {
       flexibleSpace: FlexibleSpaceBar(
         collapseMode: CollapseMode.parallax,
         background: Container(
-          decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF0D2A86), Color(0xFF1A4FD6), Color(0xFF7C4DFF)])),
+          decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF0D2A86), AppTheme.primaryColor, Color(0xFF7C4DFF)])),
           child: Stack(children: [
             Positioned(top: -40.h, left: -30.w, child: Container(width: 140.w, height: 140.w, decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.07)))),
             Positioned(bottom: -30.h, right: -20.w, child: Container(width: 180.w, height: 180.w, decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.06)))),
@@ -57,7 +57,7 @@ class ReportsHeader extends StatelessWidget {
                           child: Row(children: [
                             Icon(Icons.auto_graph_rounded, size: 13.sp, color: AppTheme.primaryColor),
                             SizedBox(width: 5.w),
-                            Text(balance >= 0 ? 'رابح' : 'خسارة', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: balance >= 0 ? const Color(0xFF059669) : const Color(0xFFE11D48))),
+                            Text(balance >= 0 ? 'رابح' : 'خسارة', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: balance >= 0 ? AppTheme.successDark : AppTheme.danger)),
                           ]),
                         ),
                       ),

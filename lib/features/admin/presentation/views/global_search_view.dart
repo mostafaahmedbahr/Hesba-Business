@@ -1,7 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hesba/core/di/service_locator.dart';
 import 'package:hesba/core/theme/app_theme.dart';
+import 'package:hesba/features/admin/data/repos/admin_search_repo.dart';
 import 'package:hesba/features/admin/presentation/cubit/global_search_cubit.dart';
 import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
 import 'package:hesba/features/admin/presentation/views/product_details_view.dart';
@@ -15,7 +16,8 @@ class GlobalSearchView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => GlobalSearchCubit(),
+      create: (_) =>
+          GlobalSearchCubit(searchRepo: sl<AdminSearchRepo>()),
       child: Builder(
         builder: (context) {
           return Padding(
@@ -59,6 +61,16 @@ class GlobalSearchView extends StatelessWidget {
                       if (state is SearchLoading) {
                         return const LinearProgressIndicator(minHeight: 4);
                       }
+                      if (state is SearchError) {
+                        return Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: AdminSpace.lg),
+                            child: Text(state.message,
+                                style: const TextStyle(fontSize: 12.5)),
+                          ),
+                        );
+                      }
                       if (state is SearchResults) {
                         if (state.hits.isEmpty) {
                           return adminEmpty(Icons.search_off_outlined, 'لا توجد نتائج');
@@ -90,7 +102,9 @@ class GlobalSearchView extends StatelessWidget {
                                           const SizedBox(height: 2),
                                           Row(
                                             children: [
-                                              AdminStatusBadge(label: hit.kind, color: _colorFor(hit.kind)),
+                                              AdminStatusBadge(
+                                                  label: _labelFor(hit.kind),
+                                                  color: _colorFor(hit.kind)),
                                               const SizedBox(width: 6),
                                               CopyableId(id: hit.id),
                                             ],
@@ -124,15 +138,21 @@ class GlobalSearchView extends StatelessWidget {
     );
   }
 
+  String _labelFor(String kind) => switch (kind) {
+        'shop' => 'محل',
+        'product' => 'منتج',
+        _ => 'طلب اشتراك',
+      };
+
   IconData _iconFor(String kind) => switch (kind) {
-        'محل' => Icons.storefront_outlined,
-        'منتج' => Icons.inventory_2_outlined,
+        'shop' => Icons.storefront_outlined,
+        'product' => Icons.inventory_2_outlined,
         _ => Icons.receipt_long_outlined,
       };
 
   Color _colorFor(String kind) => switch (kind) {
-        'محل' => AppTheme.primaryColor,
-        'منتج' => AppTheme.secondaryColor,
+        'shop' => AppTheme.primaryColor,
+        'product' => AppTheme.secondaryColor,
         _ => AppTheme.successColor,
       };
 
@@ -141,26 +161,23 @@ class GlobalSearchView extends StatelessWidget {
     // going back returns to the results, and the context stays valid.
     final messenger = ScaffoldMessenger.of(context);
     try {
-      final kind = hit.kind.trim();
-      if (kind == 'محل') {
-        final snap = await FirebaseFirestore.instance.collection('shops').doc(hit.id).get();
-        if (!context.mounted) return;
-        if (!snap.exists) {
+      final kind = hit.kind;
+      final data =
+          await context.read<GlobalSearchCubit>().fetchHitData(hit);
+      if (!context.mounted) return;
+      if (kind == 'shop') {
+        if (data == null) {
           messenger.showSnackBar(
             const SnackBar(content: Text('المحل غير موجود'), behavior: SnackBarBehavior.floating),
           );
           return;
         }
-        final data = snap.data() ?? {};
         await Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => ShopDetailsView(shopId: hit.id, ownerId: data['ownerId'] as String? ?? ''),
           ),
         );
-      } else if (kind == 'منتج') {
-        final snap = await FirebaseFirestore.instance.collection('products').doc(hit.id).get();
-        if (!context.mounted) return;
-        final data = snap.data();
+      } else if (kind == 'product') {
         if (data == null) {
           messenger.showSnackBar(
             const SnackBar(content: Text('المنتج غير موجود'), behavior: SnackBarBehavior.floating),
@@ -172,10 +189,6 @@ class GlobalSearchView extends StatelessWidget {
         );
       } else {
         // طلب اشتراك: افتح حوار مراجعة الطلب نفسه بدل الذهاب للقائمة.
-        final snap =
-            await FirebaseFirestore.instance.collection('subscription_requests').doc(hit.id).get();
-        if (!context.mounted) return;
-        final data = snap.data();
         if (data == null) {
           messenger.showSnackBar(
             const SnackBar(content: Text('الطلب غير موجود'), behavior: SnackBarBehavior.floating),

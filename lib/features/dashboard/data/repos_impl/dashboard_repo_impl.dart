@@ -4,6 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../../core/constants/app_constants.dart';
+import '../../../expenses/data/models/expense_model.dart';
+import '../../../returns/data/models/return_model.dart';
+import '../../../sales/data/models/sale_model.dart';
 import '../repos/dashboard_repo.dart';
 
 class DashboardRepoImpl implements DashboardRepo {
@@ -214,5 +217,77 @@ class DashboardRepoImpl implements DashboardRepo {
     };
 
     return controller.stream;
+  }
+
+  @override
+  Stream<SaleModel?> watchLastSale(String shopId) {
+    return _firestore
+        .collection(AppConstants.salesCollection)
+        .where('shopId', isEqualTo: shopId)
+        .orderBy('createdAt', descending: true)
+        .limit(1)
+        .snapshots()
+        .map((snap) {
+      if (snap.docs.isEmpty) return null;
+      try {
+        return SaleModel.fromJson(snap.docs.first.data());
+      } catch (_) {
+        return null;
+      }
+    });
+  }
+
+  @override
+  Stream<ReturnModel?> watchLastReturn(String shopId) {
+    return _firestore
+        .collection(AppConstants.returnsCollection)
+        .where('shopId', isEqualTo: shopId)
+        .orderBy('createdAt', descending: true)
+        .limit(1)
+        .snapshots()
+        .map((snap) {
+      if (snap.docs.isEmpty) return null;
+      try {
+        return ReturnModel.fromJson(snap.docs.first.data());
+      } catch (_) {
+        return null;
+      }
+    });
+  }
+
+  @override
+  Stream<ExpenseModel?> watchLastExpense(String shopId) {
+    return _watchLastExpenseDocs(shopId).map((docs) {
+      for (final doc in docs) {
+        try {
+          final expense = ExpenseModel.fromJson(doc.data());
+          if (expense.shopId == shopId) return expense;
+        } catch (_) {
+          // Corrupt doc: skipped instead of breaking the stream.
+        }
+      }
+      return null;
+    });
+  }
+
+  /// Latest expense docs — falls back to a local filter when the composite
+  /// index for `where shopId + orderBy date` is missing.
+  Stream<List<QueryDocumentSnapshot<Map<String, dynamic>>>>
+      _watchLastExpenseDocs(String shopId) async* {
+    final col = _firestore.collection(AppConstants.expensesCollection);
+    try {
+      await for (final snap in col
+          .where('shopId', isEqualTo: shopId)
+          .orderBy('date', descending: true)
+          .limit(5)
+          .snapshots()) {
+        yield snap.docs;
+      }
+    } catch (_) {
+      await for (final snap
+          in col.orderBy('date', descending: true).limit(20).snapshots()) {
+        yield snap.docs;
+      }
+    }
   }
 }

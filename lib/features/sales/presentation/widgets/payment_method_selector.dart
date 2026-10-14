@@ -22,8 +22,8 @@ class PaymentMethodSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final methods = [
-      _Method(AppConstants.paymentCash, 'نقدي', Icons.money_rounded, const [Color(0xFF059669), Color(0xFF34D399)]),
-      _Method(AppConstants.paymentCard, 'بطاقة', Icons.credit_card_rounded, const [Color(0xFF1A4FD6), Color(0xFF4A7BFF)]),
+      _Method(AppConstants.paymentCash, 'نقدي', Icons.money_rounded, const [AppTheme.successDark, Color(0xFF34D399)]),
+      _Method(AppConstants.paymentCard, 'بطاقة', Icons.credit_card_rounded, const [AppTheme.primaryColor, AppTheme.brightBlue]),
       _Method(AppConstants.paymentMobileWallet, 'محفظة', Icons.account_balance_wallet_rounded, const [Color(0xFF7C3AED), Color(0xFFA78BFA)]),
     ];
     return Row(
@@ -78,7 +78,7 @@ class _PayCard extends StatelessWidget {
           color: selected ? null : (isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF6F8FC)),
           borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
-            color: selected ? Colors.transparent : (isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0)),
+            color: selected ? Colors.transparent : (isDark ? AppTheme.darkBorder : AppTheme.borderSoft),
             width: selected ? 0 : 1.2,
           ),
           boxShadow: selected
@@ -90,7 +90,7 @@ class _PayCard extends StatelessWidget {
             Icon(
               method.icon,
               size: 22.sp,
-              color: selected ? Colors.white : const Color(0xFF94A3B8),
+              color: selected ? Colors.white : AppTheme.mutedGray,
             ),
             SizedBox(height: 6.h),
             Text(

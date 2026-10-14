@@ -35,7 +35,7 @@ class SplashLoader extends StatelessWidget {
                           child: Container(
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
-                                colors: [Color(0xFF1A4FD6), Color(0xFF4A7BFF), Color(0xFFF5A623)],
+                                colors: [AppTheme.primaryColor, AppTheme.brightBlue, Color(0xFFF5A623)],
                               ),
                               borderRadius: BorderRadius.circular(20.r),
                             ),
@@ -83,7 +83,7 @@ class SplashLoader extends StatelessWidget {
               style: TextStyle(
                 color: isDark
                     ? Colors.white.withValues(alpha: 0.55)
-                    : const Color(0xFF64748B),
+                    : AppTheme.slateGray,
                 fontSize: 11.5.sp,
                 fontWeight: FontWeight.w600,
                 fontFamily: AppTheme.fontFamily,

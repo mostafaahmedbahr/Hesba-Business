@@ -35,7 +35,7 @@ class CategoryCustomRow extends StatelessWidget {
         alignment: Alignment.centerLeft,
         padding: EdgeInsets.symmetric(horizontal: 16.w),
         decoration: BoxDecoration(
-          color: const Color(0xFFE11D48),
+          color: AppTheme.danger,
           borderRadius: BorderRadius.circular(12.r),
         ),
         child: Icon(Icons.delete_rounded, color: Colors.white, size: 20.sp),
@@ -47,10 +47,10 @@ class CategoryCustomRow extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 9.h),
         decoration: BoxDecoration(
-          color: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF8FAFC),
+          color: isDark ? AppTheme.darkSurfaceAlt : AppTheme.canvasLight,
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
-            color: isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0),
+            color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft,
           ),
         ),
         child: Row(
@@ -73,7 +73,7 @@ class CategoryCustomRow extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w700,
-                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                  color: isDark ? Colors.white : AppTheme.ink,
                 ),
               ),
             ),
@@ -84,16 +84,16 @@ class CategoryCustomRow extends StatelessWidget {
                 width: 34.w,
                 height: 34.w,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE11D48).withValues(alpha: 0.08),
+                  color: AppTheme.danger.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(10.r),
                   border: Border.all(
-                    color: const Color(0xFFE11D48).withValues(alpha: 0.14),
+                    color: AppTheme.danger.withValues(alpha: 0.14),
                   ),
                 ),
                 child: Icon(
                   Icons.delete_outline_rounded,
                   size: 16.sp,
-                  color: const Color(0xFFE11D48),
+                  color: AppTheme.danger,
                 ),
               ),
             ),

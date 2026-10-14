@@ -21,7 +21,7 @@ class CategoryCustomSection extends StatelessWidget {
         color: isDark ? AppTheme.darkSurface : Colors.white,
         borderRadius: BorderRadius.circular(18.r),
         border: Border.all(
-          color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB),
+          color: isDark ? AppTheme.darkBorder : AppTheme.hairline,
         ),
         boxShadow: AppTheme.cardShadow(context),
       ),
@@ -32,13 +32,13 @@ class CategoryCustomSection extends StatelessWidget {
             icon: Icons.folder_copy_rounded,
             title: 'أقسامك',
             count: '',
-            gradient: [Color(0xFF059669), Color(0xFF34D399)],
+            gradient: [AppTheme.successDark, Color(0xFF34D399)],
           ),
           Padding(
             padding: EdgeInsets.only(top: 4.h),
             child: Text(
               '${items.length} قسم مخصص',
-              style: TextStyle(fontSize: 11.sp, color: const Color(0xFF94A3B8)),
+              style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray),
             ),
           ),
           SizedBox(height: 12.h),

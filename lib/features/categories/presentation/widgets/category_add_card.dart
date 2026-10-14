@@ -47,7 +47,7 @@ class _CategoryAddCardState extends State<CategoryAddCard> {
         color: isDark ? AppTheme.darkSurface : Colors.white,
         borderRadius: BorderRadius.circular(18.r),
         border: Border.all(
-          color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB),
+          color: isDark ? AppTheme.darkBorder : AppTheme.hairline,
         ),
         boxShadow: AppTheme.cardShadow(context),
       ),
@@ -71,13 +71,13 @@ class _CategoryAddCardState extends State<CategoryAddCard> {
                 style: TextStyle(
                   fontSize: 13.5.sp,
                   fontWeight: FontWeight.w900,
-                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                  color: isDark ? Colors.white : AppTheme.ink,
                 ),
               ),
               const Spacer(),
               Text(
                 'يظهر فوراً في المنتج',
-                style: TextStyle(fontSize: 10.5.sp, color: const Color(0xFF94A3B8)),
+                style: TextStyle(fontSize: 10.5.sp, color: AppTheme.mutedGray),
               ),
             ],
           ),
@@ -92,9 +92,9 @@ class _CategoryAddCardState extends State<CategoryAddCard> {
                   style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w600),
                   decoration: InputDecoration(
                     hintText: 'مثال: إكسسوارات',
-                    hintStyle: TextStyle(fontSize: 12.sp, color: const Color(0xFF94A3B8)),
+                    hintStyle: TextStyle(fontSize: 12.sp, color: AppTheme.mutedGray),
                     filled: true,
-                    fillColor: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF8FAFC),
+                    fillColor: isDark ? AppTheme.darkSurfaceAlt : AppTheme.canvasLight,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14.r),
                       borderSide: BorderSide.none,
@@ -102,7 +102,7 @@ class _CategoryAddCardState extends State<CategoryAddCard> {
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14.r),
                       borderSide: BorderSide(
-                        color: isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0),
+                        color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft,
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(

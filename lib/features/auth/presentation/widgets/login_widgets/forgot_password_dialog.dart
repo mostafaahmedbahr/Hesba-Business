@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:hesba/core/theme/app_theme.dart';
 
 import '../../../../../core/di/service_locator.dart';
 import '../../../../../core/utils/toast.dart';
@@ -69,12 +70,12 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
                       width: 42.w,
                       height: 42.w,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF0B4D9C).withValues(alpha: 0.10),
+                        color: AppTheme.deepBlue.withValues(alpha: 0.10),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
                         Icons.lock_reset_rounded,
-                        color: Color(0xFF0B4D9C),
+                        color: AppTheme.deepBlue,
                         size: 22,
                       ),
                     ),
@@ -136,7 +137,7 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
               child: ElevatedButton(
                 onPressed: isLoading ? null : _send,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0B4D9C),
+                  backgroundColor: AppTheme.deepBlue,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(

@@ -24,7 +24,7 @@ class ReportsLoadingGrid extends StatelessWidget {
   Widget _box(double h, bool isDark) => Container(
         height: h,
         decoration: BoxDecoration(
-          color: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF1F5F9),
+          color: isDark ? AppTheme.darkSurfaceAlt : AppTheme.mist,
           borderRadius: BorderRadius.circular(18.r),
         ),
       );
@@ -56,7 +56,7 @@ class ReportsNoShop extends StatelessWidget {
           style: TextStyle(
             fontSize: 14.sp,
             fontWeight: FontWeight.w800,
-            color: isDark ? Colors.white : const Color(0xFF0F172A),
+            color: isDark ? Colors.white : AppTheme.ink,
           ),
         ),
       ),

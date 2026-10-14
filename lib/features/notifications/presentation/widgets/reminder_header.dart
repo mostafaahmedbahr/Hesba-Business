@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:hesba/core/theme/app_theme.dart';
 
 /// هيدر متدرج (عدد التذكيرات).
 class ReminderHeader extends StatelessWidget {
@@ -13,7 +14,7 @@ class ReminderHeader extends StatelessWidget {
     return SliverAppBar(
       pinned: true,
       expandedHeight: 178.h,
-      backgroundColor: const Color(0xFF1A4FD6),
+      backgroundColor: AppTheme.primaryColor,
       foregroundColor: Colors.white,
       elevation: 0,
       stretch: true,
@@ -29,7 +30,7 @@ class ReminderHeader extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Color(0xFF0D2A86), Color(0xFF1A4FD6), Color(0xFF7C4DFF)],
+              colors: [Color(0xFF0D2A86), AppTheme.primaryColor, Color(0xFF7C4DFF)],
             ),
           ),
           child: Stack(
@@ -123,7 +124,7 @@ class ReminderHeader extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 11.sp,
                                 fontWeight: FontWeight.w900,
-                                color: const Color(0xFF1A4FD6),
+                                color: AppTheme.primaryColor,
                               ),
                             ),
                           ),

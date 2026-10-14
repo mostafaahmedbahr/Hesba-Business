@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,12 +5,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
-import '../../../../core/constants/app_constants.dart';
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/shop_image_view.dart';
 import '../../../dashboard/presentation/cubit/dashboard_cubit.dart';
+import '../../../dashboard/data/repos/dashboard_repo.dart';
 import '../../../products/data/repos/products_repo.dart';
 import '../../../products/presentation/cubit/products_cubit.dart';
 import '../../../products/presentation/views/product_form_view.dart';
@@ -35,6 +33,20 @@ class HomeView extends StatelessWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: BlocBuilder<DashboardCubit, DashboardState>(
+        // Rebuild only when displayed data actually changes — otherwise every
+        // cubit tick replays the entry animations and rebuilds the slivers.
+        buildWhen: (p, c) =>
+            p.status != c.status ||
+            p.shopName != c.shopName ||
+            p.shopImageUrl != c.shopImageUrl ||
+            p.todaySalesTotal != c.todaySalesTotal ||
+            p.todayReturnsTotal != c.todayReturnsTotal ||
+            p.todayReturnsCount != c.todayReturnsCount ||
+            p.todayNetSales != c.todayNetSales ||
+            p.todayExpensesTotal != c.todayExpensesTotal ||
+            p.productsCount != c.productsCount ||
+            p.lowStockCount != c.lowStockCount ||
+            p.errorMessage != c.errorMessage,
         builder: (context, state) {
           return RefreshIndicator(
             color: AppTheme.primaryColor,
@@ -119,7 +131,7 @@ class _HeaderBar extends StatelessWidget {
         color: isDark ? AppTheme.darkSurface : Colors.white,
         border: Border(
           bottom: BorderSide(
-              color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB)),
+              color: isDark ? AppTheme.darkBorder : AppTheme.hairline),
         ),
       ),
       child: Row(
@@ -136,11 +148,11 @@ class _HeaderBar extends StatelessWidget {
               width: 44.w,
               height: 44.w,
               decoration: BoxDecoration(
-                color: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF1F5F9),
+                color: isDark ? AppTheme.darkSurfaceAlt : AppTheme.mist,
                 borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0)),
+                border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft),
               ),
-              child: Icon(Icons.menu_rounded, size: 20.sp, color: isDark ? Colors.white : const Color(0xFF0F172A)),
+              child: Icon(Icons.menu_rounded, size: 20.sp, color: isDark ? Colors.white : AppTheme.ink),
             ),
           ),
           SizedBox(width: 8.w),
@@ -164,7 +176,7 @@ class _HeaderBar extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16.5.sp,
                     fontWeight: FontWeight.w900,
-                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    color: isDark ? Colors.white : AppTheme.ink,
                     letterSpacing: -0.4,
                   ),
                 ),
@@ -175,7 +187,7 @@ class _HeaderBar extends StatelessWidget {
                         size: 11.sp,
                         color: isDark
                             ? AppTheme.darkTextSecondary
-                            : const Color(0xFF94A3B8)),
+                            : AppTheme.mutedGray),
                     SizedBox(width: 4.w),
                     Flexible(
                       child: Text(
@@ -186,7 +198,7 @@ class _HeaderBar extends StatelessWidget {
                             fontSize: 11.sp,
                             color: isDark
                                 ? AppTheme.darkTextSecondary
-                                : const Color(0xFF64748B),
+                                : AppTheme.slateGray,
                             fontWeight: FontWeight.w600),
                       ),
                     ),
@@ -209,17 +221,17 @@ class _HeaderBar extends StatelessWidget {
                   width: 44.w,
                   height: 44.w,
                   decoration: BoxDecoration(
-                    color: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF1F5F9),
+                    color: isDark ? AppTheme.darkSurfaceAlt : AppTheme.mist,
                     borderRadius: BorderRadius.circular(14.r),
                     border: Border.all(
-                        color: isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0)),
+                        color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft),
                   ),
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
                       Icon(Icons.notifications_none_rounded,
                           size: 22.sp,
-                          color: isDark ? Colors.white : const Color(0xFF0F172A)),
+                          color: isDark ? Colors.white : AppTheme.ink),
                       if (unread > 0)
                         Positioned(
                           top: 6.h,
@@ -228,7 +240,7 @@ class _HeaderBar extends StatelessWidget {
                             padding: EdgeInsets.symmetric(horizontal: unread > 9 ? 5.w : 0, vertical: 2.h),
                             constraints: BoxConstraints(minWidth: 18.w, minHeight: 18.w),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFE11D48),
+                              color: AppTheme.danger,
                               borderRadius: BorderRadius.circular(10.r),
                               border: Border.all(color: isDark ? AppTheme.darkSurfaceAlt : Colors.white, width: 1.5),
                             ),
@@ -246,7 +258,7 @@ class _HeaderBar extends StatelessWidget {
                             width: 8.w,
                             height: 8.w,
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF59E0B),
+                              color: AppTheme.warningAmber,
                               shape: BoxShape.circle,
                               border: Border.all(color: isDark ? AppTheme.darkSurfaceAlt : Colors.white, width: 1.5),
                             ),
@@ -285,12 +297,12 @@ class _NetSalesCard extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF0D2A86), Color(0xFF1A4FD6), Color(0xFF4A7CFF)],
+          colors: [Color(0xFF0D2A86), AppTheme.primaryColor, Color(0xFF4A7CFF)],
         ),
         borderRadius: BorderRadius.circular(24.r),
         boxShadow: [
           BoxShadow(
-              color: const Color(0xFF1A4FD6).withValues(alpha: 0.28),
+              color: AppTheme.primaryColor.withValues(alpha: 0.28),
               blurRadius: 20,
               offset: const Offset(0, 10)),
         ],
@@ -453,7 +465,7 @@ class _CurrentBalanceCard extends StatelessWidget {
         color: isDark ? AppTheme.darkSurface : Colors.white,
         borderRadius: BorderRadius.circular(24.r),
         border: Border.all(
-            color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB)),
+            color: isDark ? AppTheme.darkBorder : AppTheme.hairline),
         boxShadow: AppTheme.cardShadow(context),
       ),
       child: Column(
@@ -466,16 +478,16 @@ class _CurrentBalanceCard extends StatelessWidget {
                 height: 44.w,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(colors: isNegative
-                      ? [const Color(0xFFE11D48), const Color(0xFFFB7185)]
+                      ? [AppTheme.danger, AppTheme.roseLight]
                       : isZero
-                          ? [const Color(0xFF64748B), const Color(0xFF94A3B8)]
-                          : [const Color(0xFF059669), const Color(0xFF34D399)]),
+                          ? [AppTheme.slateGray, AppTheme.mutedGray]
+                          : [AppTheme.successDark, const Color(0xFF34D399)]),
                   borderRadius: BorderRadius.circular(13.r),
                   boxShadow: [
                     BoxShadow(
                         color: (isNegative
-                                ? const Color(0xFFE11D48)
-                                : const Color(0xFF059669))
+                                ? AppTheme.danger
+                                : AppTheme.successDark)
                             .withValues(alpha: 0.28),
                         blurRadius: 12,
                         offset: const Offset(0, 6)),
@@ -499,14 +511,14 @@ class _CurrentBalanceCard extends StatelessWidget {
                             fontWeight: FontWeight.w900,
                             color: isDark
                                 ? Colors.white
-                                : const Color(0xFF0F172A))),
+                                : AppTheme.ink)),
                     SizedBox(height: 2.h),
                     Text('المفروض يكون معاك آخر اليوم',
                         style: TextStyle(
                             fontSize: 11.sp,
                             color: isDark
                                 ? AppTheme.darkTextSecondary
-                                : const Color(0xFF64748B),
+                                : AppTheme.slateGray,
                             fontWeight: FontWeight.w600)),
                   ],
                 ),
@@ -515,17 +527,17 @@ class _CurrentBalanceCard extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
                 decoration: BoxDecoration(
                   color: isNegative
-                      ? const Color(0xFFFEF2F2)
+                      ? AppTheme.dangerSoft
                       : isZero
-                          ? const Color(0xFFF1F5F9)
+                          ? AppTheme.mist
                           : const Color(0xFFECFDF5),
                   borderRadius: BorderRadius.circular(20.r),
                   border: Border.all(
                       color: isNegative
-                          ? const Color(0xFFE11D48).withValues(alpha: 0.12)
+                          ? AppTheme.danger.withValues(alpha: 0.12)
                           : isZero
-                              ? const Color(0xFFE2E8F0)
-                              : const Color(0xFF059669).withValues(alpha: 0.12)),
+                              ? AppTheme.borderSoft
+                              : AppTheme.successDark.withValues(alpha: 0.12)),
                 ),
                 child: Text(
                   isNegative
@@ -537,10 +549,10 @@ class _CurrentBalanceCard extends StatelessWidget {
                       fontSize: 10.5.sp,
                       fontWeight: FontWeight.w800,
                       color: isNegative
-                          ? const Color(0xFFE11D48)
+                          ? AppTheme.danger
                           : isZero
-                              ? const Color(0xFF64748B)
-                              : const Color(0xFF059669)),
+                              ? AppTheme.slateGray
+                              : AppTheme.successDark),
                 ),
               ),
             ],
@@ -558,10 +570,10 @@ class _CurrentBalanceCard extends StatelessWidget {
                     fontSize: 38.sp,
                     fontWeight: FontWeight.w900,
                     color: isNegative
-                        ? const Color(0xFFE11D48)
+                        ? AppTheme.danger
                         : isZero
-                            ? (isDark ? Colors.white : const Color(0xFF0F172A))
-                            : const Color(0xFF059669),
+                            ? (isDark ? Colors.white : AppTheme.ink)
+                            : AppTheme.successDark,
                     height: 1,
                     letterSpacing: -1.1,
                   ),
@@ -573,7 +585,7 @@ class _CurrentBalanceCard extends StatelessWidget {
                         style: TextStyle(
                             fontSize: 22.sp,
                             fontWeight: FontWeight.w900,
-                            color: const Color(0xFFE11D48))),
+                            color: AppTheme.danger)),
                   ),
                 SizedBox(width: 8.w),
                 Padding(
@@ -584,7 +596,7 @@ class _CurrentBalanceCard extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                           color: isDark
                               ? AppTheme.darkTextSecondary
-                              : const Color(0xFF64748B))),
+                              : AppTheme.slateGray)),
                 ),
               ],
             ),
@@ -593,23 +605,23 @@ class _CurrentBalanceCard extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(12.w),
             decoration: BoxDecoration(
-              color: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF8FAFC),
+              color: isDark ? AppTheme.darkSurfaceAlt : AppTheme.canvasLight,
               borderRadius: BorderRadius.circular(16.r),
               border: Border.all(
-                  color: isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0)),
+                  color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft),
             ),
             child: Column(
               children: [
-                _miniRow('المبيعات', '+ ${_fmt(sales)}', const Color(0xFF1A4FD6), isDark),
+                _miniRow('المبيعات', '+ ${_fmt(sales)}', AppTheme.primaryColor, isDark),
                 SizedBox(height: 8.h),
-                _miniRow('المرتجعات', '- ${_fmt(returns)}', const Color(0xFFF59E0B), isDark),
+                _miniRow('المرتجعات', '- ${_fmt(returns)}', AppTheme.warningAmber, isDark),
                 SizedBox(height: 8.h),
-                _miniRow('المصروفات', '- ${_fmt(expenses)}', const Color(0xFFE11D48), isDark),
+                _miniRow('المصروفات', '- ${_fmt(expenses)}', AppTheme.danger, isDark),
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 10.h),
                   child: Divider(
                       height: 1,
-                      color: isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0)),
+                      color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft),
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -618,14 +630,14 @@ class _CurrentBalanceCard extends StatelessWidget {
                         style: TextStyle(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w800,
-                            color: isDark ? Colors.white : const Color(0xFF0F172A))),
+                            color: isDark ? Colors.white : AppTheme.ink)),
                     Text('${_fmt(balance)} $currency',
                         style: TextStyle(
                             fontSize: 13.5.sp,
                             fontWeight: FontWeight.w900,
                             color: isNegative
-                                ? const Color(0xFFE11D48)
-                                : const Color(0xFF059669))),
+                                ? AppTheme.danger
+                                : AppTheme.successDark)),
                   ],
                 ),
               ],
@@ -716,13 +728,13 @@ class _QuickActionsGrid extends StatelessWidget {
           icon: Icons.point_of_sale_rounded,
           label: 'homeNewSale'.tr(),
           subtitle: 'سجّل فاتورة',
-          gradient: const [Color(0xFF1A4FD6), Color(0xFF4A7BFF)],
+          gradient: const [AppTheme.primaryColor, AppTheme.brightBlue],
           accent: const Color(0xFFDBE6FF)),
       _QAData(
           icon: Icons.add_shopping_cart_rounded,
           label: 'homeAddProduct'.tr(),
           subtitle: 'أضف للمنتجات',
-          gradient: const [Color(0xFFF59E0B), Color(0xFFFBBF24)],
+          gradient: const [AppTheme.warningAmber, AppTheme.goldLight],
           accent: const Color(0xFFFFF3D6)),
       _QAData(
           icon: Icons.replay_circle_filled_rounded,
@@ -734,7 +746,7 @@ class _QuickActionsGrid extends StatelessWidget {
           icon: Icons.savings_rounded,
           label: 'homeExpense'.tr(),
           subtitle: 'تسجيل مصروف',
-          gradient: const [Color(0xFFE11D48), Color(0xFFFB7185)],
+          gradient: const [AppTheme.danger, AppTheme.roseLight],
           accent: const Color(0xFFFFE4E8)),
     ];
     return Column(children: [
@@ -825,7 +837,7 @@ class _QA extends StatelessWidget {
           decoration: BoxDecoration(
             color: isDark ? surface : Colors.white,
             borderRadius: BorderRadius.circular(22.r),
-            border: Border.all(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB)),
+            border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.hairline),
             boxShadow: AppTheme.cardShadow(context),
           ),
           child: Column(
@@ -849,9 +861,9 @@ class _QA extends StatelessWidget {
                 ],
               ),
               SizedBox(height: 14.h),
-              Text(data.label, style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w900, color: isDark ? AppTheme.darkTextPrimary : const Color(0xFF0F172A), letterSpacing: -0.2)),
+              Text(data.label, style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w900, color: isDark ? AppTheme.darkTextPrimary : AppTheme.ink, letterSpacing: -0.2)),
               SizedBox(height: 3.h),
-              Text(data.subtitle, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: isDark ? AppTheme.darkTextSecondary : const Color(0xFF94A3B8))),
+              Text(data.subtitle, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: isDark ? AppTheme.darkTextSecondary : AppTheme.mutedGray)),
               SizedBox(height: 10.h),
               Container(height: 3.h, width: 28.w, decoration: BoxDecoration(gradient: LinearGradient(colors: data.gradient), borderRadius: BorderRadius.circular(10.r))),
             ],
@@ -962,11 +974,8 @@ class _RecentMovementsSectionState extends State<_RecentMovementsSection> {
   }
 
   Future<void> _loadShopId() async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) { if (mounted) setState(() => _loadingShop = false); return; }
     try {
-      final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
-      _shopId = doc.data()?['shopId'] as String?;
+      _shopId = await sl<DashboardRepo>().getShopId();
     } catch (_) {}
     if (mounted) setState(() => _loadingShop = false);
   }
@@ -1014,7 +1023,7 @@ class _RecentMovementsSectionState extends State<_RecentMovementsSection> {
     return Column(children: List.generate(3, (_) => Container(
       height: 78.h,
       margin: EdgeInsets.only(bottom: 10.h),
-      decoration: BoxDecoration(color: isDark ? AppTheme.darkSurface : Colors.white, borderRadius: BorderRadius.circular(18.r), border: Border.all(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB))),
+      decoration: BoxDecoration(color: isDark ? AppTheme.darkSurface : Colors.white, borderRadius: BorderRadius.circular(18.r), border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.hairline)),
       child: Center(child: SizedBox(width: 22.w, height: 22.w, child: CircularProgressIndicator(strokeWidth: 2.2, color: AppTheme.primaryColor))),
     )));
   }
@@ -1022,7 +1031,7 @@ class _RecentMovementsSectionState extends State<_RecentMovementsSection> {
   Widget _emptyShop(bool isDark) {
     return Container(
       padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(color: isDark ? AppTheme.darkSurface : Colors.white, borderRadius: BorderRadius.circular(18.r), border: Border.all(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB))),
+      decoration: BoxDecoration(color: isDark ? AppTheme.darkSurface : Colors.white, borderRadius: BorderRadius.circular(18.r), border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.hairline)),
       child: Row(children: [
         Icon(Icons.store_outlined, color: Colors.grey.shade400),
         SizedBox(width: 10.w),
@@ -1032,51 +1041,59 @@ class _RecentMovementsSectionState extends State<_RecentMovementsSection> {
   }
 }
 
-class _LastSaleCard extends StatelessWidget {
+class _LastSaleCard extends StatefulWidget {
   final String shopId;
   final void Function(int index)? onNavigateTab;
   const _LastSaleCard({required this.shopId, this.onNavigateTab});
 
   @override
+  State<_LastSaleCard> createState() => _LastSaleCardState();
+}
+
+class _LastSaleCardState extends State<_LastSaleCard> {
+  // Created once: dashboard ticks rebuild the page but must NOT resubscribe.
+  late final Stream<SaleModel?> _stream;
+
+  @override
+  void initState() {
+    super.initState();
+    _stream = sl<DashboardRepo>().watchLastSale(widget.shopId);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance
-          .collection(AppConstants.salesCollection)
-          .where('shopId', isEqualTo: shopId)
-          .orderBy('createdAt', descending: true)
-          .limit(1)
-          .snapshots(),
+    return StreamBuilder<SaleModel?>(
+      stream: _stream,
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) {
-          return _recentSkeleton(isDark, const Color(0xFF1A4FD6));
+          return _recentSkeleton(isDark, AppTheme.primaryColor);
         }
-        final docs = snap.data?.docs ?? [];
-        if (docs.isEmpty) {
+        final sale = snap.data;
+        if (sale == null) {
           return _RecentEmpty(
             isDark: isDark,
             icon: Icons.point_of_sale_rounded,
-            gradient: const [Color(0xFF1A4FD6), Color(0xFF4A7BFF)],
+            gradient: const [AppTheme.primaryColor, AppTheme.brightBlue],
             title: 'آخر مبيع',
             subtitle: 'لا يوجد مبيعات اليوم',
             actionLabel: 'بيع جديد',
             onTap: () => Navigator.pushNamed(context, AppRoutes.addSaleView),
           );
         }
-        final sale = SaleModel.fromJson(docs.first.data());
         final time = _timeAgo(sale.createdAt);
         return _RecentCard(
           isDark: isDark,
           icon: Icons.point_of_sale_rounded,
-          gradient: const [Color(0xFF1A4FD6), Color(0xFF4A7BFF)],
+          gradient: const [AppTheme.primaryColor, AppTheme.brightBlue],
           title: 'آخر مبيع',
           subtitle: sale.items.isEmpty ? 'فاتورة #${sale.saleId.substring(0, 6)}' : '${sale.items.first.productName}${sale.items.length > 1 ? ' +${sale.items.length - 1}' : ''}',
           time: time,
           amount: '+${_fmt(sale.total)} ${'currencyEGP'.tr()}',
-          amountColor: const Color(0xFF059669),
+          amountColor: AppTheme.successDark,
           onTap: () {
             HapticFeedback.selectionClick();
-            if (onNavigateTab != null) { onNavigateTab!(2); } else { Navigator.pushNamed(context, AppRoutes.dashboard, arguments: {'initialTab': 2}); }
+            if (widget.onNavigateTab != null) { widget.onNavigateTab!(2); } else { Navigator.pushNamed(context, AppRoutes.dashboard, arguments: {'initialTab': 2}); }
           },
         );
       },
@@ -1084,53 +1101,61 @@ class _LastSaleCard extends StatelessWidget {
   }
 }
 
-class _LastReturnCard extends StatelessWidget {
+class _LastReturnCard extends StatefulWidget {
   final String shopId;
   final void Function(int index)? onNavigateTab;
   const _LastReturnCard({required this.shopId, this.onNavigateTab});
 
   @override
+  State<_LastReturnCard> createState() => _LastReturnCardState();
+}
+
+class _LastReturnCardState extends State<_LastReturnCard> {
+  // Created once: dashboard ticks rebuild the page but must NOT resubscribe.
+  late final Stream<ReturnModel?> _stream;
+
+  @override
+  void initState() {
+    super.initState();
+    _stream = sl<DashboardRepo>().watchLastReturn(widget.shopId);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance
-          .collection(AppConstants.returnsCollection)
-          .where('shopId', isEqualTo: shopId)
-          .orderBy('createdAt', descending: true)
-          .limit(1)
-          .snapshots(),
+    return StreamBuilder<ReturnModel?>(
+      stream: _stream,
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) {
-          return _recentSkeleton(isDark, const Color(0xFFF59E0B));
+          return _recentSkeleton(isDark, AppTheme.warningAmber);
         }
-        final docs = snap.data?.docs ?? [];
-        if (docs.isEmpty) {
+        final ret = snap.data;
+        if (ret == null) {
           return _RecentEmpty(
             isDark: isDark,
             icon: Icons.assignment_return_rounded,
-            gradient: const [Color(0xFFF59E0B), Color(0xFFFBBF24)],
+            gradient: const [AppTheme.warningAmber, AppTheme.goldLight],
             title: 'آخر مرتجع',
             subtitle: 'لا يوجد مرتجعات اليوم ✓',
             actionLabel: 'إضافة مرتجع',
-            onTap: () {
-              if (onNavigateTab != null) { onNavigateTab!(3); } else { Navigator.pushNamed(context, AppRoutes.returnsView); }
-            },
+              onTap: () {
+                if (widget.onNavigateTab != null) { widget.onNavigateTab!(3); } else { Navigator.pushNamed(context, AppRoutes.returnsView); }
+              },
           );
         }
-        final ret = ReturnModel.fromJson(docs.first.data());
         final time = _timeAgo(ret.createdAt);
         return _RecentCard(
           isDark: isDark,
           icon: Icons.assignment_return_rounded,
-          gradient: const [Color(0xFFF59E0B), Color(0xFFFBBF24)],
+          gradient: const [AppTheme.warningAmber, AppTheme.goldLight],
           title: 'آخر مرتجع',
           subtitle: ret.items.isEmpty ? (ret.reason.isEmpty ? 'مرتجع' : ret.reason) : '${ret.items.first.productName}${ret.items.length > 1 ? ' +${ret.items.length - 1}' : ''}',
           time: time,
           amount: '-${_fmt(ret.total)} ${'currencyEGP'.tr()}',
-          amountColor: const Color(0xFFE11D48),
+          amountColor: AppTheme.danger,
           onTap: () {
             HapticFeedback.selectionClick();
-            if (onNavigateTab != null) { onNavigateTab!(3); } else { Navigator.pushNamed(context, AppRoutes.returnsView); }
+            if (widget.onNavigateTab != null) { widget.onNavigateTab!(3); } else { Navigator.pushNamed(context, AppRoutes.returnsView); }
           },
         );
       },
@@ -1138,81 +1163,61 @@ class _LastReturnCard extends StatelessWidget {
   }
 }
 
-class _LastExpenseCard extends StatelessWidget {
+class _LastExpenseCard extends StatefulWidget {
   final String shopId;
   final void Function(int index)? onNavigateTab;
   const _LastExpenseCard({required this.shopId, this.onNavigateTab});
 
-  /// ستريم آخر مصروف — مش معتمد على composite index.
-  Stream<List<ExpenseModel>> _watchLastExpense() async* {
-    final col = FirebaseFirestore.instance.collection(AppConstants.expensesCollection);
-    try {
-      await for (final snap in col
-          .where('shopId', isEqualTo: shopId)
-          .orderBy('date', descending: true)
-          .limit(5)
-          .snapshots()) {
-        yield _parseDocs(snap.docs);
-      }
-    } catch (_) {
-      // الـ index ناقص: قراءة بدون where + فلترة محلية.
-      await for (final snap
-          in col.orderBy('date', descending: true).limit(20).snapshots()) {
-        yield _parseDocs(snap.docs);
-      }
-    }
-  }
+  @override
+  State<_LastExpenseCard> createState() => _LastExpenseCardState();
+}
 
-  /// parse آمن — يتخطى المستند التالف بدل ما يكسر الستريم.
-  List<ExpenseModel> _parseDocs(
-      List<QueryDocumentSnapshot<Map<String, dynamic>>> docs) {
-    final list = <ExpenseModel>[];
-    for (final d in docs) {
-      try {
-        final e = ExpenseModel.fromJson(d.data());
-        if (e.shopId == shopId) list.add(e);
-      } catch (_) {}
-    }
-    return list;
+class _LastExpenseCardState extends State<_LastExpenseCard> {
+  // Created once: dashboard ticks rebuild the page but must NOT resubscribe.
+  late final Stream<ExpenseModel?> _stream;
+
+  @override
+  void initState() {
+    super.initState();
+    _stream = sl<DashboardRepo>().watchLastExpense(widget.shopId);
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return StreamBuilder<List<ExpenseModel>>(
-      stream: _watchLastExpense(),
+    return StreamBuilder<ExpenseModel?>(
+      stream: _stream,
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) {
-          return _recentSkeleton(isDark, const Color(0xFFE11D48));
+          return _recentSkeleton(isDark, AppTheme.danger);
         }
-        final list = snap.data ?? [];
-        if (list.isEmpty) {
+        final exp = snap.data;
+        if (exp == null) {
           return _RecentEmpty(
             isDark: isDark,
             icon: Icons.savings_rounded,
-            gradient: const [Color(0xFFE11D48), Color(0xFFFB7185)],
+            gradient: const [AppTheme.danger, AppTheme.roseLight],
             title: 'آخر مصروف',
             subtitle: 'لا يوجد مصروفات اليوم',
             actionLabel: 'إضافة مصروف',
             onTap: () {
-              if (onNavigateTab != null) { onNavigateTab!(5); } else { Navigator.push(context, MaterialPageRoute(builder: (_) => ExpensesView(shopId: shopId))); }
+              if (widget.onNavigateTab != null) { widget.onNavigateTab!(5); } else { Navigator.push(context, MaterialPageRoute(builder: (_) => ExpensesView(shopId: widget.shopId))); }
             },
           );
         }
-        final exp = list.first;
         final time = _timeAgo(exp.date);
         return _RecentCard(
           isDark: isDark,
           icon: Icons.savings_rounded,
-          gradient: const [Color(0xFFE11D48), Color(0xFFFB7185)],
+          gradient: const [AppTheme.danger, AppTheme.roseLight],
           title: 'آخر مصروف',
           subtitle: exp.title.isEmpty ? exp.category : exp.title,
           time: time,
           amount: '-${_fmt(exp.amount)} ${'currencyEGP'.tr()}',
-          amountColor: const Color(0xFFE11D48),
+          amountColor: AppTheme.danger,
           onTap: () {
             HapticFeedback.selectionClick();
-            if (onNavigateTab != null) { onNavigateTab!(5); } else { Navigator.push(context, MaterialPageRoute(builder: (_) => ExpensesView(shopId: shopId))); }
+            if (widget.onNavigateTab != null) { widget.onNavigateTab!(5); } else { Navigator.push(context, MaterialPageRoute(builder: (_) => ExpensesView(shopId: widget.shopId))); }
           },
         );
       },
@@ -1241,7 +1246,7 @@ Widget _RecentCard({
         padding: EdgeInsets.all(14.w),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(18.r),
-          border: Border.all(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB)),
+          border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.hairline),
           boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.04), blurRadius: 12, offset: const Offset(0, 4))],
         ),
         child: Row(
@@ -1257,14 +1262,14 @@ Widget _RecentCard({
             SizedBox(width: 12.w),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(title, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w700, color: isDark ? AppTheme.darkTextSecondary : const Color(0xFF64748B))),
+                Text(title, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w700, color: isDark ? AppTheme.darkTextSecondary : AppTheme.slateGray)),
                 SizedBox(height: 2.h),
-                Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : const Color(0xFF0F172A))),
+                Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : AppTheme.ink)),
                 SizedBox(height: 2.h),
                 Row(children: [
-                  Icon(Icons.access_time_rounded, size: 11.sp, color: const Color(0xFF94A3B8)),
+                  Icon(Icons.access_time_rounded, size: 11.sp, color: AppTheme.mutedGray),
                   SizedBox(width: 4.w),
-                  Text(time, style: TextStyle(fontSize: 11.sp, color: const Color(0xFF94A3B8))),
+                  Text(time, style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray)),
                 ]),
               ]),
             ),
@@ -1300,15 +1305,15 @@ class _RecentEmpty extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? AppTheme.darkSurface : Colors.white,
         borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB), style: BorderStyle.solid),
+        border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.hairline, style: BorderStyle.solid),
       ),
       child: Row(children: [
         Container(width: 46.w, height: 46.w, decoration: BoxDecoration(gradient: LinearGradient(colors: gradient), borderRadius: BorderRadius.circular(13.r)), child: Icon(icon, color: Colors.white, size: 22.sp)),
         SizedBox(width: 12.w),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(title, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w700, color: const Color(0xFF64748B))),
+          Text(title, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w700, color: AppTheme.slateGray)),
           SizedBox(height: 2.h),
-          Text(subtitle, style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w700, color: isDark ? AppTheme.darkTextSecondary : const Color(0xFF94A3B8))),
+          Text(subtitle, style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w700, color: isDark ? AppTheme.darkTextSecondary : AppTheme.mutedGray)),
         ])),
         InkWell(
           onTap: onTap,
@@ -1326,7 +1331,7 @@ class _RecentEmpty extends StatelessWidget {
 Widget _recentSkeleton(bool isDark, Color accent) {
   return Container(
     height: 74.h,
-    decoration: BoxDecoration(color: isDark ? AppTheme.darkSurface : Colors.white, borderRadius: BorderRadius.circular(18.r), border: Border.all(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB))),
+    decoration: BoxDecoration(color: isDark ? AppTheme.darkSurface : Colors.white, borderRadius: BorderRadius.circular(18.r), border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.hairline)),
     child: Center(child: SizedBox(width: 18.w, height: 18.w, child: CircularProgressIndicator(strokeWidth: 2.2, color: accent))),
   );
 }

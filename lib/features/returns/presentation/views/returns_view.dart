@@ -85,13 +85,13 @@ class _ReturnsBody extends StatelessWidget {
           //   heroTag: 'returns_fab',
           //   onPressed: () => _goToAddReturn(context),
           //   elevation: 0,
-          //   backgroundColor: const Color(0xFFF59E0B),
+          //   backgroundColor: AppTheme.warningAmber,
           //   foregroundColor: Colors.white,
           //   icon: const Icon(Icons.add_rounded),
           //   label: Text('مرتجع جديد', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800)),
           // ),
           body: RefreshIndicator(
-            color: const Color(0xFFF59E0B),
+            color: AppTheme.warningAmber,
             onRefresh: () async => cubit.bootstrap(),
             child: CustomScrollView(
               slivers: [

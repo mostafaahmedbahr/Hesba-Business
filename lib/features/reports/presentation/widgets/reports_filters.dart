@@ -29,7 +29,7 @@ class ReportsPeriodChips extends StatelessWidget {
             },
             selectedColor: AppTheme.primaryColor,
             backgroundColor: Theme.of(context).colorScheme.surface,
-            side: BorderSide(color: selected ? AppTheme.primaryColor : const Color(0xFFE5E7EB)),
+            side: BorderSide(color: selected ? AppTheme.primaryColor : AppTheme.hairline),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
             showCheckmark: false,
             padding: EdgeInsets.symmetric(horizontal: 16.w),

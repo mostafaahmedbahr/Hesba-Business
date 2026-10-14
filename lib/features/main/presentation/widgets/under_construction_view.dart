@@ -62,7 +62,7 @@ class UnderConstructionView extends StatelessWidget {
                 color: surface,
                 borderRadius: BorderRadius.circular(24.r),
                 border: Border.all(
-                    color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB)),
+                    color: isDark ? AppTheme.darkBorder : AppTheme.hairline),
                 boxShadow: AppTheme.cardShadow(context),
               ),
               child: Column(
@@ -73,7 +73,7 @@ class UnderConstructionView extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w800,
-                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                      color: isDark ? Colors.white : AppTheme.ink,
                     ),
                   ),
                   SizedBox(height: 8.h),
@@ -83,7 +83,7 @@ class UnderConstructionView extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12.5.sp,
                       height: 1.6,
-                      color: isDark ? AppTheme.darkTextSecondary : const Color(0xFF64748B),
+                      color: isDark ? AppTheme.darkTextSecondary : AppTheme.slateGray,
                     ),
                   ),
                   SizedBox(height: 16.h),

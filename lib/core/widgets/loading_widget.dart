@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hesba/core/theme/app_theme.dart';
 
 /// لودر موحد (دايرة + جملة) — نفس الشكل في كل التطبيق.
 class LoadingWidget extends StatelessWidget {
@@ -23,10 +24,10 @@ class LoadingWidget extends StatelessWidget {
             width: ring,
             height: ring,
             decoration: BoxDecoration(
-              color: const Color(0xFF1A4FD6).withValues(alpha: isDark ? 0.16 : 0.08),
+              color: AppTheme.primaryColor.withValues(alpha: isDark ? 0.16 : 0.08),
               shape: BoxShape.circle,
               border: Border.all(
-                color: const Color(0xFF1A4FD6).withValues(alpha: isDark ? 0.35 : 0.18),
+                color: AppTheme.primaryColor.withValues(alpha: isDark ? 0.35 : 0.18),
               ),
             ),
             child: Center(
@@ -36,7 +37,7 @@ class LoadingWidget extends StatelessWidget {
                 child: CircularProgressIndicator(
                   strokeWidth: 4,
                   color: isDark ? const Color(0xFF8FB0FF) : const Color(0xFF0F2D8A),
-                  backgroundColor: const Color(0xFF1A4FD6).withValues(alpha: 0.15),
+                  backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.15),
                 ),
               ),
             ),

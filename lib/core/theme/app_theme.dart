@@ -20,6 +20,23 @@ class AppTheme {
   static const Color textSecondary = Color(0xFF6B7280);
   static const Color textLight = Color(0xFFFFFFFF);
 
+  // ── Shared palette (centralised magic values) ──────────
+  static const Color danger = Color(0xFFE11D48); // Destructive red
+  static const Color dangerSoft = Color(0xFFFEF2F2); // Destructive soft bg
+  static const Color roseLight = Color(0xFFFB7185); // Light rose accent
+  static const Color ink = Color(0xFF0F172A); // Deep navy text/icons
+  static const Color slateGray = Color(0xFF64748B); // Secondary slate text
+  static const Color mutedGray = Color(0xFF94A3B8); // Muted slate text/icons
+  static const Color hairline = Color(0xFFE5E7EB); // Light borders
+  static const Color borderSoft = Color(0xFFE2E8F0); // Soft slate borders
+  static const Color canvasLight = Color(0xFFF8FAFC); // Very light surfaces
+  static const Color mist = Color(0xFFF1F5F9); // Pale slate surfaces
+  static const Color warningAmber = Color(0xFFF59E0B); // Amber warnings
+  static const Color goldLight = Color(0xFFFBBF24); // Light gold accents
+  static const Color successDark = Color(0xFF059669); // Deep green
+  static const Color deepBlue = Color(0xFF0B4D9C); // Deep brand blue
+  static const Color brightBlue = Color(0xFF4A7BFF); // Bright blue accents
+
   // ── Dark ─────────────────────────────────────────────
   static const Color darkBackground = Color(0xFF0B1120);
   static const Color darkSurface = Color(0xFF151D2F);

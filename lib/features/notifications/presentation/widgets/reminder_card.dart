@@ -34,7 +34,7 @@ class ReminderCard extends StatelessWidget {
           color: isDark ? AppTheme.darkSurface : Colors.white,
           borderRadius: BorderRadius.circular(18.r),
           border: Border.all(
-            color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB),
+            color: isDark ? AppTheme.darkBorder : AppTheme.hairline,
           ),
           boxShadow: AppTheme.cardShadow(context),
         ),
@@ -57,14 +57,14 @@ class ReminderCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w800,
-                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            color: isDark ? Colors.white : AppTheme.ink,
                           ),
                         ),
                       ),
                       if (onToggle != null)
                         Switch(
                           value: enabled,
-                          activeThumbColor: const Color(0xFF1A4FD6),
+                          activeThumbColor: AppTheme.primaryColor,
                           onChanged: (_) => onToggle!(),
                         ),
                     ],
@@ -78,7 +78,7 @@ class ReminderCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 11.5.sp,
                         height: 1.4,
-                        color: isDark ? AppTheme.darkTextSecondary : const Color(0xFF64748B),
+                        color: isDark ? AppTheme.darkTextSecondary : AppTheme.slateGray,
                       ),
                     ),
                   ],
@@ -91,21 +91,21 @@ class ReminderCard extends StatelessWidget {
                       if (kDebugMode && onTest != null)
                         _SmallBtn(
                           icon: Icons.notifications_active_rounded,
-                          color: const Color(0xFF059669),
+                          color: AppTheme.successDark,
                           onTap: onTest!,
                         ),
                       SizedBox(width: 6.w),
                       if (onEdit != null)
                         _SmallBtn(
                           icon: Icons.edit_rounded,
-                          color: const Color(0xFF1A4FD6),
+                          color: AppTheme.primaryColor,
                           onTap: onEdit!,
                         ),
                       SizedBox(width: 6.w),
                       if (onDelete != null)
                         _SmallBtn(
                           icon: Icons.delete_outline_rounded,
-                          color: const Color(0xFFE11D48),
+                          color: AppTheme.danger,
                           onTap: onDelete!,
                         ),
                     ],
@@ -139,13 +139,13 @@ class _TimeBadge extends StatelessWidget {
                 Colors.grey.withValues(alpha: 0.25),
               ])
             : const LinearGradient(
-                colors: [Color(0xFF1A4FD6), Color(0xFF7C4DFF)],
+                colors: [AppTheme.primaryColor, Color(0xFF7C4DFF)],
               ),
         borderRadius: BorderRadius.circular(15.r),
         boxShadow: reminder.enabled
             ? [
                 BoxShadow(
-                  color: const Color(0xFF1A4FD6).withValues(alpha: 0.30),
+                  color: AppTheme.primaryColor.withValues(alpha: 0.30),
                   blurRadius: 12,
                   offset: const Offset(0, 6),
                 ),
@@ -197,21 +197,21 @@ class _RepeatPill extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A4FD6).withValues(alpha: 0.08),
+        color: AppTheme.primaryColor.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: const Color(0xFF1A4FD6).withValues(alpha: 0.14)),
+        border: Border.all(color: AppTheme.primaryColor.withValues(alpha: 0.14)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.event_repeat_rounded, size: 12.sp, color: const Color(0xFF1A4FD6)),
+          Icon(Icons.event_repeat_rounded, size: 12.sp, color: AppTheme.primaryColor),
           SizedBox(width: 5.w),
           Text(
             label,
             style: TextStyle(
               fontSize: 10.5.sp,
               fontWeight: FontWeight.w800,
-              color: isDark ? const Color(0xFF93B4FF) : const Color(0xFF1A4FD6),
+              color: isDark ? const Color(0xFF93B4FF) : AppTheme.primaryColor,
             ),
           ),
         ],

@@ -7,7 +7,7 @@ import '../../../../common_imports.dart';
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final titleColor = isDark ? Colors.white : AppTheme.ink;
     final subColor = isDark
         ? Colors.white.withValues(alpha: 0.72)
         : const Color(0xFF475569);

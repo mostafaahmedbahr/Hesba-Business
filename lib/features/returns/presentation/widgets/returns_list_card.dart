@@ -34,7 +34,7 @@ class _ReturnsListCardState extends State<ReturnsListCard> {
         color: isDark ? AppTheme.darkSurface : Colors.white,
         borderRadius: BorderRadius.circular(20.r),
         border: Border.all(
-          color: _expanded ? const Color(0xFFF59E0B).withValues(alpha: 0.35) : (isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB)),
+          color: _expanded ? AppTheme.warningAmber.withValues(alpha: 0.35) : (isDark ? AppTheme.darkBorder : AppTheme.hairline),
         ),
         boxShadow: AppTheme.cardShadow(context),
       ),
@@ -57,7 +57,7 @@ class _ReturnsListCardState extends State<ReturnsListCard> {
                   Container(
                     width: 46.w,
                     height: 46.w,
-                    decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFFF59E0B), Color(0xFFFBBF24)]), borderRadius: BorderRadius.circular(13.r)),
+                    decoration: BoxDecoration(gradient: const LinearGradient(colors: [AppTheme.warningAmber, AppTheme.goldLight]), borderRadius: BorderRadius.circular(13.r)),
                     child: Icon(Icons.assignment_return_rounded, size: 21.sp, color: Colors.white),
                   ),
                   SizedBox(width: 12.w),
@@ -65,24 +65,24 @@ class _ReturnsListCardState extends State<ReturnsListCard> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('مرتجع #$idShort', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : const Color(0xFF0F172A))),
+                        Text('مرتجع #$idShort', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
                         SizedBox(height: 3.h),
-                        Text('$itemsLabel • $dateStr', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.sp, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w600)),
+                        Text('$itemsLabel • $dateStr', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text('-${ret.total.toStringAsFixed(2)}', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: const Color(0xFFE11D48), height: 1)),
-                      Text('ج.م', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w700, color: const Color(0xFF94A3B8))),
+                      Text('-${ret.total.toStringAsFixed(2)}', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: AppTheme.danger, height: 1)),
+                      Text('ج.م', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w700, color: AppTheme.mutedGray)),
                     ],
                   ),
                   SizedBox(width: 6.w),
                   AnimatedRotation(
                     turns: _expanded ? 0.5 : 0,
                     duration: const Duration(milliseconds: 250),
-                    child: Icon(Icons.keyboard_arrow_down_rounded, size: 22.sp, color: const Color(0xFF94A3B8)),
+                    child: Icon(Icons.keyboard_arrow_down_rounded, size: 22.sp, color: AppTheme.mutedGray),
                   ),
                 ]),
                 // التفاصيل (تظهر بالضغطة).
@@ -114,9 +114,9 @@ class _Details extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
-          color: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF8FAFC),
+          color: isDark ? AppTheme.darkSurfaceAlt : AppTheme.canvasLight,
           borderRadius: BorderRadius.circular(14.r),
-          border: Border.all(color: isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0)),
+          border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,7 +135,7 @@ class _Details extends StatelessWidget {
                         ),
                       ),
                       SizedBox(width: 8.w),
-                      Text('${it.total.toStringAsFixed(2)} ج.م', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: const Color(0xFF64748B))),
+                      Text('${it.total.toStringAsFixed(2)} ج.م', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: AppTheme.slateGray)),
                     ],
                   ),
                 )),
@@ -158,11 +158,11 @@ class _Details extends StatelessWidget {
                 ),
               ],
               const Spacer(),
-              Text(dateTimeLabel(ret.createdAt), style: TextStyle(fontSize: 10.5.sp, color: const Color(0xFF94A3B8))),
+              Text(dateTimeLabel(ret.createdAt), style: TextStyle(fontSize: 10.5.sp, color: AppTheme.mutedGray)),
             ]),
             if (ret.note.isNotEmpty) ...[
               SizedBox(height: 8.h),
-              Text(ret.note, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.5.sp, color: isDark ? AppTheme.darkTextSecondary : const Color(0xFF64748B))),
+              Text(ret.note, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.5.sp, color: isDark ? AppTheme.darkTextSecondary : AppTheme.slateGray)),
             ],
           ],
         ),

@@ -37,7 +37,7 @@ class ShopImageView extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         gradient: hasImage ? null : AppTheme.primaryGradient,
-        color: hasImage ? (isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF1F5F9)) : null,
+        color: hasImage ? (isDark ? AppTheme.darkSurfaceAlt : AppTheme.mist) : null,
         borderRadius: BorderRadius.circular(borderRadius.r),
         boxShadow: withShadow
             ? [

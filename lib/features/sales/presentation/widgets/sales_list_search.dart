@@ -35,7 +35,7 @@ class _SalesListSearchState extends State<SalesListSearch> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(children: [
       Container(
-        decoration: BoxDecoration(color: Theme.of(context).colorScheme.surface, borderRadius: BorderRadius.circular(16.r), border: Border.all(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB)), boxShadow: AppTheme.cardShadow(context)),
+        decoration: BoxDecoration(color: Theme.of(context).colorScheme.surface, borderRadius: BorderRadius.circular(16.r), border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.hairline), boxShadow: AppTheme.cardShadow(context)),
         child: TextField(
           controller: _controller,
           onChanged: widget.onSearchChanged,
@@ -77,7 +77,7 @@ class _SalesListSearchState extends State<SalesListSearch> {
               onSelected: (_) => widget.onFilterChanged(f),
               selectedColor: AppTheme.primaryColor,
               backgroundColor: Theme.of(context).colorScheme.surface,
-              side: BorderSide(color: selected ? AppTheme.primaryColor : const Color(0xFFE5E7EB)),
+              side: BorderSide(color: selected ? AppTheme.primaryColor : AppTheme.hairline),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
               showCheckmark: false,
               padding: EdgeInsets.symmetric(horizontal: 14.w),

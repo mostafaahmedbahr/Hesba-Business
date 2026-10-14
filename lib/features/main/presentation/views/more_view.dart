@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/theme/app_theme.dart';
 
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/router/app_routes.dart';
@@ -36,7 +37,7 @@ class MoreView extends StatelessWidget {
               MoreItem(
                 icon: Icons.person_rounded,
                 label: 'moreProfile'.tr(),
-                color: const Color(0xFF1A4FD6),
+                color: AppTheme.primaryColor,
                 onTap: () => _navigateTo(context, const ProfileView()),
               ),
               MoreItem(
@@ -72,7 +73,7 @@ class MoreView extends StatelessWidget {
               MoreItem(
                 icon: Icons.category_rounded,
                 label: 'إدارة الأقسام',
-                color: const Color(0xFF059669),
+                color: AppTheme.successDark,
                 onTap: () => _navigateTo(context, const CategoryManagementView()),
               ),
             ]),
@@ -269,7 +270,7 @@ class _ThemeItem extends StatelessWidget {
           color: const Color(0xFF2E7D32),
           trailing: Switch(
             value: isDark,
-            activeThumbColor: const Color(0xFF1A4FD6),
+            activeThumbColor: AppTheme.primaryColor,
             onChanged: (_) => context.read<SettingsCubit>().toggleTheme(),
           ),
         );
@@ -300,7 +301,7 @@ class _LanguageItem extends StatelessWidget {
           ),
           Switch(
             value: isEnglish,
-            activeThumbColor: const Color(0xFF1A4FD6),
+            activeThumbColor: AppTheme.primaryColor,
             onChanged: (_) {
               context.setLocale(
                 Locale(isEnglish ? 'ar' : 'en'),

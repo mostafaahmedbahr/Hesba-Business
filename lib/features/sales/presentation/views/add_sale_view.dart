@@ -259,7 +259,7 @@ class _AddSaleViewState extends State<AddSaleView> {
                               // عنوان الأصناف + المتاح.
                               Row(
                                 children: [
-                                  Text('الأصناف', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : const Color(0xFF0F172A))),
+                                  Text('الأصناف', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
                                   SizedBox(width: 8.w),
                                   Container(
                                     padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 4.h),
@@ -270,11 +270,11 @@ class _AddSaleViewState extends State<AddSaleView> {
                                   if (_loadingProducts)
                                     SizedBox(width: 16.w, height: 16.w, child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primaryColor))
                                   else
-                                    Text('${_availableProducts.length} متاح بالمخزون', style: TextStyle(fontSize: 11.sp, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w600)),
+                                    Text('${_availableProducts.length} متاح بالمخزون', style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600)),
                                 ],
                               ),
                               SizedBox(height: 4.h),
-                              Text('ابحث واختار من المخزون أو اكتب صنف يدوياً', style: TextStyle(fontSize: 11.5.sp, color: const Color(0xFF94A3B8))),
+                              Text('ابحث واختار من المخزون أو اكتب صنف يدوياً', style: TextStyle(fontSize: 11.5.sp, color: AppTheme.mutedGray)),
                               SizedBox(height: 12.h),
 
                               // كروت الأصناف.
@@ -329,7 +329,7 @@ class _AddSaleViewState extends State<AddSaleView> {
                               SizedBox(height: 20.h),
 
                               // الدفع.
-                              Text('طريقة الدفع', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : const Color(0xFF0F172A))),
+                              Text('طريقة الدفع', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
                               SizedBox(height: 10.h),
                               PaymentMethodSelector(
                                 value: _paymentMethod,
@@ -338,14 +338,14 @@ class _AddSaleViewState extends State<AddSaleView> {
                               SizedBox(height: 20.h),
 
                               // الخصم + ملاحظة.
-                              Text('إضافات', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : const Color(0xFF0F172A))),
+                              Text('إضافات', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
                               SizedBox(height: 10.h),
                               Container(
                                 padding: EdgeInsets.all(14.w),
                                 decoration: BoxDecoration(
                                   color: isDark ? AppTheme.darkSurface : Colors.white,
                                   borderRadius: BorderRadius.circular(18.r),
-                                  border: Border.all(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB)),
+                                  border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.hairline),
                                   boxShadow: AppTheme.cardShadow(context),
                                 ),
                                 child: Column(children: [
@@ -361,13 +361,13 @@ class _AddSaleViewState extends State<AddSaleView> {
                                         margin: EdgeInsets.all(8.w),
                                         width: 34.w,
                                         height: 34.w,
-                                        decoration: BoxDecoration(color: const Color(0xFFE11D48).withValues(alpha: 0.08), borderRadius: BorderRadius.circular(10.r)),
-                                        child: Icon(Icons.discount_rounded, size: 17.sp, color: const Color(0xFFE11D48)),
+                                        decoration: BoxDecoration(color: AppTheme.danger.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(10.r)),
+                                        child: Icon(Icons.discount_rounded, size: 17.sp, color: AppTheme.danger),
                                       ),
                                       filled: true,
                                       fillColor: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF6F8FC),
                                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide.none),
-                                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide(color: isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0))),
+                                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide(color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft)),
                                       focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: const BorderSide(color: AppTheme.primaryColor, width: 1.6)),
                                       contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 13.h),
                                     ),
@@ -388,18 +388,18 @@ class _AddSaleViewState extends State<AddSaleView> {
                                     decoration: InputDecoration(
                                       labelText: 'ملاحظة (اختياري)',
                                       hintText: 'مثال: بيع لعميل دائم...',
-                                      hintStyle: TextStyle(fontSize: 12.sp, color: const Color(0xFF94A3B8)),
+                                      hintStyle: TextStyle(fontSize: 12.sp, color: AppTheme.mutedGray),
                                       prefixIcon: Container(
                                         margin: EdgeInsets.all(8.w),
                                         width: 34.w,
                                         height: 34.w,
-                                        decoration: BoxDecoration(color: const Color(0xFF64748B).withValues(alpha: 0.08), borderRadius: BorderRadius.circular(10.r)),
-                                        child: Icon(Icons.note_alt_outlined, size: 17.sp, color: const Color(0xFF64748B)),
+                                        decoration: BoxDecoration(color: AppTheme.slateGray.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(10.r)),
+                                        child: Icon(Icons.note_alt_outlined, size: 17.sp, color: AppTheme.slateGray),
                                       ),
                                       filled: true,
                                       fillColor: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF6F8FC),
                                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide.none),
-                                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide(color: isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0))),
+                                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide(color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft)),
                                       focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: const BorderSide(color: AppTheme.primaryColor, width: 1.6)),
                                       contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 13.h),
                                     ),
@@ -431,7 +431,7 @@ class _AddSaleViewState extends State<AddSaleView> {
                 padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 16.h),
                 decoration: BoxDecoration(
                   color: isDark ? AppTheme.darkSurface : Colors.white,
-                  border: Border(top: BorderSide(color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB))),
+                  border: Border(top: BorderSide(color: isDark ? AppTheme.darkBorder : AppTheme.hairline)),
                   boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 20, offset: const Offset(0, -6))],
                 ),
                 child: SafeArea(
@@ -443,13 +443,13 @@ class _AddSaleViewState extends State<AddSaleView> {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('الإجمالي', style: TextStyle(fontSize: 11.sp, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w600)),
+                            Text('الإجمالي', style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600)),
                             FittedBox(
                               fit: BoxFit.scaleDown,
                               alignment: AlignmentDirectional.centerStart,
                               child: Text(
                                 '${_total.toStringAsFixed(_total == _total.roundToDouble() ? 0 : 2)} ج.م',
-                                style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w900, color: const Color(0xFF059669), height: 1.1),
+                                style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w900, color: AppTheme.successDark, height: 1.1),
                               ),
                             ),
                           ],
@@ -510,7 +510,7 @@ class _AddHeader extends StatelessWidget {
       flexibleSpace: FlexibleSpaceBar(
         collapseMode: CollapseMode.parallax,
         background: Container(
-          decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topRight, end: Alignment.bottomLeft, colors: [Color(0xFF0A1F5C), Color(0xFF1A4FD6), Color(0xFF6D9BFF)])),
+          decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topRight, end: Alignment.bottomLeft, colors: [Color(0xFF0A1F5C), AppTheme.primaryColor, Color(0xFF6D9BFF)])),
           child: Stack(children: [
             Positioned(top: -50.h, left: -30.w, child: Container(width: 150.w, height: 150.w, decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.08)))),
             Positioned(bottom: -60.h, right: -40.w, child: Container(width: 170.w, height: 170.w, decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xFFF5A623).withValues(alpha: 0.13)))),

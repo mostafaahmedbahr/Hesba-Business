@@ -1,3 +1,7 @@
+import '../../../expenses/data/models/expense_model.dart';
+import '../../../returns/data/models/return_model.dart';
+import '../../../sales/data/models/sale_model.dart';
+
 abstract class DashboardRepo {
   /// Returns total sales amount for today.
   Future<double> getTodaySalesTotal();
@@ -26,4 +30,14 @@ Stream<({String? name, String? imageUrl})> watchShopIdentity();
   /// Watches any change in sales/products/returns/expenses for the current shop.
   /// Emits whenever any of those collections changes - used for auto-refresh.
   Stream<void> watchDashboardChanges();
+
+  /// Streams the latest sale of [shopId] (`null` when there is none) for the
+  /// home recent-activity card.
+  Stream<SaleModel?> watchLastSale(String shopId);
+
+  /// Streams the latest return of [shopId] (`null` when there is none).
+  Stream<ReturnModel?> watchLastReturn(String shopId);
+
+  /// Streams the latest expense of [shopId] (`null` when there is none).
+  Stream<ExpenseModel?> watchLastExpense(String shopId);
 }

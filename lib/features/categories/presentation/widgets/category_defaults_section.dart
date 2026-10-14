@@ -19,7 +19,7 @@ class CategoryDefaultsSection extends StatelessWidget {
         color: isDark ? AppTheme.darkSurface : Colors.white,
         borderRadius: BorderRadius.circular(18.r),
         border: Border.all(
-          color: isDark ? AppTheme.darkBorder : const Color(0xFFE5E7EB),
+          color: isDark ? AppTheme.darkBorder : AppTheme.hairline,
         ),
         boxShadow: AppTheme.cardShadow(context),
       ),
@@ -30,12 +30,12 @@ class CategoryDefaultsSection extends StatelessWidget {
             icon: Icons.layers_rounded,
             title: 'الافتراضية',
             count: '${items.length}',
-            gradient: const [Color(0xFF64748B), Color(0xFF94A3B8)],
+            gradient: const [AppTheme.slateGray, AppTheme.mutedGray],
           ),
           SizedBox(height: 4.h),
           Text(
             'ثابتة حسب نوع نشاطك — للعرض فقط',
-            style: TextStyle(fontSize: 11.sp, color: const Color(0xFF94A3B8)),
+            style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray),
           ),
           SizedBox(height: 12.h),
           if (items.isEmpty)
@@ -53,16 +53,16 @@ class CategoryDefaultsSection extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
                     decoration: BoxDecoration(
-                      color: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF1F5F9),
+                      color: isDark ? AppTheme.darkSurfaceAlt : AppTheme.mist,
                       borderRadius: BorderRadius.circular(20.r),
                       border: Border.all(
-                        color: isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0),
+                        color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft,
                       ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.category_rounded, size: 12.sp, color: const Color(0xFF64748B)),
+                        Icon(Icons.category_rounded, size: 12.sp, color: AppTheme.slateGray),
                         SizedBox(width: 6.w),
                         Text(
                           cat,
