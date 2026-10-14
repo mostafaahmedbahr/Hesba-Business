@@ -84,10 +84,12 @@ service cloud.firestore {
     }
 
     // Live subscription required for WRITES on business data.
+    // A suspended shop is read-only no matter what the status/dates say.
     function subscriptionLive() {
       let sub = get(/databases/$(database)/documents/users/$(myUid())/subscription/current).data;
       return sub != null
         && sub.get('status', '') in ['trial', 'active']
+        && sub.get('suspended', false) == false
         && sub.get('endDate', null) != null
         && sub.endDate > request.time;
     }
@@ -115,10 +117,11 @@ service cloud.firestore {
       allow read: if signedIn() && (myUid() == userId || isAdmin());
 
       // The only thing a client may create is its own 7 day trial, once,
-      // starting about now.
+      // starting about now — never pre-suspended.
       allow create: if signedIn()
         && myUid() == userId
         && request.resource.data.status == 'trial'
+        && request.resource.data.get('suspended', false) == false
         && request.resource.data.isTrial == true
         && request.resource.data.trialStartDate >= request.time - duration.value(1, 'd')
         && request.resource.data.trialStartDate <= request.time + duration.value(1, 'd')
@@ -127,9 +130,12 @@ service cloud.firestore {
 
       // Owner may move to expired / pending / rejected freely. Reaching
       // `active` requires the admin-approved request it points at.
-      // Admin may write anything (approve / reject flows).
+      // `suspended` is admin-only: owners can never flip it either way.
+      // Admin may write anything (approve / reject / suspend flows).
       allow update: if isAdmin() || (signedIn()
         && myUid() == userId
+        && request.resource.data.get('suspended', false) ==
+          resource.data.get('suspended', false)
         && (
              request.resource.data.status in ['expired', 'pending', 'rejected']
              || (

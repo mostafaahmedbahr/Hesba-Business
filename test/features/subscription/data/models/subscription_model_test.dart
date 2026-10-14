@@ -100,6 +100,35 @@ void main() {
     });
   });
 
+  group('suspended', () {
+    test('blocks modifications whatever the status and dates say', () {
+      final trial = SubscriptionModel.trialFor(createdAt: now)
+          .copyWith(suspended: true);
+      final active = SubscriptionModel(
+        status: SubscriptionStatus.active,
+        endDate: now.add(const Duration(days: 30)),
+        suspended: true,
+      );
+
+      expect(trial.canModifyData, isFalse);
+      expect(active.canModifyData, isFalse);
+      expect(trial.blockedMessageKey, 'subscriptionSuspendedBlocked');
+      expect(active.blockedMessageKey, 'subscriptionSuspendedBlocked');
+    });
+
+    test('defaults to false and round-trips through json', () {
+      const fresh = SubscriptionModel(status: SubscriptionStatus.trial);
+      expect(fresh.suspended, isFalse);
+
+      final restored = SubscriptionModel.fromJson(
+          fresh.copyWith(suspended: true).toJson());
+      expect(restored.suspended, isTrue);
+
+      final legacy = SubscriptionModel.fromJson(const {'status': 'active'});
+      expect(legacy.suspended, isFalse);
+    });
+  });
+
   group('remainingDays', () {
     test('counts whole days left and never goes negative', () {
       final sub = SubscriptionModel(

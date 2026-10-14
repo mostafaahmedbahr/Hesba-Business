@@ -55,6 +55,10 @@ abstract class AdminRepo {
   Future<void> rejectRequest(SubscriptionRequestModel request, String reason);
   Future<void> appendActivity({required String action, required String description, Map<String, dynamic>? extra});
 
+  /// Suspends or re-activates a shop immediately, whatever its plan state.
+  /// Suspended shops are read-only (client gate + security rules enforce it).
+  Future<void> setShopSuspended({required String userId, required bool suspended});
+
   // Settings
   Future<AdminSettings> getSettings();
   Future<void> saveSettings(AdminSettings settings);

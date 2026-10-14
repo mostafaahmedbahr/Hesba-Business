@@ -595,5 +595,9 @@
   "retBeforeDiscount": "Before discount {amount}",
   "retPickerOption": "Invoice #{id} - {date} - {total} {currency}",
   "retPickerLine": "Invoice #{id} • {total} {currency}",
-  "retInvoiceNumber": "Invoice #{id}"
+  "retInvoiceNumber": "Invoice #{id}",
+  "subscriptionSuspendedBlocked": "This shop has been suspended by the administration — contact us to reactivate",
+  "subscriptionStatusSuspended": "Suspended",
+  "subscriptionBlockedTitle": "Subscription required",
+  "subscriptionViewPlans": "View plans"
 }

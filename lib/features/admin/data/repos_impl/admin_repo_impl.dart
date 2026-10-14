@@ -277,6 +277,27 @@ class AdminRepoImpl implements AdminRepo {
   String? currentAdminEmail() => auth.currentUser?.email;
 
   @override
+  Future<void> setShopSuspended(
+      {required String userId, required bool suspended}) async {
+    final now = Timestamp.now();
+    await firestore
+        .collection(_users)
+        .doc(userId)
+        .collection('subscription')
+        .doc('current')
+        .set({'suspended': suspended, 'updatedAt': now},
+            SetOptions(merge: true));
+    await firestore.collection(_subscriptions).doc(userId).set(
+        {'suspended': suspended, 'updatedAt': now}, SetOptions(merge: true));
+    await appendActivity(
+      action: suspended ? 'subscription_suspended' : 'subscription_unsuspended',
+      description: suspended
+          ? 'Admin suspended shop $userId'
+          : 'Admin re-activated shop $userId',
+    );
+  }
+
+  @override
   Future<DocumentSnapshot<Map<String, dynamic>>> getUserSubscription(String userId) =>
       firestore.collection(_users).doc(userId).collection('subscription').doc('current').get();
 

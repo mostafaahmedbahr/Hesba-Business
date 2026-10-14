@@ -7,6 +7,7 @@ import '../../data/repos/products_repo.dart';
 import '../cubit/products_cubit.dart';
 import '../states/products_state.dart';
 import '../widgets/product_card.dart';
+import '../../../subscription/presentation/subscription_gate.dart';
 import '../widgets/product_list_header.dart';
 import '../widgets/product_placeholders.dart';
 import '../widgets/product_search_bar.dart';
@@ -31,6 +32,7 @@ class _ProductsBody extends StatelessWidget {
 
   /// يفتح فورم إضافة/تعديل.
   Future<void> _openForm(BuildContext context, {Product? product}) async {
+    if (!await SubscriptionGate.ensureCanModify(context)) return;
     final cubit = context.read<ProductsCubit>();
     HapticFeedback.lightImpact();
     await Navigator.of(context).push(

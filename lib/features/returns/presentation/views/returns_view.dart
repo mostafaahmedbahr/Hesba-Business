@@ -10,6 +10,7 @@ import '../widgets/returns_list_card.dart';
 import '../widgets/returns_list_header.dart';
 import '../widgets/returns_list_placeholders.dart';
 import '../widgets/returns_list_search.dart';
+import '../../../subscription/presentation/subscription_gate.dart';
 
 /// شاشة المرتجعات (صفحة داخلية لوحدها — اللوجيك في Cubit).
 class ReturnsView extends StatelessWidget {
@@ -30,6 +31,7 @@ class _ReturnsBody extends StatelessWidget {
 
   /// يفتح إضافة مرتجع وينعش الداشبورد.
   Future<void> _goToAddReturn(BuildContext context) async {
+    if (!await SubscriptionGate.ensureCanModify(context)) return;
     HapticFeedback.lightImpact();
     final result = await Navigator.pushNamed(context, AppRoutes.addReturnView);
     if (!context.mounted) return;

@@ -13,8 +13,9 @@ class SubscriptionStatusHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final suspended = subscription.suspended;
     final status = subscription.effectiveStatus;
-    final color = _colorFor(status);
+    final color = suspended ? AppTheme.errorColor : _colorFor(status);
     final theme = Theme.of(context);
 
     return Container(
@@ -36,12 +37,18 @@ class SubscriptionStatusHeader extends StatelessWidget {
                   color: color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10.r),
                 ),
-                child: Icon(_iconFor(status), size: 18.sp, color: color),
+                child: Icon(
+                  suspended ? Icons.block_rounded : _iconFor(status),
+                  size: 18.sp,
+                  color: color,
+                ),
               ),
               SizedBox(width: 10.w),
               Expanded(
                 child: Text(
-                  'subscriptionStatus${_keyFor(status)}'.tr(),
+                  suspended
+                      ? 'subscriptionStatusSuspended'.tr()
+                      : 'subscriptionStatus${_keyFor(status)}'.tr(),
                   style: TextStyle(
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w900,
@@ -49,7 +56,7 @@ class SubscriptionStatusHeader extends StatelessWidget {
                   ),
                 ),
               ),
-              if (subscription.remainingDays > 0)
+              if (!suspended && subscription.remainingDays > 0)
                 Container(
                   padding: EdgeInsets.symmetric(
                     horizontal: 9.w,
@@ -89,6 +96,7 @@ class SubscriptionStatusHeader extends StatelessWidget {
   }
 
   String? _subtitle() {
+    if (subscription.suspended) return 'subscriptionSuspendedBlocked'.tr();
     final end = subscription.endDate;
     final date =
         end == null ? null : DateFormat('yyyy/MM/dd').format(end);

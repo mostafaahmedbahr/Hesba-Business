@@ -33,6 +33,7 @@ class _ExpensesBody extends StatelessWidget {
 
   /// يفتح إضافة/تعديل مصروف.
   Future<void> _openAdd(BuildContext context, [ExpenseModel? expense]) async {
+    if (!await SubscriptionGate.ensureCanModify(context)) return;
     HapticFeedback.lightImpact();
     final res = await Navigator.push(
       context,

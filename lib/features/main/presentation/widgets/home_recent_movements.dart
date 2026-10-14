@@ -8,6 +8,7 @@ import '../../../../core/di/service_locator.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../dashboard/data/repos/dashboard_repo.dart';
+import '../../../subscription/presentation/subscription_gate.dart';
 import '../../../expenses/data/models/expense_model.dart';
 import '../../../expenses/presentation/views/expenses_view.dart';
 import '../../../returns/data/models/return_model.dart';
@@ -140,7 +141,11 @@ class _LastSaleCardState extends State<_LastSaleCard> {
             title: 'homeLastSale'.tr(),
             subtitle: 'homeNoSalesToday'.tr(),
             actionLabel: 'homeNewSale'.tr(),
-            onTap: () => Navigator.pushNamed(context, AppRoutes.addSaleView),
+            onTap: () async {
+              if (!await SubscriptionGate.ensureCanModify(context)) return;
+              if (!context.mounted) return;
+              Navigator.pushNamed(context, AppRoutes.addSaleView);
+            },
           );
         }
         final time = _timeAgo(sale.createdAt, context.locale.languageCode);

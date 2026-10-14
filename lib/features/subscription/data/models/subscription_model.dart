@@ -43,6 +43,7 @@ class SubscriptionModel extends Equatable {
     this.lastRequestId,
     this.updatedAt,
     this.cachedAt,
+    this.suspended = false,
   });
 
   final SubscriptionStatus status;
@@ -57,6 +58,10 @@ class SubscriptionModel extends Equatable {
   /// last one reviewed), so the app can check whether it was approved.
   final String? lastRequestId;
   final DateTime? updatedAt;
+
+  /// Admin kill-switch: a suspended shop is read-only no matter what the
+  /// status/dates say. Only the admin can set or clear it.
+  final bool suspended;
 
   /// Client-only: when this object was fetched, used to expire the in-memory
   /// cache the guard reads from. Never written to Firestore.
@@ -97,19 +102,23 @@ class SubscriptionModel extends Equatable {
   /// Only a trial or a paid period that has not ended may change data.
   /// `expired`, `pending` and `rejected` are read-only: the app still opens,
   /// the data stays visible, but the write must be redirected to the
-  /// subscription screen.
+  /// subscription screen. A suspended shop is read-only regardless.
   bool get canModifyData {
+    if (suspended) return false;
     final current = effectiveStatus;
     return current == SubscriptionStatus.trial ||
         current == SubscriptionStatus.active;
   }
 
   /// Why the user is blocked, so the UI can say the right thing.
-  String get blockedMessageKey => switch (effectiveStatus) {
-        SubscriptionStatus.pending => 'subscriptionPendingBlocked',
-        SubscriptionStatus.rejected => 'subscriptionRejectedBlocked',
-        _ => 'subscriptionExpiredBlocked',
-      };
+  String get blockedMessageKey {
+    if (suspended) return 'subscriptionSuspendedBlocked';
+    return switch (effectiveStatus) {
+      SubscriptionStatus.pending => 'subscriptionPendingBlocked',
+      SubscriptionStatus.rejected => 'subscriptionRejectedBlocked',
+      _ => 'subscriptionExpiredBlocked',
+    };
+  }
 
   int get remainingDays {
     final end = endDate;
@@ -158,6 +167,7 @@ class SubscriptionModel extends Equatable {
       trialEndDate: _date(json['trialEndDate']),
       lastRequestId: json['lastRequestId'] as String?,
       updatedAt: _date(json['updatedAt']),
+      suspended: json['suspended'] as bool? ?? false,
     );
   }
 
@@ -175,6 +185,7 @@ class SubscriptionModel extends Equatable {
           trialEndDate == null ? null : Timestamp.fromDate(trialEndDate!),
       'lastRequestId': lastRequestId,
       'updatedAt': Timestamp.fromDate(updatedAt ?? DateTime.now()),
+      'suspended': suspended,
     };
   }
 
@@ -189,6 +200,7 @@ class SubscriptionModel extends Equatable {
     String? lastRequestId,
     DateTime? updatedAt,
     DateTime? cachedAt,
+    bool? suspended,
   }) {
     return SubscriptionModel(
       status: status ?? this.status,
@@ -201,6 +213,7 @@ class SubscriptionModel extends Equatable {
       lastRequestId: lastRequestId ?? this.lastRequestId,
       updatedAt: updatedAt ?? this.updatedAt,
       cachedAt: cachedAt ?? this.cachedAt,
+      suspended: suspended ?? this.suspended,
     );
   }
 
@@ -223,5 +236,6 @@ class SubscriptionModel extends Equatable {
         lastRequestId,
         updatedAt,
         cachedAt,
+        suspended,
       ];
 }

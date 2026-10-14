@@ -11,6 +11,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/shop_image_view.dart';
 import '../../../dashboard/presentation/cubit/dashboard_cubit.dart';
 import '../../../products/data/repos/products_repo.dart';
+import '../../../subscription/presentation/subscription_gate.dart';
 import '../../../products/presentation/cubit/products_cubit.dart';
 import '../../../products/presentation/views/product_form_view.dart';
 import '../../../dashboard/presentation/states/dashboard_state.dart';
@@ -751,6 +752,7 @@ class _QuickActionsGrid extends StatelessWidget {
             child: _QA(
                 data: actions[0],
                 onTap: () async {
+                  if (!await SubscriptionGate.ensureCanModify(context)) return;
                   final r = await Navigator.pushNamed(context, AppRoutes.addSaleView);
                   if (r == true && context.mounted) {
                     try { context.read<DashboardCubit>().refresh(); } catch (_) {}
@@ -762,6 +764,7 @@ class _QuickActionsGrid extends StatelessWidget {
                 data: actions[1],
                 onTap: () async {
                   // يفتح فورم إضافة منتج مباشرة.
+                  if (!await SubscriptionGate.ensureCanModify(context)) return;
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -787,6 +790,7 @@ class _QuickActionsGrid extends StatelessWidget {
                 data: actions[2],
                 onTap: () async {
                   // يفتح إضافة مرتجع مباشرة.
+                  if (!await SubscriptionGate.ensureCanModify(context)) return;
                   final r = await Navigator.pushNamed(context, AppRoutes.addReturnView);
                   if (r == true && context.mounted) {
                     try { context.read<DashboardCubit>().refresh(); } catch (_) {}
@@ -798,6 +802,7 @@ class _QuickActionsGrid extends StatelessWidget {
                 data: actions[3],
                 onTap: () async {
                   // يفتح إضافة مصروف مباشرة.
+                  if (!await SubscriptionGate.ensureCanModify(context)) return;
                   final r = await Navigator.pushNamed(context, AppRoutes.addExpenseView);
                   if (r == true && context.mounted) {
                     try { context.read<DashboardCubit>().refresh(); } catch (_) {}

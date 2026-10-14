@@ -1,17 +1,17 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/di/service_locator.dart';
 import '../../../core/extensions/log_util.dart';
 import '../../../core/router/app_routes.dart';
-import '../../../core/utils/toast.dart';
 import '../data/models/subscription_model.dart';
 import '../data/repos/subscription_repo.dart';
+import 'widgets/subscription_blocked_dialog.dart';
 
 /// The one check every Add / Edit / Delete goes through before it runs.
 ///
-/// Returns true when the write may proceed. Otherwise it explains why in a
-/// toast, opens the subscription screen and returns false.
+/// Returns true when the write may proceed. Otherwise it shows a dialog
+/// explaining why the shop is read-only; when the user taps "view plans"
+/// the subscription screen opens. Always returns false on the blocked path.
 class SubscriptionGate {
   const SubscriptionGate._();
 
@@ -32,8 +32,15 @@ class SubscriptionGate {
     if (subscription.canModifyData) return true;
     if (!context.mounted) return false;
 
-    AppToast.warning(context, subscription.blockedMessageKey.tr());
-    await Navigator.pushNamed(context, AppRoutes.subscription);
+    final goPlans = await SubscriptionBlockedDialog.show(
+      context,
+      messageKey: subscription.blockedMessageKey,
+    );
+    if (!context.mounted) return false;
+
+    if (goPlans) {
+      await Navigator.pushNamed(context, AppRoutes.subscription);
+    }
     return false;
   }
 

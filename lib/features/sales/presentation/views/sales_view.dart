@@ -10,6 +10,7 @@ import '../widgets/sales_list_card.dart';
 import '../widgets/sales_list_header.dart';
 import '../widgets/sales_list_placeholders.dart';
 import '../widgets/sales_list_search.dart';
+import '../../../subscription/presentation/subscription_gate.dart';
 
 /// شاشة المبيعات (عرض بس — اللوجيك في Cubit).
 class SalesView extends StatelessWidget {
@@ -30,6 +31,7 @@ class _SalesBody extends StatelessWidget {
 
   /// يفتح إضافة بيع وينعش الداشبورد.
   Future<void> _goToAddSale(BuildContext context) async {
+    if (!await SubscriptionGate.ensureCanModify(context)) return;
     HapticFeedback.lightImpact();
     final result = await Navigator.pushNamed(context, AppRoutes.addSaleView);
     if (!context.mounted) return;

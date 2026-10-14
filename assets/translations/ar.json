@@ -595,5 +595,9 @@
   "retBeforeDiscount": "قبل الخصم {amount}",
   "retPickerOption": "فاتورة #{id} - {date} - {total} {currency}",
   "retPickerLine": "فاتورة #{id} • {total} {currency}",
-  "retInvoiceNumber": "فاتورة #{id}"
+  "retInvoiceNumber": "فاتورة #{id}",
+  "subscriptionSuspendedBlocked": "تم إيقاف المحل مؤقتًا من الإدارة — تواصل معنا لإعادة التفعيل",
+  "subscriptionStatusSuspended": "موقوف",
+  "subscriptionBlockedTitle": "الاشتراك مطلوب",
+  "subscriptionViewPlans": "عرض الباقات"
 }
