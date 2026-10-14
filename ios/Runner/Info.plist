@@ -24,6 +24,8 @@
 	<string>????</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Allow Hesba to take a photo for the shop profile.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Allow Hesba to use your current location to pin the shop address on Google Maps.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Allow Hesba to choose a photo for the shop profile.</string>
 	<key>CFBundleVersion</key>

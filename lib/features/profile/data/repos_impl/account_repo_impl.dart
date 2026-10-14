@@ -51,6 +51,9 @@ class AccountRepoImpl implements AccountRepo {
     required String city,
     required String locationUrl,
     required String shopImageUrl,
+    double? latitude,
+    double? longitude,
+    String locationAddress = '',
   }) async {
     final uid = _auth.currentUser?.uid;
     if (uid == null) {
@@ -59,6 +62,13 @@ class AccountRepoImpl implements AccountRepo {
     final userRef = _firestore.collection('users').doc(uid);
     final userSnap = await userRef.get();
     final shopId = userSnap.data()?['shopId'] as String?;
+
+    final locationFields = <String, dynamic>{
+      'locationUrl': locationUrl.trim(),
+      'latitude': latitude,
+      'longitude': longitude,
+      'locationAddress': locationAddress.trim(),
+    };
 
     // Owner fields -> users doc (also mirrors shop fields for the profile view).
     await userRef.update({
@@ -70,9 +80,9 @@ class AccountRepoImpl implements AccountRepo {
       'address': address.trim(),
       'state': state.trim(),
       'city': city.trim(),
-      'locationUrl': locationUrl.trim(),
       'shopImageUrl': shopImageUrl.trim(),
       'updatedAt': FieldValue.serverTimestamp(),
+      ...locationFields,
     });
 
     // Shop fields -> shops doc (single source for shop features).
@@ -84,9 +94,9 @@ class AccountRepoImpl implements AccountRepo {
         'address': address.trim(),
         'state': state.trim(),
         'city': city.trim(),
-        'locationUrl': locationUrl.trim(),
         'shopImageUrl': shopImageUrl.trim(),
         'updatedAt': FieldValue.serverTimestamp(),
+        ...locationFields,
       });
     }
   }

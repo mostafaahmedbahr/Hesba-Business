@@ -37,6 +37,9 @@ class ProfileCubit extends Cubit<ProfileState> {
     required String city,
     required String locationUrl,
     required String shopImageUrl,
+    double? latitude,
+    double? longitude,
+    String locationAddress = '',
   }) async {
     try {
       await _repo.updateProfile(
@@ -50,6 +53,9 @@ class ProfileCubit extends Cubit<ProfileState> {
         city: city,
         locationUrl: locationUrl,
         shopImageUrl: shopImageUrl,
+        latitude: latitude,
+        longitude: longitude,
+        locationAddress: locationAddress,
       );
       return null;
     } catch (e) {

@@ -8,16 +8,14 @@ import '../../../../../core/services/cloudinary_image_service.dart';
 import '../../../../../core/utils/shop_image_upload.dart';
 import '../../../../../core/utils/toast.dart';
 import '../../../../../core/widgets/shop_image_picker.dart';
+import '../../../../../core/widgets/shop_location_field.dart';
 import 'register_section_title.dart';
-import 'register_text_field.dart';
 
 class RegisterExtraStep extends StatefulWidget {
-  final TextEditingController locationUrlController;
   final TextEditingController shopImageUrlController;
 
   const RegisterExtraStep({
     super.key,
-    required this.locationUrlController,
     required this.shopImageUrlController,
   });
 
@@ -40,7 +38,7 @@ class _RegisterExtraStepState extends State<RegisterExtraStep> {
         SizedBox(height: 24.h),
         _buildInfoCard(),
         SizedBox(height: 18.h),
-        _buildLocationField(),
+        const ShopLocationField(accentColor: Color(0xFF0B4D9C)),
         SizedBox(height: 14.h),
         _buildImageField(),
       ],
@@ -82,17 +80,6 @@ class _RegisterExtraStepState extends State<RegisterExtraStep> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildLocationField() {
-    return RegisterTextField(
-      controller: widget.locationUrlController,
-      label: 'extraLocation'.tr(),
-      hint: 'https://maps.app.goo.gl/...',
-      icon: Icons.location_on_outlined,
-      keyboardType: TextInputType.url,
-      validator: _validateUrl,
     );
   }
 

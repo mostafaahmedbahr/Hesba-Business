@@ -31,7 +31,6 @@ class RegisterForm extends StatelessWidget {
   final TextEditingController cityController;
   final TextEditingController stateController;
 
-  final TextEditingController locationUrlController;
   final TextEditingController shopImageUrlController;
 
   const RegisterForm({
@@ -48,7 +47,6 @@ class RegisterForm extends StatelessWidget {
     required this.addressController,
     required this.cityController,
     required this.stateController,
-    required this.locationUrlController,
     required this.shopImageUrlController,
   });
 
@@ -117,8 +115,6 @@ class RegisterForm extends StatelessWidget {
               cityController,
               stateController:
               stateController,
-              locationUrlController:
-              locationUrlController,
               shopImageUrlController:
               shopImageUrlController,
             ),
@@ -165,8 +161,6 @@ class RegisterForm extends StatelessWidget {
       case 2:
         return RegisterExtraStep(
           key: const ValueKey('extra'),
-          locationUrlController:
-          locationUrlController,
           shopImageUrlController:
           shopImageUrlController,
         );

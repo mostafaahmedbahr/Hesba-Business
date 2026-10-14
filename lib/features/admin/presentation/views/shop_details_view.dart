@@ -1,9 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hesba/core/di/service_locator.dart';
+import 'package:hesba/core/models/shop_location.dart';
 import 'package:hesba/core/theme/app_theme.dart';
+import 'package:hesba/core/widgets/dialogs.dart';
 import 'package:hesba/features/admin/data/repos/admin_repo.dart';
 import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ShopDetailsView extends StatelessWidget {
   const ShopDetailsView({super.key, required this.shopId, required this.ownerId});
@@ -230,6 +233,15 @@ class _OverviewTab extends StatelessWidget {
       return s.isEmpty ? '-' : s;
     }
 
+    /// أول قيمة نصية موجودة من القيم المُمرَّرة (للتراجع بين حقول قديمة/جديدة).
+    String firstText(List<dynamic> values) {
+      for (final value in values) {
+        final s = (value as String?)?.trim() ?? '';
+        if (s.isNotEmpty) return s;
+      }
+      return '';
+    }
+
     void goTab(int i) => DefaultTabController.of(context).animateTo(i);
 
     return ListView(
@@ -261,11 +273,15 @@ class _OverviewTab extends StatelessWidget {
               const Divider(height: 14),
               AdminInfoRow(icon: Icons.location_city_outlined, label: 'المدينة', value: str(shop['city'])),
               const Divider(height: 14),
-              AdminInfoRow(icon: Icons.home_outlined, label: 'العنوان', value: str(shop['address'])),
+              AdminInfoRow(
+                icon: Icons.home_outlined,
+                label: 'العنوان',
+                value: str(firstText([shop['address'], shop['locationAddress']])),
+              ),
               const Divider(height: 14),
               AdminInfoRow(icon: Icons.map_outlined, label: 'المنطقة', value: str(shop['state'])),
               const Divider(height: 14),
-              AdminInfoRow(icon: Icons.link_outlined, label: 'رابط الموقع', value: str(shop['locationUrl'])),
+              _ShopLocationRow(shop: shop),
               const Divider(height: 14),
               AdminInfoRow(icon: Icons.calendar_month_outlined, label: 'تاريخ الإنشاء', value: AdminFmt.date(shop['createdAt'])),
               const Divider(height: 14),
@@ -287,6 +303,112 @@ class _OverviewTab extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+/// عنوان الموقع + زر فتحه على خرائط جوجل.
+///
+/// الترتيب: رابط محفوظ صالح ← رابط مبني من الإحداثيات ← بحث بالعنوان النصي
+/// ← "لم يتم تحديد موقع المحل" (ما بنعرضش رابط معطوب أبدًا).
+class _ShopLocationRow extends StatelessWidget {
+  const _ShopLocationRow({required this.shop});
+
+  final Map<String, dynamic> shop;
+
+  @override
+  Widget build(BuildContext context) {
+    final address = _address;
+    final latitude = (shop['latitude'] as num?)?.toDouble();
+    final longitude = (shop['longitude'] as num?)?.toDouble();
+
+    final url = ShopLocation.resolveMapUrl(
+      locationUrl: shop['locationUrl'] as String?,
+      latitude: latitude,
+      longitude: longitude,
+      address: address,
+    );
+
+    final String value;
+    if (url == null) {
+      value = 'لم يتم تحديد موقع المحل';
+    } else if (address.isNotEmpty) {
+      value = address;
+    } else if (latitude != null && longitude != null) {
+      value = '${latitude.toStringAsFixed(5)}, ${longitude.toStringAsFixed(5)}';
+    } else {
+      value = url;
+    }
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            AdminIconTile(icon: Icons.map_outlined, color: AppTheme.primaryColor, size: 34, iconSize: 18),
+            const SizedBox(width: AdminSpace.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('الموقع',
+                      style: TextStyle(
+                          fontSize: 11,
+                          color: AdminColors.textSecondary(context),
+                          fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 1),
+                  Text(value,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700)),
+                ],
+              ),
+            ),
+          ],
+        ),
+        if (url != null) ...[
+          const SizedBox(height: AdminSpace.sm),
+          SizedBox(
+            height: 34,
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: () => _openMaps(context, url),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppTheme.primaryColor,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                visualDensity: VisualDensity.compact,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              icon: const Icon(Icons.open_in_new_rounded, size: 14, color: Colors.white),
+              label: const Text(
+                'عرض الموقع على Google Maps',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white),
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  /// العنوان: المكتوب يدويًا، وإلا العنوان الناتج من الإحداثيات.
+  String get _address {
+    final typed = (shop['address'] as String? ?? '').trim();
+    if (typed.isNotEmpty) return typed;
+    return (shop['locationAddress'] as String? ?? '').trim();
+  }
+
+  Future<void> _openMaps(BuildContext context, String url) async {
+    var opened = false;
+    try {
+      opened = await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    } catch (_) {
+      opened = false;
+    }
+    if (!context.mounted) return;
+    if (!opened) {
+      AppDialogs.showSnackBar(context, 'تعذر فتح الموقع على خرائط جوجل', isError: true);
+    }
   }
 }
 

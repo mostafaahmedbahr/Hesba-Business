@@ -16,6 +16,9 @@ abstract class AccountRepo {
   /// Owner fields go to `users/{uid}`, shop fields go to both
   /// `users/{uid}` (profile view) and `shops/{shopId}` (shop features).
   /// Email/password are NOT editable here (separate secure flows).
+  ///
+  /// [latitude]/[longitude]/[locationAddress] describe the shop location;
+  /// passing `null`/empty clears them (legacy docs only have [locationUrl]).
   Future<void> updateProfile({
     required String ownerName,
     required String phone,
@@ -27,6 +30,9 @@ abstract class AccountRepo {
     required String city,
     required String locationUrl,
     required String shopImageUrl,
+    double? latitude,
+    double? longitude,
+    String locationAddress = '',
   });
 
   /// Changes the account password (requires recent re-authentication).

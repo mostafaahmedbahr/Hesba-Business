@@ -6,6 +6,8 @@ import 'package:easy_localization/easy_localization.dart';
 import '../../cubit/register_cubit.dart';
 import '../../states/register_state.dart';
 import '../../../data/models/register_model.dart';
+import '../../../../../core/cubit/shop_location_cubit.dart';
+import '../../../../../core/utils/toast.dart';
 
 class RegisterNavigation extends StatelessWidget {
   final GlobalKey<FormState> formKey;
@@ -23,7 +25,6 @@ class RegisterNavigation extends StatelessWidget {
   final TextEditingController cityController;
   final TextEditingController stateController;
 
-  final TextEditingController locationUrlController;
   final TextEditingController shopImageUrlController;
 
   const RegisterNavigation({
@@ -40,7 +41,6 @@ class RegisterNavigation extends StatelessWidget {
     required this.addressController,
     required this.cityController,
     required this.stateController,
-    required this.locationUrlController,
     required this.shopImageUrlController,
   });
 
@@ -160,6 +160,15 @@ class RegisterNavigation extends StatelessWidget {
     }
     print('[RegisterNavigation] Form validation PASSED');
 
+    // الموقع بيتحدد من ShopLocationCubit (GPS / خريطة / عنوان يدوي) —
+    // مفيش حقل رابط يدوي بقى، والـ locationUrl بيتبني من الإحداثيات.
+    final location = context.read<ShopLocationCubit>().state.location;
+    if (location == null || !location.hasAnyData) {
+      print('[RegisterNavigation] No shop location picked — blocking submit');
+      AppToast.error(context, 'locationRequired'.tr());
+      return;
+    }
+
     final now = DateTime.now();
     final model = RegisterModel(
       ownerId: '',
@@ -170,7 +179,10 @@ class RegisterNavigation extends StatelessWidget {
       shopName: shopNameController.text,
       businessType: businessTypeController.text,
       shopPhone: shopPhoneController.text,
-      locationUrl: locationUrlController.text,
+      locationUrl: location.locationUrl,
+      latitude: location.latitude,
+      longitude: location.longitude,
+      locationAddress: location.address,
       shopImageUrl: shopImageUrlController.text,
       address: addressController.text,
       city: cityController.text,
@@ -188,6 +200,9 @@ class RegisterNavigation extends StatelessWidget {
     print('  businessType: ${model.businessType}');
     print('  shopPhone: ${model.shopPhone}');
     print('  locationUrl: ${model.locationUrl}');
+    print('  latitude: ${model.latitude}');
+    print('  longitude: ${model.longitude}');
+    print('  locationAddress: ${model.locationAddress}');
     print('  shopImageUrl: ${model.shopImageUrl}');
     print('  address: ${model.address}');
     print('  city: ${model.city}');

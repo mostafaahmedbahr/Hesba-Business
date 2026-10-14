@@ -9,8 +9,16 @@ class RegisterModel {
   final String shopName;
   final String businessType;
   final String shopPhone;
-
   final String locationUrl;
+
+  /// GPS coordinates of the shop — `null` for legacy/manual entries.
+  final double? latitude;
+  final double? longitude;
+
+  /// Address resolved from the coordinates (the typed shop [address] stays
+  /// untouched).
+  final String locationAddress;
+
   final String shopImageUrl;
 
   final String address;
@@ -32,6 +40,9 @@ class RegisterModel {
     required this.businessType,
     required this.shopPhone,
     required this.locationUrl,
+    this.latitude,
+    this.longitude,
+    this.locationAddress = '',
     required this.shopImageUrl,
     required this.address,
     required this.city,
@@ -51,6 +62,9 @@ class RegisterModel {
       'businessType': businessType,
       'shopPhone': shopPhone,
       'locationUrl': locationUrl,
+      'latitude': latitude,
+      'longitude': longitude,
+      'locationAddress': locationAddress,
       'shopImageUrl': shopImageUrl,
       'address': address,
       'city': city,

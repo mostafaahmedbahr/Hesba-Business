@@ -4,12 +4,16 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../core/cubit/shop_location_cubit.dart';
 import '../../../../core/di/service_locator.dart';
+import '../../../../core/models/shop_location.dart';
 import '../../../../core/services/cloudinary_image_service.dart';
+import '../../../../core/services/shop_location_service.dart';
 import '../../../../core/utils/shop_image_upload.dart';
-import '../../../../core/widgets/shop_image_picker.dart';
-import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/toast.dart';
+import '../../../../core/widgets/shop_image_picker.dart';
+import '../../../../core/widgets/shop_location_field.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../auth/presentation/widgets/register_widgets/governorate_centers.dart';
 import '../../../auth/presentation/widgets/register_widgets/register_constants.dart';
 import '../../data/repos/account_repo.dart';
@@ -33,7 +37,6 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
   final _shopPhoneController = TextEditingController();
   final _addressController = TextEditingController();
   final _cityController = TextEditingController();
-  final _locationController = TextEditingController();
 
   /// التخصص ثابت من التسجيل، بينما رابط صورة المحل يتحدث عبر Cloudinary.
   String _businessType = '';
@@ -51,12 +54,11 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
     _shopPhoneController.dispose();
     _addressController.dispose();
     _cityController.dispose();
-    _locationController.dispose();
     super.dispose();
   }
 
   /// يملى الخانات مرة واحدة لما البروفايل يحمل.
-  void _prefill(ProfileState state) {
+  void _prefill(BuildContext context, ProfileState state) {
     final p = state.profile;
     if (p == null || _prefilled || _loading) return;
     _prefilled = true;
@@ -66,11 +68,19 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
     _shopPhoneController.text = p.shopPhone;
     _addressController.text = p.address;
     _cityController.text = p.city;
-    _locationController.text = p.locationUrl;
     _businessType = p.businessType.trim();
     _shopImageUrl = p.shopImageUrl.trim();
     final gov = p.state.trim();
     if (gov.isNotEmpty) _governorate = gov;
+
+    // موقع المحل المحفوظ (قد يكون قديمًا: رابط فقط أو إحداثيات فقط).
+    final location = ShopLocation(
+      latitude: p.latitude,
+      longitude: p.longitude,
+      address: p.locationAddress,
+      locationUrl: p.locationUrl,
+    );
+    context.read<ShopLocationCubit>().restore(location.hasAnyData ? location : null);
   }
 
   /// مدن المحافظة المختارة.
@@ -82,13 +92,16 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return AppScaffold(
       title: 'updateProfileTitle'.tr(),
-      body: BlocProvider(
-        create: (_) => ProfileCubit(repo: sl<AccountRepo>())..loadProfile(),
+      body: MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (_) => ProfileCubit(repo: sl<AccountRepo>())..loadProfile()),
+          BlocProvider(create: (_) => ShopLocationCubit(locationService: sl<ShopLocationService>())),
+        ],
         child: Builder(
           builder: (innerContext) => BlocListener<ProfileCubit, ProfileState>(
             listener: (context, state) {
               if (state.profile != null) {
-                _prefill(state);
+                _prefill(context, state);
                 setState(() {});
               }
             },
@@ -234,18 +247,10 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
                         title: 'shopImageSection'.tr(),
                         gradient: const [Color(0xFFF59E0B), Color(0xFFFBBF24)],
                         child: Column(children: [
-                          ShopImagePicker(isDark: isDark, imageUrl: _shopImageUrl, uploading: _uploadingImage, changeLabel: 'shopImageChange'.tr(), uploadingLabel: 'shopImageUploading'.tr(), onTap: _chooseShopImage),
-                          SizedBox(height: 12.h),
-                          _Field(
-                            isDark: isDark,
-                            controller: _locationController,
-                            label: 'extraLocation'.tr(),
-                            hint: 'https://maps...',
-                            icon: Icons.link_rounded,
-                            keyboard: TextInputType.url,
-                            validator: (v) => _validateUrl(v),
-                          ),
-                        ]),
+                              ShopImagePicker(isDark: isDark, imageUrl: _shopImageUrl, uploading: _uploadingImage, changeLabel: 'shopImageChange'.tr(), uploadingLabel: 'shopImageUploading'.tr(), onTap: _chooseShopImage),
+                              SizedBox(height: 12.h),
+                              ShopLocationField(isDark: isDark),
+                            ]),
                       ),
                       SizedBox(height: 22.h),
                       SizedBox(
@@ -279,16 +284,6 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
         ),
       ),
     );
-  }
-
-  /// رابط اختياري — لو مكتوب لازم يبقى صحيح.
-  String? _validateUrl(String? v) {
-    final t = v?.trim() ?? '';
-    if (t.isEmpty) return null;
-    if (!t.startsWith('http://') && !t.startsWith('https://')) {
-      return 'extraUrlInvalid'.tr();
-    }
-    return null;
   }
 
   /// يفتح اختيار مصدر صورة المحل.
@@ -344,6 +339,7 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
 
+    final location = ctx.read<ShopLocationCubit>().state.location;
     final error = await ctx.read<ProfileCubit>().updateProfile(
           ownerName: _nameController.text,
           phone: _phoneController.text,
@@ -353,7 +349,10 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
           address: _addressController.text,
           state: _governorate ?? '',
           city: _cityController.text,
-          locationUrl: _locationController.text,
+          locationUrl: location?.locationUrl ?? '',
+          latitude: location?.latitude,
+          longitude: location?.longitude,
+          locationAddress: location?.address ?? '',
           shopImageUrl: _shopImageUrl,
         );
 

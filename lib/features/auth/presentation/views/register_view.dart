@@ -3,8 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
 
+import '../../../../core/cubit/shop_location_cubit.dart';
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/services/shop_location_service.dart';
 import '../../../../core/utils/toast.dart';
 import '../../data/repos/auth_repo.dart';
 import '../cubit/register_cubit.dart';
@@ -16,8 +18,13 @@ class RegisterView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => RegisterCubit(authRepo: sl<AuthRepo>()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => RegisterCubit(authRepo: sl<AuthRepo>())),
+        BlocProvider(
+          create: (_) => ShopLocationCubit(locationService: sl<ShopLocationService>()),
+        ),
+      ],
       child: const _RegisterBody(),
     );
   }
@@ -49,7 +56,6 @@ class _RegisterBodyState extends State<_RegisterBody> {
   final cityController = TextEditingController();
   final stateController = TextEditingController();
 
-  final locationUrlController = TextEditingController();
   final shopImageUrlController = TextEditingController();
 
   @override
@@ -69,7 +75,6 @@ class _RegisterBodyState extends State<_RegisterBody> {
     cityController.dispose();
     stateController.dispose();
 
-    locationUrlController.dispose();
     shopImageUrlController.dispose();
 
     super.dispose();
@@ -100,7 +105,6 @@ class _RegisterBodyState extends State<_RegisterBody> {
                   addressController: addressController,
                   cityController: cityController,
                   stateController: stateController,
-                  locationUrlController: locationUrlController,
                   shopImageUrlController: shopImageUrlController,
                 ),
               ),

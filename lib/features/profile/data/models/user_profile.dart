@@ -9,6 +9,14 @@ class UserProfile {
   final String businessType;
   final String shopPhone;
   final String locationUrl;
+
+  /// GPS coordinates of the shop — `null` for legacy/manual entries.
+  final double? latitude;
+  final double? longitude;
+
+  /// Address resolved from the coordinates (see `ShopLocation`).
+  final String locationAddress;
+
   final String shopImageUrl;
   final String address;
   final String city;
@@ -24,6 +32,9 @@ class UserProfile {
     required this.businessType,
     required this.shopPhone,
     required this.locationUrl,
+    this.latitude,
+    this.longitude,
+    this.locationAddress = '',
     required this.shopImageUrl,
     required this.address,
     required this.city,
@@ -41,6 +52,9 @@ class UserProfile {
       businessType: json['businessType'] as String? ?? '',
       shopPhone: json['shopPhone'] as String? ?? '',
       locationUrl: json['locationUrl'] as String? ?? '',
+      latitude: (json['latitude'] as num?)?.toDouble(),
+      longitude: (json['longitude'] as num?)?.toDouble(),
+      locationAddress: json['locationAddress'] as String? ?? '',
       shopImageUrl: json['shopImageUrl'] as String? ?? '',
       address: json['address'] as String? ?? '',
       city: json['city'] as String? ?? '',
@@ -55,6 +69,9 @@ class UserProfile {
     String? businessType,
     String? shopPhone,
     String? locationUrl,
+    double? latitude,
+    double? longitude,
+    String? locationAddress,
     String? shopImageUrl,
     String? address,
     String? city,
@@ -70,6 +87,9 @@ class UserProfile {
       businessType: businessType ?? this.businessType,
       shopPhone: shopPhone ?? this.shopPhone,
       locationUrl: locationUrl ?? this.locationUrl,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      locationAddress: locationAddress ?? this.locationAddress,
       shopImageUrl: shopImageUrl ?? this.shopImageUrl,
       address: address ?? this.address,
       city: city ?? this.city,
