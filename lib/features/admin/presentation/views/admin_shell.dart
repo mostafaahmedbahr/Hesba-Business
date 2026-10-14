@@ -2,7 +2,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hesba/core/di/service_locator.dart';
 import 'package:hesba/core/theme/app_theme.dart';
 
@@ -162,7 +161,7 @@ class _TopBar extends StatelessWidget implements PreferredSizeWidget {
       danger: true,
     );
     if (ok && context.mounted) {
-      await FirebaseAuth.instance.signOut();
+      await sl<AdminRepo>().signOutAdmin();
       if (context.mounted) context.read<AdminAuthCubit>().checkSession();
     }
   }
@@ -208,7 +207,7 @@ class _Sidebar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final email = FirebaseAuth.instance.currentUser?.email ?? 'مدير النظام';
+    final email = sl<AdminRepo>().currentAdminEmail() ?? 'مدير النظام';
     return Column(
       children: [
         _Logo(expanded: expanded),

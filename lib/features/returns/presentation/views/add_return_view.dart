@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -9,10 +7,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/models/product.dart';
+import '../../../../core/services/shop_resolver.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/number_parser.dart';
 import '../../../../core/utils/toast.dart';
 import '../../../products/data/repos/products_repo.dart';
+import '../../data/repos/returns_repo.dart';
 import '../../../sales/data/models/sale_model.dart';
 import '../../data/models/return_model.dart';
 import '../cubit/returns_cubit.dart';
@@ -47,7 +47,7 @@ class _AddReturnViewState extends State<AddReturnView> {
   // Sale selection
   List<SaleModel> _sales = [];
   SaleModel? _selectedSale;
-  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _salesSub;
+  StreamSubscription<List<SaleModel>>? _salesSub;
   bool _loadingSales = true;
 
   // Products for category lookup
@@ -82,24 +82,18 @@ class _AddReturnViewState extends State<AddReturnView> {
   }
 
   Future<void> _resolveIdsAndBusinessType() async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (_resolvedOwnerId == null || _resolvedOwnerId!.isEmpty) _resolvedOwnerId = uid;
+    final resolver = sl<ShopResolver>();
+    if (_resolvedOwnerId == null || _resolvedOwnerId!.isEmpty) {
+      _resolvedOwnerId = resolver.currentUid;
+    }
     if (_resolvedShopId == null || _resolvedShopId!.isEmpty) {
-      if (uid != null) {
-        try {
-          final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
-          _resolvedShopId = doc.data()?['shopId'] as String?;
-        } catch (_) {}
-      }
+      _resolvedShopId = await resolver.getShopId();
     }
     // business type
     try {
       final repo = sl<ProductsRepo>();
       _shopBusinessType = await repo.getShopBusinessType();
-      if (_shopBusinessType == null && _resolvedShopId != null) {
-        final shopDoc = await FirebaseFirestore.instance.collection('shops').doc(_resolvedShopId).get();
-        _shopBusinessType = shopDoc.data()?['businessType'] as String?;
-      }
+      _shopBusinessType ??= await resolver.getShopBusinessType();
     } catch (_) {}
     _updateReasons();
     if (mounted) setState(() {});
@@ -126,15 +120,10 @@ class _AddReturnViewState extends State<AddReturnView> {
         if (mounted) setState(() => _loadingSales = false);
         return;
       }
-      _salesSub = FirebaseFirestore.instance
-          .collection(AppConstants.salesCollection)
-          .where('shopId', isEqualTo: _resolvedShopId)
-          .orderBy('createdAt', descending: true)
-          .limit(50)
-          .snapshots()
-          .listen((snap) {
+      _salesSub = sl<ReturnsRepo>()
+          .watchShopSales(shopId: _resolvedShopId!)
+          .listen((sales) {
         if (!mounted) return;
-        final sales = snap.docs.map((d) => SaleModel.fromJson(d.data())).toList();
         setState(() {
           _sales = sales;
           _loadingSales = false;
@@ -190,30 +179,7 @@ class _AddReturnViewState extends State<AddReturnView> {
   Future<void> _loadAlreadyReturned(String saleId) async {
     _historyFailed = false;
     try {
-      final snap = await FirebaseFirestore.instance
-          .collection(AppConstants.returnsCollection)
-          .where('originalSaleId', isEqualTo: saleId)
-          .get();
-      final map = <String, double>{};
-      for (final doc in snap.docs) {
-        final data = doc.data();
-        final items = (data['items'] as List<dynamic>? ?? []);
-        for (int i = 0; i < items.length; i++) {
-          final it = Map<String, dynamic>.from(items[i]);
-          final pid = it['productId'] as String? ?? '';
-          final qty = (it['quantity'] as num?)?.toDouble() ?? 0;
-          if (pid.isNotEmpty) {
-            map[pid] = (map[pid] ?? 0) + qty;
-          } else {
-            final key = '::$i';
-            map[key] = (map[key] ?? 0) + qty;
-          }
-          final pname = it['productName'] as String? ?? '';
-          if (pname.isNotEmpty) {
-            map['name::$pname'] = (map['name::$pname'] ?? 0) + qty;
-          }
-        }
-      }
+      final map = await sl<ReturnsRepo>().getAlreadyReturnedQuantities(saleId);
       _alreadyReturned.clear();
       _alreadyReturned.addAll(map);
     } catch (_) {
@@ -346,7 +312,9 @@ class _AddReturnViewState extends State<AddReturnView> {
   void dispose() {
     _salesSub?.cancel();
     _productsSub?.cancel();
-    for (final e in _entries.values) e.qtyController.dispose();
+    for (final e in _entries.values) {
+      e.qtyController.dispose();
+    }
     _noteController.dispose();
     super.dispose();
   }

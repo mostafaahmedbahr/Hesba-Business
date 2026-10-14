@@ -36,6 +36,9 @@ class AppTheme {
   static const Color successDark = Color(0xFF059669); // Deep green
   static const Color deepBlue = Color(0xFF0B4D9C); // Deep brand blue
   static const Color brightBlue = Color(0xFF4A7BFF); // Bright blue accents
+  static const Color mintLight = Color(0xFF34D399); // Light mint green
+  static const Color violetDeep = Color(0xFF7C3AED); // Deep violet
+  static const Color violetSoft = Color(0xFFA78BFA); // Soft violet
 
   // ── Dark ─────────────────────────────────────────────
   static const Color darkBackground = Color(0xFF0B1120);

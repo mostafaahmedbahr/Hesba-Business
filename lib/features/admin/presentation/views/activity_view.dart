@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hesba/core/di/service_locator.dart';
 import 'package:hesba/core/theme/app_theme.dart';
+import '../../data/repos/admin_repo.dart';
 
 import 'admin_ds.dart';
 
@@ -29,7 +31,7 @@ class _ActivityViewState extends State<ActivityView> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance.collection('activity_logs').orderBy('createdAt', descending: true).limit(100).snapshots(),
+      stream: sl<AdminRepo>().watchActivityLogs(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Column(

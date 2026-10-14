@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,6 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/models/product.dart';
+import '../../../../core/services/shop_resolver.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/number_parser.dart';
 import '../../../../core/utils/toast.dart';
@@ -51,7 +50,7 @@ class _AddSaleViewState extends State<AddSaleView> {
   StreamSubscription<List<Product>>? _productsSub;
   bool _loadingProducts = true;
 
-  // Resolved ids (fallback to FirebaseAuth + Firestore lookup)
+  // Resolved ids (owner/shop of the current account, via ShopResolver)
   String? _resolvedOwnerId;
   String? _resolvedShopId;
 
@@ -67,20 +66,12 @@ class _AddSaleViewState extends State<AddSaleView> {
   }
 
   Future<void> _resolveIds() async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
+    final resolver = sl<ShopResolver>();
     if (_resolvedOwnerId == null || _resolvedOwnerId!.isEmpty) {
-      _resolvedOwnerId = uid;
+      _resolvedOwnerId = resolver.currentUid;
     }
     if (_resolvedShopId == null || _resolvedShopId!.isEmpty) {
-      if (uid != null) {
-        try {
-          final doc = await FirebaseFirestore.instance
-              .collection('users')
-              .doc(uid)
-              .get();
-          _resolvedShopId = doc.data()?['shopId'] as String?;
-        } catch (_) {}
-      }
+      _resolvedShopId = await resolver.getShopId();
     }
     if (mounted) setState(() {});
   }
@@ -142,10 +133,10 @@ class _AddSaleViewState extends State<AddSaleView> {
   }
 
   double get _subtotal {
-    return _items.fold(0, (sum, e) {
+    return _items.fold(0, (acc, e) {
       final q = NumberParser.parseDouble(e.quantity.text);
       final p = NumberParser.parseDouble(e.price.text);
-      return sum + (q * p);
+      return acc + (q * p);
     });
   }
 

@@ -5,12 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/models/product.dart';
+import '../../../../core/services/shop_resolver.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/number_parser.dart';
 import '../../../../core/utils/toast.dart';
@@ -95,23 +93,22 @@ class _ProductFormViewState extends State<ProductFormView> {
 
     final savedCategory = p?.category ?? '';
     if (savedCategory.isNotEmpty) {
-      if (_categories.contains(savedCategory)) _category = savedCategory;
-      else { _category = _otherOption; _customCategory = true; _customCategoryController.text = savedCategory; }
+      if (_categories.contains(savedCategory)) {
+        _category = savedCategory;
+      } else { _category = _otherOption; _customCategory = true; _customCategoryController.text = savedCategory; }
     }
     final savedSize = p?.size ?? '';
     if (savedSize.isNotEmpty) {
-      if (AppConstants.productSizes.contains(savedSize)) _size = savedSize;
-      else { _size = _otherOption; _customSize = true; _customSizeController.text = savedSize; }
+      if (AppConstants.productSizes.contains(savedSize)) {
+        _size = savedSize;
+      } else { _size = _otherOption; _customSize = true; _customSizeController.text = savedSize; }
     }
     _loadCustomCategories();
   }
 
   Future<void> _loadCustomCategories() async {
     try {
-      final uid = FirebaseAuth.instance.currentUser?.uid;
-      if (uid == null) return;
-      final userDoc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
-      _shopId = userDoc.data()?['shopId'] as String?;
+      _shopId = await sl<ShopResolver>().getShopId();
       if (_shopId == null || _shopId!.isEmpty) return;
       final repo = sl<CategoryRepo>();
       _catSub?.cancel();
@@ -233,7 +230,7 @@ class _ProductFormViewState extends State<ProductFormView> {
             // _imagePreviewCard(isDark),
             // SizedBox(height: 14.h),
 
-            _SectionCard(icon: Icons.info_outline_rounded, title: 'المعلومات الأساسية', gradient: const [AppTheme.primaryColor, AppTheme.brightBlue], child: Column(children: [
+            sectionCard(icon: Icons.info_outline_rounded, title: 'المعلومات الأساسية', gradient: const [AppTheme.primaryColor, AppTheme.brightBlue], child: Column(children: [
               _field(controller: _nameController, label: 'productFormName'.tr(), hint: 'productFormNameHint'.tr(), icon: Icons.inventory_2_rounded, required: true, validator: (v) => (v == null || v.trim().isEmpty) ? 'validatorRequired'.tr() : null),
               SizedBox(height: 12.h),
               _dropdownField<String>(label: 'productFormCategory'.tr(), icon: Icons.category_rounded, value: _category, items: [for (final c in _allCategories) DropdownMenuItem(value: c, child: Text(c, style: TextStyle(fontSize: 13.sp)))], onChanged: (v) => setState(() { _category = v; _customCategory = v == _otherOption; })),
@@ -254,7 +251,7 @@ class _ProductFormViewState extends State<ProductFormView> {
             ])),
 
             SizedBox(height: 14.h),
-            _SectionCard(icon: Icons.payments_rounded, title: 'التسعير والمخزون', gradient: const [AppTheme.successDark, Color(0xFF34D399)], child: Column(children: [
+            sectionCard(icon: Icons.payments_rounded, title: 'التسعير والمخزون', gradient: const [AppTheme.successDark, AppTheme.mintLight], child: Column(children: [
               Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Expanded(child: _field(controller: _costPriceController, label: 'productFormCostPrice'.tr(), icon: Icons.shopping_cart_rounded, suffix: 'currencyEGP'.tr(), keyboard: _numberKeyboard(decimal: true), required: true, validator: (v) => _positiveNumber(v))),
                 SizedBox(width: 10.w),
@@ -271,7 +268,7 @@ class _ProductFormViewState extends State<ProductFormView> {
             ])),
 
             SizedBox(height: 14.h),
-            _SectionCard(icon: Icons.tune_rounded, title: 'التفاصيل', gradient: const [Color(0xFF7C3AED), Color(0xFFA78BFA)], child: Column(children: [
+            sectionCard(icon: Icons.tune_rounded, title: 'التفاصيل', gradient: const [AppTheme.violetDeep, AppTheme.violetSoft], child: Column(children: [
               Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Expanded(child: _dropdownField<String>(label: 'productFormSize'.tr(), icon: Icons.straighten_rounded, value: _size, items: [for (final s in AppConstants.productSizes) DropdownMenuItem(value: s, child: Text(s, style: TextStyle(fontSize: 13.sp)))], onChanged: (v) => setState(() { _size = v; _customSize = v == _otherOption; }))),
                 SizedBox(width: 10.w),
@@ -281,7 +278,7 @@ class _ProductFormViewState extends State<ProductFormView> {
             ])),
 
             SizedBox(height: 14.h),
-            _SectionCard(icon: Icons.image_rounded, title: 'الوسائط والملاحظات', gradient: const [AppTheme.warningAmber, AppTheme.goldLight], child: Column(children: [
+            sectionCard(icon: Icons.image_rounded, title: 'الوسائط والملاحظات', gradient: const [AppTheme.warningAmber, AppTheme.goldLight], child: Column(children: [
               // _field(controller: _imageUrlController, label: 'productFormImageUrl'.tr(), hint: 'productFormImageUrlHint'.tr(), icon: Icons.link_rounded, keyboard: TextInputType.url, onChanged: (_) => setState(() {})),
               // SizedBox(height: 12.h),
               _field(controller: _notesController, label: 'productFormNotes'.tr(), hint: 'productFormNotesHint'.tr(), icon: Icons.notes_rounded, maxLines: 3),
@@ -336,7 +333,7 @@ class _ProductFormViewState extends State<ProductFormView> {
     );
   }
 
-  Widget _SectionCard({required IconData icon, required String title, required List<Color> gradient, required Widget child}) {
+  Widget sectionCard({required IconData icon, required String title, required List<Color> gradient, required Widget child}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: EdgeInsets.all(16.w),

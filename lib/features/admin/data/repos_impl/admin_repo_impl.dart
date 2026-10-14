@@ -234,6 +234,49 @@ class AdminRepoImpl implements AdminRepo {
       firestore.collection('shops').doc(shopId).get();
 
   @override
+  Future<int> countShopDocs(
+      {required String collection, required String shopId}) async {
+    final snap = await firestore
+        .collection(collection)
+        .where('shopId', isEqualTo: shopId)
+        .limit(100)
+        .get();
+    return snap.size;
+  }
+
+  @override
+  Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>> getShopItems(
+      {required String collection, required String shopId}) async {
+    final snap = await firestore
+        .collection(collection)
+        .where('shopId', isEqualTo: shopId)
+        .limit(50)
+        .get();
+    return snap.docs;
+  }
+
+  @override
+  Stream<QuerySnapshot<Map<String, dynamic>>> watchActivityLogs() {
+    return firestore
+        .collection(_activity)
+        .orderBy('createdAt', descending: true)
+        .limit(100)
+        .snapshots();
+  }
+
+  @override
+  Future<void> signInAdmin(String email, String password) {
+    // Throws FirebaseAuthException on bad credentials — the cubit maps it.
+    return auth.signInWithEmailAndPassword(email: email, password: password);
+  }
+
+  @override
+  Future<void> signOutAdmin() => auth.signOut();
+
+  @override
+  String? currentAdminEmail() => auth.currentUser?.email;
+
+  @override
   Future<DocumentSnapshot<Map<String, dynamic>>> getUserSubscription(String userId) =>
       firestore.collection(_users).doc(userId).collection('subscription').doc('current').get();
 

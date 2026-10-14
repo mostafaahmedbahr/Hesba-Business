@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import 'package:hesba/core/di/service_locator.dart';
 import 'package:hesba/core/router/app_routes.dart';
 import 'package:hesba/features/splash/presentation/views/splash_view.dart';
 import 'package:hesba/features/auth/presentation/views/login_view.dart';
@@ -23,7 +24,7 @@ class AppRouter {
     // Route guard: protected screens require a signed-in user. Without this,
     // back-gesture/deep-link/notification taps could open them after logout
     // or with an expired token.
-    if (_requiresAuth(settings.name) && FirebaseAuth.instance.currentUser == null) {
+    if (_requiresAuth(settings.name) && sl<FirebaseAuth>().currentUser == null) {
       return _buildRoute(const LoginView(), settings);
     }
     switch (settings.name) {

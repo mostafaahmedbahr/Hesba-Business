@@ -1,5 +1,5 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:equatable/equatable.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/repos/admin_repo.dart';
 
@@ -33,12 +33,12 @@ class AdminLoginCubit extends Cubit<AdminLoginState> {
   Future<void> login(String email, String password) async {
     emit(AdminLoginLoading());
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
+      await repo.signInAdmin(email, password);
       final ok = await repo.isAdmin();
       if (ok) {
         emit(AdminLoginSuccess());
       } else {
-        await FirebaseAuth.instance.signOut();
+        await repo.signOutAdmin();
         emit(const AdminLoginDenied());
       }
     } on FirebaseAuthException catch (e) {

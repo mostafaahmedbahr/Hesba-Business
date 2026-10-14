@@ -10,7 +10,7 @@ void main() {
 
   setUp(() {
     mockRepo = MockExpensesRepo();
-    cubit = ExpensesCubit(expensesRepo: mockRepo, auth: null);
+    cubit = ExpensesCubit(expensesRepo: mockRepo);
   });
 
   tearDown(() {

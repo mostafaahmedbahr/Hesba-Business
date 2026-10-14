@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../../core/constants/app_constants.dart';
+import '../../../sales/data/models/sale_model.dart';
 import '../models/return_model.dart';
 import '../repos/returns_repo.dart';
 
@@ -130,7 +131,7 @@ class ReturnsRepoImpl implements ReturnsRepo {
       }
     }
 
-    final grossSubtotal = items.fold<double>(0, (sum, e) => sum + e.total);
+    final grossSubtotal = items.fold<double>(0, (acc, e) => acc + e.total);
 
     // Smart discount allocation: refund only the net paid amount proportionally
     final saleSubtotal = (saleData['subtotal'] as num?)?.toDouble() ?? grossSubtotal;
@@ -211,5 +212,47 @@ class ReturnsRepoImpl implements ReturnsRepo {
         .limit(500)
         .snapshots()
         .map((snap) => snap.docs.map((d) => ReturnModel.fromJson(d.data())).toList());
+  }
+
+  @override
+  Stream<List<SaleModel>> watchShopSales({required String shopId}) {
+    return firestore
+        .collection(AppConstants.salesCollection)
+        .where('shopId', isEqualTo: shopId)
+        .orderBy('createdAt', descending: true)
+        .limit(50)
+        .snapshots()
+        .map((snap) =>
+            snap.docs.map((d) => SaleModel.fromJson(d.data())).toList());
+  }
+
+  @override
+  Future<Map<String, double>> getAlreadyReturnedQuantities(
+      String saleId) async {
+    final snap = await firestore
+        .collection(AppConstants.returnsCollection)
+        .where('originalSaleId', isEqualTo: saleId)
+        .get();
+    final map = <String, double>{};
+    for (final doc in snap.docs) {
+      final data = doc.data();
+      final items = (data['items'] as List<dynamic>? ?? []);
+      for (int i = 0; i < items.length; i++) {
+        final it = Map<String, dynamic>.from(items[i]);
+        final pid = it['productId'] as String? ?? '';
+        final qty = (it['quantity'] as num?)?.toDouble() ?? 0;
+        if (pid.isNotEmpty) {
+          map[pid] = (map[pid] ?? 0) + qty;
+        } else {
+          final key = '::$i';
+          map[key] = (map[key] ?? 0) + qty;
+        }
+        final pname = it['productName'] as String? ?? '';
+        if (pname.isNotEmpty) {
+          map['name::$pname'] = (map['name::$pname'] ?? 0) + qty;
+        }
+      }
+    }
+    return map;
   }
 }

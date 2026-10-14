@@ -141,8 +141,8 @@ class ProductThumb extends StatelessWidget {
         width: 66.w,
         height: 66.w,
         fit: BoxFit.cover,
-        placeholder: (_, __) => placeholder,
-        errorWidget: (_, __, ___) => placeholder,
+        placeholder: (_, _) => placeholder,
+        errorWidget: (_, _, _) => placeholder,
       ),
     );
   }

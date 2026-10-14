@@ -27,4 +27,7 @@ abstract class ExpensesRepo {
   Stream<List<ExpenseModel>> watchExpenses({required String shopId});
 
   Future<void> deleteExpense({required String expenseId, required String shopId});
+
+  /// Current user's shopId (`null` when signed out or not yet assigned).
+  Future<String?> getShopId();
 }

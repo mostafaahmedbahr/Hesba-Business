@@ -25,6 +25,9 @@ class ExpensesRepoImpl implements ExpensesRepo {
     return doc.data()?['shopId'] as String?;
   }
 
+  @override
+  Future<String?> getShopId() => _resolveShopId(null);
+
   Future<String?> _resolveOwnerId(String? providedOwnerId) async {
     if (providedOwnerId != null && providedOwnerId.isNotEmpty) return providedOwnerId;
     return _uid;

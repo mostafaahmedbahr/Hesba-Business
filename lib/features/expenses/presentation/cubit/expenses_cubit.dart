@@ -1,8 +1,6 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../../core/services/app_events.dart';
 import '../../data/models/expense_model.dart';
@@ -11,13 +9,11 @@ import 'expenses_state.dart';
 
 class ExpensesCubit extends Cubit<ExpensesState> {
   final ExpensesRepo expensesRepo;
-  final FirebaseAuth? _auth;
   StreamSubscription<List<ExpenseModel>>? _expensesSubscription;
   StreamSubscription<AppEvent>? _eventSub;
   String? _lastShopId;
 
-  ExpensesCubit({required this.expensesRepo, FirebaseAuth? this._auth})
-      : super(const ExpensesState()) {
+  ExpensesCubit({required this.expensesRepo}) : super(const ExpensesState()) {
     // أي إضافة/تعديل/حذف من أي Cubit تاني يحدّث القائمة فوراً
     _eventSub = AppEvents.instance.stream.listen((event) {
       if (event.type == AppEventType.expenseCreated ||
@@ -36,12 +32,7 @@ class ExpensesCubit extends Cubit<ExpensesState> {
 
   Future<String?> _resolveShopId(String? providedShopId) async {
     if (providedShopId != null && providedShopId.isNotEmpty) return providedShopId;
-    if (_auth == null) return null;
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) return null;
-    final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
-    if (!doc.exists) return null;
-    return doc.data()?['shopId'] as String?;
+    return expensesRepo.getShopId();
   }
 
   Future<void> loadExpenses({required String shopId}) async {
@@ -54,7 +45,7 @@ class ExpensesCubit extends Cubit<ExpensesState> {
     final effectiveShopId = resolvedShopId ?? shopId;
     _expensesSubscription = expensesRepo.watchExpenses(shopId: effectiveShopId).listen(
       (expenses) {
-        final total = expenses.fold<double>(0, (sum, e) => sum + e.amount);
+        final total = expenses.fold<double>(0, (acc, e) => acc + e.amount);
         emit(state.copyWith(
           status: ExpensesStatus.success,
           expenses: expenses,

@@ -72,6 +72,9 @@ class MockExpensesRepo implements ExpensesRepo {
     _expenses.remove(expenseId);
   }
 
+  @override
+  Future<String?> getShopId() async => 'shop1';
+
   void addToMap(ExpenseModel expense) {
     _expenses[expense.expenseId] = expense;
   }

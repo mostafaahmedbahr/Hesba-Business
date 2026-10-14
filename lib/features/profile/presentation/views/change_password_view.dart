@@ -72,7 +72,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                 // قوة الباسورد live.
                 ValueListenableBuilder<TextEditingValue>(
                   valueListenable: _newController,
-                  builder: (_, value, __) => value.text.isEmpty
+                  builder: (_, value, _) => value.text.isEmpty
                       ? const SizedBox.shrink()
                       : PasswordStrengthIndicator(password: value.text),
                 ),
@@ -95,7 +95,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                 // تطابق live (علامة صح أول ما يتطابقوا).
                 ValueListenableBuilder<TextEditingValue>(
                   valueListenable: _confirmController,
-                  builder: (_, value, __) {
+                  builder: (_, value, _) {
                     if (value.text.isEmpty) return const SizedBox.shrink();
                     final match = value.text == _newController.text;
                     return Padding(

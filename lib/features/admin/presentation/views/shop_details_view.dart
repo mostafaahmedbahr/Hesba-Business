@@ -446,10 +446,10 @@ class _CountTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return AdminCard(
       onTap: () => onGo(tab),
-      child: FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        future: FirebaseFirestore.instance.collection(collection).where('shopId', isEqualTo: shopId).limit(100).get(),
+      child: FutureBuilder<int>(
+        future: sl<AdminRepo>().countShopDocs(collection: collection, shopId: shopId),
         builder: (context, snap) {
-          final count = snap.data?.docs.length ?? 0;
+          final count = snap.data ?? 0;
           final capped = snap.connectionState == ConnectionState.waiting ? '…' : (count >= 100 ? '100+' : '$count');
           return Column(
             children: [
@@ -513,12 +513,12 @@ class _ShopItemsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final shopId = context.findAncestorWidgetOfExactType<_DetailsScaffold>()!.shopId;
-    return FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      future: FirebaseFirestore.instance.collection(collection).where('shopId', isEqualTo: shopId).limit(50).get(),
+    return FutureBuilder<List<QueryDocumentSnapshot<Map<String, dynamic>>>>(
+      future: sl<AdminRepo>().getShopItems(collection: collection, shopId: shopId),
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) return adminSkeletonList(context, count: 4);
         if (snap.hasError) return adminError('تعذر تحميل البيانات', () => (context as Element).markNeedsBuild());
-        final docs = [...(snap.data?.docs ?? [])]
+        final docs = [...(snap.data ?? [])]
           ..sort((a, b) {
             final da = AdminFmt.toDate(a.data()['createdAt']);
             final db = AdminFmt.toDate(b.data()['createdAt']);

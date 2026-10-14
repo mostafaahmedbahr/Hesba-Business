@@ -70,7 +70,7 @@ class SalesRepoImpl implements SalesRepo {
       }
     }
 
-    final subtotal = items.fold<double>(0, (sum, item) => sum + item.total);
+    final subtotal = items.fold<double>(0, (acc, item) => acc + item.total);
     final double finalDiscount = discount < 0 ? 0 : discount > subtotal ? subtotal : discount;
     final double total = subtotal - finalDiscount < 0 ? 0 : subtotal - finalDiscount;
 

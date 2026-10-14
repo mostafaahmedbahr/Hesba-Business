@@ -1082,7 +1082,7 @@ class _LastSaleCardState extends State<_LastSaleCard> {
           );
         }
         final time = _timeAgo(sale.createdAt);
-        return _RecentCard(
+        return recentCard(
           isDark: isDark,
           icon: Icons.point_of_sale_rounded,
           gradient: const [AppTheme.primaryColor, AppTheme.brightBlue],
@@ -1144,7 +1144,7 @@ class _LastReturnCardState extends State<_LastReturnCard> {
           );
         }
         final time = _timeAgo(ret.createdAt);
-        return _RecentCard(
+        return recentCard(
           isDark: isDark,
           icon: Icons.assignment_return_rounded,
           gradient: const [AppTheme.warningAmber, AppTheme.goldLight],
@@ -1206,7 +1206,7 @@ class _LastExpenseCardState extends State<_LastExpenseCard> {
           );
         }
         final time = _timeAgo(exp.date);
-        return _RecentCard(
+        return recentCard(
           isDark: isDark,
           icon: Icons.savings_rounded,
           gradient: const [AppTheme.danger, AppTheme.roseLight],
@@ -1225,7 +1225,7 @@ class _LastExpenseCardState extends State<_LastExpenseCard> {
   }
 }
 
-Widget _RecentCard({
+Widget recentCard({
   required bool isDark,
   required IconData icon,
   required List<Color> gradient,

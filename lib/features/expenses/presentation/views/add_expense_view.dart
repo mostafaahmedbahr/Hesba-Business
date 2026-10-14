@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,7 +6,9 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/di/service_locator.dart';
+import '../../../../core/services/shop_resolver.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/number_parser.dart';
 import '../../../../core/utils/toast.dart';
 import '../cubit/expenses_cubit.dart';
 import '../cubit/expenses_state.dart';
@@ -54,21 +54,18 @@ class _AddExpenseViewState extends State<AddExpenseView> {
   }
 
   Future<void> _resolveIds() async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (_resolvedOwnerId == null || _resolvedOwnerId!.isEmpty) _resolvedOwnerId = uid;
+    final resolver = sl<ShopResolver>();
+    if (_resolvedOwnerId == null || _resolvedOwnerId!.isEmpty) {
+      _resolvedOwnerId = resolver.currentUid;
+    }
     if (_resolvedShopId == null || _resolvedShopId!.isEmpty) {
-      if (uid != null) {
-        try {
-          final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
-          _resolvedShopId = doc.data()?['shopId'] as String?;
-        } catch (_) {}
-      }
+      _resolvedShopId = await resolver.getShopId();
     }
     if (mounted) setState(() {});
   }
 
   /// المبلغ الحالي (بعد تحويل الأرقام العربية).
-  double get _amount => double.tryParse(_toLatin(_amountController.text.trim())) ?? 0;
+  double get _amount => NumberParser.parseDouble(_amountController.text.trim());
 
   Future<void> _submit(BuildContext innerContext) async {
     if (!await SubscriptionGate.ensureCanModify(innerContext)) return;
@@ -82,7 +79,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
       await _resolveIds();
     }
     final title = _titleController.text.trim();
-    final amount = double.tryParse(_toLatin(_amountController.text.trim())) ?? 0;
+    final amount = NumberParser.parseDouble(_amountController.text.trim());
     final note = _noteController.text.trim();
     HapticFeedback.lightImpact();
     if (_isEditing && widget.expense != null) {

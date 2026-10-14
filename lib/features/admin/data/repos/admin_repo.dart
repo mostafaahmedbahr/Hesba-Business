@@ -7,6 +7,9 @@ abstract class AdminRepo {
   // Auth / access
   Future<bool> isAdmin();
   Stream<String?> watchUid();
+  Future<void> signInAdmin(String email, String password);
+  Future<void> signOutAdmin();
+  String? currentAdminEmail();
 
   // Dashboard aggregates
   Future<int> countShops();
@@ -36,6 +39,16 @@ abstract class AdminRepo {
   Future<DocumentSnapshot<Map<String, dynamic>>> getShop(String shopId);
   Future<DocumentSnapshot<Map<String, dynamic>>> getUserSubscription(String userId);
   Future<SubscriptionRequestModel?> getRequest(String requestId);
+
+  /// Capped document count of a shop collection (products/sales/expenses).
+  Future<int> countShopDocs({required String collection, required String shopId});
+
+  /// Latest documents of a shop collection for the details tabs.
+  Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>> getShopItems(
+      {required String collection, required String shopId});
+
+  /// Latest activity log entries for the activity view.
+  Stream<QuerySnapshot<Map<String, dynamic>>> watchActivityLogs();
 
   // Approve / reject
   Future<void> approveRequest(SubscriptionRequestModel request);

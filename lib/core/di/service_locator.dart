@@ -10,6 +10,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/services/cloudinary_image_service.dart';
 import '../../core/services/notification_service.dart';
 import '../../core/services/shop_location_service.dart';
+import '../../core/services/shop_resolver.dart';
 import '../../features/auth/data/repos/auth_repo.dart';
 import '../../features/auth/data/repos_impl/auth_repo_impl.dart';
 import '../../features/contact/data/repos/contact_repo.dart';
@@ -87,6 +88,9 @@ void _initAdmin() {
 void _initAuth() {
   sl.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
   sl.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
+  sl.registerLazySingleton<ShopResolver>(
+    () => ShopResolver(auth: sl(), firestore: sl()),
+  );
 
   sl.registerLazySingleton<AuthRepo>(
     () => AuthRepoImpl(
