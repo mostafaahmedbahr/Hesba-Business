@@ -69,6 +69,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
 
   Future<void> _submit(BuildContext innerContext) async {
     if (!await SubscriptionGate.ensureCanModify(innerContext)) return;
+    if (!innerContext.mounted) return;
     if (!_formKey.currentState!.validate()) return;
     if (_category.isEmpty) {
       AppToast.error(innerContext, 'اختر تصنيف المصروف');
@@ -78,6 +79,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
     if (_resolvedShopId == null || _resolvedShopId!.isEmpty || _resolvedOwnerId == null || _resolvedOwnerId!.isEmpty) {
       await _resolveIds();
     }
+    if (!innerContext.mounted) return;
     final title = _titleController.text.trim();
     final amount = NumberParser.parseDouble(_amountController.text.trim());
     final note = _noteController.text.trim();

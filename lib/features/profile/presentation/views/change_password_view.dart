@@ -206,7 +206,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
           newPassword: _newController.text,
         );
 
-    if (!mounted) return;
+    if (!mounted || !ctx.mounted) return;
     setState(() => _loading = false);
 
     if (error == null) {

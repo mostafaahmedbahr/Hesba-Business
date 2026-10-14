@@ -15,6 +15,7 @@ class CategoryCustomRow extends StatelessWidget {
   /// يفتح التأكيد ثم يحذف.
   Future<void> _askDelete(BuildContext context) async {
     if (!await SubscriptionGate.ensureCanModify(context)) return;
+    if (!context.mounted) return;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => CategoryDeleteDialog(name: name),

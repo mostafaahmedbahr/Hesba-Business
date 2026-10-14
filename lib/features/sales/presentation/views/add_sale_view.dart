@@ -153,6 +153,7 @@ class _AddSaleViewState extends State<AddSaleView> {
 
   Future<void> _submit(BuildContext innerContext) async {
     if (!await SubscriptionGate.ensureCanModify(innerContext)) return;
+    if (!innerContext.mounted) return;
     if (!_formKey.currentState!.validate()) {
       AppToast.warning(innerContext, 'راجع بيانات المنتجات');
       return;

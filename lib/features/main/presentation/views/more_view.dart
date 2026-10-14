@@ -356,6 +356,7 @@ class _LogoutButton extends StatelessWidget {
       builder: (ctx) => const _LogoutDialog(),
     );
     if (confirmed != true) return;
+    if (!context.mounted) return;
 
     final ok = await context.read<ProfileCubit>().logout();
     if (!context.mounted) return;

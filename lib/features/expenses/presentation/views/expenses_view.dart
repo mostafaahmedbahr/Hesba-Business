@@ -48,6 +48,7 @@ class _ExpensesBody extends StatelessWidget {
   /// تأكيد ثم حذف.
   Future<void> _confirmDelete(BuildContext context, ExpenseModel expense) async {
     if (!await SubscriptionGate.ensureCanModify(context)) return;
+    if (!context.mounted) return;
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => ExpenseDeleteDialog(title: expense.title),

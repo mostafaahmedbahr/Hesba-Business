@@ -197,6 +197,7 @@ class NotificationCubit extends Cubit<NotificationState> {
   /// تأكيد ثم حذف.
   Future<void> confirmDelete(BuildContext context, LocalReminder r) async {
     if (!await SubscriptionGate.ensureCanModify(context)) return;
+    if (!context.mounted) return;
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => const ReminderDeleteDialog(),

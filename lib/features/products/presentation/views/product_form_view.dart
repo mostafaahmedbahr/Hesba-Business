@@ -174,6 +174,7 @@ class _ProductFormViewState extends State<ProductFormView> {
 
   Future<void> _delete() async {
     if (!await SubscriptionGate.ensureCanModify(context)) return;
+    if (!mounted) return;
     final ok = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => Dialog(

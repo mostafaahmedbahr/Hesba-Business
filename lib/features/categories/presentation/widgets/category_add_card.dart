@@ -27,6 +27,7 @@ class _CategoryAddCardState extends State<CategoryAddCard> {
   /// يبعت الاسم للـ Cubit ويمسح الخانة لو نجح.
   Future<void> _submit() async {
     if (!await SubscriptionGate.ensureCanModify(context)) return;
+    if (!mounted) return;
     HapticFeedback.lightImpact();
     final ok = await context.read<CategoryCubit>().addCategory(_controller.text);
     if (ok && mounted) {

@@ -264,6 +264,7 @@ class _AddReturnViewState extends State<AddReturnView> {
 
   Future<void> _submit(BuildContext innerContext) async {
     if (!await SubscriptionGate.ensureCanModify(innerContext)) return;
+    if (!innerContext.mounted) return;
     if (!(_formKey.currentState?.validate() ?? true)) {
       AppToast.warning(innerContext, 'راجع بيانات المرتجع');
       return;
