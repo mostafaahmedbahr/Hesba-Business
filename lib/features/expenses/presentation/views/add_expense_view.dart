@@ -303,6 +303,15 @@ class _AddExpenseViewState extends State<AddExpenseView> {
                                           ? 'العنوان مطلوب'
                                           : null,
                                     ),
+                                     SizedBox(height: 12.h),
+                                     _Field(
+                                       controller: _shopNameController,
+                                       label: 'اسم المحل',
+                                       hint: 'اسم المحل (اختياري)',
+                                       icon: Icons.storefront_rounded,
+                                       isDark: isDark,
+                                       onChanged: () => setState(() {}),
+                                     ),
                                   ],
                                 ),
                               ),

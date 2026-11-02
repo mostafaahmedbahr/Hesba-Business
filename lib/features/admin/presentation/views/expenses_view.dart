@@ -133,7 +133,7 @@ class _ExpensesViewState extends State<ExpensesView> {
       final data = d.data();
       if (_category != 'الكل' && (data['category'] as String? ?? '') != _category) return false;
       if (q.isEmpty) return true;
-      final haystack = [data['title'], data['category'], data['shopId'], d.id].whereType<String>().join(' ');
+      final haystack = [data['title'], data['category'], data['shopName'], data['shopId'], d.id].whereType<String>().join(' ');
       return haystack.contains(q);
     }).toList();
   }
@@ -191,6 +191,7 @@ class _ExpenseSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final shopId = (data['shopId'] as String?) ?? '';
+    final shopName = (data['shopName'] as String?) ?? '';
     return AdminSheetShell(
       title: 'تفاصيل المصروف',
       subtitle: (data['title'] as String?) ?? '-',
@@ -198,6 +199,10 @@ class _ExpenseSheet extends StatelessWidget {
         children: [
           CopyableId(id: id, full: true, label: 'معرف المصروف'),
           const Divider(height: 20),
+          if (shopName.isNotEmpty) ...[
+            AdminInfoRow(icon: Icons.storefront_outlined, label: 'المحل', value: shopName),
+            const Divider(height: 14),
+          ],
           if (shopId.isNotEmpty) ...[
             CopyableId(id: shopId, full: true, label: 'معرف المحل'),
             const Divider(height: 20),

@@ -91,6 +91,17 @@ class _ExpenseListCardState extends State<ExpenseListCard> {
                             style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600),
                           ),
                         ]),
+                           if (expense.shopName.isNotEmpty) ...[
+                             SizedBox(width: 6.w),
+                             Flexible(
+                               child: Text(
+                                 expense.shopName,
+                                 maxLines: 1,
+                                 overflow: TextOverflow.ellipsis,
+                                 style: TextStyle(fontSize: 10.5.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w700),
+                               ),
+                             ),
+                           ],
                       ],
                     ),
                   ),
