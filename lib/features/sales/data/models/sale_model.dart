@@ -6,14 +6,23 @@ class SaleItemModel {
   final double quantity;
   final double unitPrice;
 
+  /// Purchase price snapshot at the moment of the sale (سعر الشراء وقت البيع).
+  /// Stored so historical profit stays accurate even when the product price
+  /// changes later. Legacy sales have no value here (0).
+  final double costPrice;
+
   const SaleItemModel({
     required this.productId,
     required this.productName,
     required this.quantity,
     required this.unitPrice,
+    this.costPrice = 0,
   });
 
   double get total => quantity * unitPrice;
+
+  /// Profit of this line: (sale price − cost price) × quantity.
+  double get profit => (unitPrice - costPrice) * quantity;
 
   Map<String, dynamic> toJson() {
     return {
@@ -22,6 +31,8 @@ class SaleItemModel {
       'quantity': quantity,
       'unitPrice': unitPrice,
       'total': total,
+      'costPrice': costPrice,
+      'profit': profit,
     };
   }
 
@@ -31,6 +42,7 @@ class SaleItemModel {
       productName: json['productName'] ?? '',
       quantity: (json['quantity'] as num?)?.toDouble() ?? 0,
       unitPrice: (json['unitPrice'] as num?)?.toDouble() ?? 0,
+      costPrice: (json['costPrice'] as num?)?.toDouble() ?? 0,
     );
   }
 }

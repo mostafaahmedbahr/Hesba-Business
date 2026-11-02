@@ -31,9 +31,28 @@ class DashboardView extends StatelessWidget {
         }
         if (state is! AdminDashboardLoaded) return const SizedBox();
         final s = state;
+        final p = s.profitSummary;
         void go(int i) => context.read<AdminNavCubit>().select(i);
         final cards = <Widget>[
           AdminStatCard(icon: Icons.storefront_outlined, label: 'المحلات', value: AdminFmt.number(s.shops), onTap: () => go(1)),
+          AdminStatCard(
+            icon: Icons.trending_up_rounded,
+            label: 'إجمالي الأرباح',
+            value: AdminFmt.money(p.profit),
+            color: AppTheme.successColor,
+            subtitle: p.capped
+                ? 'أحدث ${AdminFmt.number(p.salesCounted)} عملية بيع'
+                : 'كل المحلات • ${AdminFmt.number(p.salesCounted)} عملية بيع',
+            onTap: () => go(5),
+          ),
+          AdminStatCard(
+            icon: Icons.payments_outlined,
+            label: 'إيرادات المبيعات',
+            value: AdminFmt.money(p.revenue),
+            color: AppTheme.violetDeep,
+            subtitle: 'التكلفة: ${AdminFmt.money(p.cost)}',
+            onTap: () => go(5),
+          ),
           AdminStatCard(
               icon: Icons.check_circle_outline, label: 'اشتراكات نشطة', value: AdminFmt.number(s.active), color: AdminColors.success, onTap: () => go(2)),
           AdminStatCard(
@@ -45,7 +64,7 @@ class DashboardView extends StatelessWidget {
           AdminStatCard(
               icon: Icons.inventory_2_outlined, label: 'المنتجات', value: AdminFmt.number(s.products), color: AppTheme.primaryColor, onTap: () => go(4)),
           AdminStatCard(
-              icon: Icons.point_of_sale_outlined, label: 'المبيعات', value: AdminFmt.number(s.sales), color: AdminColors.success, onTap: () => go(5)),
+              icon: Icons.point_of_sale_outlined, label: 'عدد المبيعات', value: AdminFmt.number(s.sales), color: AdminColors.success, onTap: () => go(5)),
           AdminStatCard(
               icon: Icons.money_off_outlined, label: 'المصروفات', value: AdminFmt.number(s.expenses), color: AdminColors.error, onTap: () => go(6)),
         ];
@@ -127,6 +146,14 @@ class _ChartsGrid extends StatelessWidget {
         description: 'إجمالي مبالغ الاشتراكات المقبولة شهريًا بالجنيه خلال آخر 12 شهرًا',
         icon: Icons.payments_outlined,
         data: s.revenueByMonth,
+        color: AppTheme.violetDeep,
+        money: true,
+      ),
+      _ChartSpec(
+        title: 'صافي الأرباح',
+        description: 'ربح المحلات الشهري بعد الخصومات (سعر البيع − سعر الشراء) بالجنيه خلال آخر 12 شهرًا',
+        icon: Icons.savings_outlined,
+        data: s.profitSummary.profitByMonth,
         color: AppTheme.successColor,
         money: true,
       ),
@@ -188,7 +215,7 @@ class _ChartCard extends StatelessWidget {
     final total = series.fold<int>(0, (sum, p) => sum + p.value);
     final average = total / series.length;
     final peak = series.reduce((a, b) => b.value > a.value ? b : a);
-    final hasData = total > 0;
+    final hasData = series.any((p) => p.value != 0);
 
     return AdminCard(
       child: Column(
@@ -358,8 +385,13 @@ class _MonthlyBars extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final maxValue = series.fold<int>(0, (m, p) => math.max(m, p.value));
-    final interval = _axisInterval(maxValue);
-    final maxY = interval * 4;
+    final minValue = series.fold<int>(0, (m, p) => math.min(m, p.value));
+    final interval = _axisInterval(math.max(maxValue, -minValue));
+    // Always keep zero visible so losing months render below the baseline.
+    final topTicks = math.max(1, (maxValue / interval).ceil());
+    final bottomTicks = minValue >= 0 ? 0 : (-minValue / interval).ceil();
+    final maxY = interval * topTicks;
+    final minY = -interval * bottomTicks;
     final average = series.fold<int>(0, (sum, p) => sum + p.value) / series.length;
 
     var peakIndex = 0;
@@ -406,7 +438,7 @@ class _MonthlyBars extends StatelessWidget {
           duration: const Duration(milliseconds: 350),
           curve: Curves.easeOutCubic,
           BarChartData(
-            minY: 0,
+            minY: minY,
             maxY: maxY,
             alignment: BarChartAlignment.spaceAround,
             barGroups: [
@@ -585,11 +617,13 @@ double _axisInterval(int maxValue) {
 
 /// "1,249" / "12.4 ألف" / "1.5 مليون" — compact axis & bar labels.
 String _compact(num value) {
-  if (value >= 1000000) {
-    return '${_trim(value / 1000000)} مليون';
+  final sign = value < 0 ? '-' : '';
+  final absolute = value.abs();
+  if (absolute >= 1000000) {
+    return '$sign${_trim(absolute / 1000000)} مليون';
   }
-  if (value >= 10000) {
-    return '${_trim(value / 1000)} ألف';
+  if (absolute >= 10000) {
+    return '$sign${_trim(absolute / 1000)} ألف';
   }
   return AdminFmt.number(value);
 }

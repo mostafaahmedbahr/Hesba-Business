@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../features/subscription/data/models/subscription_model.dart';
 import '../../../../features/subscription/data/models/subscription_request_model.dart';
 import '../models/admin_settings.dart';
+import '../models/profit_summary.dart';
 import '../repos/admin_repo.dart';
 
 class AdminRepoImpl implements AdminRepo {
@@ -143,6 +144,134 @@ class AdminRepoImpl implements AdminRepo {
   DateTime _monthCutoff(int months) {
     final now = DateTime.now();
     return DateTime(now.year, now.month - months + 1, 1);
+  }
+
+  // ── Profit ──────────────────────────────────────────────────
+
+  static const int _profitPageSize = 1000;
+  static const int _profitMaxSales = 20000;
+  static const int _profitMaxProducts = 10000;
+
+  @override
+  Future<ProfitSummary> profitSummary() async {
+    final costs = await _productCostMap();
+
+    var revenue = 0.0;
+    var cost = 0.0;
+    var counted = 0;
+    var capped = false;
+    final profitByMonth = <String, int>{};
+    final revenueByMonth = <String, int>{};
+
+    Query<Map<String, dynamic>> query = firestore
+        .collection('sales')
+        .orderBy(FieldPath.documentId)
+        .limit(_profitPageSize);
+
+    while (true) {
+      final snap = await query.get();
+      if (snap.docs.isEmpty) break;
+
+      for (final doc in snap.docs) {
+        final data = doc.data();
+        var saleCost = 0.0;
+        var itemsTotal = 0.0;
+
+        final rawItems = data['items'];
+        if (rawItems is List) {
+          for (final raw in rawItems) {
+            if (raw is! Map) continue;
+            final item = Map<String, dynamic>.from(raw);
+            final quantity = (item['quantity'] as num?)?.toDouble() ?? 0;
+            final unitPrice = (item['unitPrice'] as num?)?.toDouble() ?? 0;
+            itemsTotal += quantity * unitPrice;
+
+            // New sales store a cost snapshot; legacy sales fall back to the
+            // product's current cost price.
+            final double unitCost;
+            if (item.containsKey('costPrice')) {
+              unitCost = (item['costPrice'] as num?)?.toDouble() ?? 0;
+            } else {
+              final productId = item['productId'] as String? ?? '';
+              unitCost = costs[productId] ?? 0;
+            }
+            saleCost += quantity * unitCost;
+          }
+        }
+
+        final recordedTotal = (data['total'] as num?)?.toDouble();
+        final saleRevenue = (recordedTotal == null || recordedTotal <= 0 && itemsTotal > 0)
+            ? itemsTotal
+            : recordedTotal;
+        final saleProfit = saleRevenue - saleCost;
+
+        revenue += saleRevenue;
+        cost += saleCost;
+        counted++;
+
+        final created = data['createdAt'];
+        if (created is Timestamp) {
+          final date = created.toDate();
+          final key = '${date.year}-${date.month.toString().padLeft(2, '0')}';
+          profitByMonth[key] = (profitByMonth[key] ?? 0) + saleProfit.round();
+          revenueByMonth[key] = (revenueByMonth[key] ?? 0) + saleRevenue.round();
+        }
+
+        if (counted >= _profitMaxSales) {
+          capped = true;
+          break;
+        }
+      }
+
+      if (capped || snap.docs.length < _profitPageSize) break;
+      query = firestore
+          .collection('sales')
+          .orderBy(FieldPath.documentId)
+          .startAfterDocument(snap.docs.last)
+          .limit(_profitPageSize);
+    }
+
+    return ProfitSummary(
+      revenue: revenue,
+      cost: cost,
+      profit: revenue - cost,
+      salesCounted: counted,
+      capped: capped,
+      profitByMonth: profitByMonth,
+      revenueByMonth: revenueByMonth,
+    );
+  }
+
+  /// Document id → current purchase price, paged to stay under Firestore's
+  /// per-query limit. Used only for legacy sale items without a snapshot.
+  Future<Map<String, double>> _productCostMap() async {
+    final costs = <String, double>{};
+    Query<Map<String, dynamic>> query = firestore
+        .collection('products')
+        .orderBy(FieldPath.documentId)
+        .limit(_profitPageSize);
+
+    while (true) {
+      final snap = await query.get();
+      if (snap.docs.isEmpty) break;
+
+      for (final doc in snap.docs) {
+        costs[doc.id] =
+            (doc.data()['costPrice'] as num?)?.toDouble() ?? 0;
+      }
+
+      if (costs.length >= _profitMaxProducts ||
+          snap.docs.length < _profitPageSize) {
+        break;
+      }
+      query = firestore
+          .collection('products')
+          .orderBy(FieldPath.documentId)
+          .startAfterDocument(snap.docs.last)
+          .limit(_profitPageSize);
+    }
+
+    return costs;
   }
 
   static const int _page = 20;

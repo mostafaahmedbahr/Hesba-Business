@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../../features/subscription/data/models/subscription_request_model.dart';
 import '../models/admin_settings.dart';
+import '../models/profit_summary.dart';
 
 abstract class AdminRepo {
   // Auth / access
@@ -26,6 +27,9 @@ abstract class AdminRepo {
   Future<Map<String, int>> subscriptionCountsByMonth({required int months});
   Future<Map<String, int>> shopsByMonth({required int months});
   Future<Map<String, int>> revenueByMonth({required int months});
+
+  /// Platform-wide profit derived from sales across all shops.
+  Future<ProfitSummary> profitSummary();
 
   // Lists (paginated)
   Future<QuerySnapshot<Map<String, dynamic>>> getShopsPage({DocumentSnapshot? startAfter, String search = ''});

@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../data/models/profit_summary.dart';
 import '../../data/repos/admin_repo.dart';
 
 abstract class AdminDashboardState extends Equatable {
@@ -33,6 +34,7 @@ class AdminDashboardLoaded extends AdminDashboardState {
     required this.subscriptionsByMonth,
     required this.shopsByMonth,
     required this.revenueByMonth,
+    required this.profitSummary,
   });
 
   final int shops;
@@ -47,10 +49,13 @@ class AdminDashboardLoaded extends AdminDashboardState {
   final Map<String, int> shopsByMonth;
   final Map<String, int> revenueByMonth;
 
+  /// Platform-wide sales profit (all shops).
+  final ProfitSummary profitSummary;
+
   @override
   List<Object?> get props => [
         shops, active, trial, expired, pending, products, sales, expenses,
-        subscriptionsByMonth, shopsByMonth, revenueByMonth,
+        subscriptionsByMonth, shopsByMonth, revenueByMonth, profitSummary,
       ];
 }
 
@@ -73,6 +78,7 @@ class AdminDashboardCubit extends Cubit<AdminDashboardState> {
         repo.subscriptionCountsByMonth(months: 12),
         repo.shopsByMonth(months: 12),
         repo.revenueByMonth(months: 12),
+        repo.profitSummary(),
       ]);
       emit(AdminDashboardLoaded(
         shops: results[0] as int,
@@ -86,6 +92,7 @@ class AdminDashboardCubit extends Cubit<AdminDashboardState> {
         subscriptionsByMonth: results[8] as Map<String, int>,
         shopsByMonth: results[9] as Map<String, int>,
         revenueByMonth: results[10] as Map<String, int>,
+        profitSummary: results[11] as ProfitSummary,
       ));
     } catch (e) {
       emit(AdminDashboardError(e.toString()));

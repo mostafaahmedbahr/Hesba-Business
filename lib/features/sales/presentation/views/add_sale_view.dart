@@ -130,6 +130,7 @@ class _AddSaleViewState extends State<AddSaleView> {
         productName: e.name.text.trim(),
         quantity: NumberParser.parseDouble(e.quantity.text),
         unitPrice: NumberParser.parseDouble(e.price.text),
+        costPrice: e.selectedProduct?.costPrice ?? 0,
       );
     }).toList();
   }
