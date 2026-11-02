@@ -18,13 +18,27 @@ class SettingsLoaded extends AdminSettingsState {
   List<Object?> get props => [settings];
 }
 
-class SettingsSaving extends AdminSettingsState {}
+class SettingsSaving extends AdminSettingsState {
+  const SettingsSaving(this.settings);
+  final AdminSettings settings;
+  @override
+  List<Object?> get props => [settings];
+}
 
 class SettingsSaved extends AdminSettingsState {
   const SettingsSaved(this.settings);
   final AdminSettings settings;
   @override
   List<Object?> get props => [settings];
+}
+
+/// Save failed but the form keeps its current values so nothing is lost.
+class SettingsSaveFailed extends AdminSettingsState {
+  const SettingsSaveFailed(this.settings, this.message);
+  final AdminSettings settings;
+  final String message;
+  @override
+  List<Object?> get props => [settings, message];
 }
 
 class SettingsError extends AdminSettingsState {
@@ -48,13 +62,13 @@ class AdminSettingsCubit extends Cubit<AdminSettingsState> {
   }
 
   Future<void> save(AdminSettings settings) async {
-    emit(SettingsSaving());
+    emit(SettingsSaving(settings));
     try {
       await repo.saveSettings(settings);
       emit(SettingsSaved(settings));
       emit(SettingsLoaded(settings));
     } catch (e) {
-      emit(SettingsError(e.toString()));
+      emit(SettingsSaveFailed(settings, e.toString()));
     }
   }
 }
