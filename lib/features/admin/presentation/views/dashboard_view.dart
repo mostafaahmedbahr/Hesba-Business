@@ -36,6 +36,20 @@ class DashboardView extends StatelessWidget {
         final cards = <Widget>[
           AdminStatCard(icon: Icons.storefront_outlined, label: 'المحلات', value: AdminFmt.number(s.shops), onTap: () => go(1)),
           AdminStatCard(
+              icon: Icons.check_circle_outline, label: 'اشتراكات نشطة', value: AdminFmt.number(s.active), color: AdminColors.success, onTap: () => go(2)),
+          AdminStatCard(
+              icon: Icons.hourglass_bottom_outlined, label: 'فترة تجريبية', value: AdminFmt.number(s.trial), color: AdminColors.info, onTap: () => go(2)),
+          AdminStatCard(
+              icon: Icons.cancel_outlined, label: 'اشتراكات منتهية', value: AdminFmt.number(s.expired), color: AdminColors.error, onTap: () => go(2)),
+          AdminStatCard(
+              icon: Icons.pending_actions_outlined, label: 'طلبات معلقة', value: AdminFmt.number(s.pending), color: AdminColors.warning, onTap: () => go(3)),
+          AdminStatCard(
+              icon: Icons.inventory_2_outlined, label: 'المنتجات', value: AdminFmt.number(s.products), color: AppTheme.primaryColor, onTap: () => go(4)),
+          AdminStatCard(
+              icon: Icons.point_of_sale_outlined, label: 'عدد المبيعات', value: AdminFmt.number(s.sales), color: AdminColors.success, onTap: () => go(5)),
+          AdminStatCard(
+              icon: Icons.money_off_outlined, label: 'المصروفات', value: AdminFmt.number(s.expenses), color: AdminColors.error, onTap: () => go(6)),
+          AdminStatCard(
             icon: Icons.trending_up_rounded,
             label: 'إجمالي الأرباح',
             value: AdminFmt.money(p.profit),
@@ -53,20 +67,6 @@ class DashboardView extends StatelessWidget {
             subtitle: 'التكلفة: ${AdminFmt.money(p.cost)}',
             onTap: () => go(5),
           ),
-          AdminStatCard(
-              icon: Icons.check_circle_outline, label: 'اشتراكات نشطة', value: AdminFmt.number(s.active), color: AdminColors.success, onTap: () => go(2)),
-          AdminStatCard(
-              icon: Icons.hourglass_bottom_outlined, label: 'فترة تجريبية', value: AdminFmt.number(s.trial), color: AdminColors.info, onTap: () => go(2)),
-          AdminStatCard(
-              icon: Icons.cancel_outlined, label: 'اشتراكات منتهية', value: AdminFmt.number(s.expired), color: AdminColors.error, onTap: () => go(2)),
-          AdminStatCard(
-              icon: Icons.pending_actions_outlined, label: 'طلبات معلقة', value: AdminFmt.number(s.pending), color: AdminColors.warning, onTap: () => go(3)),
-          AdminStatCard(
-              icon: Icons.inventory_2_outlined, label: 'المنتجات', value: AdminFmt.number(s.products), color: AppTheme.primaryColor, onTap: () => go(4)),
-          AdminStatCard(
-              icon: Icons.point_of_sale_outlined, label: 'عدد المبيعات', value: AdminFmt.number(s.sales), color: AdminColors.success, onTap: () => go(5)),
-          AdminStatCard(
-              icon: Icons.money_off_outlined, label: 'المصروفات', value: AdminFmt.number(s.expenses), color: AdminColors.error, onTap: () => go(6)),
         ];
         return RefreshIndicator(
           onRefresh: () => context.read<AdminDashboardCubit>().load(),
