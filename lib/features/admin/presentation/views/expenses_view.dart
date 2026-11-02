@@ -139,43 +139,230 @@ class _ExpensesViewState extends State<ExpensesView> {
   }
 }
 
+
+
 class _ExpenseCard extends StatelessWidget {
   const _ExpenseCard({required this.doc});
+
   final QueryDocumentSnapshot<Map<String, dynamic>> doc;
 
   @override
   Widget build(BuildContext context) {
     final d = doc.data();
+
+    final title = (d['title'] as String?) ?? '-';
+    final shopName = (d['shopName'] as String?) ?? '-';
+    final category = (d['category'] as String?) ?? '-';
+    final amount = (d['amount'] as num?) ?? 0;
+    final date = AdminFmt.dateNum(d['createdAt'] ?? d['date']);
+
+    final secondary = AdminColors.textSecondary(context);
+
     return AdminCard(
       padding: const EdgeInsets.all(AdminSpace.md),
-      onTap: () => showAdminSheet(context, _ExpenseSheet(data: d, id: doc.id)),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const AdminIconTile(icon: Icons.money_off_outlined, color: AdminColors.error, size: 44),
-          const SizedBox(width: AdminSpace.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          // Shop Header
+          Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: AdminColors.error.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.storefront_rounded,
+                  color: AdminColors.error,
+                  size: 23,
+                ),
+              ),
+
+              const SizedBox(width: 12),
+
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      shopName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'اسم المحل',
+                      style: TextStyle(
+                        color: secondary,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: AdminColors.error.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text(
+                  'مصروف',
+                  style: TextStyle(
+                    color: AdminColors.error,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          // Expense Content
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: AdminColors.error.withValues(alpha: 0.045),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: AdminColors.error.withValues(alpha: 0.08),
+              ),
+            ),
+            child: Row(
               children: [
-                Text((d['title'] as String?) ?? '-',
-                    maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
-                const SizedBox(height: 2),
-                Text('${d['category'] ?? '-'} • ${AdminFmt.dateNum(d['createdAt'] ?? d['date'])}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: AdminColors.textSecondary(context), fontSize: 12)),
-                const SizedBox(height: 2),
-                CopyableId(id: doc.id),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.category_outlined,
+                            size: 15,
+                            color: secondary,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            'التصنيف',
+                            style: TextStyle(
+                              color: secondary,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 7),
+
+                      Text(
+                        category,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      Text(
+                        title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: secondary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(width: 12),
+
+                Container(
+                  width: 1,
+                  height: 70,
+                  color: AdminColors.error.withValues(alpha: 0.15),
+                ),
+
+                const SizedBox(width: 12),
+
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: AdminColors.error.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(13),
+                      ),
+                      child: const Icon(
+                        Icons.payments_rounded,
+                        color: AdminColors.error,
+                        size: 22,
+                      ),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    Text(
+                      AdminFmt.money(amount),
+                      style: const TextStyle(
+                        color: AdminColors.error,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
-          const SizedBox(width: AdminSpace.sm),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration:
-                BoxDecoration(color: AdminColors.error.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(AdminRadius.tag)),
-            child: Text(AdminFmt.money((d['amount'] as num?) ?? 0),
-                style: const TextStyle(color: AdminColors.error, fontWeight: FontWeight.w800, fontSize: 12.5)),
+
+          const SizedBox(height: 14),
+
+          // Footer
+          Row(
+            children: [
+              Icon(
+                Icons.calendar_month_rounded,
+                size: 15,
+                color: secondary,
+              ),
+
+              const SizedBox(width: 6),
+
+              Expanded(
+                child: Text(
+                  date,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: secondary,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+
+              CopyableId(id: doc.id),
+            ],
           ),
         ],
       ),
@@ -183,41 +370,4 @@ class _ExpenseCard extends StatelessWidget {
   }
 }
 
-class _ExpenseSheet extends StatelessWidget {
-  const _ExpenseSheet({required this.data, required this.id});
-  final Map<String, dynamic> data;
-  final String id;
 
-  @override
-  Widget build(BuildContext context) {
-    final shopId = (data['shopId'] as String?) ?? '';
-    final shopName = (data['shopName'] as String?) ?? '';
-    return AdminSheetShell(
-      title: 'تفاصيل المصروف',
-      subtitle: (data['title'] as String?) ?? '-',
-      child: Column(
-        children: [
-          CopyableId(id: id, full: true, label: 'معرف المصروف'),
-          const Divider(height: 20),
-          if (shopName.isNotEmpty) ...[
-            AdminInfoRow(icon: Icons.storefront_outlined, label: 'المحل', value: shopName),
-            const Divider(height: 14),
-          ],
-          if (shopId.isNotEmpty) ...[
-            CopyableId(id: shopId, full: true, label: 'معرف المحل'),
-            const Divider(height: 20),
-          ],
-          AdminInfoRow(icon: Icons.title_outlined, label: 'العنوان', value: (data['title'] as String?) ?? '-'),
-          const Divider(height: 14),
-          AdminInfoRow(icon: Icons.category_outlined, label: 'التصنيف', value: (data['category'] as String?) ?? '-'),
-          const Divider(height: 14),
-          AdminInfoRow(
-              icon: Icons.payments_outlined, label: 'المبلغ', value: AdminFmt.money((data['amount'] as num?) ?? 0)),
-          const Divider(height: 14),
-          AdminInfoRow(
-              icon: Icons.calendar_month_outlined, label: 'التاريخ', value: AdminFmt.dateTime(data['createdAt'] ?? data['date'])),
-        ],
-      ),
-    );
-  }
-}
