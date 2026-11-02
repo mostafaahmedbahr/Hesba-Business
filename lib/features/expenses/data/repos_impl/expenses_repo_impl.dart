@@ -37,6 +37,7 @@ class ExpensesRepoImpl implements ExpensesRepo {
   Future<ExpenseModel> addExpense({
     required String ownerId,
     required String shopId,
+    required String shopName,
     required String title,
     required String category,
     required double amount,
@@ -60,6 +61,7 @@ class ExpensesRepoImpl implements ExpensesRepo {
     final ref = firestore.collection(AppConstants.expensesCollection).doc();
     final expense = ExpenseModel(
       expenseId: ref.id,
+      shopName: shopName,
       ownerId: resolvedOwnerId,
       shopId: resolvedShopId,
       title: title.trim(),
@@ -79,6 +81,7 @@ class ExpensesRepoImpl implements ExpensesRepo {
     required String expenseId,
     required String ownerId,
     required String shopId,
+    required String shopName,
     required String title,
     required String category,
     required double amount,
@@ -113,6 +116,7 @@ class ExpensesRepoImpl implements ExpensesRepo {
 
     final updated = ExpenseModel(
       expenseId: expenseId,
+      shopName: shopName,
       ownerId: resolvedOwnerId,
       shopId: resolvedShopId,
       title: title.trim(),

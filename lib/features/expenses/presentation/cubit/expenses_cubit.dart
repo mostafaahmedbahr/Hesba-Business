@@ -62,6 +62,7 @@ class ExpensesCubit extends Cubit<ExpensesState> {
   Future<void> addExpense({
     required String ownerId,
     required String shopId,
+    required String  shopName,
     required String title,
     required String category,
     required double amount,
@@ -86,6 +87,7 @@ class ExpensesCubit extends Cubit<ExpensesState> {
       final expense = await expensesRepo.addExpense(
         ownerId: ownerId,
         shopId: shopId,
+        shopName: shopName,
         title: title,
         category: category,
         amount: amount,
@@ -105,6 +107,7 @@ class ExpensesCubit extends Cubit<ExpensesState> {
     required String expenseId,
     required String ownerId,
     required String shopId,
+    required String shopName,
     required String title,
     required String category,
     required double amount,
@@ -130,6 +133,7 @@ class ExpensesCubit extends Cubit<ExpensesState> {
         expenseId: expenseId,
         ownerId: ownerId,
         shopId: shopId,
+        shopName: shopName,
         title: title,
         category: category,
         amount: amount,

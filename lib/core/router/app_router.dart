@@ -80,6 +80,7 @@ class AppRouter {
           AddExpenseView(
             ownerId: aeArgs?['ownerId'] as String?,
             shopId: aeArgs?['shopId'] as String?,
+            shopName: aeArgs?['shopName'] as String?,
           ),
           settings,
         );

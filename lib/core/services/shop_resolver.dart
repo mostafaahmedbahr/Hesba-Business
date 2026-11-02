@@ -29,6 +29,26 @@ class ShopResolver {
     }
   }
 
+  /// اسم المحل الحالي (من ملف المستخدم، مع fallback لمستند shops).
+  Future<String?> getShopName() async {
+    final uid = currentUid;
+    if (uid == null) return null;
+    try {
+      final userDoc = await _firestore.collection('users').doc(uid).get();
+      final name = userDoc.data()?['shopName'] as String?;
+      if (name != null && name.trim().isNotEmpty) return name.trim();
+      final shopId = await getShopId();
+      if (shopId != null && shopId.isNotEmpty) {
+        final shopDoc = await _firestore.collection('shops').doc(shopId).get();
+        final sName = shopDoc.data()?['shopName'] as String?;
+        if (sName != null && sName.trim().isNotEmpty) return sName.trim();
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<String?> getShopBusinessType() async {
     try {
       final shopId = await getShopId();

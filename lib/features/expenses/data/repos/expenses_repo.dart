@@ -4,6 +4,7 @@ abstract class ExpensesRepo {
   Future<ExpenseModel> addExpense({
     required String ownerId,
     required String shopId,
+    required String shopName,
     required String title,
     required String category,
     required double amount,
@@ -15,6 +16,7 @@ abstract class ExpensesRepo {
     required String expenseId,
     required String ownerId,
     required String shopId,
+    required String shopName,
     required String title,
     required String category,
     required double amount,

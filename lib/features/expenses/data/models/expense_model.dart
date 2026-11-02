@@ -4,6 +4,7 @@ class ExpenseModel {
   final String expenseId;
   final String ownerId;
   final String shopId;
+  final String shopName;
   final String title;
   final String category;
   final double amount;
@@ -15,6 +16,7 @@ class ExpenseModel {
     required this.expenseId,
     required this.ownerId,
     required this.shopId,
+    required this.shopName,
     required this.title,
     required this.category,
     required this.amount,
@@ -28,6 +30,7 @@ class ExpenseModel {
       'expenseId': expenseId,
       'ownerId': ownerId,
       'shopId': shopId,
+      'shopName': shopName,
       'title': title,
       'category': category,
       'amount': amount,
@@ -42,6 +45,7 @@ class ExpenseModel {
       expenseId: json['expenseId'] ?? '',
       ownerId: json['ownerId'] ?? '',
       shopId: json['shopId'] ?? '',
+      shopName: json['shopName'] ?? '',
       title: json['title'] ?? '',
       category: json['category'] ?? '',
       amount: (json['amount'] as num?)?.toDouble() ?? 0,
@@ -72,6 +76,7 @@ class ExpenseModel {
       expenseId: expenseId,
       ownerId: ownerId,
       shopId: shopId,
+      shopName: shopName,
       title: title ?? this.title,
       category: category ?? this.category,
       amount: amount ?? this.amount,
