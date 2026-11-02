@@ -139,78 +139,245 @@ class _SalesViewState extends State<SalesView> {
   }
 }
 
+
 class _SaleCard extends StatelessWidget {
   const _SaleCard({required this.doc});
+
   final QueryDocumentSnapshot<Map<String, dynamic>> doc;
 
   @override
   Widget build(BuildContext context) {
     final d = doc.data();
+
+    final shopName = (d['shopName'] as String?) ?? '-';
+    final total = (d['total'] as num?) ?? 0;
     final method = (d['paymentMethod'] as String?)?.trim() ?? '';
+    final date = AdminFmt.dateNum(d['createdAt']);
+    final itemsCount = d['items'] is List
+        ? (d['items'] as List).length
+        : 0;
+
+    final secondary = AdminColors.textSecondary(context);
+
     return AdminCard(
       padding: const EdgeInsets.all(AdminSpace.md),
-      onTap: () => showAdminSheet(context, _SaleSheet(data: d, id: doc.id)),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const AdminIconTile(icon: Icons.point_of_sale_outlined, color: AdminColors.success, size: 44),
-          const SizedBox(width: AdminSpace.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(AdminFmt.money((d['total'] as num?) ?? 0),
-                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14.5)),
-                const SizedBox(height: 2),
-                Text(
-                  '${AdminFmt.dateNum(d['createdAt'])}${method.isNotEmpty ? ' • $method' : ''}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: AdminColors.textSecondary(context), fontSize: 12),
+          // Shop Header
+          Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: AdminColors.success.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                const SizedBox(height: 2),
-                CopyableId(id: doc.id),
+                child: const Icon(
+                  Icons.storefront_rounded,
+                  color: AdminColors.success,
+                  size: 23,
+                ),
+              ),
+
+              const SizedBox(width: 12),
+
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      shopName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'اسم المحل',
+                      style: TextStyle(
+                        color: secondary,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: AdminColors.success.withValues(alpha: 0.09),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text(
+                  'عملية بيع',
+                  style: TextStyle(
+                    color: AdminColors.success,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          // Sale Details
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: AdminColors.success.withValues(alpha: 0.045),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: AdminColors.success.withValues(alpha: 0.09),
+              ),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.shopping_bag_outlined,
+                            size: 15,
+                            color: secondary,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            'تفاصيل البيع',
+                            style: TextStyle(
+                              color: secondary,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      Text(
+                        '$itemsCount أصناف',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+
+                      if (method.isNotEmpty) ...[
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.wallet_outlined,
+                              size: 14,
+                              color: secondary,
+                            ),
+                            const SizedBox(width: 5),
+                            Flexible(
+                              child: Text(
+                                method,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: secondary,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+
+                const SizedBox(width: 12),
+
+                Container(
+                  width: 1,
+                  height: 75,
+                  color: AdminColors.success.withValues(alpha: 0.15),
+                ),
+
+                const SizedBox(width: 12),
+
+                Column(
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: AdminColors.success.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(13),
+                      ),
+                      child: const Icon(
+                        Icons.point_of_sale_rounded,
+                        color: AdminColors.success,
+                        size: 22,
+                      ),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    Text(
+                      AdminFmt.money(total),
+                      style: const TextStyle(
+                        color: AdminColors.success,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
-          Icon(Icons.chevron_left_rounded, color: AdminColors.textMuted(context), size: 22),
+
+          const SizedBox(height: 14),
+
+          // Footer
+          Row(
+            children: [
+              Icon(
+                Icons.calendar_month_rounded,
+                size: 15,
+                color: secondary,
+              ),
+
+              const SizedBox(width: 6),
+
+              Expanded(
+                child: Text(
+                  date,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: secondary,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+
+              CopyableId(id: doc.id),
+            ],
+          ),
         ],
       ),
     );
   }
 }
 
-class _SaleSheet extends StatelessWidget {
-  const _SaleSheet({required this.data, required this.id});
-  final Map<String, dynamic> data;
-  final String id;
-
-  @override
-  Widget build(BuildContext context) {
-    final shopId = (data['shopId'] as String?) ?? '';
-    return AdminSheetShell(
-      title: 'تفاصيل عملية البيع',
-      subtitle: AdminFmt.money((data['total'] as num?) ?? 0),
-      child: Column(
-        children: [
-          CopyableId(id: id, full: true, label: 'معرف العملية'),
-          const Divider(height: 20),
-          if (shopId.isNotEmpty) ...[
-            CopyableId(id: shopId, full: true, label: 'معرف المحل'),
-            const Divider(height: 20),
-          ],
-          AdminInfoRow(icon: Icons.payments_outlined, label: 'الإجمالي', value: AdminFmt.money((data['total'] as num?) ?? 0)),
-          const Divider(height: 14),
-          AdminInfoRow(icon: Icons.calendar_month_outlined, label: 'التاريخ', value: AdminFmt.dateTime(data['createdAt'])),
-          if ((data['paymentMethod'] as String?)?.isNotEmpty ?? false) ...[
-            const Divider(height: 14),
-            AdminInfoRow(icon: Icons.wallet_outlined, label: 'طريقة الدفع', value: data['paymentMethod'].toString()),
-          ],
-          if (data['items'] is List) ...[
-            const Divider(height: 14),
-            AdminInfoRow(icon: Icons.list_alt_outlined, label: 'عدد الأصناف', value: '${(data['items'] as List).length}'),
-          ],
-        ],
-      ),
-    );
-  }
-}
