@@ -113,6 +113,17 @@ Transformation get shopImageTransformation =>
     );
   }
 
+  /// Uploads a product photo (own folder, no shop sepia/shrink preset).
+  Future<String?> uploadProductImage({ImageSource? source, XFile? file}) {
+    return _upload(
+      source: source,
+      file: file,
+      folder: AppConstants.cloudinaryProductImageFolder,
+      preset: AppConstants.cloudinaryUploadPreset,
+      verify: false,
+    );
+  }
+
   Future<String?> _upload({
     ImageSource? source,
     XFile? file,

@@ -31,6 +31,12 @@ class Product {
   /// Optional image URL (the app stores images as links, not files).
   final String imageUrl;
 
+  /// مواصفات إضافية حسب النشاط (باركود، صلاحية، إضافات، مكونات، ماركة...).
+  ///
+  /// مفتاحها واحد من ProductFieldKeys. المنتجات القديمة بلا specs → {}.
+  /// الحقول الأساسية (color/size/...) تبقى top-level للتوافق مع البيانات القديمة.
+  final Map<String, dynamic> specs;
+
   final String shopId;
   final String ownerId;
   final bool isActive;
@@ -50,6 +56,7 @@ class Product {
     this.color = '',
     this.notes = '',
     this.imageUrl = '',
+    this.specs = const {},
     required this.shopId,
     required this.ownerId,
     this.isActive = true,
@@ -71,6 +78,7 @@ class Product {
       color: json['color'] as String? ?? '',
       notes: json['notes'] as String? ?? '',
       imageUrl: json['imageUrl'] as String? ?? '',
+      specs: _readSpecs(json['specs']),
       shopId: json['shopId'] as String? ?? '',
       ownerId: json['ownerId'] as String? ?? '',
       isActive: json['isActive'] as bool? ?? true,
@@ -92,6 +100,7 @@ class Product {
       'color': color,
       'notes': notes,
       'imageUrl': imageUrl,
+      'specs': specs,
       'isActive': isActive,
     };
   }
@@ -108,6 +117,7 @@ class Product {
     String? color,
     String? notes,
     String? imageUrl,
+    Map<String, dynamic>? specs,
     bool? isActive,
   }) {
     return Product(
@@ -123,6 +133,7 @@ class Product {
       color: color ?? this.color,
       notes: notes ?? this.notes,
       imageUrl: imageUrl ?? this.imageUrl,
+      specs: specs ?? this.specs,
       shopId: shopId,
       ownerId: ownerId,
       isActive: isActive ?? this.isActive,
@@ -138,4 +149,17 @@ class Product {
   /// Profit margin percentage on the sale price.
   double get marginPercent =>
       price <= 0 ? 0 : ((price - costPrice) / price * 100);
+
+  /// قراءة آمنة لخريطة المواصفات: تتحمل المنتجات القديمة بلا specs
+  /// وأي قيمة غير متوقعة من Firestore بدون إسقاط (throw).
+  static Map<String, dynamic> _readSpecs(Object? raw) {
+    if (raw is Map) {
+      try {
+        return Map<String, dynamic>.from(raw);
+      } catch (_) {
+        return const {};
+      }
+    }
+    return const {};
+  }
 }

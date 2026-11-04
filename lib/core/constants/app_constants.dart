@@ -25,6 +25,10 @@ class AppConstants {
   static const String cloudinaryShopImageFolder = 'hesba/shop-images';
   static const int cloudinaryShopImageSize = 250;
 
+  // Product photos live apart from shop photos so the shop's 250px/sepia
+  // preset never distorts a product card image.
+  static const String cloudinaryProductImageFolder = 'hesba/product-images';
+
   // Payment receipts live apart from shop photos so the shop's 250px/sepia
   // preset never shrinks a screenshot the admin has to read.
   static const String cloudinaryPaymentProofFolder = 'hesba/payment-proofs';
