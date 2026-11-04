@@ -184,8 +184,9 @@ class _AddReturnViewState extends State<AddReturnView> {
       final map = await sl<ReturnsRepo>().getAlreadyReturnedQuantities(saleId);
       _alreadyReturned.clear();
       _alreadyReturned.addAll(map);
-    } catch (_) {
+    } catch (e) {
       // Fail closed: without history the editable max is unreliable.
+      debugPrint('getAlreadyReturnedQuantities failed: $e');
       _historyFailed = true;
     }
   }

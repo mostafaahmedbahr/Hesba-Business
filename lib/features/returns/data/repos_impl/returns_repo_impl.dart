@@ -83,8 +83,12 @@ class ReturnsRepoImpl implements ReturnsRepo {
       if (name.isNotEmpty) soldQtyByKey['name::$name'] = qty;
     }
 
+    // Scoped by shopId: Firestore rules only allow reads that prove
+    // ownerId/shopId ownership, so an originalSaleId-only query is
+    // rejected with permission-denied.
     final alreadySnap = await firestore
         .collection(AppConstants.returnsCollection)
+        .where('shopId', isEqualTo: resolvedShopId)
         .where('originalSaleId', isEqualTo: originalSaleId)
         .get();
     final returnedQtyByKey = <String, double>{};
@@ -229,8 +233,15 @@ class ReturnsRepoImpl implements ReturnsRepo {
   @override
   Future<Map<String, double>> getAlreadyReturnedQuantities(
       String saleId) async {
+    // The returns read rules require the query to be provably scoped to
+    // the caller's shop/owner. Filtering by originalSaleId alone makes
+    // Firestore answer permission-denied, which surfaced as
+    // _historyFailed in the add-return screen.
+    final shopId = await _resolveShopId(null);
+    if (shopId == null || shopId.isEmpty) return <String, double>{};
     final snap = await firestore
         .collection(AppConstants.returnsCollection)
+        .where('shopId', isEqualTo: shopId)
         .where('originalSaleId', isEqualTo: saleId)
         .get();
     final map = <String, double>{};
