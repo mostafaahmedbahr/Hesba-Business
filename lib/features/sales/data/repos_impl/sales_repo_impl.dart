@@ -34,6 +34,37 @@ class SalesRepoImpl implements SalesRepo {
     return _uid;
   }
 
+  /// اسم المحل ليُحفظ مع كل فاتورة.
+  ///
+  /// يُجلب من shops/{shopName} مع fallback لاسم المستخدم، ويُخزَّن للجلسة
+  /// حتى لا نقرأه في كل عملية. الفشل لا يمنع حفظ الفاتورة ('').
+  String? _cachedShopNameFor;
+  String? _cachedShopName;
+
+  Future<String> _resolveShopName(String shopId) async {
+    if (_cachedShopNameFor == shopId && _cachedShopName != null) {
+      return _cachedShopName!;
+    }
+    try {
+      final shopDoc = await firestore
+          .collection(AppConstants.shopsCollection)
+          .doc(shopId)
+          .get();
+      var name = shopDoc.data()?['shopName'] as String? ?? '';
+      if (name.trim().isEmpty && _uid != null) {
+        final userDoc = await firestore.collection('users').doc(_uid!).get();
+        name = userDoc.data()?['shopName'] as String? ?? '';
+      }
+      name = name.trim();
+      if (name.isEmpty) return '';
+      _cachedShopNameFor = shopId;
+      _cachedShopName = name;
+      return name;
+    } catch (_) {
+      return '';
+    }
+  }
+
   @override
   Future<SaleModel> addSale({
     required String ownerId,
@@ -56,6 +87,8 @@ class SalesRepoImpl implements SalesRepo {
     if (resolvedOwnerId == null || resolvedOwnerId.isEmpty) {
       throw Exception('يجب تسجيل الدخول أولاً');
     }
+
+    final shopName = await _resolveShopName(resolvedShopId);
 
     // Validate items
     for (final item in items) {
@@ -80,6 +113,7 @@ class SalesRepoImpl implements SalesRepo {
       saleId: saleRef.id,
       ownerId: resolvedOwnerId,
       shopId: resolvedShopId,
+      shopName: shopName,
       items: items,
       subtotal: subtotal,
       discount: finalDiscount.toDouble(),

@@ -52,6 +52,10 @@ class SaleModel {
   final String ownerId;
   final String shopId;
 
+  /// اسم المحل وقت البيع — يُحفظ مع الفاتورة حتى تبقى البيانات مكتملة
+  /// ولو تغيّر اسم المحل لاحقاً. الفواتير القديمة بلا قيمة ('').
+  final String shopName;
+
   final List<SaleItemModel> items;
 
   final double subtotal;
@@ -67,6 +71,7 @@ class SaleModel {
     required this.saleId,
     required this.ownerId,
     required this.shopId,
+    this.shopName = '',
     required this.items,
     required this.subtotal,
     required this.discount,
@@ -81,6 +86,7 @@ class SaleModel {
       'saleId': saleId,
       'ownerId': ownerId,
       'shopId': shopId,
+      'shopName': shopName,
       'items': items.map((item) => item.toJson()).toList(),
       'subtotal': subtotal,
       'discount': discount,
@@ -104,6 +110,7 @@ class SaleModel {
       saleId: json['saleId'] ?? '',
       ownerId: json['ownerId'] ?? '',
       shopId: json['shopId'] ?? '',
+      shopName: json['shopName'] ?? '',
       items: items,
       subtotal: (json['subtotal'] as num?)?.toDouble() ?? 0,
       discount: (json['discount'] as num?)?.toDouble() ?? 0,
