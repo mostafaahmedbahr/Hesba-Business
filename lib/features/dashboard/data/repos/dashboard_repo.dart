@@ -6,6 +6,11 @@ abstract class DashboardRepo {
   /// Returns total sales amount for today.
   Future<double> getTodaySalesTotal();
 
+  /// Returns today's sales totals grouped by payment method
+  /// (`{'cash': 120, 'mobile_wallet': 50}`) — powers the balance breakdown
+  /// dialog on the home screen.
+  Future<Map<String, double>> getTodaySalesByMethod();
+
   /// Returns total returns amount for today.
   Future<double> getTodayReturnsTotal();
 

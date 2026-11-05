@@ -9,6 +9,11 @@ class DashboardState {
   final int todayReturnsCount;
   final double todayNetSales;
   final double todayExpensesTotal;
+
+  /// مبيعات اليوم مجمّعة حسب وسيلة الدفع (cash/card/mobile_wallet/...)
+  /// — مصدر تفصيل الرصيد في الديالوج.
+  final Map<String, double> todaySalesByMethod;
+
   final int productsCount;
   final int lowStockCount;
   final String? errorMessage;
@@ -22,6 +27,7 @@ class DashboardState {
     this.todayReturnsCount = 0,
     this.todayNetSales = 0,
     this.todayExpensesTotal = 0,
+    this.todaySalesByMethod = const {},
     this.productsCount = 0,
     this.lowStockCount = 0,
     this.errorMessage,
@@ -36,6 +42,7 @@ class DashboardState {
     int? todayReturnsCount,
     double? todayNetSales,
     double? todayExpensesTotal,
+    Map<String, double>? todaySalesByMethod,
     int? productsCount,
     int? lowStockCount,
     String? errorMessage,
@@ -50,6 +57,7 @@ class DashboardState {
       todayReturnsCount: todayReturnsCount ?? this.todayReturnsCount,
       todayNetSales: todayNetSales ?? this.todayNetSales,
       todayExpensesTotal: todayExpensesTotal ?? this.todayExpensesTotal,
+      todaySalesByMethod: todaySalesByMethod ?? this.todaySalesByMethod,
       productsCount: productsCount ?? this.productsCount,
       lowStockCount: lowStockCount ?? this.lowStockCount,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),

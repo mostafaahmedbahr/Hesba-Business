@@ -97,7 +97,7 @@ class DashboardCubit extends Cubit<DashboardState> {
 
     try {
       final results = await Future.wait([
-        _repo.getTodaySalesTotal(),
+        _repo.getTodaySalesByMethod(),
         _repo.getTodayReturnsTotal(),
         _repo.getTodayReturnsCount(),
         _repo.getTodayExpensesTotal(),
@@ -105,7 +105,9 @@ class DashboardCubit extends Cubit<DashboardState> {
         _repo.getLowStockProductsCount(),
       ]);
 
-      final salesTotal = results[0] as double;
+      // الإجمالي = مجموع كل وسائل الدفع (فواتير بلا وسيلة مدخلة تحت '').
+      final byMethod = results[0] as Map<String, double>;
+      final salesTotal = byMethod.values.fold<double>(0, (s, v) => s + v);
       final returnsTotal = results[1] as double;
       final returnsCount = results[2] as int;
       final expensesTotal = results[3] as double;
@@ -116,6 +118,7 @@ class DashboardCubit extends Cubit<DashboardState> {
       emit(state.copyWith(
         status: DashboardStatus.success,
         todaySalesTotal: salesTotal,
+        todaySalesByMethod: byMethod,
         todayReturnsTotal: returnsTotal,
         todayReturnsCount: returnsCount,
         todayNetSales: salesTotal - returnsTotal,

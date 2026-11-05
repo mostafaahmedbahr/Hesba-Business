@@ -66,6 +66,29 @@ class DashboardRepoImpl implements DashboardRepo {
   }
 
   @override
+  Future<Map<String, double>> getTodaySalesByMethod() async {
+    final shopId = await _getShopIdInternal();
+    if (shopId == null) return {};
+
+    final snapshot = await _firestore
+        .collection('sales')
+        .where('shopId', isEqualTo: shopId)
+        .where('createdAt', isGreaterThanOrEqualTo: _todayStart)
+        .where('createdAt', isLessThanOrEqualTo: _todayEnd)
+        .get();
+
+    final byMethod = <String, double>{};
+    for (final doc in snapshot.docs) {
+      final data = doc.data();
+      // الفواتير بلا وسيلة دفع تُجمع تحت '' حتى لا يختفي إجماليها.
+      final method = (data['paymentMethod'] as String?)?.trim() ?? '';
+      byMethod[method] =
+          (byMethod[method] ?? 0) + ((data['total'] as num?)?.toDouble() ?? 0);
+    }
+    return byMethod;
+  }
+
+  @override
   Future<double> getTodayReturnsTotal() async {
     final shopId = await _getShopIdInternal();
     if (shopId == null) return 0;
