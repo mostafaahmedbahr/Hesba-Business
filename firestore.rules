@@ -278,7 +278,10 @@ service cloud.firestore {
     }
 
     match /admin_settings/{docId} {
-      allow read, write: if isAdmin();
+      // Customers read the settings (plan prices, trial days, wallet numbers)
+      // so dashboard edits apply live; only admins may write.
+      allow read: if signedIn();
+      allow write: if isAdmin();
     }
   }
 }

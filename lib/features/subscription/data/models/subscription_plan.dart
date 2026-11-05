@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 
-/// Every purchasable plan and payment channel in one file, so prices, durations
-/// and wallet numbers are written once and never repeated across widgets.
-///
-/// Change a price here and the whole app follows.
-enum SubscriptionPlan {
-  monthly('monthly', 30, 99, null),
-  threeMonths('threeMonths', 90, 249, 297),
-  sixMonths('sixMonths', 180, 449, 594),
-  yearly('yearly', 365, 799, 1188);
+import '../../../../core/models/admin_settings.dart';
+import '../../../../core/services/app_settings_service.dart';
 
-  const SubscriptionPlan(this.id, this.days, this.price, this.normalPrice);
+/// Every purchasable plan and payment channel in one file, so durations and
+/// labels are written once and never repeated across widgets.
+///
+/// Prices and wallet numbers are NOT stored here anymore: they are read live
+/// from `admin_settings/settings` (edited from the dashboard) through
+/// [AppSettingsService], so changing them in the dashboard applies instantly.
+enum SubscriptionPlan {
+  monthly('monthly', 30, 1),
+  threeMonths('threeMonths', 90, 3),
+  sixMonths('sixMonths', 180, 6),
+  yearly('yearly', 365, 12);
+
+  const SubscriptionPlan(this.id, this.days, this.months);
 
   /// Stored in Firestore / the subscription request.
   final String id;
@@ -18,11 +23,24 @@ enum SubscriptionPlan {
   /// How long the period lasts once it starts.
   final int days;
 
-  /// What the customer actually pays.
-  final int price;
+  /// Plan length in months — used to derive the "bought monthly" comparison
+  /// price (monthly price × months).
+  final int months;
+
+  /// Latest settings loaded from the dashboard (defaults before first fetch).
+  static AdminSettings get _settings => AppSettingsService.current;
+
+  /// What the customer actually pays — from the dashboard settings.
+  int get price => switch (this) {
+        SubscriptionPlan.monthly => _settings.monthlyPrice,
+        SubscriptionPlan.threeMonths => _settings.threeMonthsPrice,
+        SubscriptionPlan.sixMonths => _settings.sixMonthsPrice,
+        SubscriptionPlan.yearly => _settings.yearlyPrice,
+      };
 
   /// What the same period costs bought month by month (null when no saving).
-  final int? normalPrice;
+  int? get normalPrice =>
+      months == 1 ? null : _settings.monthlyPrice * months;
 
   /// Pounds saved compared with paying monthly.
   int? get savedAmount {
@@ -56,15 +74,31 @@ enum SubscriptionPlan {
 }
 
 /// Manual payment channels shown after the plan is picked.
+///
+/// The visible wallet [number] is read live from the dashboard settings
+/// ([AppSettingsService]); the constructor value is only a fallback used
+/// before the settings are fetched.
 enum SubscriptionPaymentMethod {
   instapay('instapay', '01110690299'),
   vodafoneCash('vodafone_cash', '01093312802'),
   etisalatCash('etisalat_cash', '01145049298');
 
-  const SubscriptionPaymentMethod(this.id, this.number);
+  const SubscriptionPaymentMethod(this.id, this.fallbackNumber);
 
   final String id;
-  final String number;
+
+  /// Default number, used only when the dashboard settings are unavailable.
+  final String fallbackNumber;
+
+  /// Wallet number shown to the customer — from the dashboard settings.
+  String get number {
+    for (final method in AppSettingsService.current.paymentMethods) {
+      if (method.id == id && method.number.trim().isNotEmpty) {
+        return method.number;
+      }
+    }
+    return fallbackNumber;
+  }
 
   String get labelKey => switch (this) {
         SubscriptionPaymentMethod.instapay => 'payInstapay',

@@ -446,7 +446,7 @@
   "payInstapay": "إنستاباي",
   "payVodafoneCash": "فودافون كاش",
   "payEtisalatCash": "اتصالات كاش",
-  "subscriptionHomeHint": "جرّب 7 أيام مجانًا — باقات تبدأ من 99 ج.م",
+  "subscriptionHomeHint": "جرّب {days} أيام مجانًا — باقات تبدأ من {from} ج.م",
   "locationSectionTitle": "موقع المحل",
   "locationPicking": "جارٍ تحديد موقعك الحالي…",
   "locationGeocoding": "جارٍ تحويل الإحداثيات إلى عنوان…",

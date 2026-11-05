@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
+import '../../../../core/services/app_settings_service.dart';
 import 'subscription_plan.dart';
 
 /// The five states the app cares about. Everything else is derived from dates.
@@ -29,9 +30,6 @@ enum SubscriptionStatus {
 /// every read so a trial or a paid period flips to `expired` by itself without
 /// needing a background job.
 class SubscriptionModel extends Equatable {
-  /// Free period handed to every new account, in days.
-  static const int trialDays = 7;
-
   const SubscriptionModel({
     this.status = SubscriptionStatus.expired,
     this.plan,
@@ -67,10 +65,15 @@ class SubscriptionModel extends Equatable {
   /// cache the guard reads from. Never written to Firestore.
   final DateTime? cachedAt;
 
-  /// A brand new account: 7 days starting at creation, and the free trial can
-  /// never be claimed a second time.
+  /// A brand new account: the free trial length configured in the dashboard
+  /// (`admin_settings.trialDays`, default 7 days) starting at creation, and
+  /// the free trial can never be claimed a second time.
+  ///
+  /// Refresh [AppSettingsService] before calling so the latest dashboard value
+  /// is used; on a failed fetch the default (7) applies.
   factory SubscriptionModel.trialFor({required DateTime createdAt}) {
-    final end = createdAt.add(const Duration(days: trialDays));
+    final days = AppSettingsService.current.trialDays;
+    final end = createdAt.add(Duration(days: days));
     return SubscriptionModel(
       status: SubscriptionStatus.trial,
       isTrial: true,

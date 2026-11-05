@@ -442,7 +442,7 @@
   "payInstapay": "InstaPay",
   "payVodafoneCash": "Vodafone Cash",
   "payEtisalatCash": "Etisalat Cash",
-  "subscriptionHomeHint": "Try 7 free days - plans from 99 EGP",
+  "subscriptionHomeHint": "Try {days} free days - plans from {from} EGP",
   "locationSectionTitle": "Shop location",
   "locationPicking": "Detecting your current location…",
   "locationGeocoding": "Converting coordinates to an address…",

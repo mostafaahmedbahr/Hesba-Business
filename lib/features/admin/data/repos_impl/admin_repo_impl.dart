@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../../features/subscription/data/models/subscription_model.dart';
 import '../../../../features/subscription/data/models/subscription_request_model.dart';
-import '../models/admin_settings.dart';
+import '../../../../core/models/admin_settings.dart';
 import '../models/profit_summary.dart';
 import '../repos/admin_repo.dart';
 

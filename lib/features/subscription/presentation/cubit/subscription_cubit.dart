@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../core/services/app_settings_service.dart';
 import '../../data/models/subscription_plan.dart';
 import '../../data/repos/subscription_repo.dart';
 import '../states/subscription_state.dart';
@@ -17,6 +18,9 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
       loadStatus: SubscriptionLoadStatus.loading,
       messageKey: null,
     ));
+    // Pull the latest plan prices / trial / wallet numbers from the dashboard
+    // settings so the paywall shows live values (never throws on failure).
+    await AppSettingsService.refresh();
     try {
       final subscription = await _repo.getSubscription(refresh: true);
       emit(state.copyWith(

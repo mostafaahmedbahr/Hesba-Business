@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/extensions/log_util.dart';
 import '../../../../core/services/cloudinary_image_service.dart';
+import '../../../../core/services/app_settings_service.dart';
 import '../models/subscription_model.dart';
 import '../models/subscription_plan.dart';
 import '../models/subscription_request_model.dart';
@@ -75,6 +76,9 @@ class SubscriptionRepoImpl implements SubscriptionRepo {
     required String userId,
     required DateTime createdAt,
   }) async {
+    // Pick up the dashboard-configured trial length (falls back to the
+    // default when the fetch fails — refresh never throws).
+    await AppSettingsService.refresh();
     final trial = SubscriptionModel.trialFor(createdAt: createdAt);
     await _subscriptionRef(userId).set(trial.toJson());
     await _mirrorSubscription(userId, trial);

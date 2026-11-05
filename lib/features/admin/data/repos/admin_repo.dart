@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../../features/subscription/data/models/subscription_request_model.dart';
-import '../models/admin_settings.dart';
+import '../../../../core/models/admin_settings.dart';
 import '../models/profit_summary.dart';
 
 abstract class AdminRepo {

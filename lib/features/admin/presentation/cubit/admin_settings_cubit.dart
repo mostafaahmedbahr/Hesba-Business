@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../data/models/admin_settings.dart';
+import '../../../../core/models/admin_settings.dart';
 import '../../data/repos/admin_repo.dart';
 
 abstract class AdminSettingsState extends Equatable {

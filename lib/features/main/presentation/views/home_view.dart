@@ -7,6 +7,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/services/app_settings_service.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/shop_image_view.dart';
 import '../../../dashboard/presentation/cubit/dashboard_cubit.dart';
@@ -879,11 +880,31 @@ class _QA extends StatelessWidget {
 
 /// Opens the subscription screen. Always visible so the trial countdown and
 /// the plans are one tap away.
-class _SubscriptionBanner extends StatelessWidget {
+///
+/// The hint text (trial length + cheapest plan price) is read live from the
+/// dashboard settings via [AppSettingsService] — editing them there updates
+/// this banner on the next refresh.
+class _SubscriptionBanner extends StatefulWidget {
   const _SubscriptionBanner();
 
   @override
+  State<_SubscriptionBanner> createState() => _SubscriptionBannerState();
+}
+
+class _SubscriptionBannerState extends State<_SubscriptionBanner> {
+  @override
+  void initState() {
+    super.initState();
+    // Fetch the latest settings; on success rebuild with live values.
+    // refresh() never throws, so no error handling is needed here.
+    AppSettingsService.refresh().then((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final settings = AppSettingsService.current;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -935,7 +956,10 @@ class _SubscriptionBanner extends StatelessWidget {
                     ),
                     SizedBox(height: 2.h),
                     Text(
-                      'subscriptionHomeHint'.tr(),
+                      'subscriptionHomeHint'.tr(namedArgs: {
+                        'days': '${settings.trialDays}',
+                        'from': '${settings.monthlyPrice}',
+                      }),
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.88),
                         fontSize: 11.5.sp,
