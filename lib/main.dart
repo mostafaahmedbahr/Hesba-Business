@@ -22,7 +22,6 @@ import 'package:hesba/features/settings/presentation/states/settings_state.dart'
   ]);
   runApp(TranslationProvider(child: const HesbaApp()));
 }
-
 /// Fired when the user taps any notification (FCM push, scheduled reminder or
 /// the test notification). If a user is signed in, opens the dashboard; the
 /// splash/login flow handles the not-signed-in case.
