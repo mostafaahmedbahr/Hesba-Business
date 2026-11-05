@@ -39,9 +39,16 @@ class ProductsState {
     }).toList();
   }
 
-  /// قيمة المخزون (سعر الشراء × الكمية).
+  /// قيمة المخزون بسعر الشراء (إجمالي ما دُفع في المخزون).
   double get inventoryValue =>
       products.fold<double>(0, (s, p) => s + p.costPrice * p.stock);
+
+  /// إجمالي سعر البيع للمخزون الحالي (سعر البيع × الكمية).
+  double get saleValue =>
+      products.fold<double>(0, (s, p) => s + p.price * p.stock);
+
+  /// الربح الإجمالي المتوقع = إجمالي البيع − إجمالي الشراء.
+  double get expectedProfit => saleValue - inventoryValue;
 
   /// عدد المنتجات قليلة المخزون.
   int get lowStockCount => products.where((p) => p.isLowStock).length;

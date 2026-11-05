@@ -61,7 +61,7 @@ class _ProductsBody extends StatelessWidget {
           return Scaffold(
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             body: CustomScrollView(slivers: [
-              ProductListHeader(count: 0, inventoryValue: 0, lowStockCount: 0),
+              ProductListHeader(count: 0, inventoryValue: 0, saleValue: 0, expectedProfit: 0, lowStockCount: 0),
               SliverFillRemaining(
                 hasScrollBody: false,
                 child: ProductListEmpty(onAdd: () => _openForm(context)),
@@ -81,6 +81,8 @@ class _ProductsBody extends StatelessWidget {
                 ProductListHeader(
                   count: state.products.length,
                   inventoryValue: state.inventoryValue,
+                  saleValue: state.saleValue,
+                  expectedProfit: state.expectedProfit,
                   lowStockCount: state.lowStockCount,
                   onAdd: () => _openForm(context),
                 ),
