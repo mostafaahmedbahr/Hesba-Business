@@ -5,6 +5,7 @@ import 'package:hesba/core/di/service_locator.dart';
 import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
 import 'package:hesba/features/admin/data/repos/admin_repo.dart';
 import 'package:hesba/features/admin/presentation/cubit/admin_list_cubit.dart';
+import 'package:hesba/features/sales/presentation/cubit/sales_list_state.dart';
 
 class SalesView extends StatefulWidget {
   const SalesView({super.key});
@@ -79,7 +80,11 @@ class _SalesViewState extends State<SalesView> {
                 AdminFilterChips(
                   selected: _method,
                   onSelect: (k) => setState(() => _method = k),
-                  items: [for (final m in methods) AdminChipItem(m, m)],
+                  // القيمة خام للفلترة (cash/...) واللي يظهر عربي زي شاشة العميل.
+                  items: [
+                    for (final m in methods)
+                      AdminChipItem(m, m == 'الكل' ? m : SalesListState.paymentLabel(m)),
+                  ],
                 ),
                 if (filtering)
                   AdminResultCount(
@@ -133,7 +138,14 @@ class _SalesViewState extends State<SalesView> {
       final data = d.data();
       if (_method != 'الكل' && (data['paymentMethod'] as String? ?? '') != _method) return false;
       if (q.isEmpty) return true;
-      final haystack = [data['shopId'], data['paymentMethod'], d.id].whereType<String>().join(' ');
+      // البحث يشمل القيمة الخام (cash) والاسم العربي (نقدي).
+      final rawMethod = (data['paymentMethod'] as String?) ?? '';
+      final haystack = [
+        data['shopId'],
+        rawMethod,
+        SalesListState.paymentLabel(rawMethod),
+        d.id,
+      ].whereType<String>().join(' ');
       return haystack.contains(q);
     }).toList();
   }
@@ -287,7 +299,7 @@ class _SaleCard extends StatelessWidget {
                             const SizedBox(width: 5),
                             Flexible(
                               child: Text(
-                                method,
+                                SalesListState.paymentLabel(method),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(

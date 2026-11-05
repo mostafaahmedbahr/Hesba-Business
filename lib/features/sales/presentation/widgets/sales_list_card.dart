@@ -148,23 +148,62 @@ class _Details extends StatelessWidget {
           children: [
             ...sale.items.map((it) => Padding(
                   padding: EdgeInsets.only(bottom: 8.h),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(width: 7.w, height: 7.w, decoration: const BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [AppTheme.primaryColor, Color(0xFF6D9BFF)]))),
-                      SizedBox(width: 8.w),
-                      Expanded(
+                      Row(
+                        children: [
+                          Container(width: 7.w, height: 7.w, decoration: const BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [AppTheme.primaryColor, Color(0xFF6D9BFF)]))),
+                          SizedBox(width: 8.w),
+                          Expanded(
+                            child: Text(
+                              '${it.productName} × ${it.quantity.toStringAsFixed(it.quantity % 1 == 0 ? 0 : 1)}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w600, color: isDark ? Colors.white : const Color(0xFF1E293B)),
+                            ),
+                          ),
+                          Text('moneyAmount'.tr(namedArgs: {'total': it.total.toStringAsFixed(2), 'currency': 'currencyEGP'.tr()}), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: AppTheme.slateGray)),
+                        ],
+                      ),
+                      // سعر الشراء وسعر البيع للصنف (الفواتير القديمة بلا تكلفة → البيع فقط).
+                      Padding(
+                        padding: EdgeInsets.only(left: 15.w, top: 2.h),
                         child: Text(
-                          '${it.productName} × ${it.quantity.toStringAsFixed(it.quantity % 1 == 0 ? 0 : 1)}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w600, color: isDark ? Colors.white : const Color(0xFF1E293B)),
+                          it.costPrice > 0
+                              ? 'saleItemCostSale'.tr(namedArgs: {
+                                  'cost': it.costPrice.toStringAsFixed(2),
+                                  'price': it.unitPrice.toStringAsFixed(2),
+                                  'currency': 'currencyEGP'.tr(),
+                                })
+                              : 'saleItemSalePrice'.tr(namedArgs: {
+                                  'price': it.unitPrice.toStringAsFixed(2),
+                                  'currency': 'currencyEGP'.tr(),
+                                }),
+                          style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.w600, color: AppTheme.mutedGray),
                         ),
                       ),
-                      Text('moneyAmount'.tr(namedArgs: {'total': it.total.toStringAsFixed(2), 'currency': 'currencyEGP'.tr()}), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: AppTheme.slateGray)),
                     ],
                   ),
                 )),
             if (sale.discount > 0) ...[
+              // المجموع قبل الخصم (المجموع الكلي للأصناف).
+              Padding(
+                padding: EdgeInsets.only(bottom: 4.h),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('salesBeforeDiscount'.tr(), style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w700, color: AppTheme.slateGray)),
+                    Text(
+                      'moneyAmount'.tr(namedArgs: {
+                        'total': (sale.subtotal > 0 ? sale.subtotal : sale.total + sale.discount).toStringAsFixed(2),
+                        'currency': 'currencyEGP'.tr(),
+                      }),
+                      style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: AppTheme.slateGray),
+                    ),
+                  ],
+                ),
+              ),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
                 decoration: BoxDecoration(color: AppTheme.danger.withValues(alpha: 0.07), borderRadius: BorderRadius.circular(10.r)),

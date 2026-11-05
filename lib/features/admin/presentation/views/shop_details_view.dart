@@ -7,6 +7,7 @@ import 'package:hesba/core/widgets/dialogs.dart';
 import 'package:hesba/features/admin/data/repos/admin_repo.dart';
 import 'package:hesba/features/subscription/data/models/subscription_model.dart';
 import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
+import 'package:hesba/features/sales/presentation/cubit/sales_list_state.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ShopDetailsView extends StatelessWidget {
@@ -695,29 +696,7 @@ class _ShopItemsTab extends StatelessWidget {
           ),
         );
       case 'sales':
-        return AdminCard(
-          padding: const EdgeInsets.all(AdminSpace.md),
-          child: Row(
-            children: [
-              const AdminIconTile(icon: Icons.point_of_sale_outlined, color: AdminColors.success, size: 46),
-              const SizedBox(width: AdminSpace.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(AdminFmt.money((data['total'] as num?) ?? 0),
-                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
-                    const SizedBox(height: 2),
-                    Text('${AdminFmt.dateNum(data['createdAt'])}${data['paymentMethod'] != null ? ' • ${data['paymentMethod']}' : ''}',
-                        style: TextStyle(color: AdminColors.textSecondary(context), fontSize: 12)),
-                    const SizedBox(height: 2),
-                    CopyableId(id: id),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
+        return _saleCard(context, id, data);
       default:
         return AdminCard(
           padding: const EdgeInsets.all(AdminSpace.md),
@@ -749,6 +728,148 @@ class _ShopItemsTab extends StatelessWidget {
           ),
         );
     }
+  }
+
+  /// كارت فاتورة مبيعات كامل: المنتجات (الاسم × العدد + سعر الشراء والبيع)
+  /// ثم الإجمالي قبل الخصم وبعده — حتى يفهم الأدمن الفاتورة من غير ما يفتحها.
+  Widget _saleCard(BuildContext context, String id, Map<String, dynamic> data) {
+    final items = (data['items'] as List<dynamic>? ?? [])
+        .whereType<Map<String, dynamic>>()
+        .toList();
+    final discount = (data['discount'] as num?) ?? 0;
+    final total = (data['total'] as num?) ?? 0;
+    // فواتير قديمة بلا subtotal → نشتقه من الإجمالي + الخصم.
+    final subtotal = (data['subtotal'] as num?) ?? (total + discount);
+
+    // طريقة الدفع بالعربي زي شاشة العميل (نقدي / بطاقة / محفظة).
+    final method = (data['paymentMethod'] as String?) ?? '';
+    final methodLabel = method.isEmpty ? '' : SalesListState.paymentLabel(method);
+
+    return AdminCard(
+      padding: const EdgeInsets.all(AdminSpace.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const AdminIconTile(icon: Icons.point_of_sale_outlined, color: AdminColors.success, size: 46),
+              const SizedBox(width: AdminSpace.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('فاتورة مبيعات', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${AdminFmt.dateNum(data['createdAt'])}${methodLabel.isNotEmpty ? ' • $methodLabel' : ''}',
+                      style: TextStyle(color: AdminColors.textSecondary(context), fontSize: 12),
+                    ),
+                    const SizedBox(height: 2),
+                    CopyableId(id: id),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                    color: AdminColors.success.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(AdminRadius.tag)),
+                child: Text(AdminFmt.money(total),
+                    style: const TextStyle(color: AdminColors.success, fontWeight: FontWeight.w800, fontSize: 12.5)),
+              ),
+            ],
+          ),
+          if (items.isNotEmpty) ...[
+            const Divider(height: 16),
+            for (final item in items) _saleItemRow(context, item),
+          ],
+          const Divider(height: 16),
+          _saleTotalRow(context, 'قبل الخصم', subtotal),
+          if (discount > 0) ...[
+            const SizedBox(height: 2),
+            _saleTotalRow(context, 'الخصم', -discount, negative: true),
+          ],
+          const SizedBox(height: 2),
+          _saleTotalRow(context, 'بعد الخصم', total, bold: true),
+        ],
+      ),
+    );
+  }
+
+  /// صنف داخل الفاتورة: اسم المنتج × العدد + سعر الشراء وسعر البيع
+  /// (الفواتير القديمة بلا costPrice → نعرض سعر البيع فقط).
+  Widget _saleItemRow(BuildContext context, Map<String, dynamic> item) {
+    final name = (item['productName'] as String?) ?? '-';
+    final qtyNum = (item['quantity'] as num?) ?? 0;
+    final qty = qtyNum == qtyNum.roundToDouble() ? '${qtyNum.toInt()}' : '$qtyNum';
+    final cost = (item['costPrice'] as num?) ?? 0;
+    final price = (item['unitPrice'] as num?) ?? 0;
+    final lineTotal = (item['total'] as num?) ?? (qtyNum * price);
+
+    final prices = cost > 0
+        ? 'شراء: ${AdminFmt.money(cost)} • بيع: ${AdminFmt.money(price)}'
+        : 'سعر البيع: ${AdminFmt.money(price)}';
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+            decoration: BoxDecoration(
+                color: AppTheme.primaryColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(AdminRadius.tag)),
+            child: Text('×$qty',
+                style: const TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.w800, fontSize: 11.5)),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                const SizedBox(height: 1),
+                Text(prices,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: AdminColors.textSecondary(context), fontSize: 11.5)),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(AdminFmt.money(lineTotal),
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5)),
+        ],
+      ),
+    );
+  }
+
+  /// سطر إجمالي في أسفل الفاتورة (قبل الخصم / الخصم / بعد الخصم).
+  Widget _saleTotalRow(BuildContext context, String label, num amount,
+      {bool bold = false, bool negative = false}) {
+    final color = negative
+        ? AdminColors.error
+        : (bold ? AdminColors.success : AdminColors.textSecondary(context));
+    return Row(
+      children: [
+        Expanded(
+          child: Text(label,
+              style: TextStyle(
+                color: AdminColors.textSecondary(context),
+                fontSize: 12.5,
+                fontWeight: bold ? FontWeight.w800 : FontWeight.w600,
+              )),
+        ),
+        Text(AdminFmt.money(amount),
+            style: TextStyle(
+              color: color,
+              fontSize: bold ? 14 : 12.5,
+              fontWeight: FontWeight.w800,
+            )),
+      ],
+    );
   }
 }
 
