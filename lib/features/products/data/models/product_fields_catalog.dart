@@ -215,7 +215,7 @@ class ProductFieldsCatalog {
     ),
   );
 
-  // ── ملابس / أحذية: لون + مقاس + موديل + كميات لكل لون ومقاس ──
+  // ── ملابس / أحذية: لون + مقاس + موديل (حقل واحد فقط لكل منتج) ──
 
   static const ProductFieldConfig _color = ProductFieldConfig(
     key: ProductFieldKeys.color,
@@ -246,19 +246,13 @@ class ProductFieldsCatalog {
     section: ProductFormSection.specs,
   );
 
-  static const ProductFieldConfig _variants = ProductFieldConfig(
-    key: ProductFieldKeys.variants,
-    type: ProductFieldType.variants,
-    labelKey: 'productFormVariants',
-    hintKey: 'productFormVariantsHint',
-    icon: Icons.grid_view_rounded,
-    section: ProductFormSection.specs,
-  );
-
+  // NOTE: جدول الإضافة المتعددة (variants) اتشال من ملابس/أحذية بناءً على
+  // رغبة المالك: كل منتج له لون ومقاس واحد بس. البيانات القديمة في
+  // specs['variants'] بتفضل محفوظة بس مش معروضة ولا بتتعدل في الفورم.
   static ProductFormConfig _variantsProfile(String? type) => ProductFormConfig(
     profileId: profileVariants,
     businessType: type,
-    fields: _baseFields(extra: const [_color, _size, _model, _variants]),
+    fields: _baseFields(extra: const [_color, _size, _model]),
   );
 
   // ── بقالة / سوبر ماركت / لحوم / خضروات ...: باركود + وحدة + صلاحية ──

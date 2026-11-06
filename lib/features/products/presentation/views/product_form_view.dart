@@ -137,10 +137,14 @@ class _ProductFormViewState extends State<ProductFormView> {
     if (raw is! List) return;
     for (final row in raw) {
       if (row is Map) {
+        final savedSize = '${row['size'] ?? ''}';
+        final isCustomSize =
+            savedSize.isNotEmpty && !AppConstants.productSizes.contains(savedSize);
         _variants.add(ProductVariantRow(
           color: '${row['color'] ?? ''}',
-          size: '${row['size'] ?? ''}',
+          size: savedSize,
           qty: '${row['qty'] ?? ''}',
+          useCustomSize: isCustomSize,
         ));
       }
     }
@@ -544,12 +548,21 @@ class _ProductFormViewState extends State<ProductFormView> {
         return ProductFormVariantsEditor(
           key: ValueKey(f.key),
           rows: _variants,
+          availableStock: _variantsAvailableStock(),
           validator: (rows) {
             for (final r in rows) {
               final qty = r.qty.trim();
               if (qty.isEmpty || (int.tryParse(NumberParser.toLatin(qty)) ?? -1) < 0) {
                 return 'productsInvalidNumber'.tr();
               }
+              if (r.useCustomSize && r.size.trim().isEmpty) {
+                return 'productFormCustomSize'.tr();
+              }
+            }
+            final available = _variantsAvailableStock();
+            final total = ProductFormVariantsEditor.totalQty(rows);
+            if (available != null && total > available) {
+              return 'productFormVariantsExceed'.tr();
             }
             return null;
           },
@@ -600,10 +613,19 @@ class _ProductFormViewState extends State<ProductFormView> {
     }
   }
 
-  /// الكمية الإجمالية تتبع صفوف جدول Variants تلقائياً.
+  /// الكمية الإجمالية تُملأ تلقائياً من الجدول فقط لو المستخدم ما كتبش فوق.
+  /// لو الكمية المكتوبة موجودة تبقى سقف (cap): المجموع مينفعش يعديها والتحقق بيمنع الحفظ.
   void _syncStockFromVariants() {
+    final current = _ctrl(ProductFieldKeys.stock).text.trim();
+    if (current.isNotEmpty) return;
     final total = ProductFormVariantsEditor.totalQty(_variants);
     _ctrl(ProductFieldKeys.stock).text = '$total';
+  }
+
+  int? _variantsAvailableStock() {
+    final text = _ctrl(ProductFieldKeys.stock).text.trim();
+    if (text.isEmpty) return null;
+    return int.tryParse(NumberParser.toLatin(text));
   }
 
   /// قواعد التحقق المطبقة على الحقول النصية/الرقمية (نفس منطق Cubit).

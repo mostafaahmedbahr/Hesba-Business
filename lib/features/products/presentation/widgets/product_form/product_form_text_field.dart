@@ -77,6 +77,7 @@ class ProductFormTextField extends StatelessWidget {
   final TextInputType? keyboard;
   final int maxLines;
   final Widget? suffixIcon;
+  final bool readOnly;
   final String? Function(String?)? validator;
   final ValueChanged<String>? onChanged;
 
@@ -91,6 +92,7 @@ class ProductFormTextField extends StatelessWidget {
     this.keyboard,
     this.maxLines = 1,
     this.suffixIcon,
+    this.readOnly = false,
     this.validator,
     this.onChanged,
   });
@@ -101,6 +103,7 @@ class ProductFormTextField extends StatelessWidget {
       controller: controller,
       keyboardType: keyboard ?? TextInputType.text,
       maxLines: maxLines,
+      readOnly: readOnly,
       validator: validator,
       onChanged: onChanged,
       style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w600),

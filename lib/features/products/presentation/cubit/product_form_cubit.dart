@@ -76,7 +76,25 @@ class ProductFormCubit extends Cubit<ProductFormState> {
   String? validate(Map<String, dynamic> values) {
     // وجود صفوف Variants يعني أن الكمية محسوبة منها (الحقل قد يكون فارغاً).
     final variantsRaw = values[ProductFieldKeys.variants];
-    final hasVariantRows = variantsRaw is List && variantsRaw.isNotEmpty;
+    final List variantsList = variantsRaw is List ? variantsRaw : const [];
+    final hasVariantRows = variantsList.isNotEmpty;
+    if (hasVariantRows) {
+      var total = 0;
+      for (final row in variantsList) {
+        if (row is Map) {
+          final qty = int.tryParse(NumberParser.toLatin('${row['qty'] ?? ''}')) ?? -1;
+          if (qty < 0) return 'productsInvalidNumber';
+          total += qty;
+        }
+      }
+      final stockText = values[ProductFieldKeys.stock];
+      final stockValue = stockText is String && stockText.trim().isNotEmpty
+          ? int.tryParse(NumberParser.toLatin(stockText.trim()))
+          : null;
+      if (stockValue != null && total > stockValue) {
+        return 'productFormVariantsExceed';
+      }
+    }
 
     for (final field in state.config.fields) {
       if (!isFieldVisible(field)) continue;
