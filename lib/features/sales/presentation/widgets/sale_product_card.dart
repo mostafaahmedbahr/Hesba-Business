@@ -95,7 +95,7 @@ class SaleProductCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20.r),
                   ),
                   child: Text(
-                    selectedProduct!.isOutOfStock ? 'productOutOfStock'.tr() : 'productAvailableColon'.tr(namedArgs: {'stock': '${selectedProduct!.stock}'}),
+                    selectedProduct!.isOutOfStock ? 'productOutOfStock'.tr() : 'productAvailableColon'.tr(namedArgs: {'stock': selectedProduct!.stockLabel}),
                     style: TextStyle(
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w800,
@@ -169,8 +169,8 @@ class SaleProductCard extends StatelessWidget {
                           ),
                           subtitle: Text(
                             inactive
-                                ? '${'productInactive'.tr()} — ${'productPriceStock'.tr(namedArgs: {'price': p.price.toStringAsFixed(0), 'currency': 'currencyEGP'.tr(), 'stock': '${p.stock}'})} '
-                                : 'productPriceStock'.tr(namedArgs: {'price': p.price.toStringAsFixed(0), 'currency': 'currencyEGP'.tr(), 'stock': '${p.stock}'}),
+                                ? '${'productInactive'.tr()} — ${'productPriceStock'.tr(namedArgs: {'price': p.price.toStringAsFixed(0), 'currency': 'currencyEGP'.tr(), 'stock': p.stockLabel})} '
+                                : 'productPriceStock'.tr(namedArgs: {'price': p.price.toStringAsFixed(0), 'currency': 'currencyEGP'.tr(), 'stock': p.stockLabel}),
                             style: TextStyle(fontSize: 11.sp, color: inactive ? AppTheme.danger : AppTheme.slateGray, fontWeight: inactive ? FontWeight.w700 : FontWeight.w400),
                           ),
                           trailing: inactive
@@ -321,7 +321,7 @@ class SaleProductCard extends StatelessWidget {
                     final q = double.tryParse(v ?? '');
                     if (q == null || q <= 0) return '!';
                     if (selectedProduct != null && q > selectedProduct!.stock) {
-                      return 'productAvailable'.tr(namedArgs: {'stock': '${selectedProduct!.stock}'});
+                      return 'productAvailable'.tr(namedArgs: {'stock': selectedProduct!.stockLabel});
                     }
                     return null;
                   },

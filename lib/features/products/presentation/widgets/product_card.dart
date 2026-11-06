@@ -60,7 +60,7 @@ class ProductCard extends StatelessWidget {
                     Row(mainAxisSize: MainAxisSize.min, children: [
                       if (product.isLowStock) Icon(Icons.warning_amber_rounded, size: 12.sp, color: AppTheme.warningAmber),
                       if (product.isLowStock) SizedBox(width: 3.w),
-                      Text('${product.stock}', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: product.isOutOfStock ? AppTheme.danger : isDark ? Colors.white : AppTheme.ink)),
+                      Text(product.stockLabel, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: product.isOutOfStock ? AppTheme.danger : isDark ? Colors.white : AppTheme.ink)),
                     ]),
                   ]),
                 ),

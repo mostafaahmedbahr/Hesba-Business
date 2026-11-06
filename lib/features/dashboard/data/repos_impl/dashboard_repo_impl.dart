@@ -168,8 +168,8 @@ class DashboardRepoImpl implements DashboardRepo {
 
     int count = 0;
     for (final doc in snapshot.docs) {
-      final stock = (doc.data()['stock'] as num?)?.toInt() ?? 0;
-      final threshold = (doc.data()['lowStockThreshold'] as num?)?.toInt() ?? 5;
+      final stock = (doc.data()['stock'] as num?)?.toDouble() ?? 0;
+      final threshold = (doc.data()['lowStockThreshold'] as num?)?.toDouble() ?? 5;
       if (stock <= threshold) count++;
     }
     return count;

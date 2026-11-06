@@ -140,7 +140,7 @@ class SalesRepoImpl implements SalesRepo {
           if ((data['shopId'] as String?) != resolvedShopId) {
             throw Exception('المنتج لا يتبع هذا المحل: ${item.productName}');
           }
-          final currentStock = (data['stock'] as num?)?.toInt() ?? 0;
+          final currentStock = (data['stock'] as num?)?.toDouble() ?? 0;
           final isActive = data['isActive'] as bool? ?? true;
           if (!isActive) {
             throw Exception('المنتج غير متاح: ${item.productName}');
@@ -149,9 +149,9 @@ class SalesRepoImpl implements SalesRepo {
             throw Exception(
                 'الكمية المطلوبة غير متوفرة لـ ${item.productName} (المتاح: $currentStock)');
           }
-          // Decrement stock
+          // Decrement stock (نص كيلو = خصم 0.5 تماماً)
           transaction.update(productRef, {
-            'stock': currentStock - item.quantity.toInt(),
+            'stock': currentStock - item.quantity,
             'updatedAt': FieldValue.serverTimestamp(),
           });
         }

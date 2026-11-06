@@ -33,7 +33,7 @@ class ProductFormVariantsEditor extends StatelessWidget {
   final List<ProductVariantRow> rows;
 
   /// الكمية المتاحة المُدخلة فوق — سقف لمجموع الصفوف.
-  final int? availableStock;
+  final double? availableStock;
   final VoidCallback onAdd;
   final ValueChanged<int> onRemove;
   final void Function(int index, ProductVariantRow row) onChange;
@@ -49,10 +49,10 @@ class ProductFormVariantsEditor extends StatelessWidget {
     this.validator,
   });
 
-  static int totalQty(List<ProductVariantRow> rows) {
-    var total = 0;
+  static double totalQty(List<ProductVariantRow> rows) {
+    var total = 0.0;
     for (final row in rows) {
-      total += int.tryParse(NumberParser.toLatin(row.qty)) ?? 0;
+      total += double.tryParse(NumberParser.toLatin(row.qty)) ?? 0;
     }
     return total;
   }
@@ -62,6 +62,12 @@ class ProductFormVariantsEditor extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final error = validator?.call(rows);
     final total = totalQty(rows);
+    final totalLabel = total == total.roundToDouble() ? total.toStringAsFixed(0) : total.toStringAsFixed(1);
+    final availableLabel = availableStock == null
+        ? ''
+        : (availableStock! == availableStock!.roundToDouble()
+            ? availableStock!.toStringAsFixed(0)
+            : availableStock!.toStringAsFixed(1));
     final exceeds = availableStock != null && total > availableStock!;
 
     return Column(
@@ -120,8 +126,8 @@ class ProductFormVariantsEditor extends StatelessWidget {
               Expanded(
                 child: Text(
                   availableStock != null
-                      ? '${'productFormVariantsTotal'.tr()}: $total / ${'productFormStock'.tr()}: $availableStock'
-                      : '${'productFormVariantsTotal'.tr()}: $total',
+                      ? '${'productFormVariantsTotal'.tr()}: $totalLabel / ${'productFormStock'.tr()}: $availableLabel'
+                      : '${'productFormVariantsTotal'.tr()}: $totalLabel',
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w800,
@@ -208,7 +214,7 @@ class ProductFormVariantsEditor extends StatelessWidget {
                 flex: 2,
                 child: TextFormField(
                   initialValue: row.qty,
-                  keyboardType: TextInputType.number,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600),
                   decoration: productFormDecoration(
                     context,

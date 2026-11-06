@@ -10,9 +10,9 @@ class Product {
   /// Purchase price (سعر الشراء).
   final double costPrice;
 
-  /// Available quantity in stock.
-  final int stock;
-  final int lowStockThreshold;
+  /// Available quantity in stock (double: pieces or kg/litre).
+  final double stock;
+  final double lowStockThreshold;
   final String category;
 
   /// Optional product code (كود المنتج).
@@ -70,8 +70,8 @@ class Product {
       name: json['name'] as String? ?? '',
       price: (json['price'] as num?)?.toDouble() ?? 0,
       costPrice: (json['costPrice'] as num?)?.toDouble() ?? 0,
-      stock: (json['stock'] as num?)?.toInt() ?? 0,
-      lowStockThreshold: (json['lowStockThreshold'] as num?)?.toInt() ?? 5,
+      stock: (json['stock'] as num?)?.toDouble() ?? 0,
+      lowStockThreshold: (json['lowStockThreshold'] as num?)?.toDouble() ?? 5,
       category: json['category'] as String? ?? '',
       code: json['code'] as String? ?? '',
       size: json['size'] as String? ?? '',
@@ -109,8 +109,8 @@ class Product {
     String? name,
     double? price,
     double? costPrice,
-    int? stock,
-    int? lowStockThreshold,
+    double? stock,
+    double? lowStockThreshold,
     String? category,
     String? code,
     String? size,
@@ -145,6 +145,11 @@ class Product {
   bool get isLowStock => stock <= lowStockThreshold;
 
   bool get isOutOfStock => stock <= 0;
+
+  /// عرض المخزون: عدد صحيح من غير كسور، وكسر برقم عشري واحد.
+  String get stockLabel => stock == stock.roundToDouble() ? stock.toStringAsFixed(0) : stock.toStringAsFixed(1);
+
+  String get lowStockLabel => lowStockThreshold == lowStockThreshold.roundToDouble() ? lowStockThreshold.toStringAsFixed(0) : lowStockThreshold.toStringAsFixed(1);
 
   /// Profit margin percentage on the sale price.
   double get marginPercent =>

@@ -79,17 +79,17 @@ class ProductFormCubit extends Cubit<ProductFormState> {
     final List variantsList = variantsRaw is List ? variantsRaw : const [];
     final hasVariantRows = variantsList.isNotEmpty;
     if (hasVariantRows) {
-      var total = 0;
+      var total = 0.0;
       for (final row in variantsList) {
         if (row is Map) {
-          final qty = int.tryParse(NumberParser.toLatin('${row['qty'] ?? ''}')) ?? -1;
+          final qty = double.tryParse(NumberParser.toLatin('${row['qty'] ?? ''}')) ?? -1;
           if (qty < 0) return 'productsInvalidNumber';
           total += qty;
         }
       }
       final stockText = values[ProductFieldKeys.stock];
       final stockValue = stockText is String && stockText.trim().isNotEmpty
-          ? int.tryParse(NumberParser.toLatin(stockText.trim()))
+          ? double.tryParse(NumberParser.toLatin(stockText.trim()))
           : null;
       if (stockValue != null && total > stockValue) {
         return 'productFormVariantsExceed';
@@ -117,6 +117,11 @@ class ProductFormCubit extends Cubit<ProductFormState> {
           }
           final n = double.tryParse(NumberParser.toLatin(text));
           if (n == null) return 'validatorNumber';
+          // المخزون يسمح بالصفر (نفد المخزون)، لكن الأسعار لازم تكون > 0.
+          if (field.key == ProductFieldKeys.stock || field.key == ProductFieldKeys.lowStockThreshold) {
+            if (n < 0) return 'productsInvalidNumber';
+            break;
+          }
           if (n <= 0) return 'validatorPositiveNumber';
         case ProductFieldType.number:
           if (text.isEmpty) {
@@ -166,14 +171,16 @@ class ProductFormCubit extends Cubit<ProductFormState> {
     }
 
     final variants = values[ProductFieldKeys.variants];
-    var stock = int.tryParse(NumberParser.toLatin(str(ProductFieldKeys.stock))) ??
-        existing?.stock ??
-        0;
+    var stock =
+        double.tryParse(NumberParser.toLatin(str(ProductFieldKeys.stock))) ??
+            existing?.stock ??
+            0;
+    if (stock < 0) stock = 0;
     if (variants is List && variants.isNotEmpty) {
       stock = 0;
       for (final row in variants) {
         if (row is Map) {
-          stock += int.tryParse(
+          stock += double.tryParse(
                 NumberParser.toLatin('${row['qty'] ?? ''}'),
               ) ??
               0;
@@ -191,11 +198,12 @@ class ProductFormCubit extends Cubit<ProductFormState> {
         0;
     // الحقل الفاضي يحتفظ بالافتراضي التاريخي 5.
     final lowStockText = str(ProductFieldKeys.lowStockThreshold);
-    final lowStock = lowStockText.isEmpty
+    var lowStock = lowStockText.isEmpty
         ? (existing?.lowStockThreshold ?? 5)
-        : (int.tryParse(NumberParser.toLatin(lowStockText)) ??
+        : (double.tryParse(NumberParser.toLatin(lowStockText)) ??
               existing?.lowStockThreshold ??
               5);
+    if (lowStock < 0) lowStock = 0;
 
     // color/size تبقى top-level؛ تُمرَّر فقط لو الحقل ظاهر في الإعدادات.
     final hasColor = state.config.has(ProductFieldKeys.color);

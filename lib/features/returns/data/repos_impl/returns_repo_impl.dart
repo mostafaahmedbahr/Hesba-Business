@@ -176,8 +176,8 @@ class ReturnsRepoImpl implements ReturnsRepo {
             continue;
           }
           final data = snap.data()!;
-          final currentStock = (data['stock'] as num?)?.toInt() ?? 0;
-          final newStock = currentStock + item.quantity.toInt();
+          final currentStock = (data['stock'] as num?)?.toDouble() ?? 0;
+          final newStock = currentStock + item.quantity;
           transaction.update(productRef, {
             'stock': newStock,
             'updatedAt': FieldValue.serverTimestamp(),

@@ -209,9 +209,9 @@ class _ProductFormViewState extends State<ProductFormView> {
       case ProductFieldKeys.price:
         return p != null ? _num(p.price) : '';
       case ProductFieldKeys.stock:
-        return p != null ? '${p.stock}' : '';
+        return p != null ? p.stockLabel : '';
       case ProductFieldKeys.lowStockThreshold:
-        return p != null ? '${p.lowStockThreshold}' : '5';
+        return p != null ? p.lowStockLabel : '5';
       case ProductFieldKeys.color:
         return p?.color ?? '';
       case ProductFieldKeys.size:
@@ -552,7 +552,7 @@ class _ProductFormViewState extends State<ProductFormView> {
           validator: (rows) {
             for (final r in rows) {
               final qty = r.qty.trim();
-              if (qty.isEmpty || (int.tryParse(NumberParser.toLatin(qty)) ?? -1) < 0) {
+              if (qty.isEmpty || (double.tryParse(NumberParser.toLatin(qty)) ?? -1) < 0) {
                 return 'productsInvalidNumber'.tr();
               }
               if (r.useCustomSize && r.size.trim().isEmpty) {
@@ -619,13 +619,14 @@ class _ProductFormViewState extends State<ProductFormView> {
     final current = _ctrl(ProductFieldKeys.stock).text.trim();
     if (current.isNotEmpty) return;
     final total = ProductFormVariantsEditor.totalQty(_variants);
-    _ctrl(ProductFieldKeys.stock).text = '$total';
+    _ctrl(ProductFieldKeys.stock).text =
+        total == total.roundToDouble() ? total.toStringAsFixed(0) : total.toStringAsFixed(1);
   }
 
-  int? _variantsAvailableStock() {
+  double? _variantsAvailableStock() {
     final text = _ctrl(ProductFieldKeys.stock).text.trim();
     if (text.isEmpty) return null;
-    return int.tryParse(NumberParser.toLatin(text));
+    return double.tryParse(NumberParser.toLatin(text));
   }
 
   /// قواعد التحقق المطبقة على الحقول النصية/الرقمية (نفس منطق Cubit).
@@ -639,6 +640,10 @@ class _ProductFormViewState extends State<ProductFormView> {
         case ProductFieldType.decimal:
           final n = double.tryParse(NumberParser.toLatin(text));
           if (n == null) return 'validatorNumber'.tr();
+          if (f.key == ProductFieldKeys.stock || f.key == ProductFieldKeys.lowStockThreshold) {
+            if (n < 0) return 'productsInvalidNumber'.tr();
+            break;
+          }
           if (n <= 0) return 'validatorPositiveNumber'.tr();
         case ProductFieldType.number:
           final n = int.tryParse(NumberParser.toLatin(text));

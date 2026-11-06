@@ -115,7 +115,7 @@ class ProductFieldsCatalog {
 
   static const ProductFieldConfig _stock = ProductFieldConfig(
     key: ProductFieldKeys.stock,
-    type: ProductFieldType.number,
+    type: ProductFieldType.decimal,
     labelKey: 'productFormStock',
     icon: Icons.numbers_rounded,
     required: true,
@@ -125,7 +125,7 @@ class ProductFieldsCatalog {
 
   static const ProductFieldConfig _lowStock = ProductFieldConfig(
     key: ProductFieldKeys.lowStockThreshold,
-    type: ProductFieldType.number,
+    type: ProductFieldType.decimal,
     labelKey: 'productFormLowStock',
     icon: Icons.low_priority_rounded,
     section: ProductFormSection.pricing,
