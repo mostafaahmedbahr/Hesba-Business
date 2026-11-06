@@ -34,6 +34,7 @@ class _ExpensesBody extends StatelessWidget {
   /// يفتح إضافة/تعديل مصروف.
   Future<void> _openAdd(BuildContext context, [ExpenseModel? expense]) async {
     if (!await SubscriptionGate.ensureCanModify(context)) return;
+    if (!context.mounted) return;
     HapticFeedback.lightImpact();
     final res = await Navigator.push(
       context,
@@ -61,8 +62,6 @@ class _ExpensesBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Delete/update failures on a non-empty list would otherwise be silent:
-    // the body below only renders errors when the list itself is empty.
     return BlocConsumer<ExpensesCubit, ExpensesState>(
       listener: (context, state) {
         if (state.status == ExpensesStatus.error && state.expenses.isNotEmpty) {
@@ -127,6 +126,8 @@ class _ExpensesBody extends StatelessWidget {
             color: AppTheme.danger,
             onRefresh: () async => cubit.loadExpenses(shopId: shopId ?? ''),
             child: CustomScrollView(
+              // عشان RefreshIndicator يشتغل حتى لو المحتوى قصير.
+              physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
                 ExpenseListHeader(
                   count: state.expenses.length,
@@ -161,28 +162,33 @@ class _ExpensesBody extends StatelessWidget {
                     padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 110.h),
                     sliver: SliverList.separated(
                       itemCount: filtered.length,
-                      separatorBuilder: (_, _) => SizedBox(height: 10.h),
+                      separatorBuilder: (_, __) => SizedBox(height: 10.h),
                       itemBuilder: (itemCtx, i) {
                         final expense = filtered[i];
                         return Dismissible(
                           key: ValueKey(expense.expenseId),
                           direction: DismissDirection.endToStart,
+                          // Directional عشان يشتغل صح في RTL.
                           background: Container(
-                            alignment: Alignment.centerRight,
-                            padding: EdgeInsets.only(right: 20.w),
-                            decoration: BoxDecoration(color: AppTheme.danger, borderRadius: BorderRadius.circular(22.r)),
+                            alignment: AlignmentDirectional.centerEnd,
+                            padding: EdgeInsetsDirectional.only(end: 20.w),
+                            decoration: BoxDecoration(
+                              color: AppTheme.danger,
+                              borderRadius: BorderRadius.circular(22.r),
+                            ),
                             child: Icon(Icons.delete_rounded, color: Colors.white, size: 26.sp),
                           ),
                           confirmDismiss: (_) => _confirmDelete(itemCtx, expense).then((_) => false),
                           child: ExpenseListCard(
                             expense: expense,
-                            onEdit: () => _openAdd(context, expense),
-                            onDelete: () => _confirmDelete(context, expense),
-                          )
-                              .animate(delay: (50 * i).ms)
-                              .fadeIn(duration: 320.ms)
-                              .slideY(begin: 0.06, end: 0),
-                        );
+                            onEdit: () => _openAdd(itemCtx, expense),
+                            onDelete: () => _confirmDelete(itemCtx, expense),
+                          ),
+                        )
+                        // الأنيميشن برا الـ Dismissible.
+                            .animate(delay: (50 * i).ms)
+                            .fadeIn(duration: 320.ms)
+                            .slideY(begin: 0.06, end: 0);
                       },
                     ),
                   ),

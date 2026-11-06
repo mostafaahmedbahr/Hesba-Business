@@ -90,18 +90,20 @@ class _ExpenseListCardState extends State<ExpenseListCard> {
                             DateFormat('d MMM', 'ar').format(expense.date),
                             style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600),
                           ),
+                          // لازم يكون جوه الـ Row نفسه: Flexible جوه Column
+                          // بيساوي ارتفاع غير محدود = كراش أثناء الـ layout.
+                          if (expense.shopName.isNotEmpty) ...[
+                            SizedBox(width: 6.w),
+                            Flexible(
+                              child: Text(
+                                expense.shopName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(fontSize: 10.5.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w700),
+                              ),
+                            ),
+                          ],
                         ]),
-                           if (expense.shopName.isNotEmpty) ...[
-                             SizedBox(width: 6.w),
-                             Flexible(
-                               child: Text(
-                                 expense.shopName,
-                                 maxLines: 1,
-                                 overflow: TextOverflow.ellipsis,
-                                 style: TextStyle(fontSize: 10.5.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w700),
-                               ),
-                             ),
-                           ],
                       ],
                     ),
                   ),
