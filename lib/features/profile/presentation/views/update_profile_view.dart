@@ -38,7 +38,7 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
   final _addressController = TextEditingController();
   final _cityController = TextEditingController();
 
-  /// التخصص ثابت من التسجيل، بينما رابط صورة المحل يتحدث عبر Cloudinary.
+  /// نوع النشاط قابل للتغيير من هنا، بينما رابط صورة المحل يتحدث عبر Cloudinary.
   String _businessType = '';
   String _shopImageUrl = '';
   String? _governorate;
@@ -86,6 +86,46 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
   /// مدن المحافظة المختارة.
   List<String> get _centers =>
       _governorate == null ? [] : GovernorateData.getCenters(_governorate!);
+
+  List<String> get _businessTypeOptions => RegisterConstants.businessTypes;
+
+  /// القيمة المعروضة في الدروب داون (null لو لسه مختارش).
+  String? get _businessTypeValue {
+    final v = _businessType.trim();
+    if (v.isEmpty) return null;
+    return v;
+  }
+
+  List<DropdownMenuItem<String>> get _businessTypeItems {
+    final items = <DropdownMenuItem<String>>[
+      for (final v in _businessTypeOptions)
+        DropdownMenuItem(
+          value: v,
+          child: Text(
+            v,
+            style: TextStyle(fontSize: 13.sp),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+          ),
+        ),
+    ];
+    // قيمة قديمة مش موجودة في القائمة (أو من حساب قديم) → نظهرها لمنع خطأ Assertion
+    final current = _businessTypeValue;
+    if (current != null && !_businessTypeOptions.contains(current)) {
+      items.add(
+        DropdownMenuItem(
+          value: current,
+          child: Text(
+            current,
+            style: TextStyle(fontSize: 13.sp),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+          ),
+        ),
+      );
+    }
+    return items;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -164,6 +204,15 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
                               hint: 'shopNameHint'.tr(),
                               icon: Icons.store_rounded,
                               validator: (v) => (v == null || v.trim().isEmpty) ? 'shopNameEmpty'.tr() : null,
+                            ),
+                            SizedBox(height: 12.h),
+                            DropdownButtonFormField<String>(
+                              initialValue: _businessTypeValue,
+                              isExpanded: true,
+                              decoration: _dropdownDecoration(isDark, 'shopBusinessType'.tr(), Icons.category_outlined),
+                              items: _businessTypeItems,
+                              onChanged: (v) => setState(() => _businessType = v ?? ''),
+                              validator: (v) => (v == null || v.isEmpty) ? 'shopBusinessEmpty'.tr() : null,
                             ),
                             SizedBox(height: 12.h),
                             _Field(
