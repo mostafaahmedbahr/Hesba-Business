@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
 
@@ -31,21 +30,9 @@ class SaleProductCard extends StatelessWidget {
     this.index = 0,
   });
 
-  /// يزود / ينقص الكمية من الـ stepper.
-  void _step(double delta, double maxStock) {
-    final current = double.tryParse(quantityController.text) ?? 0;
-    var next = current + delta;
-    if (next < 0.5) next = 0.5;
-    if (maxStock > 0 && next > maxStock) next = maxStock;
-    quantityController.text = next.toStringAsFixed(next % 1 == 0 ? 0 : 1);
-    onChanged();
-    HapticFeedback.selectionClick();
-  }
-
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final maxStock = (selectedProduct?.stock ?? 0).toDouble();
     final selectedInactive = selectedProduct != null && !selectedProduct!.isActive;
     final typedInactive = selectedProduct == null &&
         nameController.text.trim().isNotEmpty &&
@@ -304,41 +291,40 @@ class SaleProductCard extends StatelessWidget {
           ],
           SizedBox(height: 12.h),
 
-          // الكمية (stepper) + السعر.
+          // الكمية (تتكتب يدوياً) + السعر — الإجمالي = الكمية × السعر.
           Row(
             children: [
               Expanded(
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
-                  decoration: BoxDecoration(
-                    color: isDark ? AppTheme.darkSurfaceAlt : AppTheme.slatePale,
-                    borderRadius: BorderRadius.circular(14.r),
-                    border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft),
+                child: TextFormField(
+                  controller: quantityController,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w700),
+                  decoration: InputDecoration(
+                    labelText: 'productFormVariantsStockQty'.tr(),
+                    hintText: '0',
+                    prefixIcon: Icon(Icons.pin_outlined, size: 18.sp, color: AppTheme.primaryColor),
+                    filled: true,
+                    fillColor: isDark ? AppTheme.darkSurfaceAlt : AppTheme.slatePale,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide.none),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14.r),
+                      borderSide: BorderSide(color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14.r),
+                      borderSide: const BorderSide(color: AppTheme.primaryColor, width: 1.6),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 13.h),
                   ),
-                  child: Row(
-                    children: [
-                      _StepBtn(icon: Icons.remove_rounded, onTap: () => _step(-1, maxStock)),
-                      Expanded(
-                        child: TextFormField(
-                          controller: quantityController,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900),
-                          decoration: const InputDecoration(border: InputBorder.none, contentPadding: EdgeInsets.zero, isDense: true),
-                          onChanged: (_) => onChanged(),
-                          validator: (v) {
-                            final q = double.tryParse(v ?? '');
-                            if (q == null || q <= 0) return '!';
-                            if (selectedProduct != null && q > selectedProduct!.stock) {
-                              return 'productAvailable'.tr(namedArgs: {'stock': '${selectedProduct!.stock}'});
-                            }
-                            return null;
-                          },
-                        ),
-                      ),
-                      _StepBtn(icon: Icons.add_rounded, onTap: () => _step(1, maxStock)),
-                    ],
-                  ),
+                  onChanged: (_) => onChanged(),
+                  validator: (v) {
+                    final q = double.tryParse(v ?? '');
+                    if (q == null || q <= 0) return '!';
+                    if (selectedProduct != null && q > selectedProduct!.stock) {
+                      return 'productAvailable'.tr(namedArgs: {'stock': '${selectedProduct!.stock}'});
+                    }
+                    return null;
+                  },
                 ),
               ),
               SizedBox(width: 10.w),
@@ -402,30 +388,6 @@ class SaleProductCard extends StatelessWidget {
             );
           }),
         ],
-      ),
-    );
-  }
-}
-
-/// زرار + / - للكمية.
-class _StepBtn extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  const _StepBtn({required this.icon, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(10.r),
-      child: Container(
-        width: 32.w,
-        height: 32.w,
-        decoration: BoxDecoration(
-          color: AppTheme.primaryColor.withValues(alpha: 0.10),
-          borderRadius: BorderRadius.circular(10.r),
-        ),
-        child: Icon(icon, size: 17.sp, color: AppTheme.primaryColor),
       ),
     );
   }
