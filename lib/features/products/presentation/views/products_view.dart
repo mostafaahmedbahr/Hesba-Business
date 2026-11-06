@@ -1,7 +1,5 @@
 import 'package:flutter/services.dart';
-
 import '../../../../common_imports.dart';
-import '../../../../core/di/service_locator.dart';
 import '../../../../core/models/product.dart';
 import '../../data/repos/products_repo.dart';
 import '../cubit/products_cubit.dart';
@@ -31,14 +29,26 @@ class _ProductsBody extends StatelessWidget {
   const _ProductsBody();
 
   /// يفتح فورم إضافة/تعديل.
+
   Future<void> _openForm(BuildContext context, {Product? product}) async {
     if (!await SubscriptionGate.ensureCanModify(context)) return;
+
+    if (!context.mounted) return;
+
     final cubit = context.read<ProductsCubit>();
+
     HapticFeedback.lightImpact();
+
     await Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => ProductFormView(cubit: cubit, product: product)),
+      MaterialPageRoute<void>(
+        builder: (_) => ProductFormView(
+          cubit: cubit,
+          product: product,
+        ),
+      ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -115,6 +125,7 @@ class _ProductsBody extends StatelessWidget {
                           .slideY(begin: 0.06, end: 0),
                     ),
                   ),
+                SliverToBoxAdapter(child: SizedBox(height: 20.h,)),
               ],
             ),
           ),
