@@ -46,6 +46,10 @@ class SaleProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final maxStock = (selectedProduct?.stock ?? 0).toDouble();
+    final selectedInactive = selectedProduct != null && !selectedProduct!.isActive;
+    final typedInactive = selectedProduct == null &&
+        nameController.text.trim().isNotEmpty &&
+        availableProducts.any((p) => !p.isActive && p.name.trim().toLowerCase() == nameController.text.trim().toLowerCase());
 
     return Container(
       padding: EdgeInsets.all(14.w),
@@ -77,7 +81,26 @@ class SaleProductCard extends StatelessWidget {
                 ),
               ),
               SizedBox(width: 8.w),
-              if (selectedProduct != null)
+              if (selectedInactive)
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+                  decoration: BoxDecoration(
+                    color: AppTheme.danger.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(20.r),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.block_rounded, size: 11.sp, color: AppTheme.danger),
+                      SizedBox(width: 4.w),
+                      Text(
+                        'productInactive'.tr(),
+                        style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: AppTheme.danger),
+                      ),
+                    ],
+                  ),
+                )
+              else if (selectedProduct != null)
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
                   decoration: BoxDecoration(
@@ -139,27 +162,36 @@ class SaleProductCard extends StatelessWidget {
                       separatorBuilder: (_, _) => Divider(height: 1.h),
                       itemBuilder: (context, index) {
                         final p = options.elementAt(index);
+                        final inactive = !p.isActive;
                         return ListTile(
                           dense: true,
+                          enabled: !inactive,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
                           leading: Container(
                             width: 38.w,
                             height: 38.w,
                             decoration: BoxDecoration(
-                              color: AppTheme.primaryColor.withValues(alpha: 0.08),
+                              color: inactive ? AppTheme.danger.withValues(alpha: 0.08) : AppTheme.primaryColor.withValues(alpha: 0.08),
                               borderRadius: BorderRadius.circular(10.r),
                             ),
-                            child: Icon(Icons.inventory_2_rounded, size: 18.sp, color: AppTheme.primaryColor),
+                            child: Icon(inactive ? Icons.block_rounded : Icons.inventory_2_rounded, size: 18.sp, color: inactive ? AppTheme.danger : AppTheme.primaryColor),
                           ),
-                          title: Text(p.name, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700)),
+                          title: Text(
+                            p.name,
+                            style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: inactive ? AppTheme.mutedGray : null),
+                          ),
                           subtitle: Text(
-                            'productPriceStock'.tr(namedArgs: {'price': p.price.toStringAsFixed(0), 'currency': 'currencyEGP'.tr(), 'stock': '${p.stock}'}),
-                            style: TextStyle(fontSize: 11.sp, color: AppTheme.slateGray),
+                            inactive
+                                ? '${'productInactive'.tr()} — ${'productPriceStock'.tr(namedArgs: {'price': p.price.toStringAsFixed(0), 'currency': 'currencyEGP'.tr(), 'stock': '${p.stock}'})} '
+                                : 'productPriceStock'.tr(namedArgs: {'price': p.price.toStringAsFixed(0), 'currency': 'currencyEGP'.tr(), 'stock': '${p.stock}'}),
+                            style: TextStyle(fontSize: 11.sp, color: inactive ? AppTheme.danger : AppTheme.slateGray, fontWeight: inactive ? FontWeight.w700 : FontWeight.w400),
                           ),
-                          trailing: p.isLowStock
-                              ? Icon(Icons.warning_amber_rounded, size: 16.sp, color: Colors.orange)
-                              : null,
-                          onTap: () => onSelected(p),
+                          trailing: inactive
+                              ? Icon(Icons.block_rounded, size: 16.sp, color: AppTheme.danger)
+                              : (p.isLowStock
+                                  ? Icon(Icons.warning_amber_rounded, size: 16.sp, color: Colors.orange)
+                                  : null),
+                          onTap: inactive ? null : () => onSelected(p),
                         );
                       },
                     ),
@@ -233,6 +265,36 @@ class SaleProductCard extends StatelessWidget {
             },
           ),
 
+          if (typedInactive) ...[
+            SizedBox(height: 6.h),
+            Row(
+              children: [
+                Icon(Icons.block_rounded, size: 13.sp, color: AppTheme.danger),
+                SizedBox(width: 5.w),
+                Expanded(
+                  child: Text(
+                    'productInactive'.tr(),
+                    style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: AppTheme.danger),
+                  ),
+                ),
+              ],
+            ),
+          ],
+          if (selectedInactive) ...[
+            SizedBox(height: 6.h),
+            Row(
+              children: [
+                Icon(Icons.block_rounded, size: 13.sp, color: AppTheme.danger),
+                SizedBox(width: 5.w),
+                Expanded(
+                  child: Text(
+                    'productInactive'.tr(),
+                    style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: AppTheme.danger),
+                  ),
+                ),
+              ],
+            ),
+          ],
           if (selectedProduct != null && selectedProduct!.category.isNotEmpty) ...[
             SizedBox(height: 6.h),
             Text(

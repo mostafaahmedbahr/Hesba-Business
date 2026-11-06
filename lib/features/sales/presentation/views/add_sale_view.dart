@@ -84,9 +84,25 @@ class _AddSaleViewState extends State<AddSaleView> {
       _productsSub = repo.watchProducts().listen(
         (products) {
           if (!mounted) return;
+          // نحتفظ بكل المنتجات (نشط + غير نشط) عشان غير النشط يظهر في البحث
+          // بعلامة "غير متاح" ومش قابل للاختيار بدل ما يختفي خالص.
           setState(() {
-            _availableProducts = products.where((p) => p.isActive).toList();
+            _availableProducts = products;
             _loadingProducts = false;
+            // منتج اتشال من النشاط واكننا مختارينه، نمسحه قبل الحفظ.
+            for (final e in _items) {
+              if (e.selectedProduct == null) continue;
+              final current = _findProduct(e.selectedProduct!.id);
+              if (current != null && !current.isActive) {
+                e.selectedProduct = null;
+                e.price.clear();
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) AppToast.warning(context, 'saleInactiveProduct'.tr(namedArgs: {'name': current.name}));
+                });
+              } else if (current != null) {
+                e.selectedProduct = current;
+              }
+            }
           });
         },
         onError: (_) {
@@ -135,6 +151,19 @@ class _AddSaleViewState extends State<AddSaleView> {
     }).toList();
   }
 
+  Product? _findProduct(String id) {
+    for (final p in _availableProducts) {
+      if (p.id == id) return p;
+    }
+    return null;
+  }
+
+  bool _isInactiveTypedName(String name) {
+    final q = name.trim().toLowerCase();
+    if (q.isEmpty) return false;
+    return _availableProducts.any((p) => !p.isActive && p.name.trim().toLowerCase() == q);
+  }
+
   double get _subtotal {
     return _items.fold(0, (acc, e) {
       final q = NumberParser.parseDouble(e.quantity.text);
@@ -157,6 +186,18 @@ class _AddSaleViewState extends State<AddSaleView> {
   Future<void> _submit(BuildContext innerContext) async {
     if (!await SubscriptionGate.ensureCanModify(innerContext)) return;
     if (!innerContext.mounted) return;
+    // منتج غير نشط مبيتفعلش في حاجة: مش بيتختار ومش بيتباع.
+    for (int i = 0; i < _items.length; i++) {
+      final e = _items[i];
+      if (e.selectedProduct != null && !e.selectedProduct!.isActive) {
+        AppToast.warning(innerContext, 'saleInactiveProduct'.tr(namedArgs: {'name': e.selectedProduct!.name}));
+        return;
+      }
+      if (e.selectedProduct == null && _isInactiveTypedName(e.name.text.trim())) {
+        AppToast.warning(innerContext, 'saleInactiveProduct'.tr(namedArgs: {'name': e.name.text.trim()}));
+        return;
+      }
+    }
     if (!_formKey.currentState!.validate()) {
       AppToast.warning(innerContext, 'saleReviewData'.tr());
       return;
@@ -265,7 +306,7 @@ class _AddSaleViewState extends State<AddSaleView> {
                                   if (_loadingProducts)
                                     SizedBox(width: 16.w, height: 16.w, child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primaryColor))
                                   else
-                                    Text('saleAvailableStock'.tr(namedArgs: {'n': '${_availableProducts.length}'}), style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600)),
+                                    Text('saleAvailableStock'.tr(namedArgs: {'n': '${_availableProducts.where((p) => p.isActive).length}'}), style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600)),
                                 ],
                               ),
                               SizedBox(height: 4.h),

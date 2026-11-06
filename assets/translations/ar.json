@@ -600,6 +600,8 @@
   "productAvailable": "المتاح {stock}",
   "productOutOfStock": "خلصان",
   "productAvailableColon": "متاح: {stock}",
+  "productInactive": "غير متاح",
+  "saleInactiveProduct": "المنتج {name} غير متاح ومش قابل للبيع",
   "payCash": "نقدي",
   "payCard": "بطاقة",
   "payWallet": "محفظة",

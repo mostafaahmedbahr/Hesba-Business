@@ -600,6 +600,8 @@
   "productAvailable": "Available {stock}",
   "productOutOfStock": "Out of stock",
   "productAvailableColon": "In stock: {stock}",
+  "productInactive": "Unavailable",
+  "saleInactiveProduct": "Product {name} is unavailable and cannot be sold",
   "payCash": "Cash",
   "payCard": "Card",
   "payWallet": "Wallet",
