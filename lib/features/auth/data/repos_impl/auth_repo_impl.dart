@@ -63,6 +63,7 @@ class AuthRepoImpl implements AuthRepo {
     final registerModel = RegisterModel(
       ownerId: user.uid,
       shopId: shopRef.id,
+      role: model.role,
       ownerName: model.ownerName.trim(),
       email: model.email.trim(),
       phone: model.phone.trim(),

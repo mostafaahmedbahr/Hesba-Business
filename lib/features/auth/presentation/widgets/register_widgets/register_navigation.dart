@@ -162,10 +162,12 @@ class RegisterNavigation extends StatelessWidget {
       return;
     }
 
+    // owner + customer + admin
     final now = DateTime.now();
     final model = RegisterModel(
       ownerId: '',
       shopId: '',
+      role: 'owner',
       ownerName: ownerNameController.text,
       email: emailController.text,
       phone: phoneController.text,

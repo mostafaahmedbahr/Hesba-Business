@@ -1,6 +1,7 @@
 class RegisterModel {
   final String ownerId;
   final String shopId;
+  final String role;
 
   final String ownerName;
   final String email;
@@ -33,6 +34,7 @@ class RegisterModel {
   const RegisterModel({
     required this.ownerId,
     required this.shopId,
+    required this.role,
     required this.ownerName,
     required this.email,
     required this.phone,
@@ -55,6 +57,7 @@ class RegisterModel {
     return {
       'ownerId': ownerId,
       'shopId': shopId,
+      'role': role,
       'ownerName': ownerName,
       'email': email,
       'phone': phone,
