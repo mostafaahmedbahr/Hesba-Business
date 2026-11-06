@@ -51,7 +51,13 @@ class ReturnsCubit extends Cubit<ReturnsState> {
         note: note,
       );
 
-      AppEvents.instance.returnCreated();
+      AppEvents.instance.returnCreated({
+        'total': ret.total,
+        'reason': ret.reason,
+        'items': ret.items
+            .map((i) => {'name': i.productName, 'qty': i.quantity})
+            .toList(),
+      });
       AppEvents.instance.productChanged();
 
       emit(ReturnsState(status: ReturnsStatus.success, ret: ret));

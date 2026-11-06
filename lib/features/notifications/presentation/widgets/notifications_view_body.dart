@@ -1,3 +1,4 @@
+import 'package:hesba/core/router/notification_router.dart';
 import 'package:hesba/core/widgets/loading_widget.dart';
 import 'package:hesba/features/notifications/presentation/widgets/activity_card.dart';
 import 'package:hesba/features/notifications/presentation/widgets/reminder_card.dart';
@@ -264,10 +265,23 @@ class _ActivitySection extends StatelessWidget {
                 )
               else
                 Column(
-                  children: List.generate(list.length, (i) => Padding(
-                        padding: EdgeInsets.only(bottom: i == list.length - 1 ? 0 : 10.h),
-                        child: ActivityCard(activity: list[i]),
-                      )),
+                  children: List.generate(list.length, (i) {
+                    final a = list[i];
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: i == list.length - 1 ? 0 : 10.h),
+                      // السجلات القديمة بلا payload مابتتنطقش (متوجهاش لحاجة).
+                      child: ActivityCard(
+                        activity: a,
+                        onTap: a.payload.isEmpty
+                            ? null
+                            : () => openNotificationPayload(
+                                  Navigator.of(context),
+                                  a.payload,
+                                  clearStack: false,
+                                ),
+                      ),
+                    );
+                  }),
                 ),
             ],
           ),

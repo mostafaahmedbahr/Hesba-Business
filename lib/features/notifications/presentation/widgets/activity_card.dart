@@ -6,13 +6,17 @@ import '../../data/models/activity_model.dart';
 /// كارت عملية واحدة (بيع/منتج/مصروف/مرتجع).
 class ActivityCard extends StatelessWidget {
   final ActivityModel activity;
-  const ActivityCard({super.key, required this.activity});
+
+  /// الضغط بيفتح الشاشة اللي العملية اتعملت فيها.
+  final VoidCallback? onTap;
+
+  const ActivityCard({super.key, required this.activity, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final grad = _gradFor(activity.type);
-    return Container(
+    final card = Container(
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: activity.isRead
@@ -55,9 +59,10 @@ class ActivityCard extends StatelessWidget {
                     Container(width: 8.w, height: 8.w, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppTheme.danger)),
                 ]),
                 SizedBox(height: 2.h),
+                // 3 سطور عشان التفاصيل (المنتجات، السعر، المكسب) تبان.
                 Text(
                   activity.body,
-                  maxLines: 2,
+                  maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(fontSize: 11.sp, height: 1.4, color: isDark ? AppTheme.darkTextSecondary : AppTheme.slateGray),
                 ),
@@ -66,11 +71,24 @@ class ActivityCard extends StatelessWidget {
                   Icon(Icons.access_time_rounded, size: 11.sp, color: AppTheme.mutedGray),
                   SizedBox(width: 4.w),
                   Text(_timeAgo(activity.createdAt), style: TextStyle(fontSize: 10.5.sp, color: AppTheme.mutedGray)),
+                  const Spacer(),
+                  if (onTap != null)
+                    Icon(Icons.chevron_left_rounded, size: 18.sp, color: AppTheme.mutedGray),
                 ]),
               ],
             ),
           ),
         ],
+      ),
+    );
+
+    if (onTap == null) return card;
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14.r),
+        child: card,
       ),
     );
   }

@@ -29,15 +29,25 @@ class AppEvents {
     }
   }
 
-  // Convenience helpers
-  void saleCreated() => emit(AppEventType.saleCreated);
-  void returnCreated() => emit(AppEventType.returnCreated);
-  void expenseCreated() => emit(AppEventType.expenseCreated);
-  void expenseUpdated() => emit(AppEventType.expenseUpdated);
-  void expenseDeleted() => emit(AppEventType.expenseDeleted);
-  void productAdded() => emit(AppEventType.productAdded);
-  void productUpdated() => emit(AppEventType.productUpdated);
-  void productDeleted() => emit(AppEventType.productDeleted);
+  // Convenience helpers.
+  // كل حدث بياخد `data` اختياري عشان سجل العمليات والإشعار يعرضوا تفاصيل
+  // حقيقية (اسم المنتج، السعر، المكسب) بدل نص عام.
+  void saleCreated([Map<String, dynamic>? data]) =>
+      emit(AppEventType.saleCreated, data);
+  void returnCreated([Map<String, dynamic>? data]) =>
+      emit(AppEventType.returnCreated, data);
+  void expenseCreated([Map<String, dynamic>? data]) =>
+      emit(AppEventType.expenseCreated, data);
+  void expenseUpdated([Map<String, dynamic>? data]) =>
+      emit(AppEventType.expenseUpdated, data);
+  void expenseDeleted([Map<String, dynamic>? data]) =>
+      emit(AppEventType.expenseDeleted, data);
+  void productAdded([Map<String, dynamic>? data]) =>
+      emit(AppEventType.productAdded, data);
+  void productUpdated([Map<String, dynamic>? data]) =>
+      emit(AppEventType.productUpdated, data);
+  void productDeleted([Map<String, dynamic>? data]) =>
+      emit(AppEventType.productDeleted, data);
   void productChanged() => emit(AppEventType.productChanged);
 
   void dispose() {

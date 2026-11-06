@@ -53,7 +53,7 @@ class ProductsCubit extends Cubit<ProductsState> {
   Future<bool> addProduct(Product product) async {
     try {
       await _repo.addProduct(product);
-      AppEvents.instance.productAdded();
+      AppEvents.instance.productAdded(_productData(product));
       AppEvents.instance.productChanged();
       return true;
     } catch (e) {
@@ -65,7 +65,7 @@ class ProductsCubit extends Cubit<ProductsState> {
   Future<bool> updateProduct(Product product) async {
     try {
       await _repo.updateProduct(product);
-      AppEvents.instance.productUpdated();
+      AppEvents.instance.productUpdated(_productData(product));
       AppEvents.instance.productChanged();
       return true;
     } catch (e) {
@@ -77,7 +77,15 @@ class ProductsCubit extends Cubit<ProductsState> {
   Future<bool> deleteProduct(String productId) async {
     try {
       await _repo.deleteProduct(productId);
-      AppEvents.instance.productDeleted();
+      // اسم المنتج من الحالة قبل ما الستريم يشيله (عشان الإشعار يبقى واضح).
+      var name = '';
+      for (final p in state.products) {
+        if (p.id == productId) {
+          name = p.name;
+          break;
+        }
+      }
+      AppEvents.instance.productDeleted({'name': name});
       AppEvents.instance.productChanged();
       return true;
     } catch (e) {
@@ -85,6 +93,15 @@ class ProductsCubit extends Cubit<ProductsState> {
       return false;
     }
   }
+
+  /// تفاصيل المنتج اللي بتتبعت مع الحدث (للسجل والإشعار).
+  Map<String, dynamic> _productData(Product p) => {
+        'name': p.name,
+        'price': p.price,
+        'stock': p.stock,
+        'category': p.category,
+        'isActive': p.isActive,
+      };
 
   @override
   Future<void> close() {

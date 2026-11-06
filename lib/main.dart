@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
  import 'package:easy_localization/easy_localization.dart';
 import 'package:hesba/common_imports.dart';
+import 'package:hesba/core/router/notification_router.dart';
 import 'package:hesba/features/notifications/data/repos/activity_repo.dart';
 import 'package:hesba/features/notifications/presentation/view_model/activity_cubit.dart';
 import 'package:hesba/features/settings/presentation/cubit/settings_cubit.dart';
@@ -23,9 +24,10 @@ import 'package:hesba/features/settings/presentation/states/settings_state.dart'
   runApp(TranslationProvider(child: const HesbaApp()));
 }
 
-/// Fired when the user taps any notification (FCM push, scheduled reminder or
-/// the test notification). If a user is signed in, opens the dashboard; the
-/// splash/login flow handles the not-signed-in case.
+/// Fired when the user taps any notification (operation push, scheduled
+/// reminder, test notification or FCM). Opens the screen the notification
+/// came from — see `core/router/notification_router.dart`. If a user is not
+/// signed in we do nothing; the splash/login flow takes over.
 Future<void> _handleNotificationTap(String? payload) async {
   if (FirebaseAuth.instance.currentUser == null) return;
 
@@ -34,10 +36,8 @@ Future<void> _handleNotificationTap(String? payload) async {
   for (var attempt = 0; attempt < 30; attempt++) {
     final navigator = appNavigatorKey.currentState;
     if (navigator != null && navigator.mounted) {
-      navigator.pushNamedAndRemoveUntil(
-        AppRoutes.dashboard,
-        (route) => false,
-      );
+      // payload → الشاشة اللي الإشعار جه منها (شوف notification_router.dart).
+      openNotificationPayload(navigator, payload);
       return;
     }
     await Future<void>.delayed(const Duration(milliseconds: 100));

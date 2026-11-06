@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/services/app_events.dart';
+import '../../../../core/services/notification_service.dart';
 import '../../data/models/activity_model.dart';
 import '../../data/repos/activity_repo.dart';
 import 'activity_state.dart';
@@ -29,9 +30,19 @@ class ActivityCubit extends Cubit<ActivityState> {
       emit(state.copyWith(activities: list, unreadCount: list.where((e) => !e.isRead).length));
     });
 
-    // أي حدث عام يتسجل تلقائيًا (اللوجيك في الـ repo).
-    _eventSub = AppEvents.instance.stream.listen((event) {
-      _repo.logAppEvent(event);
+    // أي حدث عام يتسجل تلقائيًا (اللوجيك في الـ repo) + إشعار نظام بنفس النص.
+    _eventSub = AppEvents.instance.stream.listen((event) async {
+      final msg = await _repo.logAppEvent(event);
+      if (msg == null || isClosed) return;
+      try {
+        await NotificationService().showActivity(
+          title: msg.title,
+          body: msg.body,
+          payload: msg.payload,
+        );
+      } catch (e) {
+        // إشعار فاشل ما يكسرش تسجيل العملية.
+      }
     });
   }
 

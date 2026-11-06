@@ -86,8 +86,23 @@ class SalesCubit extends Cubit<SalesState> {
         note: note,
       );
 
-      // Notify whole app (Home, Dashboard, etc.) to refresh
-      AppEvents.instance.saleCreated();
+      // Notify whole app (Home, Dashboard, etc.) to refresh.
+      // التفاصيل بتروح للسجل والإشعار (اسم المنتج، السعر، المكسب).
+      AppEvents.instance.saleCreated({
+        'total': sale.total,
+        'discount': sale.discount,
+        'paymentMethod': sale.paymentMethod,
+        'profit': sale.items.fold<double>(0, (s, i) => s + i.profit),
+        'items': sale.items
+            .map((i) => {
+                  'name': i.productName,
+                  'qty': i.quantity,
+                  'price': i.unitPrice,
+                  'total': i.total,
+                  'profit': i.profit,
+                })
+            .toList(),
+      });
       AppEvents.instance.productChanged();
 
       emit(

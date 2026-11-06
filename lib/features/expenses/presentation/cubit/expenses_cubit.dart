@@ -94,7 +94,11 @@ class ExpensesCubit extends Cubit<ExpensesState> {
         note: note,
         date: date,
       );
-      AppEvents.instance.expenseCreated();
+      AppEvents.instance.expenseCreated({
+        'title': title,
+        'amount': amount,
+        'category': category,
+      });
       AppEvents.instance.productChanged();
       emit(state.copyWith(status: ExpensesStatus.success, addedExpense: expense, errorMessage: null));
     } catch (e) {
@@ -140,7 +144,11 @@ class ExpensesCubit extends Cubit<ExpensesState> {
         note: note,
         date: date,
       );
-      AppEvents.instance.expenseUpdated();
+      AppEvents.instance.expenseUpdated({
+        'title': title,
+        'amount': amount,
+        'category': category,
+      });
       AppEvents.instance.productChanged();
       emit(state.copyWith(status: ExpensesStatus.success, addedExpense: expense, errorMessage: null));
     } catch (e) {
@@ -161,10 +169,22 @@ class ExpensesCubit extends Cubit<ExpensesState> {
     emit(state.copyWith(categoryFilter: filter));
   }
 
-  Future<void> deleteExpense({required String expenseId, required String shopId}) async {
+  /// يحذف مصروف. التفاصيل (title/amount) اختيارية وبتتحط في سجل العمليات
+  /// والإشعار عشان اللي يقرا يعرف أنهي مصروف اتحذف وكم كان.
+  Future<void> deleteExpense({
+    required String expenseId,
+    required String shopId,
+    String title = '',
+    double amount = 0,
+    String category = '',
+  }) async {
     try {
       await expensesRepo.deleteExpense(expenseId: expenseId, shopId: shopId);
-      AppEvents.instance.expenseDeleted();
+      AppEvents.instance.expenseDeleted({
+        'title': title,
+        'amount': amount,
+        'category': category,
+      });
       AppEvents.instance.productChanged();
       emit(state.copyWith(status: ExpensesStatus.success));
     } catch (e) {

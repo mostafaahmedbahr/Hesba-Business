@@ -35,6 +35,9 @@ class ActivityModel {
   final DateTime createdAt;
   final bool isRead;
 
+  /// وجهة الضغط عليه (`activity:sale` …) — فاضي للسجلات القديمة.
+  final String payload;
+
   const ActivityModel({
     required this.id,
     required this.type,
@@ -42,12 +45,13 @@ class ActivityModel {
     required this.body,
     required this.createdAt,
     this.isRead = false,
+    this.payload = '',
   });
 
   /// نسخ مع تعديل المقروء.
   ActivityModel copyWith({bool? isRead}) {
     return ActivityModel(
-      id: id, type: type, title: title, body: body, createdAt: createdAt, isRead: isRead ?? this.isRead);
+      id: id, type: type, title: title, body: body, createdAt: createdAt, isRead: isRead ?? this.isRead, payload: payload);
   }
 
   /// للتحويل لـ Map (تخزين).
@@ -58,6 +62,7 @@ class ActivityModel {
     'body': body,
     'createdAt': createdAt.millisecondsSinceEpoch,
     'isRead': isRead,
+    'payload': payload,
   };
 
   /// من Map مخزنة.
@@ -71,6 +76,7 @@ class ActivityModel {
           ? DateTime.fromMillisecondsSinceEpoch(json['createdAt'] as int)
           : (json['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       isRead: json['isRead'] as bool? ?? false,
+      payload: json['payload'] as String? ?? '',
     );
   }
 }

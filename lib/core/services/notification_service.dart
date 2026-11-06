@@ -81,7 +81,8 @@ final channel = AndroidNotificationChannel(
         ),
         iOS: const DarwinNotificationDetails(),
       ),
-      payload: 'fcm',
+      // نفس الـ payload اللي في الفورجراوند: الضغط يفتح الشاشة المقصودة.
+      payload: (message.data['type'] as String?) ?? 'fcm',
     );
   }
 
@@ -266,7 +267,8 @@ final channel = AndroidNotificationChannel(
       title,
       body,
       _fcmDetails(),
-      payload: 'fcm',
+      // `data.type` بيوصّل نفس الـ payload المستخدم في الكولد-ستارت.
+      payload: (message.data['type'] as String?) ?? 'fcm',
     );
   }
 
@@ -315,6 +317,32 @@ final channel = AndroidNotificationChannel(
       payload: 'test',
     );
   }
+
+  // عدّاد لـ id متفرد لكل عملية — عشان العملية الجديدة ما تلاشى القديمة.
+  int _activitySeq = 0;
+
+  /// إشعار نظام لعملية (بيع / مصروف / منتج / مرتجع).
+  ///
+  /// [payload] بيتسجّل مع الإشعار، ولما المستخدم يضغط عليه بيتحوّل لـ route
+  /// في `main.dart` فيفتح الشاشة اللي العملية اتعملت فيها.
+  Future<void> showActivity({
+    required String title,
+    required String body,
+    required String payload,
+  }) {
+    final id = _activityBaseId + (_activitySeq % _activityIdSpan);
+    _activitySeq++;
+    return _local.show(
+      id,
+      title,
+      body,
+      _fcmDetails(),
+      payload: payload,
+    );
+  }
+
+  static const int _activityBaseId = 4000;
+  static const int _activityIdSpan = 1000;
 
   /// Schedules one daily reminder at a fixed local clock time.
   Future<void> scheduleDailyReminder({

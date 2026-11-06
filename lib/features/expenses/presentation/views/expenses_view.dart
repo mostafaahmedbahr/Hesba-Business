@@ -56,7 +56,13 @@ class _ExpensesBody extends StatelessWidget {
       builder: (_) => ExpenseDeleteDialog(title: expense.title),
     );
     if (ok == true && context.mounted) {
-      context.read<ExpensesCubit>().deleteExpense(expenseId: expense.expenseId, shopId: shopId ?? '');
+      context.read<ExpensesCubit>().deleteExpense(
+            expenseId: expense.expenseId,
+            shopId: shopId ?? '',
+            title: expense.title,
+            amount: expense.amount,
+            category: expense.category,
+          );
     }
   }
 
