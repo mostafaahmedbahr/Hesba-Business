@@ -18,6 +18,7 @@ import '../../../settings/presentation/cubit/settings_cubit.dart';
 import '../../../settings/presentation/states/settings_state.dart';
 import '../../../notifications/presentation/views/notifications_view.dart';
 import '../../../categories/presentation/views/category_management_view.dart';
+import '../../../suppliers/presentation/views/suppliers_view.dart';
 import '../widgets/main_app_bar.dart';
 
 class MoreView extends StatelessWidget {
@@ -56,7 +57,8 @@ class MoreView extends StatelessWidget {
                 icon: Icons.workspace_premium_rounded,
                 label: 'subscriptionTitle'.tr(),
                 color: const Color(0xFF22C55E),
-                onTap: () => Navigator.pushNamed(context, AppRoutes.subscription),
+                onTap: () =>
+                    Navigator.pushNamed(context, AppRoutes.subscription),
               ),
             ]),
             SizedBox(height: 20.h),
@@ -71,10 +73,17 @@ class MoreView extends StatelessWidget {
             SizedBox(height: 20.h),
             _SectionCard('إدارة المتجر', [
               MoreItem(
+                icon: Icons.local_shipping_rounded,
+                label: 'suppliersSection'.tr(),
+                color: AppTheme.violetDeep,
+                onTap: () => _navigateTo(context, const SuppliersView()),
+              ),
+              MoreItem(
                 icon: Icons.category_rounded,
                 label: 'إدارة الأقسام',
                 color: AppTheme.successDark,
-                onTap: () => _navigateTo(context, const CategoryManagementView()),
+                onTap: () =>
+                    _navigateTo(context, const CategoryManagementView()),
               ),
               MoreItem(
                 icon: Icons.add_shopping_cart_rounded,
@@ -150,7 +159,9 @@ class _ProfileCard extends StatelessWidget {
                           email.isEmpty ? '—' : email,
                           style: TextStyle(
                             fontSize: 12.sp,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -310,9 +321,7 @@ class _LanguageItem extends StatelessWidget {
             value: isEnglish,
             activeThumbColor: AppTheme.primaryColor,
             onChanged: (_) {
-              context.setLocale(
-                Locale(isEnglish ? 'ar' : 'en'),
-              );
+              context.setLocale(Locale(isEnglish ? 'ar' : 'en'));
             },
           ),
         ],
@@ -336,7 +345,9 @@ class _LogoutButton extends StatelessWidget {
             child: ElevatedButton.icon(
               onPressed: () => _confirmLogout(context),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF6B6B).withValues(alpha: 0.12),
+                backgroundColor: const Color(
+                  0xFFFF6B6B,
+                ).withValues(alpha: 0.12),
                 foregroundColor: const Color(0xFFE53935),
                 elevation: 0,
                 shape: RoundedRectangleBorder(
@@ -368,11 +379,7 @@ class _LogoutButton extends StatelessWidget {
     final ok = await context.read<ProfileCubit>().logout();
     if (!context.mounted) return;
     if (ok) {
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        AppRoutes.login,
-        (_) => false,
-      );
+      Navigator.pushNamedAndRemoveUntil(context, AppRoutes.login, (_) => false);
     } else {
       AppToast.error(context, 'moreLogoutFailed'.tr());
     }
@@ -413,10 +420,7 @@ class _LogoutDialog extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: LinearGradient(
-                  colors: [
-                    const Color(0xFFFF6B6B),
-                    const Color(0xFFE53935),
-                  ],
+                  colors: [const Color(0xFFFF6B6B), const Color(0xFFE53935)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -462,9 +466,7 @@ class _LogoutDialog extends StatelessWidget {
                     child: OutlinedButton(
                       onPressed: () => Navigator.pop(context, false),
                       style: OutlinedButton.styleFrom(
-                        side: BorderSide(
-                          color: theme.colorScheme.outline,
-                        ),
+                        side: BorderSide(color: theme.colorScheme.outline),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14.r),
                         ),
@@ -550,7 +552,8 @@ class MoreItem extends StatelessWidget {
           color: Theme.of(context).colorScheme.onSurface,
         ),
       ),
-      trailing: trailing ??
+      trailing:
+          trailing ??
           Icon(
             Icons.chevron_left_rounded,
             color: Theme.of(context).colorScheme.onSurfaceVariant,

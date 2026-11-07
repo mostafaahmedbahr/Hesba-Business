@@ -18,57 +18,212 @@ class ProductCard extends StatelessWidget {
       color: isDark ? AppTheme.darkSurface : Colors.white,
       borderRadius: BorderRadius.circular(20.r),
       child: InkWell(
-        onTap: () { HapticFeedback.selectionClick(); onTap(); },
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
         borderRadius: BorderRadius.circular(20.r),
         child: Container(
           padding: EdgeInsets.all(14.w),
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(20.r), border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.hairline), boxShadow: AppTheme.cardShadow(context)),
-          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            ProductThumb(product: product),
-            SizedBox(width: 12.w),
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Row(children: [
-                Expanded(child: Text(product.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 14.5.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : AppTheme.ink))),
-                if (product.isOutOfStock) ProductBadge(label: 'productsOutOfStock'.tr(), color: AppTheme.danger, icon: Icons.block_rounded)
-                else if (product.isLowStock) ProductBadge(label: 'productsLow'.tr(), color: AppTheme.warningAmber, icon: Icons.warning_amber_rounded),
-              ]),
-              SizedBox(height: 6.h),
-              if (product.category.isNotEmpty || product.code.isNotEmpty)
-                Row(children: [
-                  if (product.category.isNotEmpty) Flexible(child: ProductChip(icon: Icons.category_rounded, text: product.category)),
-                  if (product.category.isNotEmpty && product.code.isNotEmpty) SizedBox(width: 6.w),
-                  if (product.code.isNotEmpty) Flexible(child: ProductChip(icon: Icons.qr_code_rounded, text: product.code)),
-                ]),
-              if (product.category.isNotEmpty || product.code.isNotEmpty) SizedBox(height: 10.h),
-              Row(children: [
-                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('productsSalePrice'.tr(), style: TextStyle(fontSize: 10.sp, color: isDark ? AppTheme.darkTextSecondary : AppTheme.slateGray, fontWeight: FontWeight.w600)),
-                  SizedBox(height: 2.h),
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: AlignmentDirectional.centerStart,
-                    child: Text('${_formatPrice(product.price)} ${'currencyEGP'.tr()}', style: TextStyle(fontSize: 14.5.sp, fontWeight: FontWeight.w900, color: AppTheme.successDark)),
-                  ),
-                  if (product.costPrice > 0) Text('شراء ${_formatPrice(product.costPrice)}', style: TextStyle(fontSize: 10.sp, color: AppTheme.mutedGray)),
-                ])),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 7.h),
-                  decoration: BoxDecoration(color: isDark ? AppTheme.darkSurfaceAlt : AppTheme.canvasLight, borderRadius: BorderRadius.circular(12.r), border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft)),
-                  child: Column(children: [
-                    Text('productsStock'.tr(), style: TextStyle(fontSize: 9.sp, color: AppTheme.slateGray, fontWeight: FontWeight.w700)),
-                    SizedBox(height: 2.h),
-                    Row(mainAxisSize: MainAxisSize.min, children: [
-                      if (product.isLowStock) Icon(Icons.warning_amber_rounded, size: 12.sp, color: AppTheme.warningAmber),
-                      if (product.isLowStock) SizedBox(width: 3.w),
-                      Text(product.stockLabel, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: product.isOutOfStock ? AppTheme.danger : isDark ? Colors.white : AppTheme.ink)),
-                    ]),
-                  ]),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20.r),
+            border: Border.all(
+              color: isDark ? AppTheme.darkBorder : AppTheme.hairline,
+            ),
+            boxShadow: AppTheme.cardShadow(context),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ProductThumb(product: product),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            product.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 14.5.sp,
+                              fontWeight: FontWeight.w800,
+                              color: isDark ? Colors.white : AppTheme.ink,
+                            ),
+                          ),
+                        ),
+                        if (product.isOutOfStock)
+                          ProductBadge(
+                            label: 'productsOutOfStock'.tr(),
+                            color: AppTheme.danger,
+                            icon: Icons.block_rounded,
+                          )
+                        else if (product.isLowStock)
+                          ProductBadge(
+                            label: 'productsLow'.tr(),
+                            color: AppTheme.warningAmber,
+                            icon: Icons.warning_amber_rounded,
+                          ),
+                      ],
+                    ),
+                    SizedBox(height: 6.h),
+                    if (product.category.isNotEmpty ||
+                        product.code.isNotEmpty ||
+                        product.hasSupplier)
+                      Row(
+                        children: [
+                          if (product.category.isNotEmpty)
+                            Flexible(
+                              child: ProductChip(
+                                icon: Icons.category_rounded,
+                                text: product.category,
+                              ),
+                            ),
+                          if (product.category.isNotEmpty &&
+                              (product.code.isNotEmpty || product.hasSupplier))
+                            SizedBox(width: 6.w),
+                          if (product.code.isNotEmpty)
+                            Flexible(
+                              child: ProductChip(
+                                icon: Icons.qr_code_rounded,
+                                text: product.code,
+                              ),
+                            ),
+                          if (product.code.isNotEmpty && product.hasSupplier)
+                            SizedBox(width: 6.w),
+                          if (product.hasSupplier)
+                            Flexible(
+                              child: ProductChip(
+                                icon: Icons.local_shipping_rounded,
+                                text: product.supplierName ?? '',
+                              ),
+                            ),
+                        ],
+                      ),
+                    if (product.category.isNotEmpty ||
+                        product.code.isNotEmpty ||
+                        product.hasSupplier)
+                      SizedBox(height: 10.h),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'productsSalePrice'.tr(),
+                                style: TextStyle(
+                                  fontSize: 10.sp,
+                                  color: isDark
+                                      ? AppTheme.darkTextSecondary
+                                      : AppTheme.slateGray,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              SizedBox(height: 2.h),
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: AlignmentDirectional.centerStart,
+                                child: Text(
+                                  '${_formatPrice(product.price)} ${'currencyEGP'.tr()}',
+                                  style: TextStyle(
+                                    fontSize: 14.5.sp,
+                                    fontWeight: FontWeight.w900,
+                                    color: AppTheme.successDark,
+                                  ),
+                                ),
+                              ),
+                              if (product.costPrice > 0)
+                                Text(
+                                  'شراء ${_formatPrice(product.costPrice)}',
+                                  style: TextStyle(
+                                    fontSize: 10.sp,
+                                    color: AppTheme.mutedGray,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 10.w,
+                            vertical: 7.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? AppTheme.darkSurfaceAlt
+                                : AppTheme.canvasLight,
+                            borderRadius: BorderRadius.circular(12.r),
+                            border: Border.all(
+                              color: isDark
+                                  ? AppTheme.darkBorder
+                                  : AppTheme.borderSoft,
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              Text(
+                                'productsStock'.tr(),
+                                style: TextStyle(
+                                  fontSize: 9.sp,
+                                  color: AppTheme.slateGray,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              SizedBox(height: 2.h),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (product.isLowStock)
+                                    Icon(
+                                      Icons.warning_amber_rounded,
+                                      size: 12.sp,
+                                      color: AppTheme.warningAmber,
+                                    ),
+                                  if (product.isLowStock) SizedBox(width: 3.w),
+                                  Text(
+                                    product.stockLabel,
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w900,
+                                      color: product.isOutOfStock
+                                          ? AppTheme.danger
+                                          : isDark
+                                          ? Colors.white
+                                          : AppTheme.ink,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(width: 8.w),
+                        Container(
+                          width: 30.w,
+                          height: 30.w,
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryColor.withValues(
+                              alpha: 0.08,
+                            ),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.chevron_left_rounded,
+                            size: 18.sp,
+                            color: AppTheme.primaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                SizedBox(width: 8.w),
-                Container(width: 30.w, height: 30.w, decoration: BoxDecoration(color: AppTheme.primaryColor.withValues(alpha: 0.08), shape: BoxShape.circle), child: Icon(Icons.chevron_left_rounded, size: 18.sp, color: AppTheme.primaryColor)),
-              ]),
-            ])),
-          ]),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -80,18 +235,37 @@ class ProductBadge extends StatelessWidget {
   final String label;
   final Color color;
   final IconData icon;
-  const ProductBadge({super.key, required this.label, required this.color, required this.icon});
+  const ProductBadge({
+    super.key,
+    required this.label,
+    required this.color,
+    required this.icon,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(20.r), border: Border.all(color: color.withValues(alpha: 0.18))),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Icon(icon, size: 10.sp, color: color),
-        SizedBox(width: 4.w),
-        Text(label, style: TextStyle(fontSize: 9.5.sp, fontWeight: FontWeight.w800, color: color)),
-      ]),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: color.withValues(alpha: 0.18)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 10.sp, color: color),
+          SizedBox(width: 4.w),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 9.5.sp,
+              fontWeight: FontWeight.w800,
+              color: color,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -107,12 +281,32 @@ class ProductChip extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-      decoration: BoxDecoration(color: isDark ? AppTheme.darkSurfaceAlt : AppTheme.mist, borderRadius: BorderRadius.circular(10.r), border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft)),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Icon(icon, size: 11.sp, color: AppTheme.slateGray),
-        SizedBox(width: 4.w),
-        Flexible(child: Text(text, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.w600, color: AppTheme.slateGray))),
-      ]),
+      decoration: BoxDecoration(
+        color: isDark ? AppTheme.darkSurfaceAlt : AppTheme.mist,
+        borderRadius: BorderRadius.circular(10.r),
+        border: Border.all(
+          color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 11.sp, color: AppTheme.slateGray),
+          SizedBox(width: 4.w),
+          Flexible(
+            child: Text(
+              text,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 10.5.sp,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.slateGray,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -125,13 +319,27 @@ class ProductThumb extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final placeholder = Container(
-      width: 66.w, height: 66.w,
+      width: 66.w,
+      height: 66.w,
       decoration: BoxDecoration(
-        gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [AppTheme.primaryColor.withValues(alpha: 0.12), const Color(0xFF7C4DFF).withValues(alpha: 0.12)]),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppTheme.primaryColor.withValues(alpha: 0.12),
+            const Color(0xFF7C4DFF).withValues(alpha: 0.12),
+          ],
+        ),
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppTheme.primaryColor.withValues(alpha: 0.08)),
+        border: Border.all(
+          color: AppTheme.primaryColor.withValues(alpha: 0.08),
+        ),
       ),
-      child: Icon(Icons.inventory_2_rounded, size: 26.sp, color: AppTheme.primaryColor.withValues(alpha: 0.9)),
+      child: Icon(
+        Icons.inventory_2_rounded,
+        size: 26.sp,
+        color: AppTheme.primaryColor.withValues(alpha: 0.9),
+      ),
     );
     if (product.imageUrl.isEmpty) return placeholder;
     return ClipRRect(
@@ -149,5 +357,6 @@ class ProductThumb extends StatelessWidget {
 }
 
 /// تنسيق سعر.
-String _formatPrice(double value) =>
-    value == value.roundToDouble() ? value.toStringAsFixed(0) : value.toStringAsFixed(2);
+String _formatPrice(double value) => value == value.roundToDouble()
+    ? value.toStringAsFixed(0)
+    : value.toStringAsFixed(2);

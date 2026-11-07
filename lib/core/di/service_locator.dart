@@ -43,6 +43,8 @@ import '../../features/admin/data/repos/admin_repo.dart';
 import '../../features/admin/data/repos_impl/admin_repo_impl.dart';
 import '../../features/admin/data/repos/admin_search_repo.dart';
 import '../../features/admin/data/repos_impl/admin_search_repo_impl.dart';
+import '../../features/suppliers/data/repos/suppliers_repo.dart';
+import '../../features/suppliers/data/repos_impl/suppliers_repo_impl.dart';
 
 final sl = GetIt.instance;
 
@@ -66,6 +68,7 @@ Future<void> initDependencies() async {
   _initExpenses();
   _initActivity();
   _initCategories();
+  _initSuppliers();
 }
 
 void _initSubscription() {
@@ -140,7 +143,7 @@ void _initProfile() {
 
 void _initContact() {
   sl.registerLazySingleton<ContactRepo>(
-        () => ContactRepoImpl(
+    () => ContactRepoImpl(
       auth: sl<FirebaseAuth>(),
       firestore: sl<FirebaseFirestore>(),
     ),
@@ -158,10 +161,7 @@ void _initDashboard() {
 
 void _initNotifications() {
   sl.registerLazySingleton<NotificationRepo>(
-    () => NotificationRepoImpl(
-      sl<SharedPreferences>(),
-      NotificationService(),
-    ),
+    () => NotificationRepoImpl(sl<SharedPreferences>(), NotificationService()),
   );
 }
 
@@ -207,7 +207,6 @@ void _initExpenses() {
   );
 }
 
-
 void _initActivity() {
   sl.registerLazySingleton<ActivityRepo>(
     () => ActivityRepoImpl(sl<SharedPreferences>()),
@@ -216,6 +215,18 @@ void _initActivity() {
 
 void _initCategories() {
   sl.registerLazySingleton<CategoryRepo>(
-    () => CategoryRepoImpl(firestore: sl<FirebaseFirestore>(), auth: sl<FirebaseAuth>()),
+    () => CategoryRepoImpl(
+      firestore: sl<FirebaseFirestore>(),
+      auth: sl<FirebaseAuth>(),
+    ),
+  );
+}
+
+void _initSuppliers() {
+  sl.registerLazySingleton<SuppliersRepo>(
+    () => SuppliersRepoImpl(
+      auth: sl<FirebaseAuth>(),
+      firestore: sl<FirebaseFirestore>(),
+    ),
   );
 }

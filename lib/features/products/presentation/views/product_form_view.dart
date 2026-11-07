@@ -16,6 +16,7 @@ import '../../../../core/utils/toast.dart';
 import '../../../categories/data/repos/category_repo.dart';
 import '../../../categories/presentation/views/category_management_view.dart';
 import '../../../subscription/presentation/subscription_gate.dart';
+import '../../../suppliers/data/repos/suppliers_repo.dart';
 import '../../data/models/product_field.dart';
 import '../../data/models/product_form_config.dart';
 import '../../data/repos/product_config_repo.dart';
@@ -27,6 +28,7 @@ import '../widgets/product_form/product_form_date_field.dart';
 import '../widgets/product_form/product_form_image_field.dart';
 import '../widgets/product_form/product_form_optional_specs.dart';
 import '../widgets/product_form/product_form_section.dart';
+import '../widgets/product_form/product_form_supplier_field.dart';
 import '../widgets/product_form/product_form_text_field.dart';
 import '../widgets/product_form/product_form_toggle.dart';
 import '../widgets/product_form/product_form_variants_editor.dart';
@@ -78,7 +80,9 @@ class _ProductFormViewState extends State<ProductFormView> {
       final trimmed = c.trim();
       if (trimmed.isEmpty) continue;
       if (lowerBase.contains(trimmed.toLowerCase())) continue;
-      if (base.map((e) => e.toLowerCase()).contains(trimmed.toLowerCase())) continue;
+      if (base.map((e) => e.toLowerCase()).contains(trimmed.toLowerCase())) {
+        continue;
+      }
       base.add(trimmed);
     }
     if (other != null) base.add(other);
@@ -86,7 +90,8 @@ class _ProductFormViewState extends State<ProductFormView> {
   }
 
   List<String> _categoriesFor(String? shopType) =>
-      AppConstants.productCategoriesByBusinessType[shopType] ?? AppConstants.defaultProductCategories;
+      AppConstants.productCategoriesByBusinessType[shopType] ??
+      AppConstants.defaultProductCategories;
 
   @override
   void initState() {
@@ -104,7 +109,9 @@ class _ProductFormViewState extends State<ProductFormView> {
     _specValues[ProductFieldKeys.expiryDate] =
         p?.specs[ProductFieldKeys.expiryDate] as String?;
     _specValues[ProductFieldKeys.addons] = _readChips(ProductFieldKeys.addons);
-    _specValues[ProductFieldKeys.ingredients] = _readChips(ProductFieldKeys.ingredients);
+    _specValues[ProductFieldKeys.ingredients] = _readChips(
+      ProductFieldKeys.ingredients,
+    );
     _readVariants();
 
     final savedCategory = p?.category ?? '';
@@ -120,7 +127,9 @@ class _ProductFormViewState extends State<ProductFormView> {
 
     if (widget.cubit.state.shopType == null) {
       widget.cubit.loadShopType().then((type) {
-        if (mounted && type != null) setState(() => _categories = _categoriesFor(type));
+        if (mounted && type != null) {
+          setState(() => _categories = _categoriesFor(type));
+        }
       });
     }
     _loadCustomCategories();
@@ -139,13 +148,16 @@ class _ProductFormViewState extends State<ProductFormView> {
       if (row is Map) {
         final savedSize = '${row['size'] ?? ''}';
         final isCustomSize =
-            savedSize.isNotEmpty && !AppConstants.productSizes.contains(savedSize);
-        _variants.add(ProductVariantRow(
-          color: '${row['color'] ?? ''}',
-          size: savedSize,
-          qty: '${row['qty'] ?? ''}',
-          useCustomSize: isCustomSize,
-        ));
+            savedSize.isNotEmpty &&
+            !AppConstants.productSizes.contains(savedSize);
+        _variants.add(
+          ProductVariantRow(
+            color: '${row['color'] ?? ''}',
+            size: savedSize,
+            qty: '${row['qty'] ?? ''}',
+            useCustomSize: isCustomSize,
+          ),
+        );
       }
     }
   }
@@ -160,7 +172,8 @@ class _ProductFormViewState extends State<ProductFormView> {
         if (!mounted) return;
         setState(() => _customCategories = list);
         final saved = widget.product?.category ?? '';
-        if (saved.isNotEmpty && list.map((e) => e.toLowerCase()).contains(saved.toLowerCase())) {
+        if (saved.isNotEmpty &&
+            list.map((e) => e.toLowerCase()).contains(saved.toLowerCase())) {
           setState(() {
             _category = saved;
             _customCategory = false;
@@ -170,7 +183,8 @@ class _ProductFormViewState extends State<ProductFormView> {
     } catch (_) {}
   }
 
-  String get _otherOption => _allCategories.isNotEmpty ? _allCategories.last : _categories.last;
+  String get _otherOption =>
+      _allCategories.isNotEmpty ? _allCategories.last : _categories.last;
 
   @override
   void dispose() {
@@ -191,10 +205,8 @@ class _ProductFormViewState extends State<ProductFormView> {
     () => TextEditingController(text: _initialText(key)),
   );
 
-  TextEditingController _customCtrl(String key) => _customControllers.putIfAbsent(
-    key,
-    () => TextEditingController(),
-  );
+  TextEditingController _customCtrl(String key) =>
+      _customControllers.putIfAbsent(key, () => TextEditingController());
 
   /// القيمة الابتدائية للحقول النصية من المنتج الحالي.
   String _initialText(String key) {
@@ -203,7 +215,9 @@ class _ProductFormViewState extends State<ProductFormView> {
       case ProductFieldKeys.name:
         return p?.name ?? '';
       case ProductFieldKeys.code:
-        return (p?.code.isNotEmpty ?? false) ? p!.code : _generateCode(widget.cubit.state.products);
+        return (p?.code.isNotEmpty ?? false)
+            ? p!.code
+            : _generateCode(widget.cubit.state.products);
       case ProductFieldKeys.costPrice:
         return p != null ? _num(p.costPrice) : '';
       case ProductFieldKeys.price:
@@ -237,8 +251,11 @@ class _ProductFormViewState extends State<ProductFormView> {
     return 'PRD-${(max + 1).toString().padLeft(3, '0')}';
   }
 
-  void _regenerateCode() =>
-      setState(() => _controllers[ProductFieldKeys.code]?.text = _generateCode(widget.cubit.state.products));
+  void _regenerateCode() => setState(
+    () => _controllers[ProductFieldKeys.code]?.text = _generateCode(
+      widget.cubit.state.products,
+    ),
+  );
 
   // ─────────────────────────── الحفظ ───────────────────────────
 
@@ -253,8 +270,9 @@ class _ProductFormViewState extends State<ProductFormView> {
         ProductFieldType.dropdown => _dropdownValue(f),
         ProductFieldType.date => _specValues[f.key],
         ProductFieldType.toggle => _specValues[f.key] ?? true,
-        ProductFieldType.chips =>
-          List<String>.from(_specValues[f.key] as List? ?? const []),
+        ProductFieldType.chips => List<String>.from(
+          _specValues[f.key] as List? ?? const [],
+        ),
         ProductFieldType.image => _specValues[f.key] ?? '',
         ProductFieldType.variants => [for (final r in _variants) r.toMap()],
         _ => _ctrl(f.key).text,
@@ -287,18 +305,45 @@ class _ProductFormViewState extends State<ProductFormView> {
       return;
     }
     setState(() => _saving = true);
-    final product = _formCubit.buildProduct(existing: widget.product, values: values);
+    // لقطة الاسم: نعيد قراءة اسم المورد الحيّ عند الحفظ حتى لا يعرض
+    // المنتج اسماً قديماً لو اتغيّر المورد من شاشة تانية.
+    await _refreshSupplierSnapshot();
+    final product = _formCubit.buildProduct(
+      existing: widget.product,
+      values: values,
+    );
     final ok = _isEdit
         ? await widget.cubit.updateProduct(product)
         : await widget.cubit.addProduct(product);
     if (!mounted) return;
     if (ok) {
       HapticFeedback.mediumImpact();
-      AppToast.success(context, _isEdit ? 'productUpdated'.tr() : 'productSaved'.tr());
+      AppToast.success(
+        context,
+        _isEdit ? 'productUpdated'.tr() : 'productSaved'.tr(),
+      );
       Navigator.pop(context);
     } else {
       setState(() => _saving = false);
       AppToast.error(context, 'productSaveFailed'.tr());
+    }
+  }
+
+  /// يعيد قراءة اسم المورد الحيّ قبل الحفظ (لقطة العرض في المنتج).
+  ///
+  /// فشل القراءة مش بيوقف الحفظ — الاسم المخزّن في الحالة يفضل كما هو.
+  Future<void> _refreshSupplierSnapshot() async {
+    final id = _formCubit.state.supplierId;
+    if (id == null || id.isEmpty) return;
+    try {
+      final supplier = await sl<SuppliersRepo>().getSupplierById(id);
+      if (!mounted || supplier == null) return;
+      final liveName = supplier.displayName;
+      if (liveName.isNotEmpty && liveName != _formCubit.state.supplierName) {
+        _formCubit.setSupplier(id, liveName);
+      }
+    } catch (_) {
+      // أفضل جهد فقط.
     }
   }
 
@@ -312,20 +357,75 @@ class _ProductFormViewState extends State<ProductFormView> {
         insetPadding: EdgeInsets.symmetric(horizontal: 24.w),
         child: Container(
           padding: EdgeInsets.all(20.w),
-          decoration: BoxDecoration(color: Theme.of(context).colorScheme.surface, borderRadius: BorderRadius.circular(24.r)),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Container(width: 64.w, height: 64.w, decoration: BoxDecoration(color: AppTheme.dangerSoft, shape: BoxShape.circle), child: Icon(Icons.delete_rounded, color: AppTheme.danger, size: 28.sp)),
-            SizedBox(height: 14.h),
-            Text('productDeleteConfirmTitle'.tr(), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800)),
-            SizedBox(height: 8.h),
-            Text('productDeleteConfirmBody'.tr(), textAlign: TextAlign.center, style: TextStyle(fontSize: 12.5.sp, color: Theme.of(context).colorScheme.onSurfaceVariant, height: 1.5)),
-            SizedBox(height: 18.h),
-            Row(children: [
-              Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(dialogContext, false), style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)), padding: EdgeInsets.symmetric(vertical: 12.h)), child: Text('cancel'.tr()))),
-              SizedBox(width: 10.w),
-              Expanded(child: FilledButton(onPressed: () => Navigator.pop(dialogContext, true), style: FilledButton.styleFrom(backgroundColor: AppTheme.danger, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)), padding: EdgeInsets.symmetric(vertical: 12.h)), child: Text('productDelete'.tr()))),
-            ]),
-          ]),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(24.r),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 64.w,
+                height: 64.w,
+                decoration: BoxDecoration(
+                  color: AppTheme.dangerSoft,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.delete_rounded,
+                  color: AppTheme.danger,
+                  size: 28.sp,
+                ),
+              ),
+              SizedBox(height: 14.h),
+              Text(
+                'productDeleteConfirmTitle'.tr(),
+                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800),
+              ),
+              SizedBox(height: 8.h),
+              Text(
+                'productDeleteConfirmBody'.tr(),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12.5.sp,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  height: 1.5,
+                ),
+              ),
+              SizedBox(height: 18.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(dialogContext, false),
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
+                      ),
+                      child: Text('cancel'.tr()),
+                    ),
+                  ),
+                  SizedBox(width: 10.w),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: () => Navigator.pop(dialogContext, true),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppTheme.danger,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
+                      ),
+                      child: Text('productDelete'.tr()),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -355,10 +455,22 @@ class _ProductFormViewState extends State<ProductFormView> {
         foregroundColor: isDark ? Colors.white : AppTheme.ink,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: Text(_isEdit ? 'productFormEdit'.tr() : 'productFormAdd'.tr(), style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w900)),
+        title: Text(
+          _isEdit ? 'productFormEdit'.tr() : 'productFormAdd'.tr(),
+          style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w900),
+        ),
         centerTitle: true,
-        leading: IconButton(icon: Icon(Icons.close_rounded, size: 22.sp), onPressed: () => Navigator.pop(context)),
-        bottom: PreferredSize(preferredSize: const Size.fromHeight(1), child: Container(height: 1, color: isDark ? AppTheme.darkBorder : AppTheme.hairline)),
+        leading: IconButton(
+          icon: Icon(Icons.close_rounded, size: 22.sp),
+          onPressed: () => Navigator.pop(context),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            height: 1,
+            color: isDark ? AppTheme.darkBorder : AppTheme.hairline,
+          ),
+        ),
       ),
       body: BlocBuilder<ProductFormCubit, ProductFormState>(
         bloc: _formCubit,
@@ -368,7 +480,10 @@ class _ProductFormViewState extends State<ProductFormView> {
               child: SizedBox(
                 width: 26.w,
                 height: 26.w,
-                child: const CircularProgressIndicator(strokeWidth: 2.6, color: AppTheme.primaryColor),
+                child: const CircularProgressIndicator(
+                  strokeWidth: 2.6,
+                  color: AppTheme.primaryColor,
+                ),
               ),
             );
           }
@@ -379,6 +494,17 @@ class _ProductFormViewState extends State<ProductFormView> {
               padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 24.h),
               children: [
                 ..._buildSections(state),
+                // المورد (اختياري) — بعد الأقسام الأساسية وقبل المواصفات.
+                ProductSupplierField(
+                  key: const ValueKey('productSupplierField'),
+                  supplierId: state.supplierId,
+                  supplierName: state.supplierName,
+                  existing: widget.product,
+                  onCleared: (_) => _formCubit.setSupplier(null, null),
+                  onSelected: (supplier) =>
+                      _formCubit.setSupplier(supplier.id, supplier.displayName),
+                ),
+                SizedBox(height: 14.h),
                 if (state.config.optionalFields.isNotEmpty) ...[
                   ProductFormOptionalSpecs(
                     fields: state.config.optionalFields,
@@ -392,15 +518,78 @@ class _ProductFormViewState extends State<ProductFormView> {
                   height: 54.h,
                   child: FilledButton(
                     onPressed: _saving || _deleting ? null : _save,
-                    style: FilledButton.styleFrom(backgroundColor: AppTheme.primaryColor, foregroundColor: Colors.white, elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r))),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppTheme.primaryColor,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16.r),
+                      ),
+                    ),
                     child: _saving
-                        ? SizedBox(width: 22.w, height: 22.w, child: const CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
-                        : Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(_isEdit ? Icons.check_rounded : Icons.add_rounded, size: 18.sp), SizedBox(width: 8.w), Text(_isEdit ? 'productFormUpdate'.tr() : 'productFormSave'.tr(), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800))]),
+                        ? SizedBox(
+                            width: 22.w,
+                            height: 22.w,
+                            child: const CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                _isEdit
+                                    ? Icons.check_rounded
+                                    : Icons.add_rounded,
+                                size: 18.sp,
+                              ),
+                              SizedBox(width: 8.w),
+                              Text(
+                                _isEdit
+                                    ? 'productFormUpdate'.tr()
+                                    : 'productFormSave'.tr(),
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ],
+                          ),
                   ),
                 ),
                 if (_isEdit) ...[
                   SizedBox(height: 10.h),
-                  SizedBox(height: 50.h, child: OutlinedButton.icon(onPressed: _saving || _deleting ? null : _delete, style: OutlinedButton.styleFrom(foregroundColor: AppTheme.danger, side: const BorderSide(color: AppTheme.danger), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r))), icon: _deleting ? SizedBox(width: 18.w, height: 18.w, child: const CircularProgressIndicator(strokeWidth: 2.2, color: AppTheme.danger)) : const Icon(Icons.delete_outline_rounded, size: 18), label: Text('productDelete'.tr(), style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w700)))),
+                  SizedBox(
+                    height: 50.h,
+                    child: OutlinedButton.icon(
+                      onPressed: _saving || _deleting ? null : _delete,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppTheme.danger,
+                        side: const BorderSide(color: AppTheme.danger),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16.r),
+                        ),
+                      ),
+                      icon: _deleting
+                          ? SizedBox(
+                              width: 18.w,
+                              height: 18.w,
+                              child: const CircularProgressIndicator(
+                                strokeWidth: 2.2,
+                                color: AppTheme.danger,
+                              ),
+                            )
+                          : const Icon(Icons.delete_outline_rounded, size: 18),
+                      label: Text(
+                        'productDelete'.tr(),
+                        style: TextStyle(
+                          fontSize: 13.5.sp,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ],
             ),
@@ -420,21 +609,23 @@ class _ProductFormViewState extends State<ProductFormView> {
           .toList(growable: false);
       if (fields.isEmpty) continue;
       final meta = _sectionMeta(section);
-      out.add(ProductFormSectionCard(
-        icon: meta.$1,
-        titleKey: meta.$2,
-        gradient: meta.$3,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _fieldsBody(fields),
-            if (section == ProductFormSection.pricing) ...[
-              SizedBox(height: 12.h),
-              _profitPreview(),
+      out.add(
+        ProductFormSectionCard(
+          icon: meta.$1,
+          titleKey: meta.$2,
+          gradient: meta.$3,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _fieldsBody(fields),
+              if (section == ProductFormSection.pricing) ...[
+                SizedBox(height: 12.h),
+                _profitPreview(),
+              ],
             ],
-          ],
+          ),
         ),
-      ));
+      );
       out.add(SizedBox(height: 14.h));
     }
     return out;
@@ -471,14 +662,16 @@ class _ProductFormViewState extends State<ProductFormView> {
     while (i < fields.length) {
       final f = fields[i];
       if (f.paired && i + 1 < fields.length && fields[i + 1].paired) {
-        rows.add(Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(child: _render(f)),
-            SizedBox(width: 10.w),
-            Expanded(child: _render(fields[i + 1])),
-          ],
-        ));
+        rows.add(
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: _render(f)),
+              SizedBox(width: 10.w),
+              Expanded(child: _render(fields[i + 1])),
+            ],
+          ),
+        );
         i += 2;
       } else {
         rows.add(_render(f));
@@ -502,7 +695,11 @@ class _ProductFormViewState extends State<ProductFormView> {
           label: f.labelKey.tr(),
           hint: f.hintKey?.tr(),
           icon: f.icon,
-          suffixIcon: _iconBtn(Icons.autorenew_rounded, AppTheme.primaryColor, _regenerateCode),
+          suffixIcon: _iconBtn(
+            Icons.autorenew_rounded,
+            AppTheme.primaryColor,
+            _regenerateCode,
+          ),
         );
       case ProductFieldType.dropdown:
         return _renderDropdown(f);
@@ -514,7 +711,9 @@ class _ProductFormViewState extends State<ProductFormView> {
           value: _specValues[f.key] as String?,
           required: f.required,
           validator: (v) {
-            if (f.required && (v == null || v.trim().isEmpty)) return 'validatorRequired'.tr();
+            if (f.required && (v == null || v.trim().isEmpty)) {
+              return 'validatorRequired'.tr();
+            }
             return null;
           },
           onChanged: (v) => setState(() => _specValues[f.key] = v),
@@ -552,7 +751,8 @@ class _ProductFormViewState extends State<ProductFormView> {
           validator: (rows) {
             for (final r in rows) {
               final qty = r.qty.trim();
-              if (qty.isEmpty || (double.tryParse(NumberParser.toLatin(qty)) ?? -1) < 0) {
+              if (qty.isEmpty ||
+                  (double.tryParse(NumberParser.toLatin(qty)) ?? -1) < 0) {
                 return 'productsInvalidNumber'.tr();
               }
               if (r.useCustomSize && r.size.trim().isEmpty) {
@@ -601,9 +801,13 @@ class _ProductFormViewState extends State<ProductFormView> {
           hint: f.hintKey?.tr(),
           icon: f.icon,
           required: f.required,
-          suffix: f.type == ProductFieldType.decimal ? 'currencyEGP'.tr() : null,
+          suffix: f.type == ProductFieldType.decimal
+              ? 'currencyEGP'.tr()
+              : null,
           keyboard: switch (f.type) {
-            ProductFieldType.decimal => const TextInputType.numberWithOptions(decimal: true),
+            ProductFieldType.decimal => const TextInputType.numberWithOptions(
+              decimal: true,
+            ),
             ProductFieldType.number => TextInputType.number,
             _ => TextInputType.text,
           },
@@ -619,8 +823,9 @@ class _ProductFormViewState extends State<ProductFormView> {
     final current = _ctrl(ProductFieldKeys.stock).text.trim();
     if (current.isNotEmpty) return;
     final total = ProductFormVariantsEditor.totalQty(_variants);
-    _ctrl(ProductFieldKeys.stock).text =
-        total == total.roundToDouble() ? total.toStringAsFixed(0) : total.toStringAsFixed(1);
+    _ctrl(ProductFieldKeys.stock).text = total == total.roundToDouble()
+        ? total.toStringAsFixed(0)
+        : total.toStringAsFixed(1);
   }
 
   double? _variantsAvailableStock() {
@@ -630,7 +835,8 @@ class _ProductFormViewState extends State<ProductFormView> {
   }
 
   /// قواعد التحقق المطبقة على الحقول النصية/الرقمية (نفس منطق Cubit).
-  FormFieldValidator<String>? _fieldValidator(ProductFieldConfig f) {    return (String? v) {
+  FormFieldValidator<String>? _fieldValidator(ProductFieldConfig f) {
+    return (String? v) {
       final text = (v ?? '').trim();
       // الكمية تُحسب من صفوف Variants لو موجودة.
       if (f.key == ProductFieldKeys.stock && _variants.isNotEmpty) return null;
@@ -640,7 +846,8 @@ class _ProductFormViewState extends State<ProductFormView> {
         case ProductFieldType.decimal:
           final n = double.tryParse(NumberParser.toLatin(text));
           if (n == null) return 'validatorNumber'.tr();
-          if (f.key == ProductFieldKeys.stock || f.key == ProductFieldKeys.lowStockThreshold) {
+          if (f.key == ProductFieldKeys.stock ||
+              f.key == ProductFieldKeys.lowStockThreshold) {
             if (n < 0) return 'productsInvalidNumber'.tr();
             break;
           }
@@ -663,7 +870,13 @@ class _ProductFormViewState extends State<ProductFormView> {
           label: f.labelKey.tr(),
           icon: f.icon,
           value: _category,
-          items: [for (final c in _allCategories) DropdownMenuItem(value: c, child: Text(c, style: TextStyle(fontSize: 13.sp)))],
+          items: [
+            for (final c in _allCategories)
+              DropdownMenuItem(
+                value: c,
+                child: Text(c, style: TextStyle(fontSize: 13.sp)),
+              ),
+          ],
           onChanged: (v) => setState(() {
             _category = v;
             _customCategory = v == _otherOption;
@@ -673,11 +886,30 @@ class _ProductFormViewState extends State<ProductFormView> {
           alignment: AlignmentDirectional.centerEnd,
           child: TextButton.icon(
             onPressed: () async {
-              await Navigator.push(context, MaterialPageRoute(builder: (_) => const CategoryManagementView()));
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const CategoryManagementView(),
+                ),
+              );
             },
-            icon: Icon(Icons.settings_rounded, size: 14.sp, color: AppTheme.primaryColor),
-            label: Text('productFormManageCategories'.tr(), style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w700, color: AppTheme.primaryColor)),
-            style: TextButton.styleFrom(padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h), tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+            icon: Icon(
+              Icons.settings_rounded,
+              size: 14.sp,
+              color: AppTheme.primaryColor,
+            ),
+            label: Text(
+              'productFormManageCategories'.tr(),
+              style: TextStyle(
+                fontSize: 11.5.sp,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.primaryColor,
+              ),
+            ),
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
           ),
         ),
         if (_customCategory) ...[
@@ -700,12 +932,22 @@ class _ProductFormViewState extends State<ProductFormView> {
   Widget _renderDropdown(ProductFieldConfig f) {
     final current = _dropdownValues[f.key];
     final items = <DropdownMenuItem<String>>[
-      for (final o in f.options) DropdownMenuItem(value: o, child: Text(o, style: TextStyle(fontSize: 13.sp))),
+      for (final o in f.options)
+        DropdownMenuItem(
+          value: o,
+          child: Text(o, style: TextStyle(fontSize: 13.sp)),
+        ),
       if (f.allowCustom && !f.options.contains('أخرى'))
-        DropdownMenuItem(value: 'أخرى', child: Text('أخرى', style: TextStyle(fontSize: 13.sp))),
+        DropdownMenuItem(
+          value: 'أخرى',
+          child: Text('أخرى', style: TextStyle(fontSize: 13.sp)),
+        ),
       // قيمة قديمة غير موجودة في القائمة → نعرضها لمنع خطأ Assertion.
       if (current != null && current.isNotEmpty && !f.options.contains(current))
-        DropdownMenuItem(value: current, child: Text(current, style: TextStyle(fontSize: 13.sp))),
+        DropdownMenuItem(
+          value: current,
+          child: Text(current, style: TextStyle(fontSize: 13.sp)),
+        ),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -714,17 +956,31 @@ class _ProductFormViewState extends State<ProductFormView> {
           key: ValueKey(f.key),
           initialValue: current,
           isExpanded: true,
-          decoration: productFormDecoration(context, label: f.labelKey.tr(), icon: f.icon, required: f.required),
+          decoration: productFormDecoration(
+            context,
+            label: f.labelKey.tr(),
+            icon: f.icon,
+            required: f.required,
+          ),
           items: items,
-          validator: (v) => f.required && (v == null || v.isEmpty) ? 'validatorRequired'.tr() : null,
+          validator: (v) => f.required && (v == null || v.isEmpty)
+              ? 'validatorRequired'.tr()
+              : null,
           onChanged: (v) => setState(() {
             _dropdownTouched.add(f.key);
             _dropdownValues[f.key] = v;
             _customFlags[f.key] = v == 'أخرى';
           }),
-          style: TextStyle(fontSize: 13.5.sp, color: Theme.of(context).colorScheme.onSurface),
+          style: TextStyle(
+            fontSize: 13.5.sp,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           borderRadius: BorderRadius.circular(16.r),
-          icon: Icon(Icons.keyboard_arrow_down_rounded, size: 20.sp, color: AppTheme.primaryColor),
+          icon: Icon(
+            Icons.keyboard_arrow_down_rounded,
+            size: 20.sp,
+            color: AppTheme.primaryColor,
+          ),
         ),
         if (_customFlags[f.key] == true) ...[
           SizedBox(height: 12.h),
@@ -765,21 +1021,66 @@ class _ProductFormViewState extends State<ProductFormView> {
   }
 
   Widget _profitPreview() {
-    final cost = double.tryParse(NumberParser.toLatin(_ctrl(ProductFieldKeys.costPrice).text));
-    final price = double.tryParse(NumberParser.toLatin(_ctrl(ProductFieldKeys.price).text));
-    if (cost == null || price == null || cost <= 0 || price <= 0) return const SizedBox.shrink();
+    final cost = double.tryParse(
+      NumberParser.toLatin(_ctrl(ProductFieldKeys.costPrice).text),
+    );
+    final price = double.tryParse(
+      NumberParser.toLatin(_ctrl(ProductFieldKeys.price).text),
+    );
+    if (cost == null || price == null || cost <= 0 || price <= 0) {
+      return const SizedBox.shrink();
+    }
     final profit = price - cost;
     final margin = price > 0 ? (profit / price * 100) : 0;
     final positive = profit >= 0;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-      decoration: BoxDecoration(color: positive ? const Color(0xFFECFDF5) : AppTheme.dangerSoft, borderRadius: BorderRadius.circular(12.r), border: Border.all(color: positive ? AppTheme.successDark.withValues(alpha: 0.14) : AppTheme.danger.withValues(alpha: 0.14))),
-      child: Row(children: [
-        Icon(positive ? Icons.trending_up_rounded : Icons.trending_down_rounded, size: 16.sp, color: positive ? AppTheme.successDark : AppTheme.danger),
-        SizedBox(width: 8.w),
-        Expanded(child: Text(positive ? 'ربح ${_num(profit)} ج.م • هامش ${margin.toStringAsFixed(1)}%' : 'خسارة ${_num(profit.abs())} ج.م', style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w800, color: positive ? AppTheme.successDark : AppTheme.danger))),
-        Container(padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h), decoration: BoxDecoration(color: positive ? AppTheme.successDark : AppTheme.danger, borderRadius: BorderRadius.circular(20.r)), child: Text(positive ? 'مربح' : 'خسارة', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w700, color: Colors.white))),
-      ]),
+      decoration: BoxDecoration(
+        color: positive ? const Color(0xFFECFDF5) : AppTheme.dangerSoft,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(
+          color: positive
+              ? AppTheme.successDark.withValues(alpha: 0.14)
+              : AppTheme.danger.withValues(alpha: 0.14),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            positive ? Icons.trending_up_rounded : Icons.trending_down_rounded,
+            size: 16.sp,
+            color: positive ? AppTheme.successDark : AppTheme.danger,
+          ),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: Text(
+              positive
+                  ? 'ربح ${_num(profit)} ج.م • هامش ${margin.toStringAsFixed(1)}%'
+                  : 'خسارة ${_num(profit.abs())} ج.م',
+              style: TextStyle(
+                fontSize: 11.5.sp,
+                fontWeight: FontWeight.w800,
+                color: positive ? AppTheme.successDark : AppTheme.danger,
+              ),
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+            decoration: BoxDecoration(
+              color: positive ? AppTheme.successDark : AppTheme.danger,
+              borderRadius: BorderRadius.circular(20.r),
+            ),
+            child: Text(
+              positive ? 'مربح' : 'خسارة',
+              style: TextStyle(
+                fontSize: 10.sp,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -792,23 +1093,46 @@ class _ProductFormViewState extends State<ProductFormView> {
           onTap();
         },
         borderRadius: BorderRadius.circular(10.r),
-        child: Container(width: 36.w, height: 36.w, decoration: BoxDecoration(color: color.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(10.r)), child: Icon(icon, size: 18.sp, color: color)),
+        child: Container(
+          width: 36.w,
+          height: 36.w,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(10.r),
+          ),
+          child: Icon(icon, size: 18.sp, color: color),
+        ),
       ),
     );
   }
 
-  Widget _dropdownField<T>({required String label, required T? value, required List<DropdownMenuItem<T>> items, required void Function(T?) onChanged, IconData? icon}) {
+  Widget _dropdownField<T>({
+    required String label,
+    required T? value,
+    required List<DropdownMenuItem<T>> items,
+    required void Function(T?) onChanged,
+    IconData? icon,
+  }) {
     return DropdownButtonFormField<T>(
       initialValue: value,
       isExpanded: true,
       decoration: productFormDecoration(context, label: label, icon: icon),
       items: items,
       onChanged: onChanged,
-      style: TextStyle(fontSize: 13.5.sp, color: Theme.of(context).colorScheme.onSurface),
+      style: TextStyle(
+        fontSize: 13.5.sp,
+        color: Theme.of(context).colorScheme.onSurface,
+      ),
       borderRadius: BorderRadius.circular(16.r),
-      icon: Icon(Icons.keyboard_arrow_down_rounded, size: 20.sp, color: AppTheme.primaryColor),
+      icon: Icon(
+        Icons.keyboard_arrow_down_rounded,
+        size: 20.sp,
+        color: AppTheme.primaryColor,
+      ),
     );
   }
 
-  static String _num(double value) => value == value.roundToDouble() ? value.toStringAsFixed(0) : value.toStringAsFixed(2);
+  static String _num(double value) => value == value.roundToDouble()
+      ? value.toStringAsFixed(0)
+      : value.toStringAsFixed(2);
 }

@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '../../../../common_imports.dart';
 import '../../../categories/presentation/views/category_management_view.dart';
 import '../../../contact/presentation/views/contact_us_view.dart';
+import '../../../suppliers/presentation/views/suppliers_view.dart';
 import '../../../notifications/presentation/views/notifications_view.dart';
 import '../../../profile/presentation/views/change_password_view.dart';
 import '../../../profile/presentation/views/profile_view.dart';
@@ -19,7 +20,13 @@ class DrawerItemsList extends StatelessWidget {
   final VoidCallback? onOpenReturns;
   final VoidCallback? onOpenExpenses;
 
-  const DrawerItemsList({super.key, required this.isDark, this.onNavigateTab, this.onOpenReturns, this.onOpenExpenses});
+  const DrawerItemsList({
+    super.key,
+    required this.isDark,
+    this.onNavigateTab,
+    this.onOpenReturns,
+    this.onOpenExpenses,
+  });
 
   /// يفتح صفحة فوق الـ Drawer.
   void _open(BuildContext context, Widget page) {
@@ -53,9 +60,18 @@ class DrawerItemsList extends StatelessWidget {
             },
           ),
           SizedBox(height: 10.h),
-          Divider(color: isDark ? AppTheme.darkBorder : AppTheme.hairline, height: 1),
+          Divider(
+            color: isDark ? AppTheme.darkBorder : AppTheme.hairline,
+            height: 1,
+          ),
           SizedBox(height: 10.h),
           SectionLabel('إدارة المتجر', isDark),
+          CustomDrawerTile(
+            icon: Icons.local_shipping_rounded,
+            label: 'suppliersSection'.tr(),
+            color: AppTheme.violetDeep,
+            onTap: () => _open(context, const SuppliersView()),
+          ),
           CustomDrawerTile(
             icon: Icons.category_rounded,
             label: 'إدارة الأقسام',
@@ -69,7 +85,10 @@ class DrawerItemsList extends StatelessWidget {
             onTap: () => _open(context, const NotificationsView()),
           ),
           SizedBox(height: 10.h),
-          Divider(color: isDark ? AppTheme.darkBorder : AppTheme.hairline, height: 1),
+          Divider(
+            color: isDark ? AppTheme.darkBorder : AppTheme.hairline,
+            height: 1,
+          ),
           SizedBox(height: 10.h),
           SectionLabel('moreAccount'.tr(), isDark),
           CustomDrawerTile(
@@ -91,13 +110,19 @@ class DrawerItemsList extends StatelessWidget {
             onTap: () => _open(context, const ChangePasswordView()),
           ),
           SizedBox(height: 10.h),
-          Divider(color: isDark ? AppTheme.darkBorder : AppTheme.hairline, height: 1),
+          Divider(
+            color: isDark ? AppTheme.darkBorder : AppTheme.hairline,
+            height: 1,
+          ),
           SizedBox(height: 10.h),
           SectionLabel('morePreferences'.tr(), isDark),
           DrawerThemeTile(isDark: isDark),
           DrawerLanguageTile(isDark: isDark),
           SizedBox(height: 10.h),
-          Divider(color: isDark ? AppTheme.darkBorder : AppTheme.hairline, height: 1),
+          Divider(
+            color: isDark ? AppTheme.darkBorder : AppTheme.hairline,
+            height: 1,
+          ),
           SizedBox(height: 10.h),
           CustomDrawerTile(
             icon: Icons.headset_mic_rounded,
@@ -106,7 +131,10 @@ class DrawerItemsList extends StatelessWidget {
             onTap: () => _open(context, const ContactUsView()),
           ),
           SizedBox(height: 10.h),
-          Divider(color: isDark ? AppTheme.darkBorder : AppTheme.hairline, height: 1),
+          Divider(
+            color: isDark ? AppTheme.darkBorder : AppTheme.hairline,
+            height: 1,
+          ),
           SizedBox(height: 10.h),
           SectionLabel('لوحة التحكم', isDark),
           CustomDrawerTile(

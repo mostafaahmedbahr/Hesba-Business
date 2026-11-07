@@ -9,10 +9,7 @@ class ProductsRepoImpl implements ProductsRepo {
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
 
-  ProductsRepoImpl({
-    required this._auth,
-    required this._firestore,
-  });
+  ProductsRepoImpl({required this._auth, required this._firestore});
 
   String? get _uid => _auth.currentUser?.uid;
 
@@ -31,12 +28,13 @@ class ProductsRepoImpl implements ProductsRepo {
     return () async* {
       final shopId = await _getShopId();
       if (shopId == null) yield const <Product>[];
-      await for (final snap in _firestore
-          .collection(AppConstants.productsCollection)
-          .where('shopId', isEqualTo: shopId)
-          .orderBy('createdAt', descending: true)
-          .limit(500)
-          .snapshots()) {
+      await for (final snap
+          in _firestore
+              .collection(AppConstants.productsCollection)
+              .where('shopId', isEqualTo: shopId)
+              .orderBy('createdAt', descending: true)
+              .limit(500)
+              .snapshots()) {
         yield snap.docs
             .map((doc) => Product.fromJson(doc.data(), docId: doc.id))
             .toList();
@@ -53,13 +51,26 @@ class ProductsRepoImpl implements ProductsRepo {
     return doc.data()?['businessType'] as String?;
   }
 
+  /// يتأكد إن معرّف المورد (لو موجود) تابع للمحل الحالي فعلاً —
+  /// حتى لا يرتبط منتج بمورد محل آخر.
+  Future<void> _assertSupplierInShop(String? supplierId, String shopId) async {
+    if (supplierId == null || supplierId.isEmpty) return;
+    final snap = await _firestore
+        .collection(AppConstants.suppliersCollection)
+        .doc(supplierId)
+        .get();
+    final data = snap.data();
+    if (!snap.exists || data == null || data['shopId'] != shopId) {
+      throw Exception('supplierErrNotAuthorized');
+    }
+  }
+
   @override
   Future<void> addProduct(Product product) async {
     final shopId = await _getShopId();
     if (shopId == null) return;
-    final ref = _firestore
-        .collection(AppConstants.productsCollection)
-        .doc();
+    await _assertSupplierInShop(product.supplierId, shopId);
+    final ref = _firestore.collection(AppConstants.productsCollection).doc();
     final now = FieldValue.serverTimestamp();
     await ref.set({
       ...product.toJson(),
@@ -74,8 +85,10 @@ class ProductsRepoImpl implements ProductsRepo {
   Future<void> _assertOwnership(String productId) async {
     final shopId = await _getShopId();
     if (shopId == null) throw Exception('لم يتم العثور على المتجر');
-    final snap =
-        await _firestore.collection(AppConstants.productsCollection).doc(productId).get();
+    final snap = await _firestore
+        .collection(AppConstants.productsCollection)
+        .doc(productId)
+        .get();
     final data = snap.data();
     if (!snap.exists || data == null) throw Exception('المنتج غير موجود');
     if (data['shopId'] != shopId || (data['ownerId'] as String?) != _uid) {
@@ -87,13 +100,16 @@ class ProductsRepoImpl implements ProductsRepo {
   Future<void> updateProduct(Product product) async {
     if (product.id.isEmpty) return;
     await _assertOwnership(product.id);
+    final shopId = await _getShopId();
+    if (shopId == null) throw Exception('لم يتم العثور على المتجر');
+    await _assertSupplierInShop(product.supplierId, shopId);
     await _firestore
         .collection(AppConstants.productsCollection)
         .doc(product.id)
         .update({
-      ...product.toJson(),
-      'updatedAt': FieldValue.serverTimestamp(),
-    });
+          ...product.toJson(),
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
   }
 
   @override

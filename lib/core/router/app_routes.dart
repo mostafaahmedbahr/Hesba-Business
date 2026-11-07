@@ -13,4 +13,5 @@ abstract class AppRoutes {
   static const stockPurchaseView = '/stockPurchaseView';
   static const subscription = '/subscription';
   static const notifications = '/notifications';
+  static const suppliersView = '/suppliersView';
 }

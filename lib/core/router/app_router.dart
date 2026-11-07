@@ -15,6 +15,7 @@ import '../../features/expenses/presentation/views/expenses_view.dart';
 import '../../features/expenses/presentation/views/add_expense_view.dart';
 import '../../features/subscription/presentation/views/subscription_view.dart';
 import '../../features/notifications/presentation/views/notifications_view.dart';
+import '../../features/suppliers/presentation/views/suppliers_view.dart';
 
 /// Root navigator used to route the user when they tap a notification while
 /// the app is in the background or was terminated.
@@ -25,7 +26,8 @@ class AppRouter {
     // Route guard: protected screens require a signed-in user. Without this,
     // back-gesture/deep-link/notification taps could open them after logout
     // or with an expired token.
-    if (_requiresAuth(settings.name) && sl<FirebaseAuth>().currentUser == null) {
+    if (_requiresAuth(settings.name) &&
+        sl<FirebaseAuth>().currentUser == null) {
       return _buildRoute(const LoginView(), settings);
     }
     switch (settings.name) {
@@ -41,9 +43,7 @@ class AppRouter {
       case AppRoutes.dashboard:
         final dArgs = settings.arguments as Map<String, dynamic>?;
         return _buildRoute(
-          MainLayout(
-            initialTab: dArgs?['initialTab'] as int?,
-          ),
+          MainLayout(initialTab: dArgs?['initialTab'] as int?),
           settings,
         );
       case AppRoutes.addSaleView:
@@ -70,9 +70,7 @@ class AppRouter {
       case AppRoutes.expensesView:
         final eArgs = settings.arguments as Map<String, dynamic>?;
         return _buildRoute(
-          ExpensesView(
-            shopId: eArgs?['shopId'] as String? ?? '',
-          ),
+          ExpensesView(shopId: eArgs?['shopId'] as String? ?? ''),
           settings,
         );
       case AppRoutes.addExpenseView:
@@ -88,9 +86,11 @@ class AppRouter {
       case AppRoutes.subscription:
         return _buildRoute(const SubscriptionView(), settings);
 
-
       case AppRoutes.notifications:
         return _buildRoute(const NotificationsView(), settings);
+
+      case AppRoutes.suppliersView:
+        return _buildRoute(const SuppliersView(), settings);
 
       // case AppRoutes.resetPassword:
       //   return _buildRoute(const ResetPasswordScreen(), settings);
@@ -111,6 +111,7 @@ class AppRouter {
       case AppRoutes.stockPurchaseView:
       case AppRoutes.subscription:
       case AppRoutes.notifications:
+      case AppRoutes.suppliersView:
         return true;
       default:
         return false;

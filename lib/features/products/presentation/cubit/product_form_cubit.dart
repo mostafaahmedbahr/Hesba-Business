@@ -42,6 +42,9 @@ class ProductFormCubit extends Cubit<ProductFormState> {
           businessType: config.businessType,
           visibleOptional: visible,
           clearError: true,
+          // المنتج الحالي يبدأ بمورده (null لو مش مرتبط).
+          supplierId: existing?.supplierId,
+          supplierName: existing?.supplierName,
         ),
       );
     } catch (e) {
@@ -60,6 +63,14 @@ class ProductFormCubit extends Cubit<ProductFormState> {
   /// هل الحقل الاختياري ظاهر؟
   bool isFieldVisible(ProductFieldConfig field) =>
       !field.optional || state.visibleOptional.contains(field.key);
+
+  /// اختيار مورد للمنتج (أو إلغاء الاختيار بـ null).
+  ///
+  /// لا يُسمح بأسماء حرة: المورد لازم يكون من قائمة موردي المحل،
+  /// والتحقق من الملكية بيحصل قبل الحفظ في الـ repo.
+  void setSupplier(String? supplierId, String? supplierName) {
+    emit(state.copyWith(supplierId: supplierId, supplierName: supplierName));
+  }
 
   /// إظهار/إخفاء حقل اختياري من بطاقة "مواصفات إضافية".
   void toggleOptional(String key) {
@@ -82,7 +93,9 @@ class ProductFormCubit extends Cubit<ProductFormState> {
       var total = 0.0;
       for (final row in variantsList) {
         if (row is Map) {
-          final qty = double.tryParse(NumberParser.toLatin('${row['qty'] ?? ''}')) ?? -1;
+          final qty =
+              double.tryParse(NumberParser.toLatin('${row['qty'] ?? ''}')) ??
+              -1;
           if (qty < 0) return 'productsInvalidNumber';
           total += qty;
         }
@@ -103,7 +116,8 @@ class ProductFormCubit extends Cubit<ProductFormState> {
       final text = raw is String ? raw.trim() : '';
 
       if (field.required) {
-        final empty = raw == null ||
+        final empty =
+            raw == null ||
             (raw is String && raw.trim().isEmpty) ||
             (raw is List && raw.isEmpty);
         if (empty) return 'validatorRequired';
@@ -118,7 +132,8 @@ class ProductFormCubit extends Cubit<ProductFormState> {
           final n = double.tryParse(NumberParser.toLatin(text));
           if (n == null) return 'validatorNumber';
           // المخزون يسمح بالصفر (نفد المخزون)، لكن الأسعار لازم تكون > 0.
-          if (field.key == ProductFieldKeys.stock || field.key == ProductFieldKeys.lowStockThreshold) {
+          if (field.key == ProductFieldKeys.stock ||
+              field.key == ProductFieldKeys.lowStockThreshold) {
             if (n < 0) return 'productsInvalidNumber';
             break;
           }
@@ -173,23 +188,23 @@ class ProductFormCubit extends Cubit<ProductFormState> {
     final variants = values[ProductFieldKeys.variants];
     var stock =
         double.tryParse(NumberParser.toLatin(str(ProductFieldKeys.stock))) ??
-            existing?.stock ??
-            0;
+        existing?.stock ??
+        0;
     if (stock < 0) stock = 0;
     if (variants is List && variants.isNotEmpty) {
       stock = 0;
       for (final row in variants) {
         if (row is Map) {
-          stock += double.tryParse(
-                NumberParser.toLatin('${row['qty'] ?? ''}'),
-              ) ??
-              0;
+          stock +=
+              double.tryParse(NumberParser.toLatin('${row['qty'] ?? ''}')) ?? 0;
         }
       }
     }
 
     final costPrice =
-        double.tryParse(NumberParser.toLatin(str(ProductFieldKeys.costPrice))) ??
+        double.tryParse(
+          NumberParser.toLatin(str(ProductFieldKeys.costPrice)),
+        ) ??
         existing?.costPrice ??
         0;
     final price =
@@ -211,6 +226,13 @@ class ProductFormCubit extends Cubit<ProductFormState> {
     final color = hasColor ? str(ProductFieldKeys.color) : null;
     final size = hasSize ? str(ProductFieldKeys.size) : null;
 
+    // المورد من حالة النموذج: null/null لما ميكونش فيه مورد.
+    final supplierId = state.supplierId;
+    final supplierName = state.supplierName;
+    final hasSupplier = supplierId != null && supplierId.trim().isNotEmpty;
+    final supplierRef = hasSupplier ? supplierId.trim() : null;
+    final supplierSnapshot = hasSupplier ? (supplierName ?? '').trim() : null;
+
     if (existing != null) {
       return existing.copyWith(
         name: str(ProductFieldKeys.name),
@@ -225,6 +247,8 @@ class ProductFormCubit extends Cubit<ProductFormState> {
         specs: specs,
         color: color ?? existing.color,
         size: size ?? existing.size,
+        supplierId: supplierRef,
+        supplierName: supplierSnapshot,
       );
     }
 
@@ -244,6 +268,8 @@ class ProductFormCubit extends Cubit<ProductFormState> {
       specs: specs,
       shopId: '',
       ownerId: '',
+      supplierId: supplierRef,
+      supplierName: supplierSnapshot,
     );
   }
 

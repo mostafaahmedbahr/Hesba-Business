@@ -18,6 +18,13 @@ class ProductFormState {
 
   final String? errorMessage;
 
+  /// المورد المختار في نموذج المنتج (اختياري).
+  ///
+  /// `supplierId` هو مرجع العلاقة الأساسي و`supplierName` لقطة عرض —
+  /// كلاهما null لما ميكونش فيه مورد.
+  final String? supplierId;
+  final String? supplierName;
+
   const ProductFormState({
     this.status = ProductFormStatus.loading,
     this.config = const ProductFormConfig(
@@ -28,6 +35,8 @@ class ProductFormState {
     this.businessType,
     this.visibleOptional = const {},
     this.errorMessage,
+    this.supplierId,
+    this.supplierName,
   });
 
   bool get isReady => status == ProductFormStatus.ready;
@@ -39,6 +48,9 @@ class ProductFormState {
     Set<String>? visibleOptional,
     String? errorMessage,
     bool clearError = false,
+    // إرسال null صرياً يشيل المورد؛ عدم إرساله يُبقي القيمة الحالية.
+    Object? supplierId = _keepValue,
+    Object? supplierName = _keepValue,
   }) {
     return ProductFormState(
       status: status ?? this.status,
@@ -46,6 +58,15 @@ class ProductFormState {
       businessType: businessType ?? this.businessType,
       visibleOptional: visibleOptional ?? this.visibleOptional,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      supplierId: identical(supplierId, _keepValue)
+          ? this.supplierId
+          : supplierId as String?,
+      supplierName: identical(supplierName, _keepValue)
+          ? this.supplierName
+          : supplierName as String?,
     );
   }
+
+  /// علامة عدم التغيير للحقول التي تقبل الإلغاء بـ null.
+  static const Object _keepValue = Object();
 }

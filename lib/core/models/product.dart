@@ -39,6 +39,15 @@ class Product {
 
   final String shopId;
   final String ownerId;
+
+  /// معرّف المورد المرتبط بالمنتج (اختياري) — المصدر الأساسي للعلاقة.
+  /// المنتجات القديمة بلا مورد → null.
+  final String? supplierId;
+
+  /// لقطة عرض لاسم المورد (ليست مصدراً للحقيقة). تُحدَّث عند تغيير اسم
+  /// المورد، وتُقرأ من المورد الحيّ عند فتح نموذج المنتج.
+  final String? supplierName;
+
   final bool isActive;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -59,6 +68,8 @@ class Product {
     this.specs = const {},
     required this.shopId,
     required this.ownerId,
+    this.supplierId,
+    this.supplierName,
     this.isActive = true,
     this.createdAt,
     this.updatedAt,
@@ -81,6 +92,9 @@ class Product {
       specs: _readSpecs(json['specs']),
       shopId: json['shopId'] as String? ?? '',
       ownerId: json['ownerId'] as String? ?? '',
+      // المنتجات القديمة بلا حقل مورد → null (لا يُكسر أي منتج قائم).
+      supplierId: _readNullableString(json['supplierId']),
+      supplierName: _readNullableString(json['supplierName']),
       isActive: json['isActive'] as bool? ?? true,
       createdAt: (json['createdAt'] as Timestamp?)?.toDate(),
       updatedAt: (json['updatedAt'] as Timestamp?)?.toDate(),
@@ -101,6 +115,9 @@ class Product {
       'notes': notes,
       'imageUrl': imageUrl,
       'specs': specs,
+      // تُكتب دائماً (حتى لو null) حتى يُلغى ارتباط المورد بالحذف.
+      'supplierId': supplierId,
+      'supplierName': supplierName,
       'isActive': isActive,
     };
   }
@@ -119,6 +136,9 @@ class Product {
     String? imageUrl,
     Map<String, dynamic>? specs,
     bool? isActive,
+    // إرسال null صراحةً يلغي ارتباط المورد؛ عدم إرساله يُبقي القيمة الحالية.
+    Object? supplierId = _keepValue,
+    Object? supplierName = _keepValue,
   }) {
     return Product(
       id: id,
@@ -136,10 +156,29 @@ class Product {
       specs: specs ?? this.specs,
       shopId: shopId,
       ownerId: ownerId,
+      supplierId: identical(supplierId, _keepValue)
+          ? this.supplierId
+          : supplierId as String?,
+      supplierName: identical(supplierName, _keepValue)
+          ? this.supplierName
+          : supplierName as String?,
       isActive: isActive ?? this.isActive,
       createdAt: createdAt,
       updatedAt: updatedAt,
     );
+  }
+
+  /// هل المنتج مرتبط بمورد؟
+  bool get hasSupplier => supplierId != null && supplierId!.isNotEmpty;
+
+  /// علامة عدم التغيير داخل [copyWith] للحقول التي تقبل الإلغاء بـ null.
+  static const Object _keepValue = Object();
+
+  /// قراءة آمنة لحقل نصي اختياري: الغائب أو غير النص → null.
+  static String? _readNullableString(Object? value) {
+    if (value is! String) return null;
+    final trimmed = value.trim();
+    return trimmed.isEmpty ? null : trimmed;
   }
 
   bool get isLowStock => stock <= lowStockThreshold;
@@ -147,9 +186,14 @@ class Product {
   bool get isOutOfStock => stock <= 0;
 
   /// عرض المخزون: عدد صحيح من غير كسور، وكسر برقم عشري واحد.
-  String get stockLabel => stock == stock.roundToDouble() ? stock.toStringAsFixed(0) : stock.toStringAsFixed(1);
+  String get stockLabel => stock == stock.roundToDouble()
+      ? stock.toStringAsFixed(0)
+      : stock.toStringAsFixed(1);
 
-  String get lowStockLabel => lowStockThreshold == lowStockThreshold.roundToDouble() ? lowStockThreshold.toStringAsFixed(0) : lowStockThreshold.toStringAsFixed(1);
+  String get lowStockLabel =>
+      lowStockThreshold == lowStockThreshold.roundToDouble()
+      ? lowStockThreshold.toStringAsFixed(0)
+      : lowStockThreshold.toStringAsFixed(1);
 
   /// Profit margin percentage on the sale price.
   double get marginPercent =>

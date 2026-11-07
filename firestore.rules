@@ -83,6 +83,72 @@ service cloud.firestore {
         && nonNegative('lowStockThreshold');
     }
 
+    // Optional string field that, when present (and non-null), must be a
+    // string no longer than `maxLen`. Used by the supplier document.
+    function optionalString(d, key, maxLen) {
+      let v = d.get(key, null);
+      return v == null || (v is string && v.size() <= maxLen);
+    }
+
+    // Suppliers: full-document structure check (create + update).
+    //  - id / ownerId / shopId are set once by a signed-in user of the
+    //    shop they belong to (never another shop's supplier).
+    //  - name + phone are required non-empty strings; phone is 7..30 of
+    //    dialable characters (Latin + Arabic-Indic digits, + ( ) - space).
+    //  - every other field is optional but must be a bounded string.
+    function validSupplier(docId) {
+      let d = request.resource.data;
+      return d.get('id', null) == docId
+        && d.get('ownerId', null) == myUid()
+        && d.get('shopId', null) == myShopId()
+        && d.get('name', null) is string
+        && d.get('name', '').size() > 0
+        && d.get('name', '').size() <= 200
+        && d.get('name', '').matches('.*\\S.*')
+        && d.get('phone', null) is string
+        && d.get('phone', '').size() >= 7
+        && d.get('phone', '').size() <= 30
+        && d.get('phone', '').matches('[0-9٠-٩+()\\- ]+')
+        && optionalString(d, 'companyName', 200)
+        && optionalString(d, 'secondaryPhone', 30)
+        && optionalString(d, 'email', 200)
+        && optionalString(d, 'address', 300)
+        && optionalString(d, 'city', 120)
+        && optionalString(d, 'notes', 2000);
+    }
+
+    // Suppliers: only editable content fields (+ updatedAt) may change.
+    // Ownership fields (id / ownerId / shopId) and the create timestamp
+    // are immutable from clients — no cross-shop reassignment.
+    function onlySupplierEditableFields() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['name', 'phone', 'companyName', 'secondaryPhone',
+          'email', 'address', 'city', 'notes', 'updatedAt']);
+    }
+
+    // Products: an optional supplier reference must point at a supplier
+    // document that exists in the SAME shop, and supplierId/supplierName
+    // are never mixed: both present (id + name snapshot) or both absent
+    // (null/missing = no supplier, legacy docs ok).
+    // Costs one exists() + one get() per product write.
+    function validSupplierRef() {
+      let sid = request.resource.data.get('supplierId', null);
+      let sname = request.resource.data.get('supplierName', null);
+      return (sid == null && sname == null)
+        || (sid is string && sid != ''
+          && sname is string && sname.size() <= 200
+          && supplierInShop(sid, request.resource.data.get('shopId', null)));
+    }
+
+    // True only when the supplier doc exists and belongs to `shopId`.
+    // `exists()` short-circuits the `get()` for missing docs.
+    function supplierInShop(supplierId, shopId) {
+      let ref = /databases/$(database)/documents/suppliers/$(supplierId);
+      return shopId != null && shopId != ''
+        && exists(ref)
+        && get(ref).data.get('shopId', null) == shopId;
+    }
+
     // Live subscription required for WRITES on business data.
     // A suspended shop is read-only no matter what the status/dates say.
     function subscriptionLive() {
@@ -236,11 +302,13 @@ service cloud.firestore {
       allow create: if signedIn()
         && request.resource.data.ownerId == myUid()
         && validProduct()
+        && validSupplierRef()
         && mayWriteShopData(request.resource.data.shopId);
       allow update: if isAdmin() || (signedIn()
         && resource.data.ownerId == myUid()
         && request.resource.data.ownerId == myUid()
         && validProduct()
+        && validSupplierRef()
         && mayWriteShopData(resource.data.shopId));
       allow delete: if isAdmin() || (signedIn()
         && resource.data.ownerId == myUid()
@@ -321,6 +389,32 @@ service cloud.firestore {
         && nonNegative('newStock')
         && mayWriteShopData(request.resource.data.shopId);
       allow update, delete: if isAdmin();
+    }
+
+    // ── suppliers (الموردون) ─────────────────────────────────
+    // Shop-scoped supplier directory: every query/write is limited to
+    // the caller's own shop. Reads are open to the shop team, writes
+    // require a live subscription (same rule as products).
+    match /suppliers/{docId} {
+      allow read: if signedIn() && (isAdmin()
+        || resource.data.ownerId == myUid()
+        || sameShop(resource.data.shopId));
+      allow create: if signedIn()
+        && validSupplier(docId)
+        // Timestamps come from the server: nobody can back-date a supplier.
+        && request.resource.data.get('createdAt', null) == request.time
+        && request.resource.data.get('updatedAt', null) == request.time
+        && mayWriteShopData(request.resource.data.shopId);
+      // Content edits only: ownerId/shopId/id/createdAt never move.
+      allow update: if isAdmin() || (signedIn()
+        && resource.data.ownerId == myUid()
+        && resource.data.shopId == request.resource.data.shopId
+        && onlySupplierEditableFields()
+        && validSupplier(docId)
+        && mayWriteShopData(resource.data.shopId));
+      allow delete: if isAdmin() || (signedIn()
+        && resource.data.ownerId == myUid()
+        && mayWriteShopData(resource.data.shopId));
     }
 
     // ── feedback (contact us) ────────────────────────────────
