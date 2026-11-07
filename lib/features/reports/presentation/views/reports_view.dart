@@ -69,12 +69,15 @@ class _ReportsBody extends StatelessWidget {
                     padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 110.h),
                     sliver: SliverList(
                       delegate: SliverChildListDelegate([
+                        ReportsIncompleteBanner(state: state),
                         ReportsTrendCard(state: state)
                             .animate()
                             .fadeIn(duration: 350.ms)
                             .slideY(begin: 0.05, end: 0),
                         SizedBox(height: 14.h),
                         ReportsSummaryGrid(state: state),
+                        SizedBox(height: 14.h),
+                        ReportsProfitCard(state: state),
                         SizedBox(height: 14.h),
                         ReportsBalanceCard(state: state),
                         SizedBox(height: 14.h),

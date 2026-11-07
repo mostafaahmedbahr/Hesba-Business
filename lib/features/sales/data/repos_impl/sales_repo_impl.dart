@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/utils/paged_fetch.dart';
 import '../models/sale_model.dart';
 import '../repos/sales_repo.dart';
 
@@ -192,5 +193,40 @@ class SalesRepoImpl implements SalesRepo {
         .snapshots()
         .map((snap) =>
             snap.docs.map((d) => SaleModel.fromJson(d.data())).toList());
+  }
+
+  @override
+  Future<PagedResult<SaleModel>> fetchAllSales({required String shopId}) {
+    return fetchAllPages<SaleModel>(
+      idOf: (sale) => sale.saleId,
+      fetchPage: (cursor) async {
+        Query<Map<String, dynamic>> query = firestore
+            .collection(AppConstants.salesCollection)
+            .where('shopId', isEqualTo: shopId)
+            .orderBy('createdAt', descending: true)
+            .limit(kReportPageSize);
+        if (cursor != null) {
+          query = query
+              .startAfterDocument(cursor as DocumentSnapshot<Map<String, dynamic>>);
+        }
+        final snap = await query.get();
+        return PageResult<SaleModel>(
+          items: snap.docs.map((d) => SaleModel.fromJson(d.data())).toList(),
+          cursor: snap.docs.isEmpty ? null : snap.docs.last,
+          hasMore: snap.docs.length >= kReportPageSize,
+        );
+      },
+    );
+  }
+
+  @override
+  Stream<void> watchLatestSale({required String shopId}) {
+    return firestore
+        .collection(AppConstants.salesCollection)
+        .where('shopId', isEqualTo: shopId)
+        .orderBy('createdAt', descending: true)
+        .limit(1)
+        .snapshots()
+        .map<void>((_) {});
   }
 }

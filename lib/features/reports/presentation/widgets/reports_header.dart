@@ -67,13 +67,13 @@ class ReportsHeader extends StatelessWidget {
                     Expanded(
                       child: loading
                           ? _GlassSkeleton()
-                          : _HeaderGlass(icon: Icons.trending_up_rounded, label: 'صافي المبيعات', value: '${fmtReport(state.netSales)} ج.م'),
+                          : _HeaderGlass(icon: Icons.trending_up_rounded, label: 'reportsNetSales'.tr(), value: '${fmtReport(state.netSales)} ج.م'),
                     ),
                     SizedBox(width: 10.w),
                     Expanded(
                       child: loading
                           ? _GlassSkeleton()
-                          : _HeaderGlass(icon: Icons.account_balance_wallet_rounded, label: 'الرصيد الحالي', value: '${fmtReport(balance)} ج.م', danger: balance < 0),
+                          : _HeaderGlass(icon: Icons.account_balance_wallet_rounded, label: 'reportsNetProfit'.tr(), value: '${fmtReport(balance)} ج.م', danger: balance < 0),
                     ),
                   ]),
                 ]),

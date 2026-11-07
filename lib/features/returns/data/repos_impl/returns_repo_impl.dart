@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/utils/paged_fetch.dart';
 import '../../../sales/data/models/sale_model.dart';
 import '../models/return_model.dart';
 import '../repos/returns_repo.dart';
@@ -216,6 +217,41 @@ class ReturnsRepoImpl implements ReturnsRepo {
         .limit(500)
         .snapshots()
         .map((snap) => snap.docs.map((d) => ReturnModel.fromJson(d.data())).toList());
+  }
+
+  @override
+  Future<PagedResult<ReturnModel>> fetchAllReturns({required String shopId}) {
+    return fetchAllPages<ReturnModel>(
+      idOf: (ret) => ret.returnId,
+      fetchPage: (cursor) async {
+        Query<Map<String, dynamic>> query = firestore
+            .collection(AppConstants.returnsCollection)
+            .where('shopId', isEqualTo: shopId)
+            .orderBy('createdAt', descending: true)
+            .limit(kReportPageSize);
+        if (cursor != null) {
+          query = query
+              .startAfterDocument(cursor as DocumentSnapshot<Map<String, dynamic>>);
+        }
+        final snap = await query.get();
+        return PageResult<ReturnModel>(
+          items: snap.docs.map((d) => ReturnModel.fromJson(d.data())).toList(),
+          cursor: snap.docs.isEmpty ? null : snap.docs.last,
+          hasMore: snap.docs.length >= kReportPageSize,
+        );
+      },
+    );
+  }
+
+  @override
+  Stream<void> watchLatestReturn({required String shopId}) {
+    return firestore
+        .collection(AppConstants.returnsCollection)
+        .where('shopId', isEqualTo: shopId)
+        .orderBy('createdAt', descending: true)
+        .limit(1)
+        .snapshots()
+        .map<void>((_) {});
   }
 
   @override

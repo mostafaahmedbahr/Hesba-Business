@@ -1,3 +1,4 @@
+import '../../../../core/utils/paged_fetch.dart';
 import '../../../sales/data/models/sale_model.dart';
 import '../models/return_model.dart';
 
@@ -15,6 +16,12 @@ abstract class ReturnsRepo {
   Future<List<ReturnModel>> getReturns({required String shopId});
 
   Stream<List<ReturnModel>> watchReturns({required String shopId});
+
+  /// كل مرتجعات المحل بترقيم cursor (بلا حد صامت) — لحسابات التقارير.
+  Future<PagedResult<ReturnModel>> fetchAllReturns({required String shopId});
+
+  /// حدث خفيف (أثر على أحدث مرتجع) يعيد تحميل التقارير live.
+  Stream<void> watchLatestReturn({required String shopId});
 
   /// id محل اليوزر الحالي (null لو مفيش).
   Future<String?> getShopId();

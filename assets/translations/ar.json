@@ -634,5 +634,18 @@
   "subscriptionSuspendedBlocked": "تم إيقاف المحل مؤقتًا من الإدارة — تواصل معنا لإعادة التفعيل",
   "subscriptionStatusSuspended": "موقوف",
   "subscriptionBlockedTitle": "الاشتراك مطلوب",
-  "subscriptionViewPlans": "عرض الباقات"
+  "subscriptionViewPlans": "عرض الباقات",
+  "reportsTotalSales": "إجمالي المبيعات",
+  "reportsNetSales": "صافي المبيعات",
+  "reportsTotalReturns": "إجمالي المرتجعات",
+  "reportsTotalExpenses": "إجمالي المصروفات",
+  "reportsCogs": "تكلفة البضاعة المباعة",
+  "reportsGrossProfit": "إجمالي الربح",
+  "reportsNetProfit": "صافي الربح",
+  "reportsProfitsTitle": "الأرباح",
+  "reportsMargin": "هامش الربح",
+  "reportsProfitEstimated": "الربح تقديري",
+  "reportsProfitEstimatedBody": "تكلفة شرائية مفقودة لـ {0} صنف (فواتير قديمة) — الربح المعروض أعلى من الحقيقية، والإيراد والمصروفات مؤكدة. تغطية بيانات التكلفة: {1}%.",
+  "reportsDataIncomplete": "بيانات غير مكتملة",
+  "reportsDataIncompleteBody": "تعذّر جلب كل السجلات؛ الإجماليات قد تكون ناقصة — اسحب للتحديث أو اختر فترة أقصر."
 }

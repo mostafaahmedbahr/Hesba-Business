@@ -1,3 +1,4 @@
+import '../../../../core/utils/paged_fetch.dart';
 import '../models/expense_model.dart';
 
 abstract class ExpensesRepo {
@@ -27,6 +28,12 @@ abstract class ExpensesRepo {
   Future<List<ExpenseModel>> getExpenses({required String shopId});
 
   Stream<List<ExpenseModel>> watchExpenses({required String shopId});
+
+  /// كل مصروفات المحل بترقيم cursor (بلا حد صامت) — لحسابات التقارير.
+  Future<PagedResult<ExpenseModel>> fetchAllExpenses({required String shopId});
+
+  /// حدث خفيف (أثر على أحدث مصروف) يعيد تحميل التقارير live.
+  Stream<void> watchLatestExpense({required String shopId});
 
   Future<void> deleteExpense({required String expenseId, required String shopId});
 

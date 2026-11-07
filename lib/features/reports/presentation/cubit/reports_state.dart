@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import '../../../expenses/data/models/expense_model.dart';
 import '../../../returns/data/models/return_model.dart';
 import '../../../sales/data/models/sale_model.dart';
+import '../../data/report_metrics.dart';
 
 /// فترة التقرير.
 enum ReportPeriod { today, week, month, all }
@@ -37,19 +38,37 @@ extension ReportPeriodX on ReportPeriod {
   }
 
   DateTime get end => DateTime.now();
+
+  /// الحد الأعلى **حصراً** (غير شامل) — نفس حدود `ReportsCalculator`
+  /// والاستعلام حتى لا يُحسب سجل على حد الفترتين أو يسقط بينهما.
+  DateTime get endExclusive => end.add(const Duration(days: 1));
 }
 
 /// حالة التقارير.
 enum ReportsStatus { initial, loading, success, failure }
 
-/// داتا التقارير (الـ Cubit يملاها — الفلاتر والحسابات هنا).
+/// داتا التقارير (الـ Cubit يملاها — الفلاتر هنا والحسابات في `ReportsCalculator`).
+///
+/// القوائم هنا **كاملة بلا قيود 300** (جلب بترقيم cursor) وتُصفّى محلياً
+/// حسب الفترة، فالإجماليات لا تعتمد على أي صفحة عرض.
 class ReportsState extends Equatable {
   final ReportsStatus status;
   final String shopId;
   final ReportPeriod period;
+
+  /// كل سجلات المحل (بلا حد صامت) — أساس كل الحسابات.
   final List<SaleModel> allSales;
   final List<ReturnModel> allReturns;
   final List<ExpenseModel> allExpenses;
+
+  /// مؤشرات الفترة الحالية — يحسبها `ReportsCalculator` مرة واحدة لكل
+  /// (داتا × فترة) فلا تُعاد الحسابات في الودجتات.
+  final ReportMetrics metrics;
+
+  /// هل الجلب وصل لنهاية كل مجموعات الثلاث؟ false = ظهّر تحذير
+  /// "بيانات غير مكتملة" ولا تقدّم الإجماليات كأرقام نهائية.
+  final bool dataComplete;
+
   final String? errorMessage;
 
   const ReportsState({
@@ -59,6 +78,8 @@ class ReportsState extends Equatable {
     this.allSales = const [],
     this.allReturns = const [],
     this.allExpenses = const [],
+    this.metrics = ReportMetrics.empty,
+    this.dataComplete = true,
     this.errorMessage,
   });
 
@@ -70,25 +91,26 @@ class ReportsState extends Equatable {
       status == ReportsStatus.initial || status == ReportsStatus.loading;
 
   bool _inPeriod(DateTime dt) =>
-      dt.isAfter(period.start.subtract(const Duration(seconds: 1))) &&
-      dt.isBefore(period.end.add(const Duration(days: 1)));
+      !dt.isBefore(period.start) && dt.isBefore(period.endExclusive);
 
   /// القوائم بعد فلتر الفترة.
   List<SaleModel> get sales => allSales.where((s) => _inPeriod(s.createdAt)).toList();
   List<ReturnModel> get returns => allReturns.where((r) => _inPeriod(r.createdAt)).toList();
   List<ExpenseModel> get expenses => allExpenses.where((e) => _inPeriod(e.date)).toList();
 
-  /// الإجماليات.
-  double get totalSales => sales.fold<double>(0, (s, e) => s + e.total);
-  double get totalReturns => returns.fold<double>(0, (s, e) => s + e.total);
-  double get totalExpenses => expenses.fold<double>(0, (s, e) => s + e.amount);
-  double get netSales => totalSales - totalReturns;
-  double get balance => netSales - totalExpenses;
+  /// الإجماليات (كلها من `ReportsCalculator` — لا حسابات مكررة هنا).
+  double get totalSales => metrics.grossRevenue;
+  double get totalReturns => metrics.returnsTotal;
+  double get netSales => metrics.netSales;
+  double get totalExpenses => metrics.expensesTotal;
 
-  /// مبيعات آخر 7 أيام (للرسم).
+  /// صافي الربح (الbottom line) = إجمالي الربح − المصروفات.
+  double get balance => metrics.netProfit;
+
+  /// مبيعات الفترة (للرسم — نفس حدود الفترة مع بقية المؤشرات).
   Map<String, double> salesByDay(List<DateTime> days, String Function(DateTime) keyOf) {
     final map = {for (final d in days) keyOf(d): 0.0};
-    for (final s in allSales) {
+    for (final s in sales) {
       final key = keyOf(s.createdAt);
       if (map.containsKey(key)) map[key] = (map[key] ?? 0) + s.total;
     }
@@ -142,6 +164,8 @@ class ReportsState extends Equatable {
     List<SaleModel>? allSales,
     List<ReturnModel>? allReturns,
     List<ExpenseModel>? allExpenses,
+    ReportMetrics? metrics,
+    bool? dataComplete,
     String? errorMessage,
     bool clearError = false,
   }) {
@@ -152,12 +176,24 @@ class ReportsState extends Equatable {
       allSales: allSales ?? this.allSales,
       allReturns: allReturns ?? this.allReturns,
       allExpenses: allExpenses ?? this.allExpenses,
+      metrics: metrics ?? this.metrics,
+      dataComplete: dataComplete ?? this.dataComplete,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
 
   @override
-  List<Object?> get props => [status, shopId, period, allSales, allReturns, allExpenses, errorMessage];
+  List<Object?> get props => [
+        status,
+        shopId,
+        period,
+        allSales,
+        allReturns,
+        allExpenses,
+        metrics,
+        dataComplete,
+        errorMessage,
+      ];
 }
 
 /// تنسيق رقم (صحيح من غير كسور).

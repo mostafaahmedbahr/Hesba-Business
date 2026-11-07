@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/utils/paged_fetch.dart';
 import '../models/expense_model.dart';
 import '../repos/expenses_repo.dart';
 
@@ -198,6 +199,41 @@ class ExpensesRepoImpl implements ExpensesRepo {
         yield _toFiltered(snap, resolvedShopId);
       }
     }
+  }
+
+  @override
+  Future<PagedResult<ExpenseModel>> fetchAllExpenses({required String shopId}) {
+    return fetchAllPages<ExpenseModel>(
+      idOf: (expense) => expense.expenseId,
+      fetchPage: (cursor) async {
+        Query<Map<String, dynamic>> query = firestore
+            .collection(AppConstants.expensesCollection)
+            .where('shopId', isEqualTo: shopId)
+            .orderBy('createdAt', descending: true)
+            .limit(kReportPageSize);
+        if (cursor != null) {
+          query = query
+              .startAfterDocument(cursor as DocumentSnapshot<Map<String, dynamic>>);
+        }
+        final snap = await query.get();
+        return PageResult<ExpenseModel>(
+          items: snap.docs.map((d) => ExpenseModel.fromJson(d.data())).toList(),
+          cursor: snap.docs.isEmpty ? null : snap.docs.last,
+          hasMore: snap.docs.length >= kReportPageSize,
+        );
+      },
+    );
+  }
+
+  @override
+  Stream<void> watchLatestExpense({required String shopId}) {
+    return firestore
+        .collection(AppConstants.expensesCollection)
+        .where('shopId', isEqualTo: shopId)
+        .orderBy('createdAt', descending: true)
+        .limit(1)
+        .snapshots()
+        .map<void>((_) {});
   }
 
   @override

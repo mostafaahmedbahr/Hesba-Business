@@ -634,5 +634,18 @@
   "subscriptionSuspendedBlocked": "This shop has been suspended by the administration — contact us to reactivate",
   "subscriptionStatusSuspended": "Suspended",
   "subscriptionBlockedTitle": "Subscription required",
-  "subscriptionViewPlans": "View plans"
+  "subscriptionViewPlans": "View plans",
+  "reportsTotalSales": "Total sales",
+  "reportsNetSales": "Net sales",
+  "reportsTotalReturns": "Total returns",
+  "reportsTotalExpenses": "Total expenses",
+  "reportsCogs": "Cost of goods sold",
+  "reportsGrossProfit": "Gross profit",
+  "reportsNetProfit": "Net profit",
+  "reportsProfitsTitle": "Profits",
+  "reportsMargin": "Profit margin",
+  "reportsProfitEstimated": "Estimated profit",
+  "reportsProfitEstimatedBody": "Missing cost data for {0} line(s) (legacy invoices) — the profit shown is higher than reality; revenue and expenses are exact. Cost data coverage: {1}%.",
+  "reportsDataIncomplete": "Incomplete data",
+  "reportsDataIncompleteBody": "Not every record could be fetched; totals may be incomplete — pull to refresh or pick a shorter period."
 }
