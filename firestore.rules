@@ -169,13 +169,43 @@ service cloud.firestore {
       allow create: if signedIn()
         && request.resource.data.userId == myUid()
         && request.resource.data.status == 'pending'
-        // Amount is bound to the plan price — a tampered amount (e.g.
-        // amount: 1 for the yearly plan) is rejected before review.
+        // Amount is NEVER trusted from the client: it must equal the price
+        // the admin configured in `admin_settings/settings` for exactly the
+        // selected plan (a tampered amount or a mismatched plan id — e.g.
+        // amount: 1 for the yearly plan — is rejected before review).
+        // The price fields are read with a `-1` default and `amount > 0`
+        // guards the comparison, so a missing field can never be matched.
+        // The `.get('…', -1)` calls short-circuit per plan branch, staying
+        // well inside the 10 access-call budget per evaluation.
+        && request.resource.data.amount is int
+        && request.resource.data.amount > 0
         && (
-             (request.resource.data.selectedPlan == 'monthly' && request.resource.data.amount == 99)
-             || (request.resource.data.selectedPlan == 'threeMonths' && request.resource.data.amount == 249)
-             || (request.resource.data.selectedPlan == 'sixMonths' && request.resource.data.amount == 449)
-             || (request.resource.data.selectedPlan == 'yearly' && request.resource.data.amount == 799)
+             // Preferred: validate against the live dashboard-configured price.
+             (exists(/databases/$(database)/documents/admin_settings/settings)
+               && (
+                    (request.resource.data.selectedPlan == 'monthly'
+                      && request.resource.data.amount ==
+                        get(/databases/$(database)/documents/admin_settings/settings).data.get('monthlyPrice', -1))
+                    || (request.resource.data.selectedPlan == 'threeMonths'
+                      && request.resource.data.amount ==
+                        get(/databases/$(database)/documents/admin_settings/settings).data.get('threeMonthsPrice', -1))
+                    || (request.resource.data.selectedPlan == 'sixMonths'
+                      && request.resource.data.amount ==
+                        get(/databases/$(database)/documents/admin_settings/settings).data.get('sixMonthsPrice', -1))
+                    || (request.resource.data.selectedPlan == 'yearly'
+                      && request.resource.data.amount ==
+                        get(/databases/$(database)/documents/admin_settings/settings).data.get('yearlyPrice', -1))
+                  ))
+             // Fallback: only if the settings doc does not exist yet, accept
+             // the same built-in defaults the app ships with (still trusted
+             // constants written here on the server, never client data).
+             || (!exists(/databases/$(database)/documents/admin_settings/settings)
+               && (
+                    (request.resource.data.selectedPlan == 'monthly' && request.resource.data.amount == 99)
+                    || (request.resource.data.selectedPlan == 'threeMonths' && request.resource.data.amount == 249)
+                    || (request.resource.data.selectedPlan == 'sixMonths' && request.resource.data.amount == 449)
+                    || (request.resource.data.selectedPlan == 'yearly' && request.resource.data.amount == 799)
+                  ))
            )
         && request.resource.data.paymentMethod in
           ['instapay', 'vodafone_cash', 'etisalat_cash']

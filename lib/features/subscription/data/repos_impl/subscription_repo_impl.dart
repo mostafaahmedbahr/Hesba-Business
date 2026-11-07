@@ -101,6 +101,11 @@ class SubscriptionRepoImpl implements SubscriptionRepo {
     required String paymentProofUrl,
   }) async {
     final uid = _requireUid();
+    // Re-pull the dashboard settings right before pricing the request, so a
+    // price changed while the paywall was open is picked up now (the rules
+    // validate this exact amount server-side, so a stale cache would fail
+    // the write instead of silently over/undercharging).
+    await AppSettingsService.refresh();
     // One pending request at a time: a second submit while the first is
     // still under review is rejected instead of orphaning the old row.
     // (Single equality filter — no composite index required.)

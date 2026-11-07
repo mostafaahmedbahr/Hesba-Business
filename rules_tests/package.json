@@ -1,0 +1,13 @@
+{
+  "name": "hesba-rules-tests",
+  "private": true,
+  "type": "module",
+  "description": "Firestore security rules tests for Hesba (runs on the local emulator only, never deploys)",
+  "scripts": {
+    "test": "node --test rules.test.js"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.2",
+    "firebase": "^12.19.0"
+  }
+}

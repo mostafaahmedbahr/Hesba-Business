@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 import '../extensions/log_util.dart';
 import '../models/admin_settings.dart';
@@ -37,4 +38,13 @@ class AppSettingsService {
       logWarning('[AppSettings] refresh failed: $e');
     }
   }
+
+  /// للاختبارات فقط: استبدال الإعدادات الحالية في الذاكرة بدون لمس Firestore
+  /// (محاكاة حفظ الأدمن للأسعار). الكود العادي لا يستدعيها أبداً.
+  @visibleForTesting
+  static void debugSetCurrent(AdminSettings settings) => _current = settings;
+
+  /// للاختبارات فقط: إعادة القيم الافتراضية بعد كل اختبار.
+  @visibleForTesting
+  static void debugReset() => _current = AdminSettings.defaults;
 }
