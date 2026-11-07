@@ -20,6 +20,9 @@ class ProductListHeader extends StatelessWidget {
   final int lowStockCount;
   final VoidCallback? onAdd;
 
+  /// زر زيادة المخزون (فاتورة شراء).
+  final VoidCallback? onRestock;
+
   const ProductListHeader({
     super.key,
     required this.count,
@@ -28,6 +31,7 @@ class ProductListHeader extends StatelessWidget {
     required this.expectedProfit,
     required this.lowStockCount,
     this.onAdd,
+    this.onRestock,
   });
 
   @override
@@ -91,6 +95,25 @@ class ProductListHeader extends StatelessWidget {
                                       width: 36.w, height: 36.w,
                                       decoration: BoxDecoration(borderRadius: BorderRadius.circular(12.r)),
                                       child: Icon(Icons.add_rounded, size: 20.sp, color: AppTheme.primaryColor),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                              if (onRestock != null) ...[
+                                SizedBox(width: 8.w),
+                                Material(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12.r),
+                                  child: InkWell(
+                                    onTap: () { HapticFeedback.lightImpact(); onRestock!(); },
+                                    borderRadius: BorderRadius.circular(12.r),
+                                    child: Tooltip(
+                                      message: 'زيادة المخزون',
+                                      child: Container(
+                                        width: 36.w, height: 36.w,
+                                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(12.r)),
+                                        child: Icon(Icons.add_shopping_cart_rounded, size: 19.sp, color: AppTheme.successDark),
+                                      ),
                                     ),
                                   ),
                                 ),

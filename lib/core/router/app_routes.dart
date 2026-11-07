@@ -10,6 +10,7 @@ abstract class AppRoutes {
   static const addReturnView = '/addReturnView';
   static const expensesView = '/expensesView';
   static const addExpenseView = '/addExpenseView';
+  static const stockPurchaseView = '/stockPurchaseView';
   static const subscription = '/subscription';
   static const notifications = '/notifications';
 }

@@ -76,6 +76,13 @@ class MoreView extends StatelessWidget {
                 color: AppTheme.successDark,
                 onTap: () => _navigateTo(context, const CategoryManagementView()),
               ),
+              MoreItem(
+                icon: Icons.add_shopping_cart_rounded,
+                label: 'زيادة المخزون',
+                color: AppTheme.successDark,
+                onTap: () =>
+                    Navigator.pushNamed(context, AppRoutes.stockPurchaseView),
+              ),
             ]),
             SizedBox(height: 20.h),
             const _ThemeLanguageCard(),

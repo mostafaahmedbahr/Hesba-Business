@@ -290,6 +290,39 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // ── stock replenishment (purchase invoices) ──────────────
+    // Accounting note: a purchase is inventory acquisition, NOT an
+    // operating expense — it never writes to `expenses`.
+    match /stock_purchases/{docId} {
+      allow read: if signedIn() && (isAdmin()
+        || resource.data.ownerId == myUid()
+        || sameShop(resource.data.shopId));
+      allow create: if signedIn()
+        && request.resource.data.ownerId == myUid()
+        && request.resource.data.items is list
+        && request.resource.data.items.size() > 0
+        && nonNegative('totalAmount')
+        && mayWriteShopData(request.resource.data.shopId);
+      // Immutable from clients (audit trail), admin may fix records.
+      allow update, delete: if isAdmin();
+    }
+
+    // One row per product stock change (movementType = 'purchase' now).
+    match /stock_movements/{docId} {
+      allow read: if signedIn() && (isAdmin()
+        || resource.data.ownerId == myUid()
+        || sameShop(resource.data.shopId));
+      allow create: if signedIn()
+        && request.resource.data.ownerId == myUid()
+        && request.resource.data.movementType == 'purchase'
+        && request.resource.data.quantity is number
+        && request.resource.data.quantity > 0
+        && nonNegative('previousStock')
+        && nonNegative('newStock')
+        && mayWriteShopData(request.resource.data.shopId);
+      allow update, delete: if isAdmin();
+    }
+
     // ── feedback (contact us) ────────────────────────────────
     match /feedback/{docId} {
       allow create: if signedIn()

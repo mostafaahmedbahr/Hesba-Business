@@ -95,6 +95,8 @@ class _ProductsBody extends StatelessWidget {
                   expectedProfit: state.expectedProfit,
                   lowStockCount: state.lowStockCount,
                   onAdd: () => _openForm(context),
+                  onRestock: () =>
+                      Navigator.pushNamed(context, AppRoutes.stockPurchaseView),
                 ),
                 SliverToBoxAdapter(
                   child: Padding(

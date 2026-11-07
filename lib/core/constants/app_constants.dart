@@ -11,6 +11,10 @@ class AppConstants {
   static const String expensesCollection = 'expenses';
   static const String cashRegisterCollection = 'cashRegister';
 
+  // زيادة المخزون (فواتير الشراء + حركات المخزون للتدقيق).
+  static const String stockPurchasesCollection = 'stock_purchases';
+  static const String stockMovementsCollection = 'stock_movements';
+
   // Cloudinary unsigned uploads. Only the returned secure URL is stored.
   // Each value can be overridden at build time without touching this file:
   // flutter run --dart-define=CLOUDINARY_CLOUD_NAME=xxx --dart-define=CLOUDINARY_UPLOAD_PRESET=yyy
