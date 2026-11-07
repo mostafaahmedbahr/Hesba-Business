@@ -13,7 +13,6 @@ import '../../features/returns/presentation/views/add_return_view.dart';
 import '../../features/returns/presentation/views/returns_view.dart';
 import '../../features/expenses/presentation/views/expenses_view.dart';
 import '../../features/expenses/presentation/views/add_expense_view.dart';
-import '../../features/purchases/presentation/views/stock_purchase_view.dart';
 import '../../features/subscription/presentation/views/subscription_view.dart';
 import '../../features/notifications/presentation/views/notifications_view.dart';
 
@@ -89,8 +88,6 @@ class AppRouter {
       case AppRoutes.subscription:
         return _buildRoute(const SubscriptionView(), settings);
 
-      case AppRoutes.stockPurchaseView:
-        return _buildRoute(const StockPurchaseView(), settings);
 
       case AppRoutes.notifications:
         return _buildRoute(const NotificationsView(), settings);
