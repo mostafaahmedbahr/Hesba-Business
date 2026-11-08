@@ -81,6 +81,22 @@
       ]
     },
     {
+      "collectionGroup": "persons",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "shopId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "debts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "shopId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "products",
       "queryScope": "COLLECTION",
       "fields": [

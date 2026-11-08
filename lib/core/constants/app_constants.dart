@@ -18,6 +18,11 @@ class AppConstants {
   // الموردون (بيانات المورد فقط — بدون أي حسابات أو مستحقات).
   static const String suppliersCollection = 'suppliers';
 
+  // الحسابات: قاعدة أشخاص موحّدة + سجلات الذمم + حركات الدفع.
+  static const String personsCollection = 'persons';
+  static const String debtsCollection = 'debts';
+  static const String debtPaymentsSubCollection = 'payments';
+
   // Cloudinary unsigned uploads. Only the returned secure URL is stored.
   // Each value can be overridden at build time without touching this file:
   // flutter run --dart-define=CLOUDINARY_CLOUD_NAME=xxx --dart-define=CLOUDINARY_UPLOAD_PRESET=yyy

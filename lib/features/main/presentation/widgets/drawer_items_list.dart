@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '../../../../common_imports.dart';
 import '../../../categories/presentation/views/category_management_view.dart';
 import '../../../contact/presentation/views/contact_us_view.dart';
+import '../../../accounts/presentation/views/accounts_view.dart';
 import '../../../suppliers/presentation/views/suppliers_view.dart';
 import '../../../notifications/presentation/views/notifications_view.dart';
 import '../../../profile/presentation/views/change_password_view.dart';
@@ -71,6 +72,12 @@ class DrawerItemsList extends StatelessWidget {
             label: 'suppliersSection'.tr(),
             color: AppTheme.violetDeep,
             onTap: () => _open(context, const SuppliersView()),
+          ),
+          CustomDrawerTile(
+            icon: Icons.account_balance_wallet_rounded,
+            label: 'الحسابات',
+            color: AppTheme.primaryColor,
+            onTap: () => _open(context, const AccountsView()),
           ),
           CustomDrawerTile(
             icon: Icons.category_rounded,

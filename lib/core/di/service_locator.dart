@@ -45,6 +45,8 @@ import '../../features/admin/data/repos/admin_search_repo.dart';
 import '../../features/admin/data/repos_impl/admin_search_repo_impl.dart';
 import '../../features/suppliers/data/repos/suppliers_repo.dart';
 import '../../features/suppliers/data/repos_impl/suppliers_repo_impl.dart';
+import '../../features/accounts/data/repos/accounts_repo.dart';
+import '../../features/accounts/data/repos_impl/accounts_repo_impl.dart';
 
 final sl = GetIt.instance;
 
@@ -69,6 +71,7 @@ Future<void> initDependencies() async {
   _initActivity();
   _initCategories();
   _initSuppliers();
+  _initAccounts();
 }
 
 void _initSubscription() {
@@ -225,6 +228,15 @@ void _initCategories() {
 void _initSuppliers() {
   sl.registerLazySingleton<SuppliersRepo>(
     () => SuppliersRepoImpl(
+      auth: sl<FirebaseAuth>(),
+      firestore: sl<FirebaseFirestore>(),
+    ),
+  );
+}
+
+void _initAccounts() {
+  sl.registerLazySingleton<AccountsRepo>(
+    () => AccountsRepoImpl(
       auth: sl<FirebaseAuth>(),
       firestore: sl<FirebaseFirestore>(),
     ),

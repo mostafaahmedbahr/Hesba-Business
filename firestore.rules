@@ -149,6 +149,82 @@ service cloud.firestore {
         && get(ref).data.get('shopId', null) == shopId;
     }
 
+    // ── الحسابات: قاعدة الأشخاص الموحّدة (عميل / مورد / الاثنين) ──
+    //  - name + phone مطلوبان ومحدودان؛ الهاتف أرقام فقط (لاتينية أو
+    //    عربية-هندية) مع علامات التوحيد المسموحة.
+    //  - type محدود بالقيم الثلاث المعروفة.
+    function validPerson(docId) {
+      let d = request.resource.data;
+      return d.get('id', null) == docId
+        && d.get('ownerId', null) == myUid()
+        && d.get('shopId', null) == myShopId()
+        && d.get('name', null) is string
+        && d.get('name', '').size() > 0
+        && d.get('name', '').size() <= 200
+        && d.get('name', '').matches('.*\\S.*')
+        && d.get('phone', null) is string
+        && d.get('phone', '').size() >= 7
+        && d.get('phone', '').size() <= 30
+        && d.get('phone', '').matches('[0-9٠-٩+()\\- ]+')
+        && d.get('type', null) in ['customer', 'supplier', 'both'];
+    }
+
+    // تحديث الأشخاص: الاسم/الرقم/النوع/updatedAt فقط — الملكية ثابتة.
+    function onlyPersonEditableFields() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['name', 'phone', 'type', 'normalizedPhone', 'updatedAt']);
+    }
+
+    // True only when the person doc exists and belongs to `shopId`.
+    function personInShop(personId, shopId) {
+      let ref = /databases/$(database)/documents/persons/$(personId);
+      return personId is string && personId != ''
+        && shopId != null && shopId != ''
+        && exists(ref)
+        && get(ref).data.get('shopId', null) == shopId;
+    }
+
+    // ── الحسابات: سجلات الذمم (debts) ─────────────────────
+    //  - المبالغ أرقام موجبة، paidAmount لا يتجاوز amount.
+    //  - العميل دائمًا direction=receivable — لا يمكن قلب اتجاهه.
+    //  - personId يجب أن يشير لشخص في نفس المحل (نفس نمط validSupplierRef).
+    function validDebt(docId) {
+      let d = request.resource.data;
+      return d.get('id', null) == docId
+        && d.get('ownerId', null) == myUid()
+        && d.get('shopId', null) == myShopId()
+        && d.get('personId', null) is string
+        && d.get('personId', '').size() > 0
+        && d.get('personId', '').size() <= 128
+        && d.get('personName', null) is string
+        && d.get('personName', '').size() > 0
+        && d.get('personName', '').size() <= 200
+        && d.get('personName', '').matches('.*\\S.*')
+        && optionalString(d, 'personPhone', 30)
+        && d.get('partyType', null) in ['customer', 'supplier']
+        && d.get('direction', null) in ['receivable', 'payable']
+        && (d.get('partyType', null) == 'supplier'
+            || d.get('direction', null) == 'receivable')
+        && d.get('amount', null) is number
+        && d.get('amount', 0) > 0
+        && d.get('amount', 0) <= 1000000000
+        && d.get('paidAmount', null) is number
+        && d.get('paidAmount', 0) >= 0
+        && d.get('paidAmount', 0) <= d.get('amount', 0)
+        && optionalString(d, 'note', 2000)
+        && personInShop(d.get('personId', null), d.get('shopId', null));
+    }
+
+    // تحديث المديونية الوحيد المسموح من العميل: السداد عبر transaction.
+    // paidAmount لا ينقص أبدًا ولا يتجاوز الأصل؛ بقية الحقول مجمّدة.
+    function onlyDebtPaymentFields() {
+      let diff = request.resource.data.diff(resource.data).affectedKeys();
+      return diff.hasOnly(['paidAmount', 'updatedAt'])
+        && request.resource.data.paidAmount is number
+        && request.resource.data.paidAmount >= resource.data.paidAmount
+        && request.resource.data.paidAmount <= resource.data.amount;
+    }
+
     // Live subscription required for WRITES on business data.
     // A suspended shop is read-only no matter what the status/dates say.
     function subscriptionLive() {
@@ -415,6 +491,72 @@ service cloud.firestore {
       allow delete: if isAdmin() || (signedIn()
         && resource.data.ownerId == myUid()
         && mayWriteShopData(resource.data.shopId));
+    }
+
+    // ── persons (قاعدة الأشخاص الموحّدة) ─────────────────────
+    // دليل موحّد للعملاء والموردين — نفس العزل والاشتراك كالموردين.
+    match /persons/{docId} {
+      allow read: if signedIn() && (isAdmin()
+        || resource.data.ownerId == myUid()
+        || sameShop(resource.data.shopId));
+      allow create: if signedIn()
+        && validPerson(docId)
+        && request.resource.data.get('createdAt', null) == request.time
+        && request.resource.data.get('updatedAt', null) == request.time
+        && mayWriteShopData(request.resource.data.shopId);
+      allow update: if isAdmin() || (signedIn()
+        && resource.data.ownerId == myUid()
+        && resource.data.shopId == request.resource.data.shopId
+        && onlyPersonEditableFields()
+        && validPerson(docId)
+        && mayWriteShopData(resource.data.shopId));
+      // الحذف للأدمن فقط — الشخص مرتبط بسجلات ذمم تاريخية.
+      allow delete: if isAdmin();
+    }
+
+    // ── debts (ذمم العملاء والموردين) ───────────────────────
+    // السجل الأصلي لا يُحذف من العميل — يبقى كسجل تدقيق حتى بعد السداد.
+    match /debts/{debtId} {
+      allow read: if signedIn() && (isAdmin()
+        || resource.data.ownerId == myUid()
+        || sameShop(resource.data.shopId));
+      allow create: if signedIn()
+        && validDebt(debtId)
+        && request.resource.data.get('createdAt', null) == request.time
+        && request.resource.data.get('updatedAt', null) == request.time
+        // المديونية الجديدة تبدأ بلا مدفوعات.
+        && request.resource.data.paidAmount == 0
+        && mayWriteShopData(request.resource.data.shopId);
+      // التعديل الوحيد: السداد (paidAmount/updatedAt) عبر transaction.
+      allow update: if isAdmin() || (signedIn()
+        && resource.data.ownerId == myUid()
+        && resource.data.shopId == request.resource.data.shopId
+        && onlyDebtPaymentFields()
+        && mayWriteShopData(resource.data.shopId));
+      allow delete: if isAdmin();
+
+      // ── debts/{debtId}/payments (سجل حركات الدفع) ──────────
+      // لا تُعدَّل ولا تُحذف — كل حركة مالية تبقى كما سُجِّلت.
+      match /payments/{paymentId} {
+        allow read: if signedIn() && (isAdmin()
+          || get(/databases/$(database)/documents/debts/$(debtId)).data.ownerId == myUid()
+          || sameShop(get(/databases/$(database)/documents/debts/$(debtId)).data.shopId));
+        allow create: if signedIn()
+          && request.resource.data.get('ownerId', null) == myUid()
+          && request.resource.data.get('shopId', null) ==
+             get(/databases/$(database)/documents/debts/$(debtId)).data.shopId
+          && get(/databases/$(database)/documents/debts/$(debtId)).data.ownerId == myUid()
+          && request.resource.data.amount is number
+          && request.resource.data.amount > 0
+          // الدفعة لا تتجاوز المتبقي الحالي للمديونية.
+          && request.resource.data.amount <=
+             get(/databases/$(database)/documents/debts/$(debtId)).data.amount
+             - get(/databases/$(database)/documents/debts/$(debtId)).data.paidAmount
+          && optionalString(request.resource.data, 'note', 2000)
+          && request.resource.data.get('createdAt', null) == request.time
+          && mayWriteShopData(request.resource.data.get('shopId', null));
+        allow update, delete: if false;
+      }
     }
 
     // ── feedback (contact us) ────────────────────────────────
