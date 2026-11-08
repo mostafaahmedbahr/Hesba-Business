@@ -209,7 +209,6 @@ class _AccountsBody extends StatelessWidget {
                         : _EmptyState(
                             isSupplierTab:
                                 state.activeTab == AccountsTab.supplier,
-                            onAdd: () => _openAddSheet(context),
                           ),
                   )
                 else
@@ -659,11 +658,12 @@ class _NoResultsState extends StatelessWidget {
   }
 }
 
+/// الحالة الفاضية — من غير زرار إضافة: الـ FAB في الأسفل هو المكان
+/// الثابت للإضافة، فظهور الزرار هنا كان تكرارًا.
 class _EmptyState extends StatelessWidget {
   final bool isSupplierTab;
-  final VoidCallback onAdd;
 
-  const _EmptyState({required this.isSupplierTab, required this.onAdd});
+  const _EmptyState({required this.isSupplierTab});
 
   @override
   Widget build(BuildContext context) {
@@ -733,21 +733,6 @@ class _EmptyState extends StatelessWidget {
                 fontWeight: FontWeight.w600,
                 color: AppTheme.slateGray,
                 height: 1.6,
-              ),
-            ),
-            SizedBox(height: 20.h),
-            ElevatedButton.icon(
-              onPressed: onAdd,
-              icon: const Icon(Icons.add_rounded),
-              label: const Text('إضافة أول مديونية'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryColor,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 14.h),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16.r),
-                ),
               ),
             ),
           ],

@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 
 import '../../../../common_imports.dart';
+import '../../../../core/utils/validators.dart';
 import '../../data/models/debt_model.dart';
 import '../../data/models/person_model.dart';
 import '../states/accounts_state.dart';
@@ -142,7 +143,8 @@ class _AddDebtSheetState extends State<_AddDebtSheet> {
 
     setState(() {
       _nameError = name.isEmpty ? 'الاسم مطلوب' : null;
-      _phoneError = phone.isEmpty ? 'رقم الهاتف مطلوب' : null;
+      // نفس تحقق التسجيل: موبايل مصري (010/011/012/015).
+      _phoneError = Validators.egyptianPhone(phone);
       _amountError =
           (amount == null || amount <= 0) ? 'أدخل مبلغًا أكبر من صفر' : null;
     });

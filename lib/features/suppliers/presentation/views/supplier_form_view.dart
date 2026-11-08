@@ -12,6 +12,7 @@ import '../../data/models/supplier_model.dart';
 import '../cubit/supplier_form_cubit.dart';
 import '../states/supplier_form_state.dart';
 import '../widgets/supplier_field.dart';
+import '../../../auth/presentation/widgets/register_widgets/register_constants.dart';
 import '../../../subscription/presentation/subscription_gate.dart';
 
 /// نموذج إضافة/تعديل مورد — نفس الشاشة للحالتين.
@@ -79,14 +80,17 @@ class _SupplierFormBody extends StatelessWidget {
       },
       builder: (context, state) {
         final cubit = context.read<SupplierFormCubit>();
-        final nameError = state.errorMessage == 'supplierErrNameRequired'
-            ? translateError(state.errorMessage)
+        final nameError = state.nameError != null
+            ? translateError(state.nameError)
             : null;
-        final phoneError =
-            state.errorMessage == 'supplierErrPhoneRequired' ||
-                state.errorMessage == 'supplierErrPhoneInvalid' ||
-                state.errorMessage == 'supplierErrDuplicatePhone'
-            ? translateError(state.errorMessage)
+        final phoneError = state.phoneError != null
+            ? translateError(state.phoneError)
+            : null;
+        final secondaryPhoneError = state.secondaryPhoneError != null
+            ? translateError(state.secondaryPhoneError)
+            : null;
+        final emailError = state.emailError != null
+            ? translateError(state.emailError)
             : null;
 
         return Scaffold(
@@ -129,6 +133,7 @@ class _SupplierFormBody extends StatelessWidget {
                           autofocus: !_isEdit,
                           initialValue: state.name,
                           textInputAction: TextInputAction.next,
+                          hasError: nameError != null,
                           onChanged: cubit.onNameChanged,
                         ),
                         if (nameError != null) ...[
@@ -149,6 +154,7 @@ class _SupplierFormBody extends StatelessWidget {
                             ),
                           ],
                           initialValue: state.phone,
+                          hasError: phoneError != null,
                           onChanged: cubit.onPhoneChanged,
                         ),
                         if (phoneError != null) ...[
@@ -177,8 +183,13 @@ class _SupplierFormBody extends StatelessWidget {
                             ),
                           ],
                           initialValue: state.secondaryPhone,
+                          hasError: secondaryPhoneError != null,
                           onChanged: cubit.onSecondaryPhoneChanged,
                         ),
+                        if (secondaryPhoneError != null) ...[
+                          SizedBox(height: 6.h),
+                          _FieldError(message: secondaryPhoneError),
+                        ],
                         SizedBox(height: 14.h),
                         SupplierField(
                           labelKey: 'supplierFieldLabelEmail',
@@ -187,15 +198,17 @@ class _SupplierFormBody extends StatelessWidget {
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
                           initialValue: state.email,
+                          hasError: emailError != null,
                           onChanged: cubit.onEmailChanged,
                         ),
+                        if (emailError != null) ...[
+                          SizedBox(height: 6.h),
+                          _FieldError(message: emailError),
+                        ],
                         SizedBox(height: 14.h),
-                        SupplierField(
-                          labelKey: 'supplierFieldLabelCity',
-                          hintKey: 'supplierFieldHintCity',
-                          icon: Icons.location_city_outlined,
-                          textInputAction: TextInputAction.next,
-                          initialValue: state.city,
+                        // المدينة: قائمة منسدلة (المحافظات) بدل الكتابة اليدوية.
+                        _CityDropdown(
+                          currentValue: state.city,
                           onChanged: cubit.onCityChanged,
                         ),
                         SizedBox(height: 14.h),
@@ -316,6 +329,50 @@ class _SectionLabel extends StatelessWidget {
 }
 
 /// رسالة خطأ تحت الحقل.
+/// قائمة منسدلة بالمدينة (المحافظات المصرية) — تمنع الأخطاء الإملائية
+/// وتوحد تنسيق البحث والفلترة. القيمة الحالية تُدرج دائمًا حتى لو لم
+/// تكن ضمن القائمة (حفاظًا على بيانات قديمة مكتوبة يدويًا).
+class _CityDropdown extends StatelessWidget {
+  final String currentValue;
+  final ValueChanged<String> onChanged;
+
+  const _CityDropdown({required this.currentValue, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final current = currentValue.trim();
+    final items = <String>{
+      ...RegisterConstants.governorates,
+      if (current.isNotEmpty) current,
+    }.toList();
+    return DropdownButtonFormField<String>(
+      initialValue: current.isEmpty ? null : current,
+      isExpanded: true,
+      icon: const Icon(Icons.keyboard_arrow_down_rounded),
+      borderRadius: BorderRadius.circular(14.r),
+      dropdownColor: isDark ? AppTheme.darkSurfaceAlt : Colors.white,
+      elevation: 4,
+      decoration: supplierFieldDecoration(
+        context,
+        label: 'supplierFieldLabelCity'.tr(),
+        hint: 'supplierFieldHintCity'.tr(),
+        icon: Icons.location_city_outlined,
+      ),
+      items: [
+        for (final city in items)
+          DropdownMenuItem(
+            value: city,
+            child: Text(city, style: TextStyle(fontSize: 13.sp)),
+          ),
+      ],
+      onChanged: (v) {
+        if (v != null) onChanged(v);
+      },
+    );
+  }
+}
+
 class _FieldError extends StatelessWidget {
   final String message;
   const _FieldError({required this.message});

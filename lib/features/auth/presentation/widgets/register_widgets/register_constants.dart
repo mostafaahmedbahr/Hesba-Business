@@ -1,3 +1,5 @@
+import '../../../../../core/utils/validators.dart';
+
 abstract class RegisterConstants {
   static const List<String> businessTypes = [
     'سوبر ماركت',
@@ -50,11 +52,8 @@ abstract class RegisterConstants {
     'المنيا',
   ];
 
-  static String? validateEgyptianPhone(String? value) {
-    if (value == null || value.trim().isEmpty) return 'اكتب رقم الهاتف';
-    final cleaned = value.replaceAll(RegExp(r'[\s\-]'), '');
-    final regex = RegExp(r'^01[0125][0-9]{8}$');
-    if (!regex.hasMatch(cleaned)) return 'رقم الهاتف غير صحيح (مثال: 010XXXXXXXX)';
-    return null;
-  }
+  /// يفوّض للتنفيذ الموحّد في `Validators.egyptianPhone` — نفس المنطق
+  /// المستخدم في فورم الموردين.
+  static String? validateEgyptianPhone(String? value) =>
+      Validators.egyptianPhone(value);
 }

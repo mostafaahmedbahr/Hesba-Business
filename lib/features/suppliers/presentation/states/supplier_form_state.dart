@@ -6,9 +6,21 @@ enum SupplierFormStatus { idle, saving, success, failure }
 ///
 /// [saving] هي الحارس ضد تكرار الإرسال: أي ضغطة أثناء الحفظ تُتجاهل.
 /// [saved] = true بعد نجاح الحفظ (لإغلاق الشاشة مرة واحدة).
+///
+/// أخطاء الحقول ([nameError] / [phoneError] / [secondaryPhoneError] /
+/// [emailError]) بتتحدث مع كل حرف أثناء الكتابة (live validation) —
+/// يعني الرسالة تحت الحقل بتظهر بمجرد ما الرقم/البريد يكون غلط،
+/// وبتختفي أول ما يتصلّح. [errorMessage] مخصص لأخطاء الحفظ/السيرفر
+/// (و للرسائل العامة والـ listener بتاع الـ toast).
 class SupplierFormState extends Equatable {
   final SupplierFormStatus status;
   final String? errorMessage;
+
+  /// أخطاء كل حقل على حدة (بمفاتيح الترجمة) — بتتحدث لحظيًا أثناء الكتابة.
+  final String? nameError;
+  final String? phoneError;
+  final String? secondaryPhoneError;
+  final String? emailError;
 
   /// القيم المعبّأة لعرضها مجدداً بعد فشل الحفظ.
   final String name;
@@ -23,6 +35,10 @@ class SupplierFormState extends Equatable {
   const SupplierFormState({
     this.status = SupplierFormStatus.idle,
     this.errorMessage,
+    this.nameError,
+    this.phoneError,
+    this.secondaryPhoneError,
+    this.emailError,
     this.name = '',
     this.phone = '',
     this.companyName = '',
@@ -39,6 +55,10 @@ class SupplierFormState extends Equatable {
   SupplierFormState copyWith({
     SupplierFormStatus? status,
     Object? errorMessage = _sentinel,
+    Object? nameError = _sentinel,
+    Object? phoneError = _sentinel,
+    Object? secondaryPhoneError = _sentinel,
+    Object? emailError = _sentinel,
     String? name,
     String? phone,
     String? companyName,
@@ -53,6 +73,18 @@ class SupplierFormState extends Equatable {
       errorMessage: identical(errorMessage, _sentinel)
           ? this.errorMessage
           : errorMessage as String?,
+      nameError: identical(nameError, _sentinel)
+          ? this.nameError
+          : nameError as String?,
+      phoneError: identical(phoneError, _sentinel)
+          ? this.phoneError
+          : phoneError as String?,
+      secondaryPhoneError: identical(secondaryPhoneError, _sentinel)
+          ? this.secondaryPhoneError
+          : secondaryPhoneError as String?,
+      emailError: identical(emailError, _sentinel)
+          ? this.emailError
+          : emailError as String?,
       name: name ?? this.name,
       phone: phone ?? this.phone,
       companyName: companyName ?? this.companyName,
@@ -70,6 +102,10 @@ class SupplierFormState extends Equatable {
   List<Object?> get props => [
     status,
     errorMessage,
+    nameError,
+    phoneError,
+    secondaryPhoneError,
+    emailError,
     name,
     phone,
     companyName,

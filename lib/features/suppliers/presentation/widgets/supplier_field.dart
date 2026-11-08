@@ -13,8 +13,10 @@ InputDecoration supplierFieldDecoration(
   IconData? icon,
   bool required = false,
   Widget? suffixIcon,
+  bool hasError = false,
 }) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
+  final borderColor = hasError ? AppTheme.danger : null;
   return InputDecoration(
     labelText: required ? '$label *' : label,
     hintText: hint,
@@ -36,12 +38,17 @@ InputDecoration supplierFieldDecoration(
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14.r),
       borderSide: BorderSide(
-        color: isDark ? AppTheme.darkBorder : AppTheme.hairline,
+        color:
+            borderColor ?? (isDark ? AppTheme.darkBorder : AppTheme.hairline),
+        width: hasError ? 1.4 : 1.0,
       ),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14.r),
-      borderSide: const BorderSide(color: AppTheme.violetDeep, width: 1.4),
+      borderSide: BorderSide(
+        color: hasError ? AppTheme.danger : AppTheme.violetDeep,
+        width: 1.4,
+      ),
     ),
     errorBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14.r),
@@ -73,6 +80,7 @@ class SupplierField extends StatefulWidget {
   final List<TextInputFormatter>? inputFormatters;
   final String? initialValue;
   final bool autofocus;
+  final bool hasError;
   final ValueChanged<String>? onFieldSubmitted;
   final ValueChanged<String> onChanged;
 
@@ -90,6 +98,7 @@ class SupplierField extends StatefulWidget {
     this.inputFormatters,
     this.initialValue,
     this.autofocus = false,
+    this.hasError = false,
     this.onFieldSubmitted,
   });
 
@@ -135,6 +144,7 @@ class _SupplierFieldState extends State<SupplierField> {
         hint: widget.hintKey?.tr(),
         icon: widget.icon,
         required: widget.required,
+        hasError: widget.hasError,
       ),
     );
   }
