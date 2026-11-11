@@ -1,11 +1,14 @@
 import 'package:flutter/services.dart';
 import 'dart:ui' as ui;
+import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
- import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:hesba/common_imports.dart';
 import 'package:hesba/core/router/notification_router.dart';
+import 'package:hesba/core/di/service_locator.dart';
+import 'package:hesba/features/expenses/data/repos/expenses_repo.dart';
 import 'package:hesba/features/notifications/data/repos/activity_repo.dart';
 import 'package:hesba/features/notifications/presentation/view_model/activity_cubit.dart';
 import 'package:hesba/features/settings/presentation/cubit/settings_cubit.dart';
@@ -21,7 +24,19 @@ import 'package:hesba/features/settings/presentation/states/settings_state.dart'
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+  // مزامنة المصروفات المتكررة: يسجل تلقائيًا أي موعد فات (أو يوصل)
+  // ويعيد ضبط التذكيرات — يعمل في الخلفية بأمان.
+  unawaited(_syncRecurringExpensesSafely());
   runApp(TranslationProvider(child: const HesbaApp()));
+}
+
+/// مزامنة المصروفات المتكررة بدون رمي أي خطأ (best effort عند الإقلاع).
+Future<void> _syncRecurringExpensesSafely() async {
+  try {
+    await sl<ExpensesRepo>().syncRecurringExpenses();
+  } catch (_) {
+    // فشل المزامنة ما يمنعش التطبيق يفتح — هتتعمل تاني عند فتح شاشة المصاريف.
+  }
 }
 
 /// Fired when the user taps any notification (operation push, scheduled

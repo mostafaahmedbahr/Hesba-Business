@@ -48,6 +48,37 @@ class _AddExpenseViewState extends State<AddExpenseView> {
   String? _resolvedShopName;
   bool _isEditing = false;
 
+  // التكرار: مرة واحدة ('') أو يومي/أسبوعي/شهري — مع موعد استحقاق.
+  String _recurrence = ExpenseModel.recurrenceNone;
+  TimeOfDay _dueTime = const TimeOfDay(hour: 9, minute: 0);
+
+  bool get isRecurring => _recurrence != ExpenseModel.recurrenceNone;
+
+  late final List<_RecurrenceOption> _recurrenceOptions = const [
+    _RecurrenceOption('مرة واحدة', Icons.looks_one_rounded,
+        ExpenseModel.recurrenceNone),
+    _RecurrenceOption(
+        'يومي', Icons.event_repeat_rounded, ExpenseModel.recurrenceDaily),
+    _RecurrenceOption(
+        'أسبوعي', Icons.calendar_view_week_rounded, ExpenseModel.recurrenceWeekly),
+    _RecurrenceOption(
+        'شهري', Icons.calendar_month_rounded, ExpenseModel.recurrenceMonthly),
+  ];
+
+  String get _recurrenceHint {
+    const prefix = 'هتتسجّل تلقائيًا ';
+    switch (_recurrence) {
+      case ExpenseModel.recurrenceDaily:
+        return '${prefix}يوميًا — وإشعار قبل الميعاد بساعتين';
+      case ExpenseModel.recurrenceWeekly:
+        return '${prefix}أسبوعيًا — وإشعار قبل الميعاد بيوم';
+      case ExpenseModel.recurrenceMonthly:
+        return '${prefix}شهريًا — وإشعار قبل الميعاد بيومين';
+      default:
+        return '';
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -64,6 +95,9 @@ class _AddExpenseViewState extends State<AddExpenseView> {
       _shopNameController.text = widget.expense!.shopName;
       _category = widget.expense!.category;
       _selectedDate = widget.expense!.date;
+      _recurrence = widget.expense!.recurrence;
+      final t = _parseDueTimeString(widget.expense!.dueTime);
+      if (t != null) _dueTime = t;
       _resolvedShopName ??= widget.expense!.shopName;
     }
     _resolveIds();
@@ -123,6 +157,8 @@ class _AddExpenseViewState extends State<AddExpenseView> {
         amount: amount,
         note: note,
         date: _selectedDate,
+        recurrence: _recurrence,
+        dueTime: _dueTimeString,
       );
     } else {
       await innerContext.read<ExpensesCubit>().addExpense(
@@ -134,8 +170,39 @@ class _AddExpenseViewState extends State<AddExpenseView> {
         amount: amount,
         note: note,
         date: _selectedDate,
+        recurrence: _recurrence,
+        dueTime: _dueTimeString,
       );
     }
+  }
+
+  /// صيغة 'HH:mm' لما يحتاجها المستودع والجدولة.
+  String get _dueTimeString =>
+      '${_dueTime.hour.toString().padLeft(2, '0')}:${_dueTime.minute.toString().padLeft(2, '0')}';
+
+  static TimeOfDay? _parseDueTimeString(String value) {
+    final parts = value.trim().split(':');
+    if (parts.length != 2) return null;
+    final hour = int.tryParse(parts[0]);
+    final minute = int.tryParse(parts[1]);
+    if (hour == null || minute == null) return null;
+    if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
+    return TimeOfDay(hour: hour, minute: minute);
+  }
+
+  /// اختيار الوقت (يُستخدم فقط عندما يكون المصروف مكررًا).
+  Future<void> _pickTime(BuildContext innerContext) async {
+    final picked = await showTimePicker(
+      context: innerContext,
+      initialTime: _dueTime,
+      builder: (context, child) => Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: ColorScheme.fromSeed(seedColor: AppTheme.amberDeep),
+        ),
+        child: child!,
+      ),
+    );
+    if (picked != null) setState(() => _dueTime = picked);
   }
 
   String _toLatin(String input) => input
@@ -315,6 +382,138 @@ class _AddExpenseViewState extends State<AddExpenseView> {
                                   ],
                                 ),
                               ),
+                              SizedBox(height: 20.h),
+
+                              // التكرار (مرة واحدة / يومي / أسبوعي / شهري).
+                              _SectionTitle('التكرار', isDark: isDark),
+                              SizedBox(height: 10.h),
+                              Wrap(
+                                spacing: 9.w,
+                                runSpacing: 9.h,
+                                children: [
+                                  for (final opt in _recurrenceOptions)
+                                    _RecurrenceChip(
+                                      label: opt.label,
+                                      icon: opt.icon,
+                                      selected: _recurrence == opt.value,
+                                      isDark: isDark,
+                                      onTap: () {
+                                        HapticFeedback.selectionClick();
+                                        setState(() => _recurrence = opt.value);
+                                      },
+                                    ),
+                                ],
+                              ),
+                              if (isRecurring) ...[
+                                SizedBox(height: 14.h),
+                                InkWell(
+                                  onTap: () => _pickTime(innerContext),
+                                  borderRadius: BorderRadius.circular(16.r),
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 14.w,
+                                      vertical: 12.h,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: isDark
+                                          ? AppTheme.darkSurface
+                                          : Colors.white,
+                                      borderRadius: BorderRadius.circular(16.r),
+                                      border: Border.all(
+                                        color: isDark
+                                            ? AppTheme.darkBorder
+                                            : AppTheme.hairline,
+                                      ),
+                                      boxShadow: AppTheme.cardShadow(context),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 42.w,
+                                          height: 42.w,
+                                          decoration: BoxDecoration(
+                                            color: AppTheme.amberDeep.withValues(alpha: 0.10),
+                                            borderRadius: BorderRadius.circular(12.r),
+                                          ),
+                                          child: Icon(
+                                            Icons.schedule_rounded,
+                                            size: 19.sp,
+                                            color: AppTheme.amberDeep,
+                                          ),
+                                        ),
+                                        SizedBox(width: 12.w),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'موعد الاستحقاق',
+                                                style: TextStyle(
+                                                  fontSize: 11.sp,
+                                                  color: AppTheme.mutedGray,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                              SizedBox(height: 2.h),
+                                              Text(
+                                                MaterialLocalizations.of(context)
+                                                    .formatTimeOfDay(_dueTime),
+                                                style: TextStyle(
+                                                  fontSize: 13.5.sp,
+                                                  fontWeight: FontWeight.w800,
+                                                  color: isDark
+                                                      ? Colors.white
+                                                      : AppTheme.ink,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Icon(
+                                          Icons.keyboard_arrow_down_rounded,
+                                          color: AppTheme.mutedGray,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 10.h),
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 12.w,
+                                    vertical: 10.h,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.amberDeep.withValues(alpha: 0.07),
+                                    borderRadius: BorderRadius.circular(12.r),
+                                    border: Border.all(
+                                      color: AppTheme.amberDeep.withValues(alpha: 0.18),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.notifications_active_outlined,
+                                        size: 15.sp,
+                                        color: AppTheme.amberDeep,
+                                      ),
+                                      SizedBox(width: 8.w),
+                                      Expanded(
+                                        child: Text(
+                                          _recurrenceHint,
+                                          style: TextStyle(
+                                            fontSize: 10.5.sp,
+                                            fontWeight: FontWeight.w700,
+                                            color: AppTheme.amberDeep,
+                                            height: 1.5,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                               SizedBox(height: 20.h),
 
                               // التاريخ + ملاحظة.
@@ -975,6 +1174,77 @@ class _AddHeader extends StatelessWidget {
                       ),
                     ],
                   ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// خيار تكرار المصروف (مرة واحدة / يومي / أسبوعي / شهري).
+class _RecurrenceOption {
+  final String label;
+  final IconData icon;
+  final String value;
+  const _RecurrenceOption(this.label, this.icon, this.value);
+}
+
+/// شريحة اختيار التكرار.
+class _RecurrenceChip extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final bool isDark;
+  final VoidCallback onTap;
+
+  const _RecurrenceChip({
+    required this.label,
+    required this.icon,
+    required this.selected,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedColor = AppTheme.primaryColor;
+    return Material(
+      color: selected ? selectedColor : (isDark ? AppTheme.darkSurfaceAlt : Colors.white),
+      borderRadius: BorderRadius.circular(14.r),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14.r),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 13.w, vertical: 9.h),
+          decoration: BoxDecoration(
+            color: selected ? selectedColor : null,
+            borderRadius: BorderRadius.circular(14.r),
+            border: Border.all(
+              color: selected
+                  ? Colors.transparent
+                  : (isDark ? AppTheme.darkBorder : AppTheme.borderSoft),
+              width: selected ? 0 : 1.2,
+            ),
+            boxShadow: selected
+                ? [BoxShadow(color: selectedColor.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4))]
+                : null,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 15.sp, color: selected ? Colors.white : AppTheme.mutedGray),
+              SizedBox(width: 6.w),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
+                  color: selected
+                      ? Colors.white
+                      : (isDark ? AppTheme.darkTextSecondary : AppTheme.slateDark),
                 ),
               ),
             ],

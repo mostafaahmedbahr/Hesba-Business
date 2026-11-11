@@ -86,6 +86,31 @@ class _ExpenseListCardState extends State<ExpenseListCard> {
                             child: Text(expense.category.isEmpty ? 'عام' : expense.category, style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w800, color: color)),
                           ),
                           SizedBox(width: 6.w),
+                          if (expense.isTemplate) ...[
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                              decoration: BoxDecoration(
+                                color: AppTheme.amberDeep.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(8.r),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.repeat_rounded, size: 11.sp, color: AppTheme.amberDeep),
+                                  SizedBox(width: 3.w),
+                                  Text(
+                                    expense.recurrence == ExpenseModel.recurrenceDaily
+                                        ? 'يومي'
+                                        : expense.recurrence == ExpenseModel.recurrenceWeekly
+                                            ? 'أسبوعي'
+                                            : 'شهري',
+                                    style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w800, color: AppTheme.amberDeep),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(width: 6.w),
+                          ],
                           Text(
                             DateFormat('d MMM', 'ar').format(expense.date),
                             style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600),
@@ -157,6 +182,35 @@ class _Details extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (expense.isTemplate) ...[
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(11.w),
+              margin: EdgeInsets.only(bottom: 8.h),
+              decoration: BoxDecoration(
+                color: AppTheme.amberDeep.withValues(alpha: 0.07),
+                borderRadius: BorderRadius.circular(13.r),
+                border: Border.all(color: AppTheme.amberDeep.withValues(alpha: 0.18)),
+              ),
+              child: Row(children: [
+                Icon(Icons.event_repeat_rounded, size: 14.sp, color: AppTheme.amberDeep),
+                SizedBox(width: 6.w),
+                Expanded(
+                  child: Text(
+                    expense.nextDue == null
+                        ? 'سيُسجَّل تلقائيًا ${expense.recurrence == ExpenseModel.recurrenceDaily ? 'يوميًا' : expense.recurrence == ExpenseModel.recurrenceWeekly ? 'أسبوعيًا' : 'شهريًا'}'
+                        : 'الموعد القادم: ${DateFormat('EEEE d MMMM • hh:mm a', 'ar').format(expense.nextDue!)}',
+                    style: TextStyle(
+                      fontSize: 10.5.sp,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.amberDeep,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+              ]),
+            ),
+          ],
           if (expense.note.isNotEmpty) ...[
             Container(
               width: double.infinity,

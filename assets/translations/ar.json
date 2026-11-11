@@ -786,5 +786,8 @@
   "saleSavedCredit": "تم حفظ البيع وإضافة المديونية للحسابات",
   "retSavedCredit": "تم حفظ المرتجع وخصم قيمته من المديونية",
   "retCreditBadge": "آجل",
-  "retCreditDebtAdjust": "هتتخصم قيمة المرتجع من ذمة العميل تلقائيًا"
+  "retCreditDebtAdjust": "هتتخصم قيمة المرتجع من ذمة العميل تلقائيًا",
+  "excRecurrenceDailyLabel": "يومي",
+  "excRecurrenceWeeklyLabel": "أسبوعي",
+  "excRecurrenceMonthlyLabel": "شهري"
 }

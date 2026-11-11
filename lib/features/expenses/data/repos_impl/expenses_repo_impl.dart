@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/paged_fetch.dart';
 import '../models/expense_model.dart';
+import '../expense_reminder_scheduler.dart';
 import '../repos/expenses_repo.dart';
 
 class ExpensesRepoImpl implements ExpensesRepo {
@@ -44,6 +45,8 @@ class ExpensesRepoImpl implements ExpensesRepo {
     required double amount,
     required String note,
     required DateTime date,
+    String recurrence = ExpenseModel.recurrenceNone,
+    String dueTime = '',
   }) async {
     if (title.trim().isEmpty) throw Exception('عنوان المصروف مطلوب');
     if (amount <= 0) throw Exception('المبلغ يجب أن يكون أكبر من صفر');
@@ -59,6 +62,15 @@ class ExpensesRepoImpl implements ExpensesRepo {
       throw Exception('يجب تسجيل الدخول أولاً');
     }
 
+    final isRecurring = recurrence != ExpenseModel.recurrenceNone;
+    final time = _parseDueTime(dueTime);
+    if (isRecurring && time == null) {
+      throw Exception('حدد موعد الاستحقاق (الساعة والدقيقة)');
+    }
+    final anchorDue = isRecurring
+        ? DateTime(date.year, date.month, date.day, time!.hour, time.minute)
+        : null;
+
     final ref = firestore.collection(AppConstants.expensesCollection).doc();
     final expense = ExpenseModel(
       expenseId: ref.id,
@@ -71,9 +83,16 @@ class ExpensesRepoImpl implements ExpensesRepo {
       note: note.trim(),
       date: date,
       createdAt: DateTime.now(),
+      recurrence: recurrence,
+      dueTime: dueTime,
+      nextDue: anchorDue,
     );
 
     await ref.set(expense.toJson());
+    if (isRecurring) {
+      // يولّد أي موعد استحق اليوم (ويعيد جدولة التذكيرات).
+      await syncRecurringExpenses();
+    }
     return expense;
   }
 
@@ -88,6 +107,8 @@ class ExpensesRepoImpl implements ExpensesRepo {
     required double amount,
     required String note,
     required DateTime date,
+    String recurrence = ExpenseModel.recurrenceNone,
+    String dueTime = '',
   }) async {
     if (title.trim().isEmpty) throw Exception('عنوان المصروف مطلوب');
     if (amount <= 0) throw Exception('المبلغ يجب أن يكون أكبر من صفر');
@@ -114,6 +135,38 @@ class ExpensesRepoImpl implements ExpensesRepo {
       throw Exception('غير مصرح بتعديل هذا المصروف');
     }
     final existingCreatedAt = (existingData['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
+    final existingRecurrence =
+        (existingData['recurrence'] as String?) ?? ExpenseModel.recurrenceNone;
+    final existingDueTime = (existingData['dueTime'] as String?) ?? '';
+
+    final isRecurring = recurrence != ExpenseModel.recurrenceNone;
+    final time = _parseDueTime(dueTime);
+    if (isRecurring && time == null) {
+      throw Exception('حدد موعد الاستحقاق (الساعة والدقيقة)');
+    }
+
+    // يعيد حساب الموعد القادم فقط لو تغيّرت الجدولة (التكرار / الوقت / التاريخ)
+    // — تعديل العنوان أو المبلغ لا يلمس الجدول.
+    final scheduleChanged = existingRecurrence != recurrence ||
+        existingDueTime != dueTime ||
+        (existingData['date'] is Timestamp &&
+            ((existingData['date'] as Timestamp).toDate().year != date.year ||
+                (existingData['date'] as Timestamp).toDate().month != date.month ||
+                (existingData['date'] as Timestamp).toDate().day != date.day));
+    DateTime? nextDue;
+    if (isRecurring) {
+      if (scheduleChanged) {
+        nextDue = DateTime(date.year, date.month, date.day, time!.hour, time.minute);
+      } else {
+        // يحتفظ بالجدول القائم (لو موجود) — أو يبدأ من تاريخ البداية.
+        final ts = existingData['nextDue'];
+        if (ts is Timestamp) {
+          nextDue = ts.toDate();
+        } else {
+          nextDue = DateTime(date.year, date.month, date.day, time!.hour, time.minute);
+        }
+      }
+    }
 
     final updated = ExpenseModel(
       expenseId: expenseId,
@@ -126,9 +179,13 @@ class ExpensesRepoImpl implements ExpensesRepo {
       note: note.trim(),
       date: date,
       createdAt: existingCreatedAt,
+      recurrence: recurrence,
+      dueTime: dueTime,
+      nextDue: nextDue,
     );
 
     await docRef.update(updated.toJson());
+    await syncRecurringExpenses();
     return updated;
   }
 
@@ -247,6 +304,119 @@ class ExpensesRepoImpl implements ExpensesRepo {
     if (data['shopId'] != resolvedShopId || (data['ownerId'] as String?) != _uid) {
       throw Exception('غير مصرح بحذف هذا المصروف');
     }
+    // لو قالب متكرر — الغاء كل تذكيراته الجدولة.
+    if ((data['recurrence'] as String?) != null &&
+        (data['recurrence'] as String) != ExpenseModel.recurrenceNone) {
+      await ExpenseReminderScheduler.cancelAll(expenseId);
+    }
     await docRef.delete();
   }
+
+  @override
+  Future<int> syncRecurringExpenses() async {
+    final shopId = await _resolveShopId(null);
+    if (shopId == null || shopId.isEmpty) return 0;
+    final snap = await firestore
+        .collection(AppConstants.expensesCollection)
+        .where('shopId', isEqualTo: shopId)
+        .limit(500)
+        .get();
+
+    var created = 0;
+    final now = DateTime.now();
+    for (final doc in snap.docs) {
+      final data = doc.data();
+      final recurrence =
+          (data['recurrence'] as String?) ?? ExpenseModel.recurrenceNone;
+      if (recurrence == ExpenseModel.recurrenceNone) continue;
+      if ((data['ownerId'] as String?) == null) continue;
+      final template = ExpenseModel.fromJson(data);
+      final dueTimeStr = (data['dueTime'] as String?) ?? '';
+      final time = _parseDueTime(dueTimeStr);
+      var nextDue = template.nextDue;
+      if (nextDue == null) {
+        final dateTs = data['date'];
+        final anchor = dateTs is Timestamp ? dateTs.toDate() : now;
+        final t = time ?? const _DueTime(hour: 9, minute: 0);
+        nextDue =
+            DateTime(anchor.year, anchor.month, anchor.day, t.hour, t.minute);
+      }
+
+      // يولّد كل موعد فات — مع تخطي أي موعد سُجّل فعلًا (idempotent).
+      var hop = 0;
+      var cursor = nextDue;
+      while (!cursor.isAfter(now) && hop < 500) {
+        hop++;
+        final already = await _occurrenceExists(shopId, doc.id, cursor);
+        if (!already) {
+          final ref = firestore.collection(AppConstants.expensesCollection).doc();
+          final occ = ExpenseModel(
+            expenseId: ref.id,
+            ownerId: data['ownerId'] as String,
+            shopId: shopId,
+            shopName: data['shopName'] as String? ?? '',
+            title: (data['title'] as String?) ?? '',
+            category: (data['category'] as String?) ?? '',
+            amount: (data['amount'] as num?)?.toDouble() ?? 0,
+            note: (data['note'] as String?) ?? '',
+            date: cursor,
+            createdAt: DateTime.now(),
+            generatedFrom: doc.id,
+          );
+          await ref.set(occ.toJson());
+          created++;
+        }
+        cursor = ExpenseModel.advanceNextDue(cursor, recurrence);
+      }
+      if (cursor != nextDue || template.nextDue == null) {
+        await doc.reference.update({'nextDue': Timestamp.fromDate(cursor)});
+      }
+      await ExpenseReminderScheduler.reschedule(
+        ExpenseModel.fromJson(data).copyWith(nextDue: cursor),
+      );
+    }
+    return created;
+  }
+
+  /// هل يوجد مصروف مولّد من القالب [templateId] في [due]؟
+  Future<bool> _occurrenceExists(
+      String shopId, String templateId, DateTime due) async {
+    final snap = await firestore
+        .collection(AppConstants.expensesCollection)
+        .where('shopId', isEqualTo: shopId)
+        .where('generatedFrom', isEqualTo: templateId)
+        .where('date', isEqualTo: Timestamp.fromDate(due))
+        .limit(1)
+        .get();
+    return snap.docs.isNotEmpty;
+  }
+
+  /// يقرأ 'HH:mm' ويرجع (ساعة، دقيقة) أو null لو الصيغة خاطئة.
+  _DueTime? _parseDueTime(String value) {
+    final parts = value.trim().split(':');
+    if (parts.length != 2) return null;
+    final hour = int.tryParse(_toLatinDigits(parts[0]));
+    final minute = int.tryParse(_toLatinDigits(parts[1]));
+    if (hour == null || minute == null) return null;
+    if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
+    return _DueTime(hour: hour, minute: minute);
+  }
+
+  /// يحول الأرقام العربية الهندية إلى لاتينية.
+  String _toLatinDigits(String input) {
+    const arabic = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    const indic = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+    var out = input;
+    for (var i = 0; i < 10; i++) {
+      out = out.replaceAll(arabic[i], '$i').replaceAll(indic[i], '$i');
+    }
+    return out;
+  }
+}
+
+/// وقت الاستحقاق (ساعة/دقيقة) — خاص بطبقة البيانات (بدون Material).
+class _DueTime {
+  final int hour;
+  final int minute;
+  const _DueTime({required this.hour, required this.minute});
 }

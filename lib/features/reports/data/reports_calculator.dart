@@ -91,7 +91,9 @@ class ReportsCalculator {
     }
 
     // ── المصروفات (بحقل `date` — عرف التطبيق) ──
+    // القوالب المتكررة ليست مصروفات فعلية — لا تُخصم.
     for (final expense in expenses) {
+      if (expense.isTemplate) continue;
       if (!inRange(expense.date)) continue;
       rawExpenses += expense.amount;
     }

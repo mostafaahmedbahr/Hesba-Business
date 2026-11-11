@@ -135,6 +135,9 @@ class DashboardRepoImpl implements DashboardRepo {
 
     double total = 0;
     for (final doc in snapshot.docs) {
+      // القوالب المتكررة ليست مصروفات فعلية — لا تُحتسب.
+      final recurrence = (doc.data()['recurrence'] as String?) ?? 'none';
+      if (recurrence != 'none') continue;
       total += (doc.data()['amount'] as num?)?.toDouble() ?? 0;
     }
     return total;
@@ -284,6 +287,8 @@ class DashboardRepoImpl implements DashboardRepo {
       for (final doc in docs) {
         try {
           final expense = ExpenseModel.fromJson(doc.data());
+          // القوالب المتكررة ليست حركات فعلية — نتخطاها.
+          if (expense.isTemplate) continue;
           if (expense.shopId == shopId) return expense;
         } catch (_) {
           // Corrupt doc: skipped instead of breaking the stream.

@@ -786,5 +786,8 @@
   "saleSavedCredit": "Sale saved and debt added to Accounts",
   "retSavedCredit": "Return saved and its value deducted from the debt",
   "retCreditBadge": "Credit",
-  "retCreditDebtAdjust": "The returned value will be deducted from the customer's debt automatically"
+  "retCreditDebtAdjust": "The returned value will be deducted from the customer's debt automatically",
+  "excRecurrenceDailyLabel": "Daily",
+  "excRecurrenceWeeklyLabel": "Weekly",
+  "excRecurrenceMonthlyLabel": "Monthly"
 }

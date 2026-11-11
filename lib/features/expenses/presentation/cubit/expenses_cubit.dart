@@ -41,11 +41,19 @@ class ExpensesCubit extends Cubit<ExpensesState> {
     _expensesSubscription = null;
     emit(state.copyWith(status: ExpensesStatus.loading, errorMessage: null));
     final resolvedShopId = await _resolveShopId(shopId);
+    // مزامنة المصروفات المتكررة (تسجيل أي موعد فات) قبل الاشتراك في
+    // الستريم فتظهر أي مصروفات جديدة فورًا.
+    try {
+      await expensesRepo.syncRecurringExpenses();
+    } catch (_) {}
     // حتى لو الـ shopId فاضي، اعرض الكل (repo بيعمل fallback)
     final effectiveShopId = resolvedShopId ?? shopId;
     _expensesSubscription = expensesRepo.watchExpenses(shopId: effectiveShopId).listen(
       (expenses) {
-        final total = expenses.fold<double>(0, (acc, e) => acc + e.amount);
+        // القوالب المتكررة ليست مصروفات فعلية — لا تُحتسب في الإجمالي.
+        final total = expenses
+            .where((e) => !e.isTemplate)
+            .fold<double>(0, (acc, e) => acc + e.amount);
         emit(state.copyWith(
           status: ExpensesStatus.success,
           expenses: expenses,
@@ -68,6 +76,8 @@ class ExpensesCubit extends Cubit<ExpensesState> {
     required double amount,
     required String note,
     required DateTime date,
+    String recurrence = 'none',
+    String dueTime = '',
   }) async {
     if (title.trim().isEmpty) {
       emit(state.copyWith(status: ExpensesStatus.error, errorMessage: 'عنوان المصروف مطلوب'));
@@ -93,6 +103,8 @@ class ExpensesCubit extends Cubit<ExpensesState> {
         amount: amount,
         note: note,
         date: date,
+        recurrence: recurrence,
+        dueTime: dueTime,
       );
       AppEvents.instance.expenseCreated({
         'title': title,
@@ -117,6 +129,8 @@ class ExpensesCubit extends Cubit<ExpensesState> {
     required double amount,
     required String note,
     required DateTime date,
+    String recurrence = 'none',
+    String dueTime = '',
   }) async {
     if (title.trim().isEmpty) {
       emit(state.copyWith(status: ExpensesStatus.error, errorMessage: 'عنوان المصروف مطلوب'));
@@ -143,6 +157,8 @@ class ExpensesCubit extends Cubit<ExpensesState> {
         amount: amount,
         note: note,
         date: date,
+        recurrence: recurrence,
+        dueTime: dueTime,
       );
       AppEvents.instance.expenseUpdated({
         'title': title,

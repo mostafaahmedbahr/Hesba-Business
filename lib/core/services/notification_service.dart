@@ -288,6 +288,9 @@ final channel = AndroidNotificationChannel(
     );
   }
 
+  /// تفاصيل قناة «تذكيرات حسبة» — نفسها لكل التذكيرات.
+  NotificationDetails reminderDetails() => _reminderDetails();
+
   NotificationDetails _reminderDetails() {
     return const NotificationDetails(
       android: AndroidNotificationDetails(

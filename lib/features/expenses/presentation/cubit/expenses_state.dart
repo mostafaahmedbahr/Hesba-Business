@@ -36,10 +36,13 @@ class ExpensesState extends Equatable {
     }).toList();
   }
 
-  /// مصروفات النهاردة.
+  /// مصروفات النهاردة (القوالب المتكررة لا تُحتسب).
   List<ExpenseModel> get todayList {
     final now = DateTime.now();
-    return expenses.where((e) => e.date.year == now.year && e.date.month == now.month && e.date.day == now.day).toList();
+    return expenses
+        .where((e) => !e.isTemplate)
+        .where((e) => e.date.year == now.year && e.date.month == now.month && e.date.day == now.day)
+        .toList();
   }
 
   /// إجمالي النهاردة.

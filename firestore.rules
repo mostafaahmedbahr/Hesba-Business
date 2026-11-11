@@ -421,11 +421,25 @@ service cloud.firestore {
       allow create: if signedIn()
         && request.resource.data.ownerId == myUid()
         && nonNegative('amount')
+        && optionalString(request.resource.data, 'recurrence', 20)
+        && optionalString(request.resource.data, 'dueTime', 10)
+        && optionalString(request.resource.data, 'generatedFrom', 128)
+        && (request.resource.data.get('recurrence', 'none')
+            in ['none', 'daily', 'weekly', 'monthly'])
+        && (request.resource.data.get('nextDue', null) == null
+            || request.resource.data.get('nextDue', null) is timestamp)
         && mayWriteShopData(request.resource.data.shopId);
       allow update: if isAdmin() || (signedIn()
         && resource.data.ownerId == myUid()
         && request.resource.data.ownerId == myUid()
         && nonNegative('amount')
+        && optionalString(request.resource.data, 'recurrence', 20)
+        && optionalString(request.resource.data, 'dueTime', 10)
+        && optionalString(request.resource.data, 'generatedFrom', 128)
+        && (request.resource.data.get('recurrence', 'none')
+            in ['none', 'daily', 'weekly', 'monthly'])
+        && (request.resource.data.get('nextDue', null) == null
+            || request.resource.data.get('nextDue', null) is timestamp)
         && mayWriteShopData(resource.data.shopId));
       allow delete: if isAdmin() || (signedIn()
         && resource.data.ownerId == myUid()

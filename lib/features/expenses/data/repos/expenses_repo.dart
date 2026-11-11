@@ -11,6 +11,12 @@ abstract class ExpensesRepo {
     required double amount,
     required String note,
     required DateTime date,
+
+    /// اختياري: تكرار المصروف — 'none' (الافتراضي) أو daily/weekly/monthly.
+    String recurrence,
+
+    /// 'HH:mm' موعد الاستحقاق (مطلوب عندما recurrence != 'none').
+    String dueTime,
   });
 
   Future<ExpenseModel> updateExpense({
@@ -23,7 +29,18 @@ abstract class ExpensesRepo {
     required double amount,
     required String note,
     required DateTime date,
+    String recurrence,
+    String dueTime,
   });
+
+  /// مزامنة المصروفات المتكررة: يسجل تلقائيًا أي موعد فات (طبيقية
+  /// المستندات `expenses` الجديدة بنفس بيانات القالب) ويحدّث الموعد
+  /// القادم، ثم يعيد ضبط الإشعارات لكل قالب.
+  ///
+  /// يعيد عدد المواعد المولّدة. يُستدعى عند فتح التطبيق وفي كل
+  /// إضافة/تعديل/حذف مصروف — العملية ذرّية ولا تُولّد أي تكرار
+  /// مكرر عند الفتح المتزامن من أكثر من جهاز.
+  Future<int> syncRecurringExpenses();
 
   Future<List<ExpenseModel>> getExpenses({required String shopId});
 
