@@ -3,7 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../common_imports.dart';
 
-/// اختيار الدفع (3 كروت بدل dropdown).
+/// اختيار الدفع (4 كروت بدل dropdown).
 class PaymentMethodSelector extends StatelessWidget {
   final String value;
   final ValueChanged<String> onChanged;
@@ -26,6 +26,7 @@ class PaymentMethodSelector extends StatelessWidget {
       _Method(AppConstants.paymentCash, 'payCash', Icons.money_rounded, const [AppTheme.successDark, AppTheme.mintLight]),
       _Method(AppConstants.paymentCard, 'payCard', Icons.credit_card_rounded, const [AppTheme.primaryColor, AppTheme.brightBlue]),
       _Method(AppConstants.paymentMobileWallet, 'payWallet', Icons.account_balance_wallet_rounded, const [AppTheme.violetDeep, AppTheme.violetSoft]),
+      _Method(AppConstants.paymentCredit, 'payCredit', Icons.schedule_rounded, const [AppTheme.amberDeep, AppTheme.warningAmber]),
     ];
     return Row(
       children: [

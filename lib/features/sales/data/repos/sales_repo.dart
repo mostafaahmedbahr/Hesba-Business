@@ -10,11 +10,23 @@ abstract class SalesRepo {
     required double discount,
     required String paymentMethod,
     required String note,
+
+    /// اختياري: اسم ورقم العميل. الاتنين لازم يُكتبوا معًا أو يفضلوا
+    /// فاضيين. نفس الرقم الموحّد داخل المحل = نفس جهة الاتصال.
+    String? customerName,
+    String? customerPhone,
   });
 
   Future<List<SaleModel>> getSales({required String shopId});
 
   Stream<List<SaleModel>> watchSales({required String shopId});
+
+  /// كل فواتير عميل معين (داخل المحل)، الأحدث أولًا — مصدر شاشة
+  /// «سجل مشتريات العميل».
+  Stream<List<SaleModel>> watchSalesForPerson({
+    required String shopId,
+    required String personId,
+  });
 
   /// كل فواتير المحل بترقيم cursor (بلا حد صامت) — مصدر حسابات التقارير.
   /// [PagedResult.isComplete] = false يعني أن الجلب توقف قبل النهاية

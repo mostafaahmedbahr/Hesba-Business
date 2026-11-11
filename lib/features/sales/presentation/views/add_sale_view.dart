@@ -15,11 +15,15 @@ import '../../../../core/utils/error_message.dart';
 import '../../../../core/utils/number_parser.dart';
 import '../../../../core/utils/toast.dart';
 import '../../../products/data/repos/products_repo.dart';
+import '../../../accounts/data/models/person_model.dart';
+import '../../../accounts/data/repos/accounts_repo.dart';
+import '../../../../core/utils/validators.dart';
 import '../../data/models/sale_model.dart';
 import '../cubit/sales_cubit.dart';
 import '../cubit/sales_state.dart';
 import '../widgets/add_sale_button.dart';
 import '../widgets/payment_method_selector.dart';
+import '../widgets/sale_customer_section.dart';
 import '../widgets/sale_product_card.dart';
 import '../widgets/sale_summary.dart';
 import '../../../subscription/presentation/subscription_gate.dart';
@@ -46,11 +50,18 @@ class _AddSaleViewState extends State<AddSaleView> {
   final _discountController = TextEditingController();
   final _noteController = TextEditingController();
 
+  // العميل (اختياري) — اسم ورقم يُكتبان معًا أو يُتركان فاضيين.
+  final _customerNameController = TextEditingController();
+  final _customerPhoneController = TextEditingController();
+
   String _paymentMethod = AppConstants.paymentCash;
 
   List<Product> _availableProducts = [];
   StreamSubscription<List<Product>>? _productsSub;
   bool _loadingProducts = true;
+
+  List<PersonModel> _persons = [];
+  StreamSubscription<List<PersonModel>>? _personsSub;
 
   // Resolved ids (owner/shop of the current account, via ShopResolver)
   String? _resolvedOwnerId;
@@ -63,6 +74,7 @@ class _AddSaleViewState extends State<AddSaleView> {
     _resolvedShopId = widget.shopId;
     _resolveIds();
     _loadProducts();
+    _loadPersons();
     _addItem();
     _discountController.addListener(_onRecalc);
   }
@@ -119,6 +131,19 @@ class _AddSaleViewState extends State<AddSaleView> {
     } catch (_) {
       _loadingProducts = false;
     }
+  }
+
+  /// جهات الاتصال المحفوظة — تُستخدم في اقتراحات العميل أثناء الكتابة.
+  void _loadPersons() {
+    try {
+      _personsSub = sl<AccountsRepo>().watchPersons().listen(
+        (persons) {
+          if (!mounted) return;
+          setState(() => _persons = persons);
+        },
+        onError: (_) {},
+      );
+    } catch (_) {}
   }
 
   void _onRecalc() => setState(() {});
@@ -203,6 +228,27 @@ class _AddSaleViewState extends State<AddSaleView> {
       return;
     }
 
+    // العميل اختياري — لكن اسمه ورقمه يُكتبان معًا.
+    // (البيع الآجل حالة خاصة: العميل إجباري لأن الذمة بتتربط به.)
+    final customerName = _customerNameController.text.trim();
+    final customerPhone = _customerPhoneController.text.trim();
+    if (customerName.isEmpty != customerPhone.isEmpty) {
+      AppToast.warning(innerContext, 'saleCustomerBothRequired'.tr());
+      return;
+    }
+    if (_paymentMethod == AppConstants.paymentCredit &&
+        (customerName.isEmpty || customerPhone.isEmpty)) {
+      AppToast.warning(innerContext, 'saleCreditRequiresCustomer'.tr());
+      return;
+    }
+    if (customerPhone.isNotEmpty) {
+      final phoneError = Validators.egyptianPhone(customerPhone);
+      if (phoneError != null) {
+        AppToast.warning(innerContext, 'contactPhoneInvalid'.tr());
+        return;
+      }
+    }
+
     // Extra validation for each row required fields
     for (int i = 0; i < _items.length; i++) {
       final e = _items[i];
@@ -239,18 +285,23 @@ class _AddSaleViewState extends State<AddSaleView> {
           discount: _discount,
           paymentMethod: _paymentMethod,
           note: _noteController.text,
+          customerName: customerName.isEmpty ? null : customerName,
+          customerPhone: customerPhone.isEmpty ? null : customerPhone,
         );
   }
 
   @override
   void dispose() {
     _productsSub?.cancel();
+    _personsSub?.cancel();
     for (final e in _items) {
       e.dispose();
     }
     _discountController.removeListener(_onRecalc);
     _discountController.dispose();
     _noteController.dispose();
+    _customerNameController.dispose();
+    _customerPhoneController.dispose();
     super.dispose();
   }
 
@@ -265,7 +316,11 @@ class _AddSaleViewState extends State<AddSaleView> {
           return BlocListener<SalesCubit, SalesState>(
             listener: (ctx, state) {
               if (state.status == SalesStatus.success) {
-                AppToast.success(ctx, 'saleSaved'.tr());
+                final isCredit = _paymentMethod == AppConstants.paymentCredit;
+                AppToast.success(
+                  ctx,
+                  (isCredit ? 'saleSavedCredit' : 'saleSaved').tr(),
+                );
                 Navigator.pop(ctx, true);
               }
               if (state.status == SalesStatus.error) {
@@ -370,6 +425,16 @@ class _AddSaleViewState extends State<AddSaleView> {
                               PaymentMethodSelector(
                                 value: _paymentMethod,
                                 onChanged: (v) => setState(() => _paymentMethod = v),
+                              ),
+                              SizedBox(height: 20.h),
+
+                              // العميل (اختياري) لربط الفاتورة بجهة اتصال.
+                              SaleCustomerSection(
+                                nameController: _customerNameController,
+                                phoneController: _customerPhoneController,
+                                persons: _persons,
+                                creditRequired:
+                                    _paymentMethod == AppConstants.paymentCredit,
                               ),
                               SizedBox(height: 20.h),
 

@@ -17,6 +17,7 @@ import '../../features/subscription/presentation/views/subscription_view.dart';
 import '../../features/notifications/presentation/views/notifications_view.dart';
 import '../../features/suppliers/presentation/views/suppliers_view.dart';
 import '../../features/accounts/presentation/views/accounts_view.dart';
+import '../../features/sales/presentation/views/customer_sales_view.dart';
 
 /// Root navigator used to route the user when they tap a notification while
 /// the app is in the background or was terminated.
@@ -96,6 +97,18 @@ class AppRouter {
       case AppRoutes.accountsView:
         return _buildRoute(const AccountsView(), settings);
 
+      case AppRoutes.customerSalesView:
+        final csArgs = settings.arguments as Map<String, dynamic>?;
+        return _buildRoute(
+          CustomerSalesView(
+            personId: csArgs?['personId'] as String? ?? '',
+            personName: csArgs?['personName'] as String? ?? '',
+            personPhone: csArgs?['personPhone'] as String? ?? '',
+            shopId: csArgs?['shopId'] as String? ?? '',
+          ),
+          settings,
+        );
+
       // case AppRoutes.resetPassword:
       //   return _buildRoute(const ResetPasswordScreen(), settings);
 
@@ -117,6 +130,7 @@ class AppRouter {
       case AppRoutes.notifications:
       case AppRoutes.suppliersView:
       case AppRoutes.accountsView:
+      case AppRoutes.customerSalesView:
         return true;
       default:
         return false;

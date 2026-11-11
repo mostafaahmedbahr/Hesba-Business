@@ -167,25 +167,89 @@ class ReturnsRepoImpl implements ReturnsRepo {
       createdAt: DateTime.now(),
     );
 
+    // ذمة آجل مرتبطة بهذه الفاتورة؟ (الذمة بتتكتب صحبة البيع، وبتشير
+    // للفاتورة عبر saleId) — المرتجع هيقللها بمبلغ المرتجع الصافي.
+    String? linkedDebtId;
+    if (originalSaleId.isNotEmpty) {
+      final dSnap = await firestore
+          .collection(AppConstants.debtsCollection)
+          .where('shopId', isEqualTo: resolvedShopId)
+          .where('saleId', isEqualTo: originalSaleId)
+          .limit(5)
+          .get();
+      if (dSnap.docs.isNotEmpty) linkedDebtId = dSnap.docs.first.id;
+    }
+    final linkedDebtRef = linkedDebtId == null
+        ? null
+        : firestore.collection(AppConstants.debtsCollection).doc(linkedDebtId);
+
     await firestore.runTransaction((transaction) async {
+      // كل القراءات أولًا (منتجات + الذمة لو موجودة) — ثم أي كتابة.
+      final productReads = <String, Map<String, dynamic>>{};
       for (final item in items) {
-        if (item.productId.isNotEmpty) {
-          final productRef = firestore.collection(AppConstants.productsCollection).doc(item.productId);
-          final snap = await transaction.get(productRef);
-          if (!snap.exists) {
-            // If product not found, still allow return as manual item but skip stock update
-            continue;
-          }
-          final data = snap.data()!;
-          final currentStock = (data['stock'] as num?)?.toDouble() ?? 0;
-          final newStock = currentStock + item.quantity;
-          transaction.update(productRef, {
-            'stock': newStock,
+        if (item.productId.isEmpty) continue;
+        final productRef =
+            firestore.collection(AppConstants.productsCollection).doc(item.productId);
+        final snap = await transaction.get(productRef);
+        if (snap.exists) productReads[item.productId] = snap.data()!;
+      }
+
+      var debtAmount = 0.0;
+      var debtPaid = 0.0;
+      var debtExists = false;
+      if (linkedDebtRef != null) {
+        final snap = await transaction.get(linkedDebtRef);
+        final data = snap.data();
+        if (snap.exists && data != null && data['shopId'] == resolvedShopId) {
+          debtExists = true;
+          debtAmount = (data['amount'] as num?)?.toDouble() ?? 0;
+          debtPaid = (data['paidAmount'] as num?)?.toDouble() ?? 0;
+        }
+      }
+
+      // استرجاع المخزون.
+      for (final item in items) {
+        if (item.productId.isEmpty) continue;
+        final data = productReads[item.productId];
+        if (data == null) continue;
+        final currentStock = (data['stock'] as num?)?.toDouble() ?? 0;
+        transaction.update(
+          firestore.collection(AppConstants.productsCollection).doc(item.productId),
+          {
+            'stock': currentStock + item.quantity,
+            'updatedAt': FieldValue.serverTimestamp(),
+          },
+        );
+      }
+      transaction.set(ref, ret.toJson());
+
+      // تسوية الذمة (إن وُجدت): المرتجع يُسجَّل كـ "دفعة تسوية" لا تتجاوز
+      // المتبقي — فالفاتورة الآجلة والمديونية بيصاحوا بعض تلقائيًا.
+      if (debtExists && linkedDebtRef != null) {
+        final remaining = debtAmount - debtPaid;
+        var adj = ret.total;
+        if (adj > remaining) adj = remaining;
+        adj = double.parse(adj.toStringAsFixed(2));
+        if (adj > 0.005) {
+          final invoiceShort = originalSaleId.length >= 6
+              ? originalSaleId.substring(0, 6)
+              : originalSaleId;
+          final paymentRef =
+              linkedDebtRef.collection(AppConstants.debtPaymentsSubCollection).doc();
+          transaction.set(paymentRef, {
+            'id': paymentRef.id,
+            'ownerId': resolvedOwnerId,
+            'shopId': resolvedShopId,
+            'amount': adj,
+            'note': 'تسوية مرتجع — فاتورة #$invoiceShort',
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+          transaction.update(linkedDebtRef, {
+            'paidAmount': FieldValue.increment(adj),
             'updatedAt': FieldValue.serverTimestamp(),
           });
         }
       }
-      transaction.set(ref, ret.toJson());
     });
 
     return ret;

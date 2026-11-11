@@ -65,6 +65,15 @@ class SaleModel {
   final String paymentMethod;
   final String note;
 
+  /// رابط جهة الاتصال (persons) المرتبطة بالفاتورة — '' = بدون عميل
+  /// (بيع عابر أو فاتورة قديمة).
+  final String personId;
+
+  /// لقطة الاسم والرقم وقت البيع — تبقى مع الفاتورة حتى لو تغيّرت
+  /// بيانات جهة الاتصال لاحقًا. الفواتير القديمة بلا قيمة ('').
+  final String personName;
+  final String personPhone;
+
   final DateTime createdAt;
 
   const SaleModel({
@@ -78,8 +87,14 @@ class SaleModel {
     required this.total,
     required this.paymentMethod,
     required this.note,
+    this.personId = '',
+    this.personName = '',
+    this.personPhone = '',
     required this.createdAt,
   });
+
+  /// هل الفاتورة مرتبطة بجهة اتصال (عميل)؟
+  bool get hasCustomer => personName.trim().isNotEmpty || personId.isNotEmpty;
 
   Map<String, dynamic> toJson() {
     return {
@@ -93,6 +108,9 @@ class SaleModel {
       'total': total,
       'paymentMethod': paymentMethod,
       'note': note,
+      'personId': personId,
+      'personName': personName,
+      'personPhone': personPhone,
       'createdAt': Timestamp.fromDate(createdAt),
     };
   }
@@ -117,6 +135,9 @@ class SaleModel {
       total: (json['total'] as num?)?.toDouble() ?? 0,
       paymentMethod: json['paymentMethod'] ?? '',
       note: json['note'] ?? '',
+      personId: json['personId'] ?? '',
+      personName: json['personName'] ?? '',
+      personPhone: json['personPhone'] ?? '',
       createdAt: _parseDate(json['createdAt']),
     );
   }

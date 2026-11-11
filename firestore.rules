@@ -212,6 +212,7 @@ service cloud.firestore {
         && d.get('paidAmount', 0) >= 0
         && d.get('paidAmount', 0) <= d.get('amount', 0)
         && optionalString(d, 'note', 2000)
+        && optionalString(d, 'saleId', 128)
         && personInShop(d.get('personId', null), d.get('shopId', null));
     }
 
@@ -395,11 +396,19 @@ service cloud.firestore {
       allow read: if signedIn() && (isAdmin()
         || resource.data.ownerId == myUid()
         || sameShop(resource.data.shopId));
+      // الفاتورة تشير اختياريًا لجهة اتصال (persons) في نفس المحل —
+      // personId الفارغ (بيع عابر / فاتورة قديمة) لا يُطلب عنه شيء.
       allow create: if signedIn()
         && request.resource.data.ownerId == myUid()
         && nonNegative('subtotal')
         && nonNegative('discount')
         && nonNegative('total')
+        && optionalString(request.resource.data, 'personId', 128)
+        && optionalString(request.resource.data, 'personName', 200)
+        && optionalString(request.resource.data, 'personPhone', 30)
+        && (request.resource.data.get('personId', '') == ''
+            || personInShop(request.resource.data.personId,
+                            request.resource.data.shopId))
         && mayWriteShopData(request.resource.data.shopId);
       // Sales are immutable from clients (returns are separate docs).
       allow update, delete: if isAdmin();

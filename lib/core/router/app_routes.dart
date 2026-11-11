@@ -15,4 +15,5 @@ abstract class AppRoutes {
   static const notifications = '/notifications';
   static const suppliersView = '/suppliersView';
   static const accountsView = '/accountsView';
+  static const customerSalesView = '/customerSalesView';
 }

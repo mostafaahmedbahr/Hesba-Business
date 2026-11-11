@@ -3,18 +3,24 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/paged_fetch.dart';
+import '../../../accounts/data/models/debt_model.dart';
+import '../../../accounts/data/models/person_model.dart';
+import '../../../accounts/data/repos/accounts_repo.dart';
 import '../models/sale_model.dart';
 import '../repos/sales_repo.dart';
 
 class SalesRepoImpl implements SalesRepo {
   final FirebaseFirestore firestore;
   final FirebaseAuth auth;
+  final AccountsRepo _accounts;
 
   SalesRepoImpl({
     FirebaseFirestore? firestore,
     FirebaseAuth? auth,
+    required AccountsRepo accountsRepo,
   })  : firestore = firestore ?? FirebaseFirestore.instance,
-        auth = auth ?? FirebaseAuth.instance;
+        auth = auth ?? FirebaseAuth.instance,
+        _accounts = accountsRepo;
 
   String? get _uid => auth.currentUser?.uid;
 
@@ -74,6 +80,8 @@ class SalesRepoImpl implements SalesRepo {
     required double discount,
     required String paymentMethod,
     required String note,
+    String? customerName,
+    String? customerPhone,
   }) async {
     if (items.isEmpty) {
       throw Exception('يجب إضافة منتج واحد على الأقل');
@@ -104,9 +112,43 @@ class SalesRepoImpl implements SalesRepo {
       }
     }
 
+    // ربط اختياري بجهة اتصال (persons): الاتنين معًا أو الاتنين فاضيين.
+    // يُنشأ/يُوجد الشخص قبل كتابة الفاتورة — قواعد Firestore تُقيَّم
+    // أثناء تنفيذ العملية فتحتاج مستند الشخص موجودًا فعلًا.
+    final cleanCustomerName = customerName?.trim() ?? '';
+    final cleanCustomerPhone = customerPhone?.trim() ?? '';
+    var personId = '';
+    var personName = '';
+    var personPhone = '';
+    if (cleanCustomerName.isNotEmpty || cleanCustomerPhone.isNotEmpty) {
+      if (cleanCustomerName.isEmpty || cleanCustomerPhone.isEmpty) {
+        throw Exception('اكتب اسم العميل ورقم هاتفه معًا');
+      }
+      final person = await _accounts.findOrCreatePerson(
+        name: cleanCustomerName,
+        phone: cleanCustomerPhone,
+        partyType: PersonModel.typeCustomer,
+      );
+      personId = person.id;
+      personName = cleanCustomerName;
+      personPhone = cleanCustomerPhone;
+    }
+
+    final isCredit = paymentMethod == AppConstants.paymentCredit;
+    // البيع الآجل يفرض اختيار عميل — مفيش ذمة من غير شخص.
+    if (isCredit &&
+        (cleanCustomerName.isEmpty || cleanCustomerPhone.isEmpty)) {
+      throw Exception('البيع الآجل يتطلب اختيار عميل');
+    }
+
     final subtotal = items.fold<double>(0, (acc, item) => acc + item.total);
     final double finalDiscount = discount < 0 ? 0 : discount > subtotal ? subtotal : discount;
     final double total = subtotal - finalDiscount < 0 ? 0 : subtotal - finalDiscount;
+
+    // المديونية تتسجل بمبلغ > 0 (قواعد Firestore تتطلب ذلك).
+    if (isCredit && total <= 0) {
+      throw Exception('لا يمكن تسجيل بيع آجل بإجمالي صفر');
+    }
 
     final saleRef = firestore.collection(AppConstants.salesCollection).doc();
 
@@ -121,6 +163,9 @@ class SalesRepoImpl implements SalesRepo {
       total: total,
       paymentMethod: paymentMethod,
       note: note.trim(),
+      personId: personId,
+      personName: personName,
+      personPhone: personPhone,
       createdAt: DateTime.now(),
     );
 
@@ -159,6 +204,43 @@ class SalesRepoImpl implements SalesRepo {
       }
 
       transaction.set(saleRef, sale.toJson());
+
+      // البيع الآجل: ذمة بقيمة الإجمالي على العميل — تُكتب في نفس
+      // الـ transaction، فالفاتورة والذمة بيتسجّلوا مع بعض أو لا شيء.
+      // الذمة تظهر فورًا في شاشة الحسابات (live stream).
+      if (isCredit) {
+        final debtRef = firestore
+            .collection(AppConstants.debtsCollection)
+            .doc();
+        final invoiceShort =
+            saleRef.id.length >= 6 ? saleRef.id.substring(0, 6) : saleRef.id;
+        final saleNote = note.trim();
+        final debtNote = saleNote.isEmpty
+            ? 'فاتورة #$invoiceShort'
+            : 'فاتورة #$invoiceShort — $saleNote';
+        final debt = DebtModel(
+          id: debtRef.id,
+          ownerId: resolvedOwnerId,
+          shopId: resolvedShopId,
+          personId: personId,
+          personName: personName,
+          personPhone: personPhone,
+          partyType: DebtParty.customer,
+          direction: DebtDirection.receivable,
+          amount: total,
+          paidAmount: 0,
+          note: debtNote,
+        );
+        transaction.set(debtRef, {
+          ...debt.toJson(),
+          'id': debtRef.id,
+          'saleId': saleRef.id,
+          'ownerId': resolvedOwnerId,
+          'shopId': resolvedShopId,
+          'createdAt': FieldValue.serverTimestamp(),
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      }
     });
 
     return sale;
@@ -177,6 +259,23 @@ class SalesRepoImpl implements SalesRepo {
     return snap.docs
         .map((d) => SaleModel.fromJson(d.data()))
         .toList();
+  }
+
+  @override
+  Stream<List<SaleModel>> watchSalesForPerson({
+    required String shopId,
+    required String personId,
+  }) {
+    if (personId.isEmpty) return const Stream.empty();
+    return firestore
+        .collection(AppConstants.salesCollection)
+        .where('shopId', isEqualTo: shopId)
+        .where('personId', isEqualTo: personId)
+        .orderBy('createdAt', descending: true)
+        .limit(500)
+        .snapshots()
+        .map((snap) =>
+            snap.docs.map((d) => SaleModel.fromJson(d.data())).toList());
   }
 
   /// id محل اليوزر الحالي.

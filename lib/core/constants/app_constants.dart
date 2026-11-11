@@ -165,10 +165,14 @@ class AppConstants {
   static const String paymentCard = 'card';
   static const String paymentMobileWallet = 'mobile_wallet';
 
+  /// بيع آجل — يُنشأ تلقائيًا ذمة على العميل في الحسابات (ليّا فلوس).
+  static const String paymentCredit = 'credit';
+
   static const List<Map<String, dynamic>> paymentMethods = [
     {'value': paymentCash, 'label': 'نقدي'},
     {'value': paymentCard, 'label': 'بطاقة'},
     {'value': paymentMobileWallet, 'label': 'محفظة إلكترونية'},
+    {'value': paymentCredit, 'label': 'آجل'},
   ];
 
   // ─────────────────────────────────────────────────────────────────

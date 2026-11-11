@@ -2,13 +2,21 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../common_imports.dart';
+import '../../../../core/utils/phone_contact.dart';
 import '../../data/models/sale_model.dart';
 import '../cubit/sales_list_state.dart';
 
 /// كارت فاتورة مختصر — ضغطة تفتح التفاصيل بأنيميشن.
+/// [fromCustomerHistory] تُخفي زرار "فواتير العميل" (اللي بيفاتح نفس
+/// الشاشة) عند استخدام الكارت داخل شاشة سجل مشتريات العميل.
 class SalesListCard extends StatefulWidget {
   final SaleModel sale;
-  const SalesListCard({super.key, required this.sale});
+  final bool fromCustomerHistory;
+  const SalesListCard({
+    super.key,
+    required this.sale,
+    this.fromCustomerHistory = false,
+  });
 
   @override
   State<SalesListCard> createState() => _SalesListCardState();
@@ -29,6 +37,8 @@ class _SalesListCardState extends State<SalesListCard> {
         : sale.items.length == 1
             ? sale.items.first.productName
             : '${sale.items.first.productName} +${sale.items.length - 1}';
+    final customerSuffix =
+        sale.personName.trim().isNotEmpty ? ' • ${sale.personName.trim()}' : '';
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
@@ -87,7 +97,7 @@ class _SalesListCardState extends State<SalesListCard> {
                           ],
                         ]),
                         SizedBox(height: 3.h),
-                        Text('$itemsLabel • $dateStr', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600)),
+                        Text('$itemsLabel$customerSuffix • $dateStr', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ),
@@ -113,7 +123,7 @@ class _SalesListCardState extends State<SalesListCard> {
                 // التفاصيل (تظهر بالضغطة).
                 AnimatedCrossFade(
                   firstChild: const SizedBox.shrink(),
-                  secondChild: _Details(sale: sale, isDark: isDark),
+                  secondChild: _Details(sale: sale, isDark: isDark, fromCustomerHistory: widget.fromCustomerHistory),
                   crossFadeState: _expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
                   duration: const Duration(milliseconds: 260),
                 ),
@@ -126,11 +136,12 @@ class _SalesListCardState extends State<SalesListCard> {
   }
 }
 
-/// تفاصيل الفاتورة (أصناف + دفع + مرتجع).
+/// تفاصيل الفاتورة (عميل + أصناف + دفع + مرتجع).
 class _Details extends StatelessWidget {
   final SaleModel sale;
   final bool isDark;
-  const _Details({required this.sale, required this.isDark});
+  final bool fromCustomerHistory;
+  const _Details({required this.sale, required this.isDark, this.fromCustomerHistory = false});
 
   @override
   Widget build(BuildContext context) {
@@ -146,6 +157,14 @@ class _Details extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (sale.hasCustomer) ...[
+              _CustomerBlock(
+                sale: sale,
+                isDark: isDark,
+                fromCustomerHistory: fromCustomerHistory,
+              ),
+              SizedBox(height: 10.h),
+            ],
             ...sale.items.map((it) => Padding(
                   padding: EdgeInsets.only(bottom: 8.h),
                   child: Column(
@@ -267,6 +286,188 @@ String dateTimeLabel(DateTime dt) {
   return '${DateFormat('dd/MM').format(dt)} • $time';
 }
 
+/// بلوك عميل الفاتورة داخل التفاصيل: اسم + رقم + اتصال/واتساب
+/// + زرار فتح سجل مشتريات العميل.
+class _CustomerBlock extends StatelessWidget {
+  final SaleModel sale;
+  final bool isDark;
+  final bool fromCustomerHistory;
+  const _CustomerBlock({
+    required this.sale,
+    required this.isDark,
+    required this.fromCustomerHistory,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final name = sale.personName.trim();
+    final phone = sale.personPhone.trim();
+    final idShort = sale.personId.length >= 6 ? sale.personId.substring(0, 6) : sale.personId;
+    final canOpenHistory = sale.personId.isNotEmpty && !fromCustomerHistory;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.person_rounded, size: 12.sp, color: AppTheme.mutedGray),
+            SizedBox(width: 5.w),
+            Text(
+              'saleCustomerTitle'.tr(),
+              style: TextStyle(
+                fontSize: 10.sp,
+                fontWeight: FontWeight.w800,
+                color: AppTheme.mutedGray,
+              ),
+            ),
+            if (idShort.isNotEmpty) ...[
+              SizedBox(width: 6.w),
+              Text(
+                '#$idShort',
+                style: TextStyle(
+                  fontSize: 9.5.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.mutedGray,
+                ),
+              ),
+            ],
+          ],
+        ),
+        SizedBox(height: 6.h),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+          decoration: BoxDecoration(
+            color: isDark ? AppTheme.darkSurface : Colors.white,
+            borderRadius: BorderRadius.circular(13.r),
+            border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft),
+          ),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 17.r,
+                backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.12),
+                child: Text(
+                  name.isEmpty ? '؟' : name.substring(0, 1),
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w900,
+                    color: AppTheme.primaryColor,
+                  ),
+                ),
+              ),
+              SizedBox(width: 9.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name.isEmpty ? '—' : name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12.5.sp,
+                        fontWeight: FontWeight.w800,
+                        color: isDark ? Colors.white : AppTheme.ink,
+                      ),
+                    ),
+                    if (phone.isNotEmpty)
+                      Text(
+                        phone,
+                        style: TextStyle(
+                          fontSize: 10.5.sp,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.slateGray,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              if (phone.isNotEmpty) ...[
+                _ContactIconButton(
+                  icon: Icons.call_rounded,
+                  tooltip: 'contactCall'.tr(),
+                  onTap: () => PhoneContact.call(context, phone),
+                ),
+                SizedBox(width: 4.w),
+                _ContactIconButton(
+                  icon: Icons.chat_rounded,
+                  tooltip: 'contactWhatsApp'.tr(),
+                  onTap: () => PhoneContact.whatsapp(context, phone),
+                ),
+              ],
+            ],
+          ),
+        ),
+        if (canOpenHistory) ...[
+          SizedBox(height: 8.h),
+          SizedBox(
+            width: double.infinity,
+            height: 40.h,
+            child: OutlinedButton.icon(
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.customerSalesView,
+                  arguments: {
+                    'personId': sale.personId,
+                    'personName': sale.personName,
+                    'personPhone': sale.personPhone,
+                    'shopId': sale.shopId,
+                  },
+                );
+              },
+              icon: Icon(Icons.receipt_long_rounded, size: 16.sp, color: AppTheme.primaryColor),
+              label: Text(
+                'customerSalesHistoryButton'.tr(),
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w800,
+                  color: AppTheme.primaryColor,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: AppTheme.primaryColor.withValues(alpha: 0.35)),
+                backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.06),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// زرار دائري صغير لاتصال/واتساب داخل بلوك العميل.
+class _ContactIconButton extends StatelessWidget {
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onTap;
+  const _ContactIconButton({required this.icon, required this.tooltip, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: AppTheme.primaryColor.withValues(alpha: 0.10),
+        shape: const CircleBorder(),
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.selectionClick();
+            onTap();
+          },
+          customBorder: const CircleBorder(),
+          child: Padding(
+            padding: EdgeInsets.all(8.w),
+            child: Icon(icon, size: 17.sp, color: AppTheme.primaryColor),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// شارة طريقة الدفع.
 class SalesPaymentChip extends StatelessWidget {
   final String method;
@@ -286,6 +487,9 @@ class SalesPaymentChip extends StatelessWidget {
       case 'mobile_wallet':
       case 'wallet':
         icon = Icons.account_balance_wallet_rounded;
+        break;
+      case 'credit':
+        icon = Icons.schedule_rounded;
         break;
       default:
         icon = Icons.payment_rounded;

@@ -21,6 +21,8 @@ class SalesCubit extends Cubit<SalesState> {
     required double discount,
     required String paymentMethod,
     required String note,
+    String? customerName,
+    String? customerPhone,
   }) async {
     // Re-entrancy guard: rapid double-taps must not create duplicate sales.
     if (state.status == SalesStatus.loading) return;
@@ -84,6 +86,8 @@ class SalesCubit extends Cubit<SalesState> {
         discount: discount,
         paymentMethod: paymentMethod,
         note: note,
+        customerName: customerName,
+        customerPhone: customerPhone,
       );
 
       // Notify whole app (Home, Dashboard, etc.) to refresh.

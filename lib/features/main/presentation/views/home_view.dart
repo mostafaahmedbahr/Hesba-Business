@@ -693,13 +693,13 @@ class _CurrentBalanceCard extends StatelessWidget {
 }
 
 /// ديالوج تفصيل الرصيد: مبيعات النهاردة حسب وسيلة الدفع
-/// (نقدي / بطاقة / محفظة) ثم المرتجعات والمصروفات = الرصيد المعروض.
+/// (نقدي / بطاقة / محفظة / آجل) ثم المرتجعات والمصروفات = الرصيد المعروض.
 class _BalanceBreakdownDialog extends StatelessWidget {
   final DashboardState state;
   const _BalanceBreakdownDialog({required this.state});
 
   /// ترتيب عرض وسائل الدفع المعروفة، ثم أي وسيلة أخرى تظهر بعدها.
-  static const _methodOrder = ['cash', 'card', 'mobile_wallet', 'wallet'];
+  static const _methodOrder = ['cash', 'card', 'mobile_wallet', 'wallet', 'credit'];
 
   @override
   Widget build(BuildContext context) {
@@ -909,6 +909,7 @@ class _MethodRow extends StatelessWidget {
           Icons.account_balance_wallet_rounded,
           AppTheme.violetDeep
         ),
+      'credit' => (Icons.schedule_rounded, AppTheme.amberDeep),
       _ => (Icons.payment_rounded, AppTheme.slateGray),
     };
 

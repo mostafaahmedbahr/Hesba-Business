@@ -169,6 +169,8 @@ String _payLabel(dynamic value) {
       return 'بطاقة';
     case 'mobile_wallet':
       return 'محفظة إلكترونية';
+    case 'credit':
+      return 'آجل';
     default:
       return (value ?? '').toString().trim();
   }

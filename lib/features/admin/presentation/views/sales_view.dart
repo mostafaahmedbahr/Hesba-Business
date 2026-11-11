@@ -144,6 +144,8 @@ class _SalesViewState extends State<SalesView> {
         data['shopId'],
         rawMethod,
         SalesListState.paymentLabel(rawMethod),
+        data['personName'],
+        data['personPhone'],
         d.id,
       ].whereType<String>().join(' ');
       return haystack.contains(q);
@@ -168,6 +170,8 @@ class _SaleCard extends StatelessWidget {
     final itemsCount = d['items'] is List
         ? (d['items'] as List).length
         : 0;
+    final customerName = (d['personName'] as String?)?.trim() ?? '';
+    final customerPhone = (d['personPhone'] as String?)?.trim() ?? '';
 
     final secondary = AdminColors.textSecondary(context);
 
@@ -300,6 +304,34 @@ class _SaleCard extends StatelessWidget {
                             Flexible(
                               child: Text(
                                 SalesListState.paymentLabel(method),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: secondary,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+
+                      if (customerName.isNotEmpty) ...[
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.person_outline_rounded,
+                              size: 14,
+                              color: secondary,
+                            ),
+                            const SizedBox(width: 5),
+                            Flexible(
+                              child: Text(
+                                customerPhone.isNotEmpty
+                                    ? '$customerName • $customerPhone'
+                                    : customerName,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(

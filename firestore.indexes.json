@@ -29,6 +29,15 @@
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "shopId", "order": "ASCENDING" },
+        { "fieldPath": "personId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "sales",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "shopId", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "ASCENDING" }
       ]
     },

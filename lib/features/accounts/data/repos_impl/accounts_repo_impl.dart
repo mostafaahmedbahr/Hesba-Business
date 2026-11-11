@@ -187,38 +187,13 @@ class AccountsRepoImpl implements AccountsRepo {
             : DebtDirection.receivable);
 
     // منع التكرار: نفس الرقم الموحّد داخل نفس المحل = نفس الشخص.
-    // ملاحظة: يُنشأ الشخص أولًا في كتابة مستقلة، ثم تُنشأ الذمة —
-    // لأن قواعد Firestore تُقيَّم ضد الحالة قبل العملية، فتحتاج
-    // الذمة أن تجد مستند الشخص موجودًا فعلًا.
-    final existing = await _findPersonByPhone(shopId, cleanPhone);
-    final String personId;
-    final String personName;
-    if (existing != null) {
-      personId = existing.id;
-      personName = cleanName; // لقطة الاسم من الإدخال الحالي
-      final mergedType = PersonModel.mergeType(existing.type, partyType);
-      if (mergedType != existing.type) {
-        await _persons.doc(existing.id).update({
-          'type': mergedType,
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
-      }
-    } else {
-      final ref = _persons.doc();
-      personId = ref.id;
-      personName = cleanName;
-      await ref.set({
-        'id': ref.id,
-        'ownerId': uid,
-        'shopId': shopId,
-        'name': cleanName,
-        'phone': cleanPhone,
-        'type': partyType,
-        'normalizedPhone': PersonModel.normalizePhone(cleanPhone),
-        'createdAt': FieldValue.serverTimestamp(),
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-    }
+    final person = await findOrCreatePerson(
+      name: cleanName,
+      phone: cleanPhone,
+      partyType: partyType,
+    );
+    final personId = person.id;
+    final personName = cleanName; // لقطة الاسم من الإدخال الحالي
 
     final debtRef = _debts.doc();
     final debt = DebtModel(
@@ -244,6 +219,61 @@ class AccountsRepoImpl implements AccountsRepo {
     });
 
     return debt;
+  }
+
+  @override
+  Future<PersonModel> findOrCreatePerson({
+    required String name,
+    required String phone,
+    required String partyType,
+  }) async {
+    final shopId = await _requireShop();
+    final uid = _uid!;
+    final cleanName = name.trim();
+    final cleanPhone = phone.trim();
+    if (cleanName.isEmpty) throw Exception('الاسم مطلوب');
+    if (cleanPhone.isEmpty) throw Exception('رقم الهاتف مطلوب');
+    _assertPhoneShape(cleanPhone);
+    if (partyType != PersonModel.typeCustomer &&
+        partyType != PersonModel.typeSupplier &&
+        partyType != PersonModel.typeBoth) {
+      throw Exception('نوع الشخص غير صحيح');
+    }
+    // منع التكرار: نفس الرقم الموحّد داخل نفس المحل = نفس الشخص.
+    // ملاحظة: يُنشأ الشخص أولًا في كتابة مستقلة، ثم يُستخدم الرقم —
+    // لأن قواعد Firestore تُقيَّم ضد الحالة قبل العملية، فتحتاج أي
+    // عملية لاحقة (ذمة / فاتورة) أن تجد مستند الشخص موجودًا فعلًا.
+    final existing = await _findPersonByPhone(shopId, cleanPhone);
+    if (existing != null) {
+      final mergedType = PersonModel.mergeType(existing.type, partyType);
+      if (mergedType != existing.type) {
+        await _persons.doc(existing.id).update({
+          'type': mergedType,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      }
+      return existing.copyWith(name: cleanName, type: mergedType);
+    }
+    final ref = _persons.doc();
+    await ref.set({
+      'id': ref.id,
+      'ownerId': uid,
+      'shopId': shopId,
+      'name': cleanName,
+      'phone': cleanPhone,
+      'type': partyType,
+      'normalizedPhone': PersonModel.normalizePhone(cleanPhone),
+      'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+    return PersonModel(
+      id: ref.id,
+      ownerId: uid,
+      shopId: shopId,
+      name: cleanName,
+      phone: cleanPhone,
+      type: partyType,
+    );
   }
 
   @override

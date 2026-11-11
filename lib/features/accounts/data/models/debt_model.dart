@@ -45,6 +45,11 @@ class DebtModel {
   final double paidAmount;
 
   final String note;
+
+  /// معرّف فاتورة المصدر (الذمة الآجلة طلعت منها) — '' لو الذمة
+  /// اتسجلت يدويًا. يتوافق مع وثائق قديمة بلا المفتاح.
+  final String saleId;
+
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -60,6 +65,7 @@ class DebtModel {
     required this.amount,
     this.paidAmount = 0,
     this.note = '',
+    this.saleId = '',
     this.createdAt,
     this.updatedAt,
   });
@@ -104,6 +110,7 @@ class DebtModel {
       amount: _num(json['amount']),
       paidAmount: _num(json['paidAmount']),
       note: _str(json['note']),
+      saleId: _str(json['saleId']),
       createdAt: _toDate(json['createdAt']),
       updatedAt: _toDate(json['updatedAt']),
     );
@@ -120,6 +127,7 @@ class DebtModel {
       'amount': amount,
       'paidAmount': paidAmount,
       'note': note,
+      'saleId': saleId,
     };
   }
 

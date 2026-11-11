@@ -333,7 +333,12 @@ class _AddReturnViewState extends State<AddReturnView> {
           return BlocListener<ReturnsCubit, ReturnsState>(
             listener: (ctx, state) {
               if (state.status == ReturnsStatus.success) {
-                AppToast.success(ctx, 'retSaved'.tr());
+                final wasCredit =
+                    _selectedSale?.paymentMethod == AppConstants.paymentCredit;
+                AppToast.success(
+                  ctx,
+                  (wasCredit ? 'retSavedCredit' : 'retSaved').tr(),
+                );
                 Navigator.pop(ctx, true);
               }
               if (state.status == ReturnsStatus.error) {
@@ -659,6 +664,41 @@ class _SaleStrip extends StatelessWidget {
             children: [
               Text('retInvoiceLine'.tr(namedArgs: {'id': idShort, 'count': '${sale.items.length}', 'unit': sale.items.length == 1 ? 'retUnitOne'.tr() : 'retUnitMany'.tr()}), style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : AppTheme.ink)),
               Text('retInvoiceTotals'.tr(namedArgs: {'total': sale.total.toStringAsFixed(2), 'currency': 'currencyEGP'.tr(), 'discount': sale.discount.toStringAsFixed(0)}), style: TextStyle(fontSize: 11.sp, color: AppTheme.slateGray)),
+              if (sale.paymentMethod == AppConstants.paymentCredit) ...[
+                SizedBox(height: 6.h),
+                Row(
+                  children: [
+                    Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                      decoration: BoxDecoration(
+                        color: AppTheme.warningAmber.withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                      child: Text(
+                        'retCreditBadge'.tr(),
+                        style: TextStyle(
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w800,
+                          color: AppTheme.amberDeep,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 6.w),
+                    Flexible(
+                      child: Text(
+                        'retCreditDebtAdjust'.tr(),
+                        style: TextStyle(
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.amberDeep,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
         ),

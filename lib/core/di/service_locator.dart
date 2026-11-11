@@ -188,6 +188,7 @@ void _initSales() {
     () => SalesRepoImpl(
       firestore: sl<FirebaseFirestore>(),
       auth: sl<FirebaseAuth>(),
+      accountsRepo: sl<AccountsRepo>(),
     ),
   );
 }

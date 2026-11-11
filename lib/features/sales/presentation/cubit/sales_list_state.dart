@@ -29,11 +29,18 @@ class SalesListState extends Equatable {
   /// المبيعات بعد البحث + الفلتر.
   List<SaleModel> get filtered {
     final q = searchQuery.trim().toLowerCase();
+    // أرقام فقط — لمطابقة أرقام الهاتف بغض النظر عن الفواصل.
+    final qDigits = q.replaceAll(RegExp('[^0-9]'), '');
     return sales.where((s) {
       final matchesSearch = q.isEmpty ||
           s.saleId.toLowerCase().contains(q) ||
           s.items.any((it) => it.productName.toLowerCase().contains(q)) ||
-          s.note.toLowerCase().contains(q);
+          s.note.toLowerCase().contains(q) ||
+          s.personName.toLowerCase().contains(q) ||
+          (qDigits.length >= 3 &&
+              s.personPhone
+                  .replaceAll(RegExp('[^0-9]'), '')
+                  .contains(qDigits));
       final matchesPayment =
           paymentFilter == 'الكل' || paymentLabel(s.paymentMethod) == paymentFilter;
       return matchesSearch && matchesPayment;
@@ -63,13 +70,15 @@ class SalesListState extends Equatable {
       case 'mobile_wallet':
       case 'wallet':
         return 'محفظة';
+      case 'credit':
+        return 'آجل';
       default:
         return method;
     }
   }
 
   /// فلاتر الدفع المتاحة.
-  static const paymentFilters = ['الكل', 'نقدي', 'بطاقة', 'محفظة'];
+  static const paymentFilters = ['الكل', 'نقدي', 'بطاقة', 'محفظة', 'آجل'];
 
   /// نسخ مع تعديل.
   SalesListState copyWith({
