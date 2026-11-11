@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -215,10 +217,53 @@ final channel = AndroidNotificationChannel(
     return granted;
   }
 
+  /// على iOS: APNS بيوصل بشكل غير متزامن — يتأخر ثوانٍ بعد قبول إذن الإشعارات.
+  /// نستنى لحد [retries] محاولة بفارق [delay]. على الأندرويد ما فيش APNS.
+  Future<bool> _waitForApnsToken({
+    int retries = 8,
+    Duration delay = const Duration(milliseconds: 500),
+  }) async {
+    if (!Platform.isIOS) return true;
+    for (var attempt = 0; attempt < retries; attempt++) {
+      try {
+        final token = await _messaging.getAPNSToken();
+        if (token != null && token.isNotEmpty) return true;
+      } catch (_) {
+        // لسه ما جهش — نحاول تاني.
+      }
+      await Future.delayed(delay);
+    }
+    return false;
+  }
+
+  /// Returns the current FCM registration token for this device.
+  /// يرجع null بدل ما يرمي `apns-token-not-set` (iOS) أو أي خطأ FCM.
+  Future<String?> getToken() async {
+    final ready = await _waitForApnsToken();
+    if (!ready) return null;
+    try {
+      return await _messaging.getToken();
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Fetches the FCM token, requests permission, and saves the token.
   Future<void> setupFcm() async {
     await _messaging.setAutoInitEnabled(true);
     await requestPermissions();
+
+    await _messaging.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
+    // iOS: من غير APNS token، getToken/subscribeToTopic بيرموا الخطأ.
+    // لو لسه ما وصلش، نتخطى بهدوء — التذكيرات المحلية تكمل عادي،
+    // وsetupFcm بتتنادى تاني في كل فتح للتطبيق فتكمّل التجهيز.
+    final apnsReady = await _waitForApnsToken();
+    if (!apnsReady) return;
 
     // Join the app-wide topic so console sends to the topic always reach
     // this device (no need to paste a token).
@@ -226,20 +271,11 @@ final channel = AndroidNotificationChannel(
       await _messaging.subscribeToTopic(appTopic);
     } catch (_) {/* best effort */}
 
-    final token = await _messaging.getToken();
+    final token = await getToken();
     if (token != null) {
       await saveToken(token);
     }
-
-    await _messaging.setForegroundNotificationPresentationOptions(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
   }
-
-  /// Returns the current FCM registration token for this device.
-  Future<String?> getToken() => _messaging.getToken();
 
   /// Saves (or removes) the token on the user document (Firestore).
   Future<void> saveToken(String token) async {

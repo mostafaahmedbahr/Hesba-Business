@@ -22,15 +22,19 @@ class NotificationCubit extends Cubit<NotificationState> {
 
   /// يجهز الإذن والتوكن.
   Future<void> init() async {
-    final granted = await _repo.requestPermissions();
-    emit(state.copyWith(permissionGranted: granted));
+    try {
+      final granted = await _repo.requestPermissions();
+      emit(state.copyWith(permissionGranted: granted));
 
-    final token = await _repo.getFcmToken();
-    emit(state.copyWith(fcmToken: token));
-    if (granted) {
-      await _repo.setupFcm();
-      final freshToken = await _repo.getFcmToken();
-      emit(state.copyWith(fcmToken: freshToken));
+      final token = await _repo.getFcmToken();
+      emit(state.copyWith(fcmToken: token));
+      if (granted) {
+        await _repo.setupFcm();
+        final freshToken = await _repo.getFcmToken();
+        emit(state.copyWith(fcmToken: freshToken));
+      }
+    } catch (_) {
+      // أي خلل في FCM (APNS لسه، شبكة، صلاحية) — التذكيرات المحلية تكمل.
     }
   }
 
