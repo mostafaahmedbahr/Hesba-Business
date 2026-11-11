@@ -56,6 +56,12 @@ class ReturnModel {
   final String reason;
   final String note;
 
+  /// لقطة اسم/رقم العميل من فاتورة البيع (نفس نمط SaleModel) —
+  /// '' للمرتجعات القديمة أو الفواتير بدون عميل.
+  final String personId;
+  final String personName;
+  final String personPhone;
+
   final DateTime createdAt;
 
   const ReturnModel({
@@ -69,6 +75,9 @@ class ReturnModel {
     required this.total,
     required this.reason,
     required this.note,
+    this.personId = '',
+    this.personName = '',
+    this.personPhone = '',
     required this.createdAt,
   });
 
@@ -86,6 +95,9 @@ class ReturnModel {
       'total': total,
       'reason': reason,
       'note': note,
+      'personId': personId,
+      'personName': personName,
+      'personPhone': personPhone,
       'createdAt': Timestamp.fromDate(createdAt),
     };
   }
@@ -111,6 +123,9 @@ class ReturnModel {
       total: tot,
       reason: json['reason'] ?? '',
       note: json['note'] ?? '',
+      personId: json['personId'] ?? '',
+      personName: json['personName'] ?? '',
+      personPhone: json['personPhone'] ?? '',
       createdAt: _parseDate(json['createdAt']),
     );
   }

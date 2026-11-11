@@ -453,6 +453,9 @@ service cloud.firestore {
       allow create: if signedIn()
         && request.resource.data.ownerId == myUid()
         && nonNegative('total')
+        && optionalString(request.resource.data, 'personId', 128)
+        && optionalString(request.resource.data, 'personName', 200)
+        && optionalString(request.resource.data, 'personPhone', 30)
         && mayWriteShopData(request.resource.data.shopId);
       allow update, delete: if isAdmin();
     }

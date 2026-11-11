@@ -151,6 +151,11 @@ class ReturnsRepoImpl implements ReturnsRepo {
     allocatedDiscount = double.parse(allocatedDiscount.toStringAsFixed(2));
     final netTotal = double.parse((grossSubtotal - allocatedDiscount).clamp(0, grossSubtotal).toStringAsFixed(2));
 
+    // لقطة العميل من فاتورة البيع — تسهّل البحث باسم/رقم العميل في قائمة المرتجعات.
+    final personId = (saleData['personId'] as String?)?.trim() ?? '';
+    final personName = (saleData['personName'] as String?)?.trim() ?? '';
+    final personPhone = (saleData['personPhone'] as String?)?.trim() ?? '';
+
     final ref = firestore.collection(AppConstants.returnsCollection).doc();
 
     final ret = ReturnModel(
@@ -164,6 +169,9 @@ class ReturnsRepoImpl implements ReturnsRepo {
       total: netTotal,
       reason: reason.trim(),
       note: note.trim(),
+      personId: personId,
+      personName: personName,
+      personPhone: personPhone,
       createdAt: DateTime.now(),
     );
 

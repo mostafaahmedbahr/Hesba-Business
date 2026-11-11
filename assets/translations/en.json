@@ -619,7 +619,7 @@
   "retLoading": "Loading returns...",
   "retEmptyHint": "Record your first return and stock updates automatically",
   "retEmpty": "No returns yet",
-  "retSearchHint": "Search by return code, product or reason",
+  "retSearchHint": "Search by return code, product, reason or customer",
   "retInvoiceSearchHint": "Search by invoice number or product name",
   "retPickInvoice": "Choose the invoice",
   "retNoInvoices": "No invoices — returns must come from a previous sale",

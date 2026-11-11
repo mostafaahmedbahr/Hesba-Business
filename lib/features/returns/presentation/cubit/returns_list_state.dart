@@ -29,11 +29,19 @@ class ReturnsListState extends Equatable {
   /// المرتجعات بعد البحث + الفلتر.
   List<ReturnModel> get filtered {
     final q = searchQuery.trim().toLowerCase();
+    // أرقام فقط — لمطابقة أرقام الهاتف بغض النظر عن الفواصل.
+    final qDigits = q.replaceAll(RegExp('[^0-9]'), '');
     return returns.where((r) {
       final matchesSearch = q.isEmpty ||
           r.returnId.toLowerCase().contains(q) ||
+          (r.originalSaleId ?? '').toLowerCase().contains(q) ||
           r.reason.toLowerCase().contains(q) ||
-          r.items.any((it) => it.productName.toLowerCase().contains(q));
+          r.items.any((it) => it.productName.toLowerCase().contains(q)) ||
+          r.personName.toLowerCase().contains(q) ||
+          (qDigits.length >= 3 &&
+              r.personPhone
+                  .replaceAll(RegExp('[^0-9]'), '')
+                  .contains(qDigits));
       final matchesReason = reasonFilter == 'الكل' || r.reason == reasonFilter;
       return matchesSearch && matchesReason;
     }).toList();
