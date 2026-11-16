@@ -21,6 +21,7 @@ import '../../../../core/utils/validators.dart';
 import '../../data/models/sale_model.dart';
 import '../cubit/sales_cubit.dart';
 import '../cubit/sales_state.dart';
+import '../widgets/invoice_sheet.dart';
 import '../widgets/add_sale_button.dart';
 import '../widgets/payment_method_selector.dart';
 import '../widgets/sale_customer_section.dart';
@@ -314,17 +315,25 @@ class _AddSaleViewState extends State<AddSaleView> {
       child: Builder(
         builder: (innerContext) {
           return BlocListener<SalesCubit, SalesState>(
-            listener: (ctx, state) {
+            listener: (ctx, state) async {
+              if (state.status == SalesStatus.error) {
+                AppToast.error(ctx, translateError(state.errorMessage, state.errorArgs));
+              }
               if (state.status == SalesStatus.success) {
                 final isCredit = _paymentMethod == AppConstants.paymentCredit;
                 AppToast.success(
                   ctx,
                   (isCredit ? 'saleSavedCredit' : 'saleSaved').tr(),
                 );
-                Navigator.pop(ctx, true);
-              }
-              if (state.status == SalesStatus.error) {
-                AppToast.error(ctx, translateError(state.errorMessage, state.errorArgs));
+                // خيار إصدار فاتورة (صورة) وإرسالها للعميل بعد الحفظ.
+                final sale = state.sale;
+                if (sale != null && ctx.mounted) {
+                  final issue = await askIssueInvoice(ctx);
+                  if (issue && ctx.mounted) {
+                    await showInvoiceSheet(ctx, sale);
+                  }
+                }
+                if (ctx.mounted) Navigator.pop(ctx, true);
               }
             },
             child: Scaffold(

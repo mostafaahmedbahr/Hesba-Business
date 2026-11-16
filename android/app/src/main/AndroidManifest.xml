@@ -8,6 +8,10 @@
     <!-- Shop/product/receipt photos: camera capture via image_picker.
          Gallery needs no permission (system photo picker). -->
     <uses-permission android:name="android.permission.CAMERA"/>
+    <!-- Saving the invoice image to the gallery (gal) on API 29 and below. -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <!-- NOTE: exact-alarm permissions intentionally omitted: scheduling uses
          AndroidScheduleMode.inexactAllowWhileIdle, and USE_EXACT_ALARM is a

@@ -44,13 +44,21 @@ abstract class PhoneContact {
     return _launch(context, Uri(scheme: 'tel', path: digits));
   }
 
-  static Future<bool> whatsapp(BuildContext context, String phone) async {
+  /// فتح واتساب على رقم [phone] — مع [text] جاهز في خانة الرسالة.
+  static Future<bool> whatsapp(
+    BuildContext context,
+    String phone, {
+    String? text,
+  }) async {
     final digits = dialablePhone(phone);
     if (digits.length < 7) {
       AppToast.warning(context, 'contactPhoneInvalid'.tr());
       return false;
     }
-    return _launch(context, Uri.parse('https://wa.me/$digits'));
+    final query = (text == null || text.isEmpty)
+        ? ''
+        : '?text=${Uri.encodeComponent(text)}';
+    return _launch(context, Uri.parse('https://wa.me/$digits$query'));
   }
 
   static Future<void> copyPhone(BuildContext context, String phone) async {

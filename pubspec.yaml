@@ -54,6 +54,9 @@ dependencies:
   geocoding: ^5.0.0
   flutter_map: ^8.3.2
   latlong2: ^0.10.1
+  share_plus: ^13.3.1
+  path_provider: ^2.1.6
+  gal: ^3.0.1
 
 dev_dependencies:
   flutter_test:

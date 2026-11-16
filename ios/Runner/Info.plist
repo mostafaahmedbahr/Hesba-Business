@@ -28,6 +28,8 @@
 	<string>Allow Hesba to use your current location to pin the shop address on Google Maps.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Allow Hesba to choose a photo for the shop profile.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Allow Hesba to save the invoice image to your photo library so you can send it to the customer.</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>

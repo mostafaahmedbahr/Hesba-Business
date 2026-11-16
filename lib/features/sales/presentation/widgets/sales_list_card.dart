@@ -5,6 +5,7 @@ import '../../../../common_imports.dart';
 import '../../../../core/utils/phone_contact.dart';
 import '../../data/models/sale_model.dart';
 import '../cubit/sales_list_state.dart';
+import 'invoice_sheet.dart';
 
 /// كارت فاتورة مختصر — ضغطة تفتح التفاصيل بأنيميشن.
 /// [fromCustomerHistory] تُخفي زرار "فواتير العميل" (اللي بيفاتح نفس
@@ -250,6 +251,24 @@ class _Details extends StatelessWidget {
               ]),
             ],
             SizedBox(height: 10.h),
+            SizedBox(
+              width: double.infinity,
+              height: 44.h,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  HapticFeedback.mediumImpact();
+                  showInvoiceSheet(context, sale);
+                },
+                icon: Icon(Icons.receipt_long_rounded, size: 17.sp, color: AppTheme.primaryColor),
+                label: Text('invoiceIssue'.tr(), style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w800, color: AppTheme.primaryColor)),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: AppTheme.primaryColor.withValues(alpha: 0.35)),
+                  backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.06),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                ),
+              ),
+            ),
+            SizedBox(height: 8.h),
             SizedBox(
               width: double.infinity,
               height: 44.h,
