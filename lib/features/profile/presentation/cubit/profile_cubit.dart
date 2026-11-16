@@ -1,5 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/di/service_locator.dart';
+import '../../../../core/services/user_role_service.dart';
 import '../../data/repos/account_repo.dart';
 import '../states/profile_state.dart';
 
@@ -81,6 +83,7 @@ class ProfileCubit extends Cubit<ProfileState> {
   Future<bool> logout() async {
     try {
       await _repo.logout();
+      sl<UserRoleService>().clear();
       return true;
     } catch (e) {
       return false;

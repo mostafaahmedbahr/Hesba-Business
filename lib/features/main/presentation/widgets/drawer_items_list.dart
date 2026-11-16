@@ -68,6 +68,12 @@ class DrawerItemsList extends StatelessWidget {
           SizedBox(height: 10.h),
           SectionLabel('إدارة المتجر', isDark),
           CustomDrawerTile(
+            icon: Icons.badge_outlined,
+            label: 'الحسابات الفرعية',
+            color: const Color(0xFF7C4DFF),
+            onTap: () => Navigator.pushNamed(context, AppRoutes.staffManagement),
+          ),
+          CustomDrawerTile(
             icon: Icons.local_shipping_rounded,
             label: 'suppliersSection'.tr(),
             color: AppTheme.violetDeep,

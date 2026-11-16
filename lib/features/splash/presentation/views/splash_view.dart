@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:hesba/features/profile/data/repos/account_repo.dart';
+import 'package:hesba/core/services/user_role_service.dart';
 import '../../../../common_imports.dart';
 import '../widgets/splash_background.dart';
 import '../widgets/splash_body_content.dart';
@@ -24,13 +25,22 @@ class _SplashViewState extends State<SplashView> {
     _timer = Timer(const Duration(seconds: 3), _navigateNext);
   }
 
-  void _navigateNext() {
-    if (!mounted) return;
+  Future<void> _navigateNext() async {
     final isLoggedIn = sl<AccountRepo>().currentUserId() != null;
-    logSuccess('[Splash] isLoggedIn: $isLoggedIn');
+    if (!isLoggedIn) {
+      sl<UserRoleService>().clear();
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, AppRoutes.login);
+      return;
+    }
+
+    await sl<UserRoleService>().reload();
+    if (!mounted) return;
+    final isStaff = sl<UserRoleService>().isStaff;
+    logSuccess('[Splash] isLoggedIn: $isLoggedIn, isStaff: $isStaff');
     Navigator.pushReplacementNamed(
       context,
-      isLoggedIn ? AppRoutes.dashboard : AppRoutes.login,
+      isStaff ? AppRoutes.staffHome : AppRoutes.dashboard,
     );
   }
 

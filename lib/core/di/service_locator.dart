@@ -11,6 +11,7 @@ import '../../core/services/cloudinary_image_service.dart';
 import '../../core/services/notification_service.dart';
 import '../../core/services/shop_location_service.dart';
 import '../../core/services/shop_resolver.dart';
+import '../../core/services/user_role_service.dart';
 import '../../features/auth/data/repos/auth_repo.dart';
 import '../../features/auth/data/repos_impl/auth_repo_impl.dart';
 import '../../features/contact/data/repos/contact_repo.dart';
@@ -47,6 +48,10 @@ import '../../features/suppliers/data/repos/suppliers_repo.dart';
 import '../../features/suppliers/data/repos_impl/suppliers_repo_impl.dart';
 import '../../features/accounts/data/repos/accounts_repo.dart';
 import '../../features/accounts/data/repos_impl/accounts_repo_impl.dart';
+import '../../features/staff/data/repos/staff_repo.dart';
+import '../../features/staff/data/repos_impl/staff_repo_impl.dart';
+import '../../features/products/data/repos/stock_purchase_repo.dart';
+import '../../features/products/data/repos_impl/stock_purchase_repo_impl.dart';
 
 final sl = GetIt.instance;
 
@@ -72,6 +77,8 @@ Future<void> initDependencies() async {
   _initCategories();
   _initSuppliers();
   _initAccounts();
+  _initStaff();
+  _initStockPurchases();
 }
 
 void _initSubscription() {
@@ -98,6 +105,9 @@ void _initAuth() {
   sl.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
   sl.registerLazySingleton<ShopResolver>(
     () => ShopResolver(auth: sl(), firestore: sl()),
+  );
+  sl.registerLazySingleton<UserRoleService>(
+    () => UserRoleService(auth: sl(), firestore: sl()),
   );
 
   sl.registerLazySingleton<AuthRepo>(
@@ -241,5 +251,17 @@ void _initAccounts() {
       auth: sl<FirebaseAuth>(),
       firestore: sl<FirebaseFirestore>(),
     ),
+  );
+}
+
+void _initStaff() {
+  sl.registerLazySingleton<StaffRepo>(
+    () => StaffRepoImpl(auth: sl(), firestore: sl()),
+  );
+}
+
+void _initStockPurchases() {
+  sl.registerLazySingleton<StockPurchaseRepo>(
+    () => StockPurchaseRepoImpl(auth: sl(), firestore: sl()),
   );
 }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../../core/router/app_routes.dart';
+import '../../../../../core/theme/app_theme.dart';
 import '../../cubit/register_cubit.dart';
 import '../../states/register_state.dart';
 
@@ -13,6 +15,7 @@ import 'register_owner_step.dart';
 import 'register_shop_step.dart';
 import 'register_extra_step.dart';
 
+/// كارت إنشاء الحساب: هيدر ملوّن + مؤشر خطوات + مساحة النموذج + أزرار.
 class RegisterForm extends StatelessWidget {
   final GlobalKey<FormState> formKey;
 
@@ -53,74 +56,83 @@ class RegisterForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(32.w),
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(28.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 30,
-            offset: const Offset(0, 12),
+            color: AppTheme.primaryDark.withValues(alpha: 0.12),
+            blurRadius: 36,
+            offset: const Offset(0, 16),
           ),
         ],
       ),
       child: Form(
         key: formKey,
         child: Column(
-          crossAxisAlignment:
-          CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const RegisterHeader(),
-
-            SizedBox(height: 28.h),
-
-            const RegisterSteps(),
-
-            SizedBox(height: 32.h),
-
-            BlocBuilder<RegisterCubit, RegisterState>(
-              builder: (context, state) {
-                return AnimatedSwitcher(
-                  duration:
-                  const Duration(milliseconds: 250),
-                  child: _step(state.step),
-                );
-              },
-            ),
-
-            SizedBox(height: 30.h),
-
-            RegisterNavigation(
-              formKey: formKey,
-              ownerNameController:
-              ownerNameController,
-              emailController:
-              emailController,
-              phoneController:
-              phoneController,
-              passwordController:
-              passwordController,
-              confirmPasswordController:
-              confirmPasswordController,
-              shopNameController:
-              shopNameController,
-              businessTypeController:
-              businessTypeController,
-              shopPhoneController:
-              shopPhoneController,
-              addressController:
-              addressController,
-              cityController:
-              cityController,
-              stateController:
-              stateController,
-              shopImageUrlController:
-              shopImageUrlController,
+            Padding(
+              padding: EdgeInsets.fromLTRB(24.w, 26.h, 24.w, 26.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const RegisterSteps(),
+                  SizedBox(height: 26.h),
+                  BlocBuilder<RegisterCubit, RegisterState>(
+                    builder: (context, state) {
+                      return AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 280),
+                        switchInCurve: Curves.easeOutCubic,
+                        switchOutCurve: Curves.easeInCubic,
+                        child: _stepView(state.step),
+                      );
+                    },
+                  ),
+                  SizedBox(height: 26.h),
+                  RegisterNavigation(
+                    formKey: formKey,
+                    ownerNameController: ownerNameController,
+                    emailController: emailController,
+                    phoneController: phoneController,
+                    passwordController: passwordController,
+                    confirmPasswordController: confirmPasswordController,
+                    shopNameController: shopNameController,
+                    businessTypeController: businessTypeController,
+                    shopPhoneController: shopPhoneController,
+                    addressController: addressController,
+                    cityController: cityController,
+                    stateController: stateController,
+                    shopImageUrlController: shopImageUrlController,
+                  ),
+                  SizedBox(height: 18.h),
+                  const _LoginFooter(),
+                ],
+              ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _stepView(int step) {
+    final stepWidget = _step(step);
+    // الخطوتان الأولى والثانية حقول — نحطهم على لوحة خفيفة،
+    // والخطوة الثالثة فيها كروت جاهزة فتُترك كما هي.
+    if (step == 2) return stepWidget;
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(18.w),
+      decoration: BoxDecoration(
+        color: AppTheme.slatePale.withValues(alpha: 0.7),
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: AppTheme.borderSoft.withValues(alpha: 0.7)),
+      ),
+      child: stepWidget,
     );
   }
 
@@ -129,44 +141,69 @@ class RegisterForm extends StatelessWidget {
       case 0:
         return RegisterOwnerStep(
           key: const ValueKey('owner'),
-          ownerNameController:
-          ownerNameController,
-          emailController:
-          emailController,
-          phoneController:
-          phoneController,
-          passwordController:
-          passwordController,
-          confirmPasswordController:
-          confirmPasswordController,
+          ownerNameController: ownerNameController,
+          emailController: emailController,
+          phoneController: phoneController,
+          passwordController: passwordController,
+          confirmPasswordController: confirmPasswordController,
         );
 
       case 1:
         return RegisterShopStep(
           key: const ValueKey('shop'),
-          shopNameController:
-          shopNameController,
-          businessTypeController:
-          businessTypeController,
-          shopPhoneController:
-          shopPhoneController,
-          addressController:
-          addressController,
-          cityController:
-          cityController,
-          stateController:
-          stateController,
+          shopNameController: shopNameController,
+          businessTypeController: businessTypeController,
+          shopPhoneController: shopPhoneController,
+          addressController: addressController,
+          cityController: cityController,
+          stateController: stateController,
         );
 
       case 2:
         return RegisterExtraStep(
           key: const ValueKey('extra'),
-          shopImageUrlController:
-          shopImageUrlController,
+          shopImageUrlController: shopImageUrlController,
         );
 
       default:
         return const SizedBox.shrink();
     }
+  }
+}
+
+class _LoginFooter extends StatelessWidget {
+  const _LoginFooter();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          'لديك حساب بالفعل؟',
+          style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade500),
+        ),
+        SizedBox(width: 4.w),
+        InkWell(
+          onTap: () => Navigator.pushNamedAndRemoveUntil(
+            context,
+            AppRoutes.login,
+            (_) => false,
+          ),
+          borderRadius: BorderRadius.circular(6.r),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+            child: Text(
+              'تسجيل الدخول',
+              style: TextStyle(
+                fontSize: 12.5.sp,
+                fontWeight: FontWeight.w900,
+                color: AppTheme.primaryColor,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

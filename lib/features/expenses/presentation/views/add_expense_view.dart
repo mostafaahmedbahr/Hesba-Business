@@ -23,12 +23,16 @@ class AddExpenseView extends StatefulWidget {
   final String? shopId;
   final ExpenseModel? expense;
 
+  /// حساب الموظف يضيف مصروفًا فقط ولا يفتح شاشة قائمة المصروفات.
+  final bool restricted;
+
   const AddExpenseView({
     super.key,
     this.ownerId,
     this.shopName,
     this.shopId,
     this.expense,
+    this.restricted = false,
   });
 
   @override

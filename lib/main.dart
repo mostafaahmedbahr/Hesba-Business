@@ -8,6 +8,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:hesba/common_imports.dart';
 import 'package:hesba/core/router/notification_router.dart';
 import 'package:hesba/core/di/service_locator.dart';
+import 'package:hesba/core/services/user_role_service.dart';
 import 'package:hesba/features/expenses/data/repos/expenses_repo.dart';
 import 'package:hesba/features/notifications/data/repos/activity_repo.dart';
 import 'package:hesba/features/notifications/presentation/view_model/activity_cubit.dart';
@@ -27,6 +28,11 @@ import 'package:hesba/features/settings/presentation/states/settings_state.dart'
   // مزامنة المصروفات المتكررة: يسجل تلقائيًا أي موعد فات (أو يوصل)
   // ويعيد ضبط التذكيرات — يعمل في الخلفية بأمان.
   unawaited(_syncRecurringExpensesSafely());
+  // تحميل الدور قبل تشغيل الـ router عشان حظر مسارات الموظف يشتغل
+  // من أول إطار حتى لو جاء الـ navigation من إشعار أو deep link.
+  if (FirebaseAuth.instance.currentUser != null) {
+    await sl<UserRoleService>().load();
+  }
   runApp(TranslationProvider(child: const HesbaApp()));
 }
 

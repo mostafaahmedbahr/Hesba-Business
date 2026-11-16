@@ -4,9 +4,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../core/cubit/shop_location_cubit.dart';
+import '../../../../core/widgets/auth_background.dart';
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/services/shop_location_service.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/toast.dart';
 import '../../data/repos/auth_repo.dart';
 import '../cubit/register_cubit.dart';
@@ -85,27 +87,34 @@ class _RegisterBodyState extends State<_RegisterBody> {
     return BlocListener<RegisterCubit, RegisterState>(
       listener: _handleState,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF5F7FB),
-        body: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.all(20.w),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: 900.w),
-                child: RegisterForm(
-                  formKey: formKey,
-                  ownerNameController: ownerNameController,
-                  emailController: emailController,
-                  phoneController: phoneController,
-                  passwordController: passwordController,
-                  confirmPasswordController: confirmPasswordController,
-                  shopNameController: shopNameController,
-                  businessTypeController: businessTypeController,
-                  shopPhoneController: shopPhoneController,
-                  addressController: addressController,
-                  cityController: cityController,
-                  stateController: stateController,
-                  shopImageUrlController: shopImageUrlController,
+        backgroundColor: AppTheme.primaryLight,
+        body: AuthBackground(
+          child: SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(
+                  16.w,
+                  16.h,
+                  16.w,
+                  16.h + MediaQuery.of(context).viewInsets.bottom,
+                ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: 520.w),
+                  child: RegisterForm(
+                    formKey: formKey,
+                    ownerNameController: ownerNameController,
+                    emailController: emailController,
+                    phoneController: phoneController,
+                    passwordController: passwordController,
+                    confirmPasswordController: confirmPasswordController,
+                    shopNameController: shopNameController,
+                    businessTypeController: businessTypeController,
+                    shopPhoneController: shopPhoneController,
+                    addressController: addressController,
+                    cityController: cityController,
+                    stateController: stateController,
+                    shopImageUrlController: shopImageUrlController,
+                  ),
                 ),
               ),
             ),

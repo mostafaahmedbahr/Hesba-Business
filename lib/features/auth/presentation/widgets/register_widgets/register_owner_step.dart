@@ -34,6 +34,7 @@ class RegisterOwnerStep extends StatelessWidget {
         RegisterSectionTitle(
           title: 'ownerTitle'.tr(),
           subtitle: 'ownerSubtitle'.tr(),
+          icon: Icons.person_outline_rounded,
         ),
         SizedBox(height: 22.h),
         _buildNameField(),

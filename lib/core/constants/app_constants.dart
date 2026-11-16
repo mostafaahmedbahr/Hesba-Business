@@ -59,6 +59,10 @@ class AppConstants {
   static const String roleManager = 'manager';
   static const String roleCashier = 'cashier';
 
+  /// حساب فرعي (موظف): يضيف بيع/شراء/مرتجع/مصروف فقط،
+  /// بدون أي شاشة تقارير أو أرباح أو إدارة منتجات.
+  static const String roleStaff = 'staff';
+
   // Expense Categories
   static const List<String> expenseCategories = [
     'إيجار',

@@ -11,6 +11,9 @@ class ReturnInvoicePicker extends StatelessWidget {
   final ValueChanged<SaleModel> onSelected;
   final VoidCallback onClear;
 
+  /// حساب الموظف يرى رقم الفاتورة والتاريخ فقط — بدون إجماليات مالية.
+  final bool hideTotals;
+
   const ReturnInvoicePicker({
     super.key,
     required this.sales,
@@ -18,6 +21,7 @@ class ReturnInvoicePicker extends StatelessWidget {
     required this.selected,
     required this.onSelected,
     required this.onClear,
+    this.hideTotals = false,
   });
 
   @override
@@ -57,6 +61,7 @@ class ReturnInvoicePicker extends StatelessWidget {
     return Autocomplete<SaleModel>(
       displayStringForOption: (s) {
             final id = s.saleId.length > 6 ? s.saleId.substring(0, 6) : s.saleId;
+            if (hideTotals) return '#$id — ${DateFormat('dd/MM').format(s.createdAt)}';
             return 'retPickerOption'.tr(namedArgs: {'id': id, 'date': DateFormat('dd/MM').format(s.createdAt), 'total': s.total.toStringAsFixed(0), 'currency': 'currencyEGP'.tr()});
           },
       optionsBuilder: (textEditingValue) {
@@ -96,7 +101,12 @@ class ReturnInvoicePicker extends StatelessWidget {
                       ),
                       child: Icon(Icons.receipt_long_rounded, size: 18.sp, color: Colors.white),
                     ),
-                    title: Text('retPickerLine'.tr(namedArgs: {'id': s.saleId.length > 6 ? s.saleId.substring(0, 6) : s.saleId, 'total': s.total.toStringAsFixed(0), 'currency': 'currencyEGP'.tr()}), style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800)),
+                    title: Text(
+                      hideTotals
+                          ? '#${s.saleId.length > 6 ? s.saleId.substring(0, 6) : s.saleId}'
+                          : 'retPickerLine'.tr(namedArgs: {'id': s.saleId.length > 6 ? s.saleId.substring(0, 6) : s.saleId, 'total': s.total.toStringAsFixed(0), 'currency': 'currencyEGP'.tr()}),
+                      style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800),
+                    ),
                     subtitle: Text('$date • ${s.items.length} ${s.items.length == 1 ? 'saleItemOne'.tr() : 'saleItemsUnit'.tr()}', style: TextStyle(fontSize: 11.sp, color: AppTheme.slateGray)),
                     trailing: isSel ? Icon(Icons.check_circle_rounded, color: AppTheme.successDark, size: 20.sp) : null,
                     onTap: () => onSelected(s),

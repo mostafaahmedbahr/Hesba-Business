@@ -31,11 +31,15 @@ class AddReturnView extends StatefulWidget {
   final String? shopId;
   final String? originalSaleId;
 
+  /// حساب الموظف: إخفاء إجماليات الفواتير أثناء اختيار فاتورة المرتجع.
+  final bool restricted;
+
   const AddReturnView({
     super.key,
     this.ownerId,
     this.shopId,
     this.originalSaleId,
+    this.restricted = false,
   });
 
   @override
@@ -369,6 +373,7 @@ class _AddReturnViewState extends State<AddReturnView> {
                                 selected: _selectedSale,
                                 onSelected: _selectSale,
                                 onClear: _clearSale,
+                                hideTotals: widget.restricted,
                               ),
 
                               if (_selectedSale != null) ...[

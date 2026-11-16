@@ -8,10 +8,14 @@ class PaymentMethodSelector extends StatelessWidget {
   final String value;
   final ValueChanged<String> onChanged;
 
+  /// الحساب الفرعي لا يستطيع البيع الآجل (يمنع إنشاء ذمم العملاء).
+  final bool allowCredit;
+
   const PaymentMethodSelector({
     super.key,
     required this.value,
     required this.onChanged,
+    this.allowCredit = true,
   });
 
   String get _normalized {
@@ -22,11 +26,12 @@ class PaymentMethodSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final methods = [
+    final methods = <_Method>[
       _Method(AppConstants.paymentCash, 'payCash', Icons.money_rounded, const [AppTheme.successDark, AppTheme.mintLight]),
       _Method(AppConstants.paymentCard, 'payCard', Icons.credit_card_rounded, const [AppTheme.primaryColor, AppTheme.brightBlue]),
       _Method(AppConstants.paymentMobileWallet, 'payWallet', Icons.account_balance_wallet_rounded, const [AppTheme.violetDeep, AppTheme.violetSoft]),
-      _Method(AppConstants.paymentCredit, 'payCredit', Icons.schedule_rounded, const [AppTheme.amberDeep, AppTheme.warningAmber]),
+      if (allowCredit)
+        _Method(AppConstants.paymentCredit, 'payCredit', Icons.schedule_rounded, const [AppTheme.amberDeep, AppTheme.warningAmber]),
     ];
     return Row(
       children: [

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:hesba/core/di/service_locator.dart';
 import 'package:hesba/core/router/app_routes.dart';
+import 'package:hesba/core/services/user_role_service.dart';
 import 'package:hesba/features/splash/presentation/views/splash_view.dart';
 import 'package:hesba/features/auth/presentation/views/login_view.dart';
 import 'package:hesba/features/auth/presentation/views/register_view.dart';
@@ -17,7 +18,10 @@ import '../../features/subscription/presentation/views/subscription_view.dart';
 import '../../features/notifications/presentation/views/notifications_view.dart';
 import '../../features/suppliers/presentation/views/suppliers_view.dart';
 import '../../features/accounts/presentation/views/accounts_view.dart';
+import '../../features/products/presentation/views/add_stock_purchase_view.dart';
 import '../../features/sales/presentation/views/customer_sales_view.dart';
+import '../../features/staff/presentation/views/staff_home_view.dart';
+import '../../features/staff/presentation/views/staff_management_view.dart';
 
 /// Root navigator used to route the user when they tap a notification while
 /// the app is in the background or was terminated.
@@ -32,6 +36,15 @@ class AppRouter {
         sl<FirebaseAuth>().currentUser == null) {
       return _buildRoute(const LoginView(), settings);
     }
+
+    // الحساب الفرعي محصور في شاشة الإدخال + فورمات الإضافة فقط.
+    // أي مسار آخر (لوحة تحكم/تقارير/منتجات/حسابات/موردين) يُعاد توجيهه.
+    if (sl<UserRoleService>().isStaff &&
+        settings.name != null &&
+        !_staffAllowedRoutes.contains(settings.name)) {
+      return _buildRoute(const StaffHomeView(), settings);
+    }
+
     switch (settings.name) {
       case AppRoutes.splash:
         return _buildRoute(const SplashView(), settings);
@@ -97,6 +110,9 @@ class AppRouter {
       case AppRoutes.accountsView:
         return _buildRoute(const AccountsView(), settings);
 
+      case AppRoutes.stockPurchaseView:
+        return _buildRoute(const AddStockPurchaseView(), settings);
+
       case AppRoutes.customerSalesView:
         final csArgs = settings.arguments as Map<String, dynamic>?;
         return _buildRoute(
@@ -109,6 +125,12 @@ class AppRouter {
           settings,
         );
 
+      case AppRoutes.staffHome:
+        return _buildRoute(const StaffHomeView(), settings);
+
+      case AppRoutes.staffManagement:
+        return _buildRoute(const StaffManagementView(), settings);
+
       // case AppRoutes.resetPassword:
       //   return _buildRoute(const ResetPasswordScreen(), settings);
 
@@ -117,8 +139,21 @@ class AppRouter {
     }
   }
 
+  /// المسارات الوحيدة المسموحة لحساب الموظف. أي شيء آخر يُحوَّل لشاشته.
+  static const Set<String> _staffAllowedRoutes = {
+    AppRoutes.splash,
+    AppRoutes.login,
+    AppRoutes.staffHome,
+    AppRoutes.addSaleView,
+    AppRoutes.addReturnView,
+    AppRoutes.addExpenseView,
+    AppRoutes.stockPurchaseView,
+  };
+
   static bool _requiresAuth(String? name) {
     switch (name) {
+      case AppRoutes.staffHome:
+      case AppRoutes.staffManagement:
       case AppRoutes.dashboard:
       case AppRoutes.addSaleView:
       case AppRoutes.returnsView:

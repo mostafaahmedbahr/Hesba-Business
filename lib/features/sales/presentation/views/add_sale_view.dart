@@ -34,10 +34,15 @@ class AddSaleView extends StatefulWidget {
   final String? ownerId;
   final String? shopId;
 
+  /// عند true (حساب الموظف): لا يُعرض قسم العميل ولا خيار البيع الآجل،
+  /// حتى لا يستطيع الموظف الوصول لبيانات العملاء أو إنشاء ذمم.
+  final bool restricted;
+
   const AddSaleView({
     super.key,
     this.ownerId,
     this.shopId,
+    this.restricted = false,
   });
 
   @override
@@ -75,7 +80,7 @@ class _AddSaleViewState extends State<AddSaleView> {
     _resolvedShopId = widget.shopId;
     _resolveIds();
     _loadProducts();
-    _loadPersons();
+    if (!widget.restricted) _loadPersons();
     _addItem();
     _discountController.addListener(_onRecalc);
   }
@@ -230,23 +235,27 @@ class _AddSaleViewState extends State<AddSaleView> {
     }
 
     // العميل اختياري — لكن اسمه ورقمه يُكتبان معًا.
-    // (البيع الآجل حالة خاصة: العميل إجباري لأن الذمة بتتربط به.)
-    final customerName = _customerNameController.text.trim();
-    final customerPhone = _customerPhoneController.text.trim();
-    if (customerName.isEmpty != customerPhone.isEmpty) {
-      AppToast.warning(innerContext, 'saleCustomerBothRequired'.tr());
-      return;
-    }
-    if (_paymentMethod == AppConstants.paymentCredit &&
-        (customerName.isEmpty || customerPhone.isEmpty)) {
-      AppToast.warning(innerContext, 'saleCreditRequiresCustomer'.tr());
-      return;
-    }
-    if (customerPhone.isNotEmpty) {
-      final phoneError = Validators.egyptianPhone(customerPhone);
-      if (phoneError != null) {
-        AppToast.warning(innerContext, 'contactPhoneInvalid'.tr());
+    // الحساب الفرعي لا يرى العملاء ولا يمكنه البيع الآجل (منع الذمم).
+    String? customerName;
+    String? customerPhone;
+    if (!widget.restricted) {
+      customerName = _customerNameController.text.trim();
+      customerPhone = _customerPhoneController.text.trim();
+      if (customerName.isEmpty != customerPhone.isEmpty) {
+        AppToast.warning(innerContext, 'saleCustomerBothRequired'.tr());
         return;
+      }
+      if (_paymentMethod == AppConstants.paymentCredit &&
+          (customerName.isEmpty || customerPhone.isEmpty)) {
+        AppToast.warning(innerContext, 'saleCreditRequiresCustomer'.tr());
+        return;
+      }
+      if (customerPhone.isNotEmpty) {
+        final phoneError = Validators.egyptianPhone(customerPhone);
+        if (phoneError != null) {
+          AppToast.warning(innerContext, 'contactPhoneInvalid'.tr());
+          return;
+        }
       }
     }
 
@@ -286,8 +295,8 @@ class _AddSaleViewState extends State<AddSaleView> {
           discount: _discount,
           paymentMethod: _paymentMethod,
           note: _noteController.text,
-          customerName: customerName.isEmpty ? null : customerName,
-          customerPhone: customerPhone.isEmpty ? null : customerPhone,
+          customerName: (customerName == null || customerName.isEmpty) ? null : customerName,
+          customerPhone: (customerPhone == null || customerPhone.isEmpty) ? null : customerPhone,
         );
   }
 
@@ -433,19 +442,23 @@ class _AddSaleViewState extends State<AddSaleView> {
                               SizedBox(height: 10.h),
                               PaymentMethodSelector(
                                 value: _paymentMethod,
+                                allowCredit: !widget.restricted,
                                 onChanged: (v) => setState(() => _paymentMethod = v),
                               ),
                               SizedBox(height: 20.h),
 
                               // العميل (اختياري) لربط الفاتورة بجهة اتصال.
-                              SaleCustomerSection(
-                                nameController: _customerNameController,
-                                phoneController: _customerPhoneController,
-                                persons: _persons,
-                                creditRequired:
-                                    _paymentMethod == AppConstants.paymentCredit,
-                              ),
-                              SizedBox(height: 20.h),
+                              // مخفي تمامًا في حساب الموظف.
+                              if (!widget.restricted) ...[
+                                SaleCustomerSection(
+                                  nameController: _customerNameController,
+                                  phoneController: _customerPhoneController,
+                                  persons: _persons,
+                                  creditRequired:
+                                      _paymentMethod == AppConstants.paymentCredit,
+                                ),
+                                SizedBox(height: 20.h),
+                              ],
 
                               // الخصم + ملاحظة.
                               Text('saleExtras'.tr(), style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),

@@ -15,5 +15,11 @@ String translateError(String? message, [Map<String, String>? args]) {
         ? message.tr()
         : message.tr(namedArgs: args);
   }
+  final lower = message.toLowerCase();
+  if (lower.contains('permission-denied') ||
+      lower.contains('permission denied') ||
+      lower.contains('insufficient permission')) {
+    return 'الصلاحية مرفوضة: تأكد أن حساب الموظف مُفعّل ومرتبط بالمحل، وأن اشتراك صاحب المحل ساري.';
+  }
   return message;
 }

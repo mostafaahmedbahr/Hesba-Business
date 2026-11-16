@@ -43,4 +43,7 @@ abstract class AccountRepo {
 
   /// Signs out the current user.
   Future<void> logout();
+
+  /// يقرأ حالة تفعيل حساب موظف معيّن (يستخدمه الموظف للخروج عند الإيقاف).
+  Future<bool?> getStaffActiveState(String uid);
 }

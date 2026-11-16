@@ -67,6 +67,7 @@ class _RegisterShopStepState extends State<RegisterShopStep> {
         RegisterSectionTitle(
           title: 'shopTitle'.tr(),
           subtitle: 'shopSubtitle'.tr(),
+          icon: Icons.storefront_outlined,
         ),
         SizedBox(height: 22.h),
         _buildShopNameField(),

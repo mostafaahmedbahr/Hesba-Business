@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/services/user_role_service.dart';
 import '../../../../core/utils/toast.dart';
 import '../../data/repos/auth_repo.dart';
 import '../cubit/login_cubit.dart';
@@ -67,12 +68,14 @@ class _LoginBodyState extends State<_LoginBody> {
     );
   }
 
-  void _handleState(BuildContext context, LoginState state) {
+  Future<void> _handleState(BuildContext context, LoginState state) async {
     if (state.status == LoginStatus.success) {
+      await sl<UserRoleService>().reload();
+      if (!context.mounted) return;
       AppToast.success(context, 'loginSuccess'.tr());
       Navigator.pushNamedAndRemoveUntil(
         context,
-        AppRoutes.dashboard,
+        sl<UserRoleService>().isStaff ? AppRoutes.staffHome : AppRoutes.dashboard,
         (_) => false,
       );
     } else if (state.status == LoginStatus.failure) {

@@ -73,6 +73,13 @@ class MoreView extends StatelessWidget {
             SizedBox(height: 20.h),
             _SectionCard('إدارة المتجر', [
               MoreItem(
+                icon: Icons.badge_outlined,
+                label: 'الحسابات الفرعية',
+                color: const Color(0xFF7C4DFF),
+                onTap: () =>
+                    Navigator.pushNamed(context, AppRoutes.staffManagement),
+              ),
+              MoreItem(
                 icon: Icons.local_shipping_rounded,
                 label: 'suppliersSection'.tr(),
                 color: AppTheme.violetDeep,

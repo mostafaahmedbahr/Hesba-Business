@@ -16,4 +16,6 @@ abstract class AppRoutes {
   static const suppliersView = '/suppliersView';
   static const accountsView = '/accountsView';
   static const customerSalesView = '/customerSalesView';
+  static const staffHome = '/staffHome';
+  static const staffManagement = '/staffManagement';
 }

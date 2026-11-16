@@ -130,4 +130,15 @@ class AccountRepoImpl implements AccountRepo {
     } catch (_) {}
     await _auth.signOut();
   }
+
+  @override
+  Future<bool?> getStaffActiveState(String uid) async {
+    try {
+      final doc = await _firestore.collection('users').doc(uid).get();
+      if (!doc.exists) return false;
+      return doc.data()?['isActive'] as bool? ?? true;
+    } catch (_) {
+      return null;
+    }
+  }
 }

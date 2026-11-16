@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/di/service_locator.dart';
+import '../../../core/services/user_role_service.dart';
 import '../../../core/extensions/log_util.dart';
 import '../../../core/router/app_routes.dart';
 import '../data/models/subscription_model.dart';
@@ -18,6 +19,10 @@ class SubscriptionGate {
   static SubscriptionRepo get _repo => sl<SubscriptionRepo>();
 
   static Future<bool> ensureCanModify(BuildContext context) async {
+    // الموظف لا يملك اشتراكًا خاصًا به؛ اشتراك المحل هو المعتمد،
+    // وقواعد Firestore تتحقق منه فعليًا عند الكتابة.
+    if (sl<UserRoleService>().isStaff) return true;
+
     SubscriptionModel subscription;
     try {
       subscription = await _repo.getSubscription();

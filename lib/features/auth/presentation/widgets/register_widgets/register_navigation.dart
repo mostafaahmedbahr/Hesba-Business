@@ -10,6 +10,7 @@ import '../../../data/models/register_model.dart';
 import '../../../../../core/cubit/shop_location_cubit.dart';
 import '../../../../../core/utils/toast.dart';
 
+/// أزرار التنقل بين خطوات التسجيل: زر رئيسي ب-gradient وزر رجوع أنيق.
 class RegisterNavigation extends StatelessWidget {
   final GlobalKey<FormState> formKey;
 
@@ -22,6 +23,7 @@ class RegisterNavigation extends StatelessWidget {
   final TextEditingController shopNameController;
   final TextEditingController businessTypeController;
   final TextEditingController shopPhoneController;
+
   final TextEditingController addressController;
   final TextEditingController cityController;
   final TextEditingController stateController;
@@ -56,21 +58,30 @@ class RegisterNavigation extends StatelessWidget {
 
         return Row(
           children: [
-            if (!isFirstStep)
+            if (!isFirstStep) ...[
               Expanded(
+                flex: 2,
                 child: _buildButton(
                   label: 'registerBack'.tr(),
-                  isLoading: false,
                   isOutlined: true,
-                  onPressed: cubit.previousStep,
+                  onPressed: isLoading ? null : cubit.previousStep,
                 ),
               ),
-            if (!isFirstStep) SizedBox(width: 12.w),
+              SizedBox(width: 12.w),
+            ],
             Expanded(
               child: _buildButton(
                 label: isLastStep ? 'registerSubmit'.tr() : 'registerNext'.tr(),
-                isLoading: isLoading,
                 isOutlined: false,
+                isLoading: isLoading,
+                suffixIcon: isLoading
+                    ? null
+                    : Icon(
+                        isLastStep
+                            ? Icons.check_circle_outline_rounded
+                            : Icons.arrow_forward_rounded,
+                        size: 18.sp,
+                      ),
                 onPressed: isLoading
                     ? null
                     : () => _onPressed(context, isLastStep),
@@ -84,52 +95,78 @@ class RegisterNavigation extends StatelessWidget {
 
   Widget _buildButton({
     required String label,
-    required bool isLoading,
     required bool isOutlined,
+    bool isLoading = false,
+    Widget? suffixIcon,
     VoidCallback? onPressed,
   }) {
     return SizedBox(
-      height: 52.h,
+      height: 54.h,
       child: isOutlined
-          ? OutlinedButton(
+          ? OutlinedButton.icon(
               onPressed: onPressed,
+              icon: Icon(Icons.arrow_back_rounded, size: 18.sp),
+              label: Text(label),
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: AppTheme.deepBlue),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14.r),
+                foregroundColor: AppTheme.primaryColor,
+                side: BorderSide(
+                  color: AppTheme.primaryColor.withValues(alpha: 0.4),
                 ),
-              ),
-              child: Text(
-                label,
-                style: const TextStyle(
-                  color: AppTheme.deepBlue,
-                  fontWeight: FontWeight.w700,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.r),
+                ),
+                textStyle: TextStyle(
+                  fontSize: 13.5.sp,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
             )
-          : ElevatedButton(
-              onPressed: onPressed,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.deepBlue,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14.r),
-                ),
-                elevation: 0,
+          : DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: AppTheme.primaryGradient,
+                borderRadius: BorderRadius.circular(15.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.primaryColor.withValues(alpha: 0.30),
+                    blurRadius: 14,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
               ),
-              child: isLoading
-                  ? SizedBox(
-                      width: 22.w,
-                      height: 22.w,
-                      child: const CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        color: Colors.white,
-                      ),
-                    )
-                  : Text(
-                      label,
-                      style: const TextStyle(fontWeight: FontWeight.w700),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: onPressed,
+                  borderRadius: BorderRadius.circular(15.r),
+                  child: Center(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (isLoading)
+                          SizedBox(
+                            width: 20.w,
+                            height: 20.w,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.4,
+                              color: Colors.white.withValues(alpha: 0.9),
+                            ),
+                          )
+                        else if (suffixIcon != null)
+                          suffixIcon,
+                        if (!isLoading) SizedBox(width: 8.w),
+                        Text(
+                          label,
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
                     ),
+                  ),
+                ),
+              ),
             ),
     );
   }
@@ -143,26 +180,20 @@ class RegisterNavigation extends StatelessWidget {
   }
 
   void _nextStep(BuildContext context) {
-    if (!formKey.currentState!.validate()) {
-      return;
-    }
+    if (!formKey.currentState!.validate()) return;
     context.read<RegisterCubit>().nextStep();
   }
 
   void _submit(BuildContext context) {
-    if (!formKey.currentState!.validate()) {
-      return;
-    }
+    if (!formKey.currentState!.validate()) return;
 
-    // الموقع بيتحدد من ShopLocationCubit (GPS / خريطة / عنوان يدوي) —
-    // مفيش حقل رابط يدوي بقى، والـ locationUrl بيتبني من الإحداثيات.
+    // الموقع بيتحدد من ShopLocationCubit (GPS / خريطة / عنوان يدوي).
     final location = context.read<ShopLocationCubit>().state.location;
     if (location == null || !location.hasAnyData) {
       AppToast.error(context, 'locationRequired'.tr());
       return;
     }
 
-    // owner + customer + admin
     final now = DateTime.now();
     final model = RegisterModel(
       ownerId: '',
@@ -186,7 +217,6 @@ class RegisterNavigation extends StatelessWidget {
       updatedAt: now,
       isActive: true,
     );
-
 
     context.read<RegisterCubit>().register(
           model: model,
