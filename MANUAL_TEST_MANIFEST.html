@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+<title>HESBA — دليل الاختبار اليدوي الشامل</title>
+<style>
+  :root{
+    --bg:#f4f6fb; --card:#fff; --ink:#0f1c3f; --muted:#667085;
+    --primary:#2f5fe0; --ok:#12996b; --bad:#d92d20; --warn:#e8a317;
+    --line:#e4e8f0; --soft:#eef3ff; --shadow:0 6px 20px rgba(16,32,72,.07);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;line-height:1.75;font-size:15px}
+  header{position:sticky;top:0;z-index:10;background:linear-gradient(135deg,#10224d,#2f5fe0);
+    color:#fff;padding:14px 16px 12px;box-shadow:0 4px 18px rgba(16,32,72,.25)}
+  .htop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  header h1{font-size:17px;margin:0;font-weight:800}
+  header .sub{font-size:11.5px;opacity:.85;margin-top:2px}
+  .badge{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);
+    border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700}
+  .bar{height:9px;background:rgba(255,255,255,.2);border-radius:99px;overflow:hidden;margin-top:10px}
+  .bar > i{display:block;height:100%;width:0;background:#7ee2b8;border-radius:99px;transition:width .3s}
+  .stats{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;margin-top:7px;opacity:.95}
+  .wrap{max-width:1050px;margin:0 auto;padding:14px}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  input[type=search],select{flex:1;min-width:180px;padding:11px 12px;border:1px solid var(--line);
+    border-radius:12px;background:#fff;font-size:14px;color:var(--ink);outline:none}
+  input[type=search]:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--soft)}
+  button{border:0;border-radius:10px;padding:9px 13px;font-size:13px;font-weight:700;cursor:pointer;
+    background:#fff;color:var(--primary);border:1px solid var(--line)}
+  button:active{transform:scale(.97)}
+  button.danger{color:var(--bad)}
+  .chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+  .chip{padding:7px 13px;border-radius:99px;border:1px solid var(--line);background:#fff;
+    color:var(--muted);font-size:13px;font-weight:700;cursor:pointer}
+  .chip.on{background:var(--primary);border-color:var(--primary);color:#fff}
+  section{background:var(--card);border:1px solid var(--line);border-radius:16px;
+    margin-bottom:14px;box-shadow:var(--shadow);overflow:hidden}
+  .shead{display:flex;align-items:center;gap:10px;padding:14px 15px;cursor:pointer;background:#fbfcff}
+  .shead .num{background:var(--soft);color:var(--primary);border-radius:10px;
+    min-width:34px;height:34px;display:grid;place-items:center;font-weight:800;font-size:13px}
+  .shead h2{font-size:15px;margin:0;flex:1;font-weight:800}
+  .shead .cnt{font-size:12px;color:var(--muted);font-weight:700}
+  .shead .arrow{color:var(--muted);font-size:12px;transition:transform .2s}
+  section.closed .sbody{display:none}
+  section.closed .arrow{transform:rotate(-90deg)}
+  .sbody{padding:4px 15px 12px}
+  .item{display:flex;gap:10px;padding:11px 4px;border-top:1px dashed var(--line);align-items:flex-start}
+  .item:first-child{border-top:0}
+  .tick{width:26px;height:26px;flex:0 0 26px;border:2px solid #c6cede;border-radius:8px;
+    background:#fff;cursor:pointer;font-size:17px;line-height:1;display:grid;place-items:center;color:#fff;margin-top:2px}
+  .tick.done{background:var(--ok);border-color:var(--ok)}
+  .ibody{flex:1;min-width:0}
+  .it{font-weight:700;font-size:14px}
+  .ie{font-size:12.7px;color:var(--muted);margin-top:2px}
+  .meta{display:flex;gap:6px;align-items:center;margin-top:5px;flex-wrap:wrap}
+  .tag{font-size:10.5px;padding:2px 8px;border-radius:99px;background:var(--soft);color:var(--primary);font-weight:700}
+  .tag.hi{background:#fff0ec;color:var(--bad)}
+  .tag.md{background:#fff8e6;color:#a56a00}
+  .tag.lo{background:#eaf8f2;color:var(--ok)}
+  .fail{font-size:11px;padding:3px 9px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--muted);cursor:pointer}
+  .fail.on{background:var(--bad);border-color:var(--bad);color:#fff}
+  .note{width:100%;margin-top:6px;padding:7px 9px;border:1px dashed var(--line);border-radius:9px;
+    font-size:12.5px;color:var(--ink);background:#fcfdff;display:none}
+  .note.show{display:block}
+  .note-btn{font-size:11px;padding:3px 9px;border:0;background:transparent;color:var(--primary);cursor:pointer;text-decoration:underline}
+  .item.isfail .it{color:var(--bad)}
+  .item.done .it{color:var(--muted)}
+  footer{text-align:center;color:var(--muted);font-size:12px;padding:18px 14px 40px}
+  .empty{text-align:center;padding:30px;color:var(--muted)}
+  @media print{header{position:static}button,.toolbar,.chips{display:none}.note{display:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="htop">
+    <div><h1>HESBA — دليل الاختبار اليدوي</h1><div class="sub">واجهة المالك / الموظف / الأدمن — بلاستيك + اختبارات الفشل والشبكة</div></div>
+    <div class="badge" id="pct">0%</div>
+  </div>
+  <div class="bar"><i id="barfill"></i></div>
+  <div class="stats">
+    <span>✅ تم: <b id="sok">0</b></span>
+    <span>❌ فشل: <b id="sbad">0</b></span>
+    <span>⬜ متبقي: <b id="sleft">0</b></span>
+    <span>الإجمالي: <b id="stot">0</b></span>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="toolbar">
+    <input id="search" type="search" placeholder="🔍 ابحث في الاختبارات…">
+    <select id="filter">
+      <option value="all">كل الحالات</option>
+      <option value="undone">غير منفذة فقط</option>
+      <option value="done">المنفذة فقط</option>
+      <option value="failed">الفاشلة فقط</option>
+    </select>
+    <button id="reset" class="danger">مسح التقدم</button>
+    <button id="expand">فتح الكل</button>
+  </div>
+  <div class="chips" id="roles"></div>
+  <div id="sections"></div>
+  <footer>يُحفظ التقدم تلقائياً على هذا الجهاز (localStorage) — لا يحتاج إنترنت.</footer>
+</div>
+
+<script>
+const D=[
+/* ============ 1. التثبيت والدخول ============ */
+{s:"الإقلاع والدخول (Splash / Login)",role:"all",items:[
+ ["يفتح التطبيق ويعرض شاشة البداية","شاشة Splash تظهر 3 ثوانٍ ثم تنتقل تلقائياً.",'lo'],
+ ["دخول بحساب صحيح","ينتقل للوحة التحكم، ولا تظهر رسالة خطأ.",'hi'],
+ ["دخول بكلمة سر غلط","رسالة عربية «كلمة المرور غير صحيحة» — ولا يحدث navigation.",'hi'],
+ ["دخول ببريد غير مسجل","رسالة «البريد الإلكتروني غير مسجل».",'md'],
+ ["دخول وبطاقة SIM/واي فاي مقفول","رسالة «تحقق من اتصال الإنترنت» وليس نص Firebase بالإنجليزي.",'hi'],
+ ["الضغط المتكرر على زر الدخول","طلب واحد فقط، والزر يتعطّل أثناء التحميل.",'hi'],
+ ["نسيت كلمة المرور","إيمال استعادة يصل، والزر لا يكرر الإرسال عند الضغط مرتين.",'md'],
+ ["إغلاق التطبيق أثناء الدخول وإعادة فتحه","لا توجد حالة معلقة ولا شاشة بيضاء.",'md'],
+]},
+{s:"التسجيل وإنشاء المحل (Register)",role:"all",items:[
+ ["التسجيل ببيانات صحيحة","تُنشأ ذمة تجريبية 7 أيام ويُفتح التطبيق.",'hi'],
+ ["بريد مستخدم من قبل","رسالة «البريد الإلكتروني مستخدم بالفعل».",'md'],
+ ["خطوات التسجيل (البيانات/المحل)","المتابعة والرجوع بين الخطوات يحفظان البيانات.",'md'],
+ ["إغلاق التطبيق أثناء التسجيل","لا يوجد حساب ناقص/مكرر عند الرجوع.",'hi'],
+]},
+/* ============ 2. الرئيسية ============ */
+{s:"الرئيسية / الداشبورد (Home)",role:"owner",items:[
+ ["تحميل الداشبورد","مبيعات اليوم + المرتجعات + المصروفات + عدد المنتجات تظهر بلا spinner معلّق.",'hi'],
+ ["تحديث الأرقام بعد بيع جديد","الأرقام تتغير فوراً بدون إعادة فتح الشاشة.",'hi'],
+ ["تحديث الأرقام بعد مرتجع","صافي المبيعات ينخفض بمبلغ الاسترداد.",'hi'],
+ ["سحب للتحديث (pull to refresh)","بيانات محدثة ولا يوجد تكرار في العدادات.",'md'],
+ ["قطع الإنترنت ثم فتح الرئيسية","رسالة خطأ مفهومة ولا يبقى مؤشر التحميل دائر للأبد.",'hi'],
+ ["فتح تفصيل الرصيد حسب وسيلة الدفع","المجموع = مجموع الوسائل (نقدي/بطاقة/محفظة).",'md'],
+ ["آخر حركة (بيع/مرتجع/مصروف)","البطاقة تعرض آخر عملية بالاسم والوقت الصحيح.",'lo'],
+ ["حساب الموقوف","يُطرد فوراً ولا يستطيع دخول الرئيسية.",'hi'],
+]},
+/* ============ 3. المبيعات ============ */
+{s:"قائمة المبيعات (Sales)",role:"owner",items:[
+ ["فتح القائمة","تظهر الفواتير مرتبة بالأحدث أولاً.",'lo'],
+ ["البحث باسم المنتج/العميل","النتائج تتطابق而无需 إعادة تحميل.",'lo'],
+ ["فلتر وسيلة الدفع","الفواتير المطابقة فقط.",'lo'],
+ ["فتح فاتورة","عرض الأصناف والكميات والإجمالي بعد الخصم.",'hi'],
+ ["قطع الاتصال أثناء فتح القائمة","حالة فشل واضحة بدل مؤشر تحميل لانهائي.",'hi'],
+]},
+{s:"إضافة بيع (Add Sale) — الأهم",role:"all",items:[
+ ["بيع نقدي عادي","تُحفظ الفاتورة، المخزون ينقص بكمية الأصناف، ولا تُنشأ ذمة.",'hi'],
+ ["بيع متعدد الأصناف بأسعار مختلفة","كل صنف يُخصم من مخزونه وحده.",'hi'],
+ ["خصم نسبة مئوية","الإجمالي = المجموع − الخصم، والربح في الإشعار بعد الخصم.",'hi'],
+ ["خصم مبلغ ثابت","نفس النتيجة الصحيحة، ولا يسمح بخصم أكبر من المجموع.",'hi'],
+ ["بيع آجل بعميل","تُنشأ ذمة واحدة فقط بنفس رقم الفاتورة والمبلغ.",'hi'],
+ ["بيع آجل بدون عميل","يُرفض قبل الحفظ.",'md'],
+ ["بيع بكمية أكبر من المخزون","يُرفض مع رسالة «الكمية غير متوفرة».",'hi'],
+ ["بيع منتج من محل آخر","يُرفض (لا يمكن التلاعب بـ shopId).",'hi'],
+ ["الضغط المتكرر على «حفظ» مرتين سريعاً","فاتورة واحدة فقط وخصم مخزون واحد.",'hi'],
+ ["قطع الإنترنت قبل الحفظ","رسالة «لا يوجد اتصال»، لا تظهر رسالة نجاح.",'hi'],
+ ["قطع الإنترنت أثناء الحفظ","لا نجاح كاذب؛ إعادة المحاولة لا تخلق فاتورة ثانية (idempotency).",'hi'],
+ ["إغلاق الشاشة أثناء الحفظ","لا setState-after-dispose ولا تكرار عند الرجوع.",'md'],
+ ["الضغط على زر الرجوع أثناء التحميل","لا تُغلق الشاشة قبل اكتمال الحفظ.",'md'],
+ ["طباعة/مشاركة الفاتورة بعد الحفظ","تظهر بعد النجاح فقط.",'lo'],
+ ["إشعار النشاط بعد البيع","يحتوي «الربح» الصحيح بعد الخصم.",'hi'],
+ ["حساب الموظف: فورم مقيد","لا تظهر قائمة العملاء ولا خيار البيع الآجل ولا إجماليات الفواتير.",'hi'],
+]},
+{s:"سجل مشتريات العميل (Customer Sales)",role:"owner",items:[
+ ["فتح سجل عميل","الفواتير الخاصة به فقط.",'hi'],
+ ["التبديل لعميل آخر","لا تظهر فواتير العميل السابق أبداً.",'hi'],
+ ["قطع الاتصال أثناء التحميل","حالة خطأ بدل بيانات قديمة.",'md'],
+]},
+/* ============ 4. المرتجعات ============ */
+{s:"قائمة المرتجعات",role:"owner",items:[
+ ["عرض المرتجعات","مرتبة بالأحدث، المبالغ صحيحة.",'lo'],
+ ["البحث والفلتر بالسبب","يعمل دون أخطاء.",'lo'],
+]},
+{s:"إضافة مرتجع (Add Return)",role:"all",items:[
+ ["مرتجع جزئي","المخزون يرجع بكمية واحدة، والمبلغ المسترد صافي بعد الخصم.",'hi'],
+ ["مرتجع كامل","المخزون كامل والفاتورة لا تُحسب مرتين في الأرباح.",'hi'],
+ ["مرتجع بعد مرتجع جزئي","الكمية المتبقية فقط هي المسموحة.",'hi'],
+ ["محاولة إرجاع أكثر من المباع","يُرفض برسالة واضحة.",'hi'],
+ ["مرتجع فاتورة آجلة","الذمة تُسوّى بالمبلغ الصافي، ودفعة واحدة فقط.",'hi'],
+ ["الضغط مرتين على حفظ","مرتجع واحد — لا استرداد مزدوج ولا إرجاع مخزون مزدوج.",'hi'],
+ ["قطع الإنترنت أثناء الإرسال","إعادة المحاولة لا تضيف مرتجعاً ثانياً.",'hi'],
+ ["إغلاق الشاشة أثناء قراءة الكميات المرجعة","لا انهيار (mounted guard).",'md'],
+ ["حساب الموظف","لا تظهر إجماليات الفواتير أثناء الاختيار.",'md'],
+]},
+/* ============ 5. المصروفات ============ */
+{s:"قائمة المصروفات",role:"owner",items:[
+ ["عرض المصروفات والمجموع","القوالب المتكررة لا تُحتسب في الإجمالي.",'hi'],
+ ["البحث/فلتر التصنيف","النتائج صحيحة.",'lo'],
+ ["حذف مصروف","يُحذف ويختفي من القائمة فوراً.",'md'],
+ ["الضغط مرتين على حذف","حذف واحد فقط.",'md'],
+ ["فشل تحميل القائمة","رسالة خطأ ولا spinner معلّق.",'hi'],
+]},
+{s:"إضافة/تعديل مصروف",role:"all",items:[
+ ["إضافة مصروف عادي","يُحفظ ويظهر في الإجمالي.",'hi'],
+ ["مصروف متكرر (شهري)","تُنشأ المواعيد الفائتة مرة واحدة فقط حتى مع إعادة الفتح.",'hi'],
+ ["فشل مزامنة التكرار بعد الحفظ","المصروف الأساسي يظل محفوظاً ولا تظهر رسالة فشل.",'hi'],
+ ["الضغط مرتين على حفظ","مصروف واحد فقط.",'hi'],
+ ["قطع الإنترنت أثناء الحفظ","رسالة عربية، ولا تكرار عند إعادة المحاولة.",'hi'],
+ ["تعديل مصروف متكرر","الجدول يتحدث دون تكرار الحالات.",'md'],
+]},
+/* ============ 6. المنتجات والمخزون ============ */
+{s:"قائمة المنتجات",role:"owner",items:[
+ ["عرض المنتجات","الصور تظهر بحجم مناسب وسريعة التمرير.",'md'],
+ ["البحث والفلتر بالقسم","يعمل فوراً.",'lo'],
+ ["منخفض المخزون","يظهر تنبيه بالعدد الصحيح.",'md'],
+ ["حذف منتج","يُحذف بعد تأكيد.",'md'],
+]},
+{s:"نموذج المنتج (Product Form)",role:"owner",items:[
+ ["إضافة منتج جديد","يُحفظ ويظهر في القائمة.",'hi'],
+ ["حفظ بدون shopId (حساب غير مكتمل)","يظهر خطأ بدل رسالة «تم الحفظ» الكاذبة.",'hi'],
+ ["ربط بمورد","المورد من قائمة المحل فقط.",'md'],
+ ["حقول المواصفات الاختيارية","تظهر وتُحفظ بشكل صحيح.",'lo'],
+ ["صورة المنتج","تُرفع وتظهر في البطاقة.",'md'],
+ ["فشل رفع الصورة","رسالة «تعذر رفع الصورة» عربية بلا تفاصيل تقنية.",'hi'],
+ ["قطع الإنترنت أثناء الحفظ","رسالة خطأ والبيانات المدخلة لسه موجودة.",'hi'],
+ ["الضغط المتكرر على حفظ","منتج واحد فقط.",'hi'],
+]},
+{s:"شراء مخزون (Stock Purchase)",role:"all",items:[
+ ["إضافة فاتورة شراء","المخزون يزيد بكل صنف، وتُنشأ حركة مخزون.",'hi'],
+ ["شراء صنف من محل آخر","يُرفض.",'hi'],
+ ["الضغط مرتين على حفظ","زيادة واحدة فقط.",'hi'],
+ ["فشل الشبكة أثناء الحفظ","لا نجاح كاذب، ولا تكرار.",'hi'],
+ ["حساب الموظف","الفورم متاح ومقيد.",'md'],
+]},
+/* ============ 7. الموردون ============ */
+{s:"الموردون",role:"owner",items:[
+ ["إضافة مورد","يُحفظ ويظهر.",'md'],
+ ["بحث الموردين","النتائج صحيحة.",'lo'],
+ ["حذف مورد مرتبط بمنتجات","يُرفض برسالة واضحة.",'hi'],
+ ["تفاصيل المورد والمنتجات المرتبطة","القائمة صحيحة.",'lo'],
+ ["فشل الشبكة","رسالة عربية، لا spinner معلّق.",'md'],
+]},
+/* ============ 8. الحسابات والذمم ============ */
+{s:"الحسابات (Accounts)",role:"owner",items:[
+ ["إضافة ذمة عميل","تُنشأ باتجاه receivable حتى لو طُلب payable.",'hi'],
+ ["إضافة ذمة مورد","تُنشأ باتجاه payable.",'md'],
+ ["نفس الرقم مرتين","يُعاد استخدام الشخص ولا يتكرر.",'md'],
+ ["إغلاق الإنترنت أثناء التحميل","حالة خطأ ولا spinner معلّق.",'hi'],
+ ["إضافة ذمة من شاشة المبيعات","الذمة تظهر فوراً في الحسابات.",'hi'],
+]},
+{s:"كشف الحساب والدفعات (Debt Details)",role:"owner",items:[
+ ["تسجيل دفعة جزئية","paidAmount يزيد، ويُضاف سطر في سجل الدفعات.",'hi'],
+ ["دفعة كاملة","الحالة تصبح مسدقة ولا تحذف الذمة.",'hi'],
+ ["دفعة أكبر من المتبقي","تُرفض برسالة واضحة.",'hi'],
+ ["الضغط مرتين على تسجيل الدفعة","دفعة واحدة فقط (idempotency).",'hi'],
+ ["قطع الإنترنت أثناء الدفع","لا نجاح كاذب، ولا تكرار عند إعادة المحاولة.",'hi'],
+ ["فشل قراءة الحساب","تظهر شاشة خطأ مع «إعادة المحاولة» بدل spinner لانهائي.",'hi'],
+ ["دفعات متزامنة من جهازين","لا يتجاوز المجموع المتبقي.",'hi'],
+]},
+/* ============ 9. التقارير ============ */
+{s:"التقارير (Reports)",role:"owner",items:[
+ ["فترة اليوم","المؤشرات = مبيعات اليوم − المرتجعات − التكلفة − المصروفات.",'hi'],
+ ["فترة 7 أيام / 30 يوم","تبديل فوري دون انتظار تحميل.",'hi'],
+ ["فترة الكل","تظهر كل البيانات مع تنبيه عدم الاكتمال لو وُجد.",'hi'],
+ ["مرتجع فاتورة قديمة","التكلفة تُقرأ من اللقطة الأصلية ولا تُخترع صفراً.",'hi'],
+ ["فاتورة قديمة بلا costPrice","الربح يظهر تقديرياً مع تحذير وتغطية التكلفة.",'hi'],
+ ["منتج بـ costPrice = 0"," يُعامل كمجهول ولا كتكلفة صفرية.",'hi'],
+ ["كميات عشرية","الحساب دقيق.",'md'],
+ ["مرتجعان جزئيان","التكلفة المرجعة لا تُحسب مرتين.",'hi'],
+ ["مطابقة الداشبورت للأدمن","ربح الأدمن = ربح التقارير لنفس البيانات.",'hi'],
+ ["قطع الإنترنت","رسالة خطأ، لا أرقام قديمة كأنها محدثة.",'md'],
+]},
+/* ============ 10. الاشتراك ============ */
+{s:"الاشتراك (Subscription)",role:"owner",items:[
+ ["عرض الباقات والأسعار","الأسعار من إعدادات الأدمن الحية.",'md'],
+ ["اختيار باقة ووسيلة دفع","يُحدد ويظهر في الملخص.",'md'],
+ ["اختيار الإيصال","صورة محلية تظهر فوراً ولا تُرَفع على Cloudinary بعد.",'hi'],
+ ["إرسال الطلب","الصورة تُرَفع ثم يُنشأ طلب واحد بحالة pending.",'hi'],
+ ["إرسال طلب والثاني معلق","يُرفض «لديك طلب معلق بالفعل».",'hi'],
+ ["فشل الإرسال بعد رفع الصورة","لا يبقى إيصال بلا مراجعة (الرفع متأجل).",'hi'],
+ ["الضغط مرتين على إرسال","طلب واحد فقط.",'hi'],
+ ["قطع الإنترنت قبل الإرسال","رسالة عربية، لا نجاح كاذب.",'hi'],
+ ["حساب منتهي","شاشة حظر مع زر عرض الباقات، والكتابة ممنوعة بالقواعد.",'hi'],
+ ["حساب موقوف","كل العمليات المحمية مرفوضة.",'hi'],
+]},
+/* ============ 11. الموظفون ============ */
+{s:"إدارة الموظفين",role:"owner",items:[
+ ["إنشاء حساب موظف","يُنشأ ويرتبط بنفس المحل وصاحب المحل.",'hi'],
+ ["موظف يحاول فتح لوحة التحكم","يُعاد توجيهه لشاشته فقط.",'hi'],
+ ["موظف يحاول اسم مسار مالك مباشرة","يُحوّل لشاشة الموظف.",'hi'],
+ ["إيقاف موظف","يُطرد فوراً من شاشته.",'hi'],
+ ["موظف يقرأ بيانات محل آخر","ممنوع (بالقواعد).",'hi'],
+]},
+{s:"شاشة الموظف (Staff Home)",role:"staff",items:[
+ ["الفوروم المسموحة فقط","بيع/مرتجع/مصروف/شراء مخزون.",'hi'],
+ ["لا تظهر التقارير أو الحسابات أو الموردون","مخفي تماماً.",'hi'],
+ ["خروج الموظف","يُمسح الدور ولا يرثه الحساب التالي.",'hi'],
+]},
+/* ============ 12. الأدمن ============ */
+{s:"دخول الأدمن والهيكل",role:"admin",items:[
+ ["دخول أدمن صحيح","تفتح لوحة الأدمن.",'hi'],
+ ["مالك يحاول دخول الأدمن","لا يصل للوحة (يظهر شاشة الدخول فقط).",'hi'],
+ ["محاولة فتح AdminShell عبر رابط مباشر","لا تفتح بدون صلاحية أدمن.",'hi'],
+ ["خروج الأدمن","يُمسح كاش الدور.",'md'],
+]},
+{s:"لوحة الأدمن — الإحصائيات",role:"admin",items:[
+ ["تحميل اللوحة","كل البطاقات والأرقام تظهر.",'hi'],
+ ["رقم الربح","يساوي ربح التقارير لنفس البيانات.",'hi'],
+ ["شارة الطلبات المعلقة","العدد صحيح ويتحدث live.",'md'],
+ ["الضغط على البحث الشامل","ينفتح_dialog ال بحث.",'lo'],
+]},
+{s:"الأدمن — المحلات والاشتراكات والطلبات",role:"admin",items:[
+ ["قائمة المحلات","تظهر بصفحات وتحميل المزيد.",'md'],
+ ["تفاصيل محل","المنتجات/المبيعات/المصروفات تُعد صحيحة.",'md'],
+ ["اعتماد طلب","يُفعّل الاشتراك بالمدة الصحيحة ولا يمكن تكراره.",'hi'],
+ ["رفض طلب","لا يفقد صاحب المحل مدته الحية.",'hi'],
+ ["اعتماد طلب قديم بعد طلب جديد","يُرفض ولا ي overwritten الحالة الأحدث.",'hi'],
+ ["إيقاف/تشغيل محل","الmirror يتحدث مع المستند الأساسي ذرياً.",'hi'],
+ ["البحث الشامل","نتائج من المحلات والمنتجات والطلبات (أول 10 آلاف مستند).",'md'],
+]},
+{s:"الأدمن — الإعدادات والسجلات",role:"admin",items:[
+ ["تعديل أسعار الباقات","يُحفظ وينعكس فوراً في تطبيق العملاء.",'hi'],
+ ["إدخال قيمة سالبة","تُرفض.",'md'],
+ ["سجل النشاطات","يظهر بالأحداث.",'lo'],
+ ["الملاحظات (Feedback)","تظهر ويمكن تعليمها كمُعالجة.",'lo'],
+ ["شاشة التشخيص","السجلات لا تحتوي كلمات مرور أو مفاتيح Cloudinary.",'hi'],
+]},
+/* ============ 13. الإشعارات ============ */
+{s:"الإشعارات والتذكيرات",role:"all",items:[
+ ["إذن الإشعارات","يُطلب عند الحاجة.",'md'],
+ ["إشعار البيع","يحتوي اسم المنتج والكمية والربح الصحيح.",'hi'],
+ ["إشعار المرتجع","يحتوي السبب والمبلغ.",'lo'],
+ ["شارة غير المقروء","تُصفّر بعد فتح الشاشة.",'lo'],
+ ["إضافة تذكير","يُحفظ ويجدول.",'md'],
+ ["حظر الاشتراك للتذكيرات","الحساب المنتهي لا يعدل التذكيرات.",'hi'],
+ ["إغلاق الإنترنت أثناء FCM setup","لا unhandled error ولا انهيار.",'md'],
+]},
+/* ============ 14. البروفايل والإعدادات ============ */
+{s:"البروفايل والإعدادات",role:"owner",items:[
+ ["تعديل البروفايل","بيانات المستخدم والمحل تتحدث معاً (ذرّي).",'hi'],
+ ["فشل تحديث المحل","لا يحدث تحديث نصف مكتمل.",'hi'],
+ ["تغيير كلمة المرور","تعمل وتظهر رسالة نجاح.",'md'],
+ ["الوضع الليلي","يتغير فوراً ويُحفظ.",'lo'],
+ ["اللغة (عربي/إنجليزي)","يتغيّر الاتجاه RTL/LTR بشكل صحيح.",'md'],
+ ["طلب حذف الحساب","يُسجل الطلب ولا يُحذف محلياً.",'hi'],
+ ["تسجيل الخروج","كاش الدور والاشتراك يُمسح.",'hi'],
+]},
+{s:"شاشة «المزيد»",role:"owner",items:[
+ ["كل الروابط تفتح الشاشة الصحيحة","لا روابط ميتة.",'lo'],
+]},
+/* ============ 15. سيناريوهات الفشل العامة ============ */
+{s:"سيناريوهات الفشل والشبكة (كل الشاشات)",role:"all",items:[
+ ["الطيران على الإنترنت قبل أي حفظ","رسالة عربية واضحة، صفر نجاح كاذب.",'hi'],
+ ["قطع الإنترنت أثناء الحفظ","لا spinner معلّق، ولا تكرار عند الرجوع.",'hi'],
+ ["استعادة الإنترنت","رسالة «عاد الاتصال»، والبيانات تُحدّث.",'lo'],
+ ["رفض صلاحية Firestore","رسالة «الصلاحية مرفوضة» بلا كود تقني.",'hi'],
+ ["انتهاء الجلسة","رسالة «انتهت جلسة الدخول» ويُطلب تسجيل الدخول.",'hi'],
+ ["خادم غير متوفر (unavailable)","رسالة «لا يوجد اتصال»، لا `[cloud_firestore/...]`.",'hi'],
+ ["مهلة الاستجابة (deadline)","رسالة «انتهت مهلة الاتصال».",'md'],
+ ["فشل رفع صورة","رسالة عربية، لا stack trace ولا CLOUDINARY credentials.",'hi'],
+ ["إعادة تشغيل التطبيق بعد عملية منقطعة","لا فاتورة/مرتجع/دفعة مكررة عند الفتح.",'hi'],
+ ["تغيير الحساب بدون إعادة تشغيل","لا تتسرب بيانات الحساب السابق ولا دوره.",'hi'],
+]},
+];
+
+/* =====Roles / filtering / persistence =====*/
+const KEY='hesba_manual_manifest_v1';
+const state=JSON.parse(localStorage.getItem(KEY)||'{}');
+let role='all';
+const roles=[['all','الكل'],['owner','مالك'],['staff','موظف'],['admin','أدمن']];
+const rolesEl=document.getElementById('roles');
+roles.forEach(([id,label])=>{
+  const b=document.createElement('button');b.className='chip'+(id===role?' on':'');
+  b.textContent=label;b.onclick=()=>{role=id;[...rolesEl.children].forEach(c=>c.classList.remove('on'));b.classList.add('on');render();};
+  rolesEl.appendChild(b);
+});
+const uid=(si,ii)=>si+'-'+ii;
+function get(si,ii){return state[uid(si,ii)]||{done:false,fail:false,note:''};}
+function set(si,ii,v){state[uid(si,ii)]=v;localStorage.setItem(KEY,JSON.stringify(state));render();}
+function flat(){let n=0;const out=[];D.forEach((s,si)=>s.items.forEach((it,ii)=>{out.push({si,ii,it});n++;}));return {n,out};}
+
+function render(){
+  const q=document.getElementById('search').value.trim().toLowerCase();
+  const f=document.getElementById('filter').value;
+  const box=document.getElementById('sections');box.innerHTML='';let shown=0,total=0,done=0,bad=0;
+  D.forEach((s,si)=>{
+    if(s.role!=='all'&&role!=='all'&&s.role!==role)return;
+    const rows=[];
+    s.items.forEach((it,ii)=>{
+      total++;const st=get(si,ii);if(st.done)done++;if(st.fail)bad++;
+      const hay=(it[0]+' '+it[1]).toLowerCase();
+      if(q&&!hay.includes(q))return;
+      if(f==='undone'&&st.done)return;
+      if(f==='done'&&!st.done)return;
+      if(f==='failed'&&!st.fail)return;
+      shown++;
+      const p=it[2]||'lo',pl=p==='hi'?'حرِج':p==='md'?'مهم':'عادي';
+      const div=document.createElement('div');
+      div.className='item'+(st.done?' done':'')+(st.fail?' isfail':'');
+      div.innerHTML=`
+        <div class="tick ${st.done?'done':''}" data-a="tick">${st.done?'✓':''}</div>
+        <div class="ibody">
+          <div class="it">${it[0]}</div>
+          <div class="ie">${it[1]}</div>
+          <div class="meta">
+            <span class="tag ${p}">${pl}</span>
+            <button class="fail ${st.fail?'on':''}" data-a="fail">${st.fail?'❌ فشل':'تحديد كفشل'}</button>
+            <button class="note-btn" data-a="note">${st.note?'✎ تعديل ملاحظة':'＋ ملاحظة'}</button>
+          </div>
+          <input class="note ${st.note?'show':''}" data-a="notein" value="${(st.note||'').replace(/"/g,'&quot;')}" placeholder="اكتب أي ملاحظة من الاختبار…">
+        </div>`;
+      div.querySelector('[data-a=tick]').onclick=()=>{
+        const s2=get(si,ii);s2.done=!s2.done;if(s2.done)s2.fail=false;set(si,ii,s2);};
+      div.querySelector('[data-a=fail]').onclick=()=>{
+        const s2=get(si,ii);s2.fail=!s2.fail;if(s2.fail)s2.done=false;set(si,ii,s2);};
+      div.querySelector('[data-a=note]').onclick=()=>{
+        const inp=div.querySelector('[data-a=notein]');inp.classList.toggle('show');inp.focus();};
+      div.querySelector('[data-a=notein]').onchange=(e)=>{
+        const s2=get(si,ii);s2.note=e.target.value;set(si,ii,s2);};
+      rows.push(div);
+    });
+    if(!rows.length)return;
+    const sec=document.createElement('section');
+    const secDone=s.items.filter((_,ii)=>get(si,ii).done).length;
+    sec.innerHTML=`<div class="shead">
+      <span class="num">${s.role==='owner'?'م':s.role==='staff'?'و':s.role==='admin'?'أ':'★'}</span>
+      <h2>${s.s}</h2><span class="cnt">${secDone}/${s.items.length}</span><span class="arrow▼">▾</span></div>
+      <div class="sbody"></div>`;
+    const body=sec.querySelector('.sbody');rows.forEach(r=>body.appendChild(r));
+    sec.querySelector('.shead').onclick=()=>sec.classList.toggle('closed');
+    box.appendChild(sec);
+  });
+  if(!shown)box.innerHTML='<div class="empty">لا توجد نتائج مطابقة للفلتر.</div>';
+  document.getElementById('sok').textContent=done;
+  document.getElementById('sbad').textContent=bad;
+  document.getElementById('sleft').textContent=total-done-bad;
+  document.getElementById('stot').textContent=total;
+  const pct=total?Math.round(done/total*100):0;
+  document.getElementById('pct').textContent=pct+'%';
+  document.getElementById('barfill').style.width=pct+'%';
+}
+document.getElementById('search').oninput=render;
+document.getElementById('filter').onchange=render;
+document.getElementById('reset').onclick=()=>{if(confirm('مسح كل علامات الاختبار على هذا الجهاز؟')){localStorage.removeItem(KEY);for(const k in state)delete state[k];render();}};
+document.getElementById('expand').onclick=()=>{
+  const secs=[...document.querySelectorAll('section')];const anyClosed=secs.some(s=>s.classList.contains('closed'));
+  secs.forEach(s=>s.classList.toggle('closed',!anyClosed));
+  document.getElementById('expand').textContent=anyClosed?'طي الكل':'فتح الكل';
+};
+render();
+</script>
+</body>
+</html>
