@@ -370,7 +370,20 @@ class _RequestDetailsDialogState extends State<RequestDetailsDialog> {
                           if (r.isPending) ...[
                             Expanded(
                               child: ElevatedButton(
-                                onPressed: loading ? null : () => context.read<RequestReviewCubit>().approve(r),
+                                onPressed: loading
+                                    ? null
+                                    : () async {
+                                        final cubit = context.read<RequestReviewCubit>();
+                                        final ok = await showAdminConfirm(
+                                          context,
+                                          title: 'موافقة على الطلب',
+                                          message:
+                                              'سيتم تفعيل خطة «${r.plan.id}» (${r.plan.days} يوم) لهذا المحل، وتُضاف المدة لأي فترة سارية. متأكد؟',
+                                          confirmLabel: 'موافقة',
+                                        );
+                                        if (!ok) return;
+                                        cubit.approve(r);
+                                      },
                                 child: loading
                                     ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                                     : const Text('موافقة'),
@@ -380,8 +393,21 @@ class _RequestDetailsDialogState extends State<RequestDetailsDialog> {
                             Expanded(
                               child: OutlinedButton(
                                 style: OutlinedButton.styleFrom(foregroundColor: AdminColors.error),
-                                onPressed:
-                                    loading ? null : () => context.read<RequestReviewCubit>().reject(r, _reason.text.trim()),
+                                onPressed: loading
+                                    ? null
+                                    : () async {
+                                        final cubit = context.read<RequestReviewCubit>();
+                                        final ok = await showAdminConfirm(
+                                          context,
+                                          title: 'رفض الطلب',
+                                          message:
+                                              'سيتم رفض الطلب. أي فترة اشتراك سارية لدى المحل تظل كما هي ولن يفقد صلاحية التعديل إلا بعد انتهائها. متأكد؟',
+                                          confirmLabel: 'رفض',
+                                          danger: true,
+                                        );
+                                        if (!ok) return;
+                                        cubit.reject(r, _reason.text.trim());
+                                      },
                                 child: const Text('رفض'),
                               ),
                             ),

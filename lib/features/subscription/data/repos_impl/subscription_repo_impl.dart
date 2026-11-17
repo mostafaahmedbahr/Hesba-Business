@@ -206,10 +206,7 @@ class SubscriptionRepoImpl implements SubscriptionRepo {
     final now = DateTime.now();
     final next = request.isApproved
         ? _activationFrom(subscription, request.plan, now)
-        : subscription.copyWith(
-            status: SubscriptionStatus.rejected,
-            updatedAt: now,
-          );
+        : _restorationFrom(subscription, now);
 
     await _subscriptionRef(uid).set(next.toJson(), SetOptions(merge: true));
     await _mirrorSubscription(uid, next);
@@ -217,6 +214,20 @@ class SubscriptionRepoImpl implements SubscriptionRepo {
     _cachedAt = now;
     logSuccess('[Subscription] request $requestId -> ${request.status}');
     return next;
+  }
+
+  /// تعافي بعد رفض الطلب: الفترة الحية (تجريبية أو مدفوعة) تظل كما هي —
+  /// الزبون لا يفقد ما دفعه لمجرد أن طلب التجديد اترفض. فقط لو الفترة
+  /// خلصت فعلاً يتحول إلى `rejected` (قراءة فقط مع رسالة الرفض).
+  SubscriptionModel _restorationFrom(SubscriptionModel s, DateTime now) {
+    final end = s.endDate;
+    final hasLivePeriod = end != null && end.isAfter(now);
+    return s.copyWith(
+      status: hasLivePeriod
+          ? (s.isTrial ? SubscriptionStatus.trial : SubscriptionStatus.active)
+          : SubscriptionStatus.rejected,
+      updatedAt: now,
+    );
   }
 
   /// Activates a purchased plan.

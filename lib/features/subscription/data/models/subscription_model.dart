@@ -85,26 +85,32 @@ class SubscriptionModel extends Equatable {
     );
   }
 
-  /// The status as it really is right now: a live trial or paid period past its
-  /// end date reads as `expired`, everything else is whatever was stored.
+  /// الحالة الفعلية الآن.
+  ///
+  /// أي فترة تجريبية أو مدفوعة سارية (endDate في المستقبل) تتغلب على أي
+  /// حالة مخزّنة — طلب تجديد معلّق أو مرفوض لا يجوز أن يقفل محلًا ما زالت
+  /// مدته قائمة. بدونه، `pending`/`rejected` تُعاد كما هي حتى تميّز الواجهة
+  /// بين "قيد المراجعة" و"مرفوض"، وأي شيء آخر يُقرأ كـ `expired`.
   SubscriptionStatus get effectiveStatus {
+    final end = endDate;
+    if (end != null && end.isAfter(DateTime.now())) {
+      return isTrial ? SubscriptionStatus.trial : SubscriptionStatus.active;
+    }
     final stored = status;
     if (stored == SubscriptionStatus.pending ||
         stored == SubscriptionStatus.rejected) {
       return stored;
     }
-    final end = endDate;
-    if (end == null || !end.isAfter(DateTime.now())) {
-      return SubscriptionStatus.expired;
-    }
-    return stored;
+    return SubscriptionStatus.expired;
   }
 
   /// The single check the whole app asks before any Add / Edit / Delete.
   ///
-  /// Only a trial or a paid period that has not ended may change data.
-  /// `expired`, `pending` and `rejected` are read-only: the app still opens,
-  /// the data stays visible, but the write must be redirected to the
+  /// Only a trial or a paid period that has not ended may change data —
+  /// including while a renewal request is pending or was rejected: a live
+  /// period is never revocable by the review flow. Without a live period,
+  /// `expired`/`pending`/`rejected` are read-only; the app still opens and
+  /// data stays visible, but the write must be redirected to the
   /// subscription screen. A suspended shop is read-only regardless.
   bool get canModifyData {
     if (suspended) return false;

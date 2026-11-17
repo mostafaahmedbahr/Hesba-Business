@@ -352,9 +352,11 @@ service cloud.firestore {
         (isStaffUser() && myUserDoc().get('ownerId', '') == userId)
       );
 
-      // The only thing a client may create is its own 7 day trial, once,
-      // starting about now — never pre-suspended.
-      allow create: if signedIn() && isOwnerUser()
+      // The only thing a regular client may create is its own 7 day trial,
+      // once, starting about now — never pre-suspended. Admins may also
+      // create the doc (approve/reject/suspend via set-merge on an account
+      // whose subscription doc is missing).
+      allow create: if isAdmin() || (signedIn() && isOwnerUser()
         && myUid() == userId
         && request.resource.data.status == 'trial'
         && request.resource.data.get('suspended', false) == false
@@ -362,7 +364,7 @@ service cloud.firestore {
         && request.resource.data.trialStartDate >= request.time - duration.value(1, 'd')
         && request.resource.data.trialStartDate <= request.time + duration.value(1, 'd')
         && request.resource.data.trialEndDate <=
-           request.resource.data.trialStartDate + duration.value(7, 'd');
+           request.resource.data.trialStartDate + duration.value(7, 'd'));
 
       // Owner may move to expired / pending / rejected freely. Reaching
       // `active` requires the admin-approved request it points at.

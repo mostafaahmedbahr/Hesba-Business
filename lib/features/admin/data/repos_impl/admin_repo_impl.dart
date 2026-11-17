@@ -445,6 +445,17 @@ class AdminRepoImpl implements AdminRepo {
     final requestRef = firestore.collection(_requests).doc(request.requestId);
 
     await firestore.runTransaction((tx) async {
+      final reqSnap = await tx.get(requestRef);
+      final reqData = reqSnap.data();
+      if (!reqSnap.exists || reqData == null) {
+        throw StateError('طلب الاشتراك غير موجود');
+      }
+      // Idempotency guard: re-approving an already-decided request must not
+      // extend the plan a second time.
+      if (reqData['status'] != SubscriptionRequestModel.statusPending) {
+        throw StateError(
+            'هذا الطلب ليس قيد المراجعة (الحالة: ${reqData['status']})');
+      }
       final subSnap =
           await tx.get(userRef.collection('subscription').doc('current'));
       final data = subSnap.data() ?? <String, dynamic>{};
@@ -465,6 +476,9 @@ class AdminRepoImpl implements AdminRepo {
         trialStartDate: stored.trialStartDate,
         trialEndDate: stored.trialEndDate,
         lastRequestId: request.requestId,
+        // Keep the admin kill-switch as it was — approving a renewal must
+        // not silently lift a suspended shop.
+        suspended: stored.suspended,
         updatedAt: now,
       );
 
@@ -482,6 +496,7 @@ class AdminRepoImpl implements AdminRepo {
           'isTrial': updated.isTrial,
           'startDate': updated.startDate == null ? null : Timestamp.fromDate(updated.startDate!),
           'endDate': updated.endDate == null ? null : Timestamp.fromDate(updated.endDate!),
+          'lastRequestId': updated.lastRequestId,
           'updatedAt': Timestamp.fromDate(now),
         },
         SetOptions(merge: true),
@@ -491,42 +506,82 @@ class AdminRepoImpl implements AdminRepo {
         'reviewedAt': Timestamp.fromDate(now),
       });
     });
-    await appendActivity(
-      action: 'subscription_approved',
-      description: 'Admin approved ${request.plan.id} for ${request.shopName}',
-      extra: {'userId': request.userId, 'requestId': request.requestId},
-    );
+    try {
+      await appendActivity(
+        action: 'subscription_approved',
+        description: 'Admin approved ${request.plan.id} for ${request.shopName}',
+        extra: {'userId': request.userId, 'requestId': request.requestId},
+      );
+    } catch (_) {
+      // The approval itself committed; the activity log is best effort.
+    }
   }
 
   @override
   Future<void> rejectRequest(SubscriptionRequestModel request, String reason) async {
     final now = DateTime.now();
-    await firestore.collection(_requests).doc(request.requestId).update({
-      'status': SubscriptionRequestModel.statusRejected,
-      'reviewedAt': Timestamp.fromDate(now),
-      'adminNote': reason,
-    });
     final userRef = firestore.collection(_users).doc(request.userId);
-    final subSnap = await userRef.collection('subscription').doc('current').get();
-    final sub = SubscriptionModel.fromJson(subSnap.data() ?? const {});
-    await userRef.collection('subscription').doc('current').set(
-          sub
-              .copyWith(status: SubscriptionStatus.rejected, updatedAt: now)
-              .toJson(),
-          SetOptions(merge: true),
-        );
-    await firestore.collection(_subscriptions).doc(request.userId).set({
-      'userId': request.userId,
-      'status': 'rejected',
-      'plan': request.plan.id,
-      'isTrial': false,
-      'updatedAt': Timestamp.fromDate(now),
-    }, SetOptions(merge: true));
-    await appendActivity(
-      action: 'subscription_rejected',
-      description: 'Admin rejected a request for ${request.shopName}${reason.isEmpty ? '' : ': $reason'}',
-      extra: {'userId': request.userId, 'requestId': request.requestId},
-    );
+    final subRef = userRef.collection('subscription').doc('current');
+    final requestRef = firestore.collection(_requests).doc(request.requestId);
+
+    await firestore.runTransaction((tx) async {
+      final reqSnap = await tx.get(requestRef);
+      final reqData = reqSnap.data();
+      if (!reqSnap.exists || reqData == null) {
+        throw StateError('طلب الاشتراك غير موجود');
+      }
+      // Idempotency guard: a decided request cannot be rejected again.
+      if (reqData['status'] != SubscriptionRequestModel.statusPending) {
+        throw StateError(
+            'هذا الطلب ليس قيد المراجعة (الحالة: ${reqData['status']})');
+      }
+      final subSnap = await tx.get(subRef);
+      final stored = SubscriptionModel.fromJson(subSnap.data() ?? const {});
+
+      // A live period (trial or paid) ALWAYS survives a rejection: the shop
+      // keeps what it already paid for. Only an ended period becomes
+      // read-only `rejected`.
+      final end = stored.endDate;
+      final hasLivePeriod = end != null && end.isAfter(now);
+      final restored = stored.copyWith(
+        status: hasLivePeriod
+            ? (stored.isTrial ? SubscriptionStatus.trial : SubscriptionStatus.active)
+            : SubscriptionStatus.rejected,
+        updatedAt: now,
+      );
+
+      tx.update(requestRef, {
+        'status': SubscriptionRequestModel.statusRejected,
+        'reviewedAt': Timestamp.fromDate(now),
+        'adminNote': reason,
+      });
+      tx.set(subRef, restored.toJson(), SetOptions(merge: true));
+      // Mirror: restored state — never the *requested plan*; the mirror must
+      // not diverge from the users-doc.
+      tx.set(
+        firestore.collection(_subscriptions).doc(request.userId),
+        {
+          'userId': request.userId,
+          'status': restored.status.id,
+          'plan': restored.plan?.id,
+          'isTrial': restored.isTrial,
+          'startDate': restored.startDate == null ? null : Timestamp.fromDate(restored.startDate!),
+          'endDate': restored.endDate == null ? null : Timestamp.fromDate(restored.endDate!),
+          'lastRequestId': request.requestId,
+          'updatedAt': Timestamp.fromDate(now),
+        },
+        SetOptions(merge: true),
+      );
+    });
+    try {
+      await appendActivity(
+        action: 'subscription_rejected',
+        description: 'Admin rejected a request for ${request.shopName}${reason.isEmpty ? '' : ': $reason'}',
+        extra: {'userId': request.userId, 'requestId': request.requestId},
+      );
+    } catch (_) {
+      // The rejection itself committed; the activity log is best effort.
+    }
   }
 
   @override
