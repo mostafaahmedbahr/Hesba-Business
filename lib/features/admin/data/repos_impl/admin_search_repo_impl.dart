@@ -24,8 +24,10 @@ class AdminSearchRepoImpl implements AdminSearchRepo {
   static const int _batchSize = 200;
 
   /// أقصى عدد مستندات نقرأها من كل collection في البحث الواحد.
-  /// (لو collection كبر عن الحد، الأقرب أول ما يظهر بالترتيب.)
-  static const int _maxScanPerCollection = 1000;
+  /// السقف مقصود كحاجز تكلفة فقط؛ الدفعات بتتوقف فور ما نلاقي 50
+  /// نتيجة، فالبحث العادي بيقرأ أقل بكتير. رُفع من 1000 إلى 10000 عشان
+  /// المستندات اللي بعد أول 1000 ما تضيعش في المجموعات الكبيرة.
+  static const int _maxScanPerCollection = 10000;
 
   /// أقصى عدد نتائج معروضة في القائمة.
   static const int _maxHits = 50;

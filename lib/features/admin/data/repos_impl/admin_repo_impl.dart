@@ -453,15 +453,25 @@ class AdminRepoImpl implements AdminRepo {
   Future<void> setShopSuspended(
       {required String userId, required bool suspended}) async {
     final now = Timestamp.now();
-    await firestore
-        .collection(_users)
-        .doc(userId)
-        .collection('subscription')
-        .doc('current')
-        .set({'suspended': suspended, 'updatedAt': now},
-            SetOptions(merge: true));
-    await firestore.collection(_subscriptions).doc(userId).set(
-        {'suspended': suspended, 'updatedAt': now}, SetOptions(merge: true));
+    // The authoritative flag and its dashboard mirror commit together.
+    await firestore.runTransaction((txn) {
+      txn.set(
+        firestore
+            .collection(_users)
+            .doc(userId)
+            .collection('subscription')
+            .doc('current'),
+        {'suspended': suspended, 'updatedAt': now},
+        SetOptions(merge: true),
+      );
+      txn.set(
+        firestore.collection(_subscriptions).doc(userId),
+        {'suspended': suspended, 'updatedAt': now},
+        SetOptions(merge: true),
+      );
+      return Future.value();
+    });
+    // Activity log stays best effort (as in approve/reject).
     await appendActivity(
       action: suspended ? 'subscription_suspended' : 'subscription_unsuspended',
       description: suspended

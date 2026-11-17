@@ -101,8 +101,13 @@ class SubscriptionRepoImpl implements SubscriptionRepo {
   }
 
   @override
-  Future<String?> uploadPaymentReceipt({required ImageSource source}) {
-    return _cloudinary.uploadPaymentReceipt(source: source);
+  Future<XFile?> pickPaymentReceipt({required ImageSource source}) {
+    return _cloudinary.pickShopImage(source: source);
+  }
+
+  @override
+  Future<String?> uploadPaymentReceipt({ImageSource? source, XFile? file}) {
+    return _cloudinary.uploadPaymentReceipt(source: source, file: file);
   }
 
   @override

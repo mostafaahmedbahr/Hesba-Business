@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/services/app_events.dart';
 import '../../../../core/utils/error_message.dart';
+import '../../../../core/utils/request_id.dart';
 import '../../data/models/expense_model.dart';
 import '../../data/repos/expenses_repo.dart';
 import 'expenses_state.dart';
@@ -19,6 +20,7 @@ class ExpensesCubit extends Cubit<ExpensesState> {
   /// subscription also sets `loading`, and a submit made while the list is
   /// loading must not be silently dropped.
   bool _saving = false;
+  String? _expenseRequestId;
   int _loadGeneration = 0;
 
   ExpensesCubit({required this.expensesRepo}) : super(const ExpensesState()) {
@@ -119,9 +121,11 @@ class ExpensesCubit extends Cubit<ExpensesState> {
     }
 
     _saving = true;
+    _expenseRequestId ??= newRequestId();
     emit(state.copyWith(status: ExpensesStatus.loading, errorMessage: null));
     try {
       final expense = await expensesRepo.addExpense(
+        requestId: _expenseRequestId,
         ownerId: ownerId,
         shopId: shopId,
         shopName: shopName,
@@ -132,13 +136,14 @@ class ExpensesCubit extends Cubit<ExpensesState> {
         date: date,
         recurrence: recurrence,
         dueTime: dueTime,
-      );
+      ).timeout(const Duration(seconds: 20));
       AppEvents.instance.expenseCreated({
         'title': title,
         'amount': amount,
         'category': category,
       });
       AppEvents.instance.productChanged();
+      _expenseRequestId = null;
       if (!isClosed) {
         emit(state.copyWith(status: ExpensesStatus.success, addedExpense: expense, errorMessage: null));
       }

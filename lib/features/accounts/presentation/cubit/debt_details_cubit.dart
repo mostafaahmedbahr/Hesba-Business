@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/extensions/log_util.dart';
 import '../../../../core/utils/error_message.dart';
+import '../../../../core/utils/request_id.dart';
 import '../../data/models/debt_model.dart';
 import '../../data/models/payment_model.dart';
 import '../../data/repos/accounts_repo.dart';
@@ -18,6 +19,7 @@ class DebtDetailsCubit extends Cubit<DebtDetailsState> {
 
   StreamSubscription<DebtModel?>? _debtSub;
   StreamSubscription<List<PaymentModel>>? _paymentsSub;
+  String? _paymentRequestId;
 
   DebtDetailsCubit({required this._repo, required this.debtId})
       : super(const DebtDetailsState());
@@ -78,9 +80,16 @@ class DebtDetailsCubit extends Cubit<DebtDetailsState> {
   /// تسجيل دفعة (جزئي أو كامل) — يرجع true عند النجاح.
   Future<bool> addPayment({required double amount, String note = ''}) async {
     if (state.saving) return false;
+    _paymentRequestId ??= newRequestId();
     emit(state.copyWith(saving: true, clearError: true));
     try {
-      await _repo.addPayment(debtId: debtId, amount: amount, note: note);
+      await _repo.addPayment(
+        debtId: debtId,
+        amount: amount,
+        note: note,
+        requestId: _paymentRequestId,
+      ).timeout(const Duration(seconds: 20));
+      _paymentRequestId = null;
       if (!isClosed) emit(state.copyWith(saving: false));
       return true;
     } catch (e, logSt) {

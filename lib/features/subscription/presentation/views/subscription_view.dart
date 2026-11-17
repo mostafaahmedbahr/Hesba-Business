@@ -184,6 +184,7 @@ class _Content extends StatelessWidget {
           SizedBox(height: 16.h),
           SubscriptionReceiptUpload(
             receiptUrl: state.receiptUrl,
+            receiptPath: state.receiptPath,
             uploading: state.isUploadingReceipt,
             onPick: (source) => cubit.pickReceipt(source),
           ),

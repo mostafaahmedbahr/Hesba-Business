@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/services/app_events.dart';
 import '../../../../core/utils/error_message.dart';
+import '../../../../core/utils/request_id.dart';
 import '../../../reports/data/reports_calculator.dart';
 import '../../data/models/sale_model.dart';
 import '../../data/repos/sales_repo.dart';
@@ -11,11 +12,17 @@ import 'package:hesba/core/services/app_logger.dart';
 class SalesCubit extends Cubit<SalesState> {
   final SalesRepo salesRepo;
 
+  /// Stable id for the current attempt — reused on retry after a lost response.
+  String? _requestId;
+
   SalesCubit({
     required this.salesRepo,
   }) : super(const SalesState());
 
-  void reset() => emit(const SalesState());
+  void reset() {
+    _requestId = null;
+    emit(const SalesState());
+  }
 
   Future<void> addSale({
     required String ownerId,
@@ -74,6 +81,7 @@ class SalesCubit extends Cubit<SalesState> {
       return;
     }
 
+    _requestId ??= newRequestId();
     emit(
       state.copyWith(
         status: SalesStatus.loading,
@@ -91,7 +99,8 @@ class SalesCubit extends Cubit<SalesState> {
         note: note,
         customerName: customerName,
         customerPhone: customerPhone,
-      );
+        requestId: _requestId,
+      ).timeout(const Duration(seconds: 20));
 
       // Notify whole app (Home, Dashboard, etc.) to refresh.
       // التفاصيل بتروح للسجل والإشعار (اسم المنتج، السعر، المكسب).
@@ -113,6 +122,7 @@ class SalesCubit extends Cubit<SalesState> {
       });
       AppEvents.instance.productChanged();
 
+      _requestId = null;
       if (!isClosed) {
         emit(
           SalesState(

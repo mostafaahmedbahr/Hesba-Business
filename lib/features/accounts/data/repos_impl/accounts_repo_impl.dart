@@ -281,6 +281,7 @@ class AccountsRepoImpl implements AccountsRepo {
     required String debtId,
     required double amount,
     String note = '',
+    String? requestId,
   }) async {
     if (debtId.isEmpty) throw Exception('الحساب غير موجود');
     if (!amount.isFinite || amount <= 0) {
@@ -291,6 +292,13 @@ class AccountsRepoImpl implements AccountsRepo {
     final debtRef = _debts.doc(debtId);
 
     await _firestore.runTransaction((txn) async {
+      // Same payment id => skip both the ledger row AND the paidAmount increment.
+      if (requestId != null) {
+        final existing = await txn.get(
+          debtRef.collection(AppConstants.debtPaymentsSubCollection).doc(requestId),
+        );
+        if (existing.exists) return;
+      }
       final snap = await txn.get(debtRef);
       final data = snap.data();
       if (!snap.exists || data == null) {
@@ -310,9 +318,9 @@ class AccountsRepoImpl implements AccountsRepo {
       if (amount > remaining + 0.0001) {
         throw Exception('الدفعة أكبر من المتبقي (${remaining.toStringAsFixed(2)})');
       }
-      final paymentRef = debtRef
-          .collection(AppConstants.debtPaymentsSubCollection)
-          .doc();
+      final paymentRef = requestId == null
+          ? debtRef.collection(AppConstants.debtPaymentsSubCollection).doc()
+          : debtRef.collection(AppConstants.debtPaymentsSubCollection).doc(requestId);
       txn.set(paymentRef, {
         'id': paymentRef.id,
         'ownerId': uid,

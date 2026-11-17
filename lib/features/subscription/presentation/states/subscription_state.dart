@@ -21,7 +21,11 @@ class SubscriptionState extends Equatable {
 
   final SubscriptionPlan? selectedPlan;
   final SubscriptionPaymentMethod? selectedPaymentMethod;
+  /// Final Cloudinary URL — only set AFTER the request is confirmed.
   final String? receiptUrl;
+
+  /// Local path of the picked receipt, shown as a preview before submission.
+  final String? receiptPath;
 
   final SubscriptionRequestPhase phase;
 
@@ -34,6 +38,7 @@ class SubscriptionState extends Equatable {
     this.selectedPlan,
     this.selectedPaymentMethod,
     this.receiptUrl,
+    this.receiptPath,
     this.phase = SubscriptionRequestPhase.idle,
     this.messageKey,
   });
@@ -51,7 +56,7 @@ class SubscriptionState extends Equatable {
   bool get canSubmit =>
       selectedPlan != null &&
       selectedPaymentMethod != null &&
-      receiptUrl != null &&
+      (receiptPath != null || receiptUrl != null) &&
       !isUploadingReceipt &&
       !isSubmitting &&
       !isSubmitted;
@@ -64,6 +69,7 @@ class SubscriptionState extends Equatable {
     SubscriptionPlan? selectedPlan,
     SubscriptionPaymentMethod? selectedPaymentMethod,
     String? receiptUrl,
+    String? receiptPath,
     SubscriptionRequestPhase? phase,
     Object? messageKey = _sentinel,
   }) {
@@ -74,6 +80,7 @@ class SubscriptionState extends Equatable {
       selectedPaymentMethod:
           selectedPaymentMethod ?? this.selectedPaymentMethod,
       receiptUrl: receiptUrl ?? this.receiptUrl,
+      receiptPath: receiptPath ?? this.receiptPath,
       phase: phase ?? this.phase,
       messageKey: identical(messageKey, _sentinel)
           ? this.messageKey
@@ -88,6 +95,7 @@ class SubscriptionState extends Equatable {
         selectedPlan,
         selectedPaymentMethod,
         receiptUrl,
+        receiptPath,
         phase,
         messageKey,
       ];

@@ -30,9 +30,15 @@ abstract class SubscriptionRepo {
     required DateTime createdAt,
   });
 
-  /// Picks a receipt image, uploads it to Cloudinary and returns its secure
-  /// URL, or null when the user cancelled the picker.
-  Future<String?> uploadPaymentReceipt({required ImageSource source});
+  /// Picks a receipt image WITHOUT uploading it. The upload is deferred to
+  /// submit time so a failed/abandoned request never leaves an unattended
+  /// payment screenshot on Cloudinary.
+  Future<XFile?> pickPaymentReceipt({required ImageSource source});
+
+  /// Uploads an already-picked receipt and returns its secure URL.
+  /// [source] is kept for backwards compatibility; when [file] is provided
+  /// it takes precedence and no second picker is opened.
+  Future<String?> uploadPaymentReceipt({ImageSource? source, XFile? file});
 
   /// Creates a `pending` subscription request and flags the account as
   /// waiting for review.

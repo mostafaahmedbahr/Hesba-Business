@@ -61,8 +61,6 @@ class AccountRepoImpl implements AccountRepo {
       throw Exception('auth/user-not-logged-in');
     }
     final userRef = _firestore.collection('users').doc(uid);
-    final userSnap = await userRef.get();
-    final shopId = userSnap.data()?['shopId'] as String?;
 
     final locationFields = <String, dynamic>{
       'locationUrl': locationUrl.trim(),
@@ -71,24 +69,15 @@ class AccountRepoImpl implements AccountRepo {
       'locationAddress': locationAddress.trim(),
     };
 
-    // Owner fields -> users doc (also mirrors shop fields for the profile view).
-    await userRef.update({
-      'ownerName': ownerName.trim(),
-      'phone': phone.trim(),
-      'shopName': shopName.trim(),
-      'businessType': businessType.trim(),
-      'shopPhone': shopPhone.trim(),
-      'address': address.trim(),
-      'state': state.trim(),
-      'city': city.trim(),
-      'shopImageUrl': shopImageUrl.trim(),
-      'updatedAt': FieldValue.serverTimestamp(),
-      ...locationFields,
-    });
+    // Both documents in ONE transaction: a failure can no longer leave the
+    // user profile updated while the shop mirror keeps the old name.
+    await _firestore.runTransaction((txn) async {
+      final userSnap = await txn.get(userRef);
+      final shopId = userSnap.data()?['shopId'] as String?;
 
-    // Shop fields -> shops doc (single source for shop features).
-    if (shopId != null && shopId.isNotEmpty) {
-      await _firestore.collection('shops').doc(shopId).update({
+      txn.update(userRef, {
+        'ownerName': ownerName.trim(),
+        'phone': phone.trim(),
         'shopName': shopName.trim(),
         'businessType': businessType.trim(),
         'shopPhone': shopPhone.trim(),
@@ -99,7 +88,21 @@ class AccountRepoImpl implements AccountRepo {
         'updatedAt': FieldValue.serverTimestamp(),
         ...locationFields,
       });
-    }
+
+      if (shopId != null && shopId.isNotEmpty) {
+        txn.update(_firestore.collection('shops').doc(shopId), {
+          'shopName': shopName.trim(),
+          'businessType': businessType.trim(),
+          'shopPhone': shopPhone.trim(),
+          'address': address.trim(),
+          'state': state.trim(),
+          'city': city.trim(),
+          'shopImageUrl': shopImageUrl.trim(),
+          'updatedAt': FieldValue.serverTimestamp(),
+          ...locationFields,
+        });
+      }
+    });
   }
 
   @override

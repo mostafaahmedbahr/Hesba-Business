@@ -41,6 +41,7 @@ void main() {
         date: any(named: 'date'),
         recurrence: any(named: 'recurrence'),
         dueTime: any(named: 'dueTime'),
+        requestId: any(named: 'requestId'),
       ),
     ).thenAnswer((_) async => makeExpense());
   }
@@ -86,6 +87,7 @@ void main() {
         date: any(named: 'date'),
         recurrence: any(named: 'recurrence'),
         dueTime: any(named: 'dueTime'),
+        requestId: any(named: 'requestId'),
       ),
     ).thenThrow(Exception('write failed'));
     await submit();
@@ -123,6 +125,7 @@ void main() {
         date: any(named: 'date'),
         recurrence: any(named: 'recurrence'),
         dueTime: any(named: 'dueTime'),
+        requestId: any(named: 'requestId'),
       ),
     ).thenAnswer((_) => completer.future);
 
@@ -144,6 +147,7 @@ void main() {
         date: any(named: 'date'),
         recurrence: any(named: 'recurrence'),
         dueTime: any(named: 'dueTime'),
+        requestId: any(named: 'requestId'),
       ),
     ).called(1);
     expect(cubit.state.status, ExpensesStatus.success);
@@ -165,6 +169,7 @@ void main() {
         date: any(named: 'date'),
         recurrence: any(named: 'recurrence'),
         dueTime: any(named: 'dueTime'),
+        requestId: any(named: 'requestId'),
       ),
     ).thenAnswer((_) => (addCalls++ == 0 ? a : b).future);
     when(
@@ -215,6 +220,7 @@ void main() {
         date: any(named: 'date'),
         recurrence: any(named: 'recurrence'),
         dueTime: any(named: 'dueTime'),
+        requestId: any(named: 'requestId'),
       ),
     ).thenAnswer((_) {
       calls++;

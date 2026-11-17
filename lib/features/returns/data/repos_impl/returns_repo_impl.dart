@@ -40,12 +40,23 @@ class ReturnsRepoImpl implements ReturnsRepo {
     required List<ReturnItemModel> items,
     required String reason,
     required String note,
+    String? requestId,
   }) async {
     if (items.isEmpty) throw Exception('يجب إضافة منتج واحد على الأقل');
     if (originalSaleId == null || originalSaleId.isEmpty) {
       throw Exception('يجب اختيار فاتورة للمرتجع');
     }
     if (reason.trim().isEmpty) throw Exception('اختر سبب المرتجع');
+
+    // Idempotency: a retry after a lost response must not restore stock or
+    // settle the debt a second time. Return the original return document.
+    if (requestId != null) {
+      final existing =
+          await firestore.collection(AppConstants.returnsCollection).doc(requestId).get();
+      if (existing.exists && existing.data() != null) {
+        return ReturnModel.fromJson(existing.data()!);
+      }
+    }
 
     final resolvedShopId = await _resolveShopId(shopId);
     final resolvedOwnerId = await _resolveOwnerId(ownerId);
@@ -163,7 +174,9 @@ class ReturnsRepoImpl implements ReturnsRepo {
     final personName = (saleData['personName'] as String?)?.trim() ?? '';
     final personPhone = (saleData['personPhone'] as String?)?.trim() ?? '';
 
-    final ref = firestore.collection(AppConstants.returnsCollection).doc();
+    final ref = requestId == null
+        ? firestore.collection(AppConstants.returnsCollection).doc()
+        : firestore.collection(AppConstants.returnsCollection).doc(requestId);
 
     final ret = ReturnModel(
       returnId: ref.id,
@@ -198,7 +211,16 @@ class ReturnsRepoImpl implements ReturnsRepo {
         ? null
         : firestore.collection(AppConstants.debtsCollection).doc(linkedDebtId);
 
+    ReturnModel? alreadyWritten;
     await firestore.runTransaction((transaction) async {
+      // Guard against a concurrent retry with the same id.
+      if (requestId != null) {
+        final existing = await transaction.get(ref);
+        if (existing.exists && existing.data() != null) {
+          alreadyWritten = ReturnModel.fromJson(existing.data()!);
+          return;
+        }
+      }
       // كل القراءات أولًا (منتجات + الذمة لو موجودة) — ثم أي كتابة.
       final productReads = <String, Map<String, dynamic>>{};
       for (final item in items) {
@@ -267,7 +289,7 @@ class ReturnsRepoImpl implements ReturnsRepo {
       }
     });
 
-    return ret;
+    return alreadyWritten ?? ret;
   }
 
   @override
@@ -299,13 +321,23 @@ class ReturnsRepoImpl implements ReturnsRepo {
   }
 
   @override
-  Future<PagedResult<ReturnModel>> fetchAllReturns({required String shopId}) {
+  Future<PagedResult<ReturnModel>> fetchAllReturns({
+    required String shopId,
+    DateTime? from,
+  }) {
     return fetchAllPages<ReturnModel>(
       idOf: (ret) => ret.returnId,
       fetchPage: (cursor) async {
         Query<Map<String, dynamic>> query = firestore
             .collection(AppConstants.returnsCollection)
-            .where('shopId', isEqualTo: shopId)
+            .where('shopId', isEqualTo: shopId);
+        if (from != null) {
+          query = query.where(
+            'createdAt',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(from),
+          );
+        }
+        query = query
             .orderBy('createdAt', descending: true)
             .limit(kReportPageSize);
         if (cursor != null) {

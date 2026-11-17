@@ -49,6 +49,7 @@ void main() {
         note: any(named: 'note'),
         customerName: any(named: 'customerName'),
         customerPhone: any(named: 'customerPhone'),
+        requestId: any(named: 'requestId'),
       ),
     ).thenAnswer((_) async => makeSale());
   }
@@ -91,6 +92,7 @@ void main() {
         note: any(named: 'note'),
         customerName: any(named: 'customerName'),
         customerPhone: any(named: 'customerPhone'),
+        requestId: any(named: 'requestId'),
       ),
     ).thenThrow(Exception('boom'));
 
@@ -128,6 +130,7 @@ void main() {
         note: any(named: 'note'),
         customerName: any(named: 'customerName'),
         customerPhone: any(named: 'customerPhone'),
+        requestId: any(named: 'requestId'),
       ),
     ).thenAnswer((_) => completer.future);
 
@@ -147,6 +150,7 @@ void main() {
         note: any(named: 'note'),
         customerName: any(named: 'customerName'),
         customerPhone: any(named: 'customerPhone'),
+        requestId: any(named: 'requestId'),
       ),
     ).called(1);
     expect(cubit.state.status, SalesStatus.success);
@@ -166,6 +170,7 @@ void main() {
         note: any(named: 'note'),
         customerName: any(named: 'customerName'),
         customerPhone: any(named: 'customerPhone'),
+        requestId: any(named: 'requestId'),
       ),
     ).thenAnswer((_) => (call++ == 0 ? firstCompleter : secondCompleter).future);
 
@@ -190,6 +195,7 @@ void main() {
         note: any(named: 'note'),
         customerName: any(named: 'customerName'),
         customerPhone: any(named: 'customerPhone'),
+        requestId: any(named: 'requestId'),
       ),
     ).thenAnswer((_) {
       call++;
@@ -216,6 +222,7 @@ void main() {
         note: any(named: 'note'),
         customerName: any(named: 'customerName'),
         customerPhone: any(named: 'customerPhone'),
+        requestId: any(named: 'requestId'),
       ),
     ).thenAnswer((_) => completer.future);
 

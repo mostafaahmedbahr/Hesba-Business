@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/di/service_locator.dart';
 import '../../../core/services/user_role_service.dart';
 import '../../../core/extensions/log_util.dart';
+import '../../../core/utils/toast.dart';
 import '../../../core/router/app_routes.dart';
 import '../data/models/subscription_model.dart';
 import '../data/repos/subscription_repo.dart';
@@ -29,11 +30,38 @@ class SubscriptionGate {
       subscription = await _repo.getSubscription();
     } catch (error, logSt) {
       AppLogger.nonFatal('features/subscription/presentation/subscription_gate.dart', error, logSt, severity: LoggingSeverity.warning);
-      // The status could not be read. Let the action continue rather than
-      // freeze the app on a flaky connection; the security rules are the
-      // authoritative check server side.
       logWarning('[SubscriptionGate] status unavailable: $error');
-      return true;
+
+      // A cached decision (same session) is still better than blindly allowing.
+      final cached = _repo.cached;
+      if (cached != null && !cached.canModifyData) {
+        if (!context.mounted) return false;
+        final goPlans = await SubscriptionBlockedDialog.show(
+          context,
+          messageKey: cached.blockedMessageKey,
+        );
+        if (goPlans && context.mounted) {
+          await Navigator.pushNamed(context, AppRoutes.subscription);
+        }
+        return false;
+      }
+
+      // Permission-denied is an authoritative refusal — never fail open on it.
+      final lower = error.toString().toLowerCase();
+      if (lower.contains('permission-denied') ||
+          lower.contains('permission denied')) {
+        if (context.mounted) {
+          AppToast.error(
+            context,
+            'الصلاحية مرفوضة: تأكد من تفعيل حسابك وارتباطه بالمحل وسريان الاشتراك.',
+          );
+        }
+        return false;
+      }
+
+      // Pure network failure with no cached decision: Firestore rules remain
+      // the authoritative server-side boundary, so keep the workflow usable.
+      return cached?.canModifyData ?? true;
     }
 
     if (subscription.canModifyData) return true;

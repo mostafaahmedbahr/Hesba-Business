@@ -42,6 +42,7 @@ class ExpensesRepoImpl implements ExpensesRepo {
     required String shopId,
     required String shopName,
     required String title,
+    String? requestId,
     required String category,
     required double amount,
     required String note,
@@ -72,7 +73,18 @@ class ExpensesRepoImpl implements ExpensesRepo {
         ? DateTime(date.year, date.month, date.day, time!.hour, time.minute)
         : null;
 
-    final ref = firestore.collection(AppConstants.expensesCollection).doc();
+    if (requestId != null) {
+      final existing = await firestore
+          .collection(AppConstants.expensesCollection)
+          .doc(requestId)
+          .get();
+      if (existing.exists && existing.data() != null) {
+        return ExpenseModel.fromJson(existing.data()!);
+      }
+    }
+    final ref = requestId == null
+        ? firestore.collection(AppConstants.expensesCollection).doc()
+        : firestore.collection(AppConstants.expensesCollection).doc(requestId);
     final expense = ExpenseModel(
       expenseId: ref.id,
       shopName: shopName,
@@ -272,14 +284,23 @@ class ExpensesRepoImpl implements ExpensesRepo {
   }
 
   @override
-  Future<PagedResult<ExpenseModel>> fetchAllExpenses({required String shopId}) {
+  Future<PagedResult<ExpenseModel>> fetchAllExpenses({
+    required String shopId,
+    DateTime? from,
+  }) {
     return fetchAllPages<ExpenseModel>(
       idOf: (expense) => expense.expenseId,
       fetchPage: (cursor) async {
+        // Reports filter expenses on `date` (not createdAt), so bound and order
+        // by the same field — uses the existing (shopId, date DESC) index.
         Query<Map<String, dynamic>> query = firestore
             .collection(AppConstants.expensesCollection)
-            .where('shopId', isEqualTo: shopId)
-            .orderBy('createdAt', descending: true)
+            .where('shopId', isEqualTo: shopId);
+        if (from != null) {
+          query = query.where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(from));
+        }
+        query = query
+            .orderBy('date', descending: true)
             .limit(kReportPageSize);
         if (cursor != null) {
           query = query

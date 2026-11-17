@@ -84,6 +84,7 @@ class SalesRepoImpl implements SalesRepo {
     required String note,
     String? customerName,
     String? customerPhone,
+    String? requestId,
   }) async {
     if (items.isEmpty) {
       throw Exception('يجب إضافة منتج واحد على الأقل');
@@ -152,7 +153,11 @@ class SalesRepoImpl implements SalesRepo {
       throw Exception('لا يمكن تسجيل بيع آجل بإجمالي صفر');
     }
 
-    final saleRef = firestore.collection(AppConstants.salesCollection).doc();
+    // An idempotency key fixes the document id: a retry after a lost response
+    // reads back the original sale instead of creating a second one.
+    final saleRef = requestId == null
+        ? firestore.collection(AppConstants.salesCollection).doc()
+        : firestore.collection(AppConstants.salesCollection).doc(requestId);
 
     final sale = SaleModel(
       saleId: saleRef.id,
@@ -172,7 +177,15 @@ class SalesRepoImpl implements SalesRepo {
     );
 
     // Use transaction to ensure stock availability and decrement atomically
+    SaleModel? alreadyWritten;
     await firestore.runTransaction((transaction) async {
+      if (requestId != null) {
+        final existing = await transaction.get(saleRef);
+        if (existing.exists && existing.data() != null) {
+          alreadyWritten = SaleModel.fromJson(existing.data()!);
+          return; // identical retry — skip ALL writes, including stock
+        }
+      }
       // Check stock for items that have productId
       for (final item in items) {
         if (item.productId.isNotEmpty) {
@@ -245,7 +258,7 @@ class SalesRepoImpl implements SalesRepo {
       }
     });
 
-    return sale;
+    return alreadyWritten ?? sale;
   }
 
   @override
@@ -297,13 +310,23 @@ class SalesRepoImpl implements SalesRepo {
   }
 
   @override
-  Future<PagedResult<SaleModel>> fetchAllSales({required String shopId}) {
+  Future<PagedResult<SaleModel>> fetchAllSales({
+    required String shopId,
+    DateTime? from,
+  }) {
     return fetchAllPages<SaleModel>(
       idOf: (sale) => sale.saleId,
       fetchPage: (cursor) async {
         Query<Map<String, dynamic>> query = firestore
             .collection(AppConstants.salesCollection)
-            .where('shopId', isEqualTo: shopId)
+            .where('shopId', isEqualTo: shopId);
+        if (from != null) {
+          query = query.where(
+            'createdAt',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(from),
+          );
+        }
+        query = query
             .orderBy('createdAt', descending: true)
             .limit(kReportPageSize);
         if (cursor != null) {

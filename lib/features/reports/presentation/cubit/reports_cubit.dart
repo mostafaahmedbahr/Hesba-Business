@@ -74,6 +74,7 @@ class ReportsCubit extends Cubit<ReportsState> {
   /// يغير الفترة (فوري — الداتا في الذاكرة، الحساب فقط يعاد).
   void setPeriod(ReportPeriod period) {
     if (period == state.period) return;
+    final wasAll = state.period == ReportPeriod.all;
     emit(state.copyWith(
       period: period,
       metrics: ReportsCalculator.calculate(
@@ -84,7 +85,18 @@ class ReportsCubit extends Cubit<ReportsState> {
         end: period.endExclusive,
       ),
     ));
+    // Recent periods share one 30-day window fetched at bootstrap, so their
+    // switching stays instant. Only "all" needs a different (full) dataset.
+    if ((period == ReportPeriod.all) != wasAll) {
+      // ignore: unawaited_futures
+      _reload(mask: 7, showLoading: true);
+    }
   }
+
+  /// Recent periods (today/7/30 days) all fit inside one bounded window.
+  static DateTime? _fetchFrom(ReportPeriod period) => period == ReportPeriod.all
+      ? null
+      : DateTime.now().subtract(const Duration(days: 30));
 
   /// جلب المجموعات المطلوبة بـ cursor ثم حساب مؤشرات الفترة مرة واحدة.
   Future<void> _reload({required int mask, bool showLoading = false}) async {
@@ -103,9 +115,16 @@ class ReportsCubit extends Cubit<ReportsState> {
       final wantExpenses = (mask & 4) != 0;
 
       // الجلب بالتوازي (كل مجموعة مستقلة).
-      final salesFut = wantSales ? _salesRepo.fetchAllSales(shopId: shopId) : null;
-      final returnsFut = wantReturns ? _returnsRepo.fetchAllReturns(shopId: shopId) : null;
-      final expensesFut = wantExpenses ? _expensesRepo.fetchAllExpenses(shopId: shopId) : null;
+      final from = _fetchFrom(state.period);
+      final salesFut = wantSales
+          ? _salesRepo.fetchAllSales(shopId: shopId, from: from)
+          : null;
+      final returnsFut = wantReturns
+          ? _returnsRepo.fetchAllReturns(shopId: shopId, from: from)
+          : null;
+      final expensesFut = wantExpenses
+          ? _expensesRepo.fetchAllExpenses(shopId: shopId, from: from)
+          : null;
 
       final salesRes = await salesFut;
       final returnsRes = await returnsFut;

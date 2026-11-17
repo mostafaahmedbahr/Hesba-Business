@@ -51,6 +51,10 @@ abstract class AccountsRepo {
     required String debtId,
     required double amount,
     String note = '',
+
+    /// Optional idempotency key: the payment document id, so a retry never
+    /// records the same payment twice or increments paidAmount twice.
+    String? requestId,
   });
 
   /// ستريم مديونية واحدة (للتحديث الحيّ في شاشة كشف الحساب).

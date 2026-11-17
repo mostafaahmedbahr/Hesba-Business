@@ -11,6 +11,9 @@ abstract class ReturnsRepo {
     required List<ReturnItemModel> items,
     required String reason,
     required String note,
+
+    /// Optional idempotency key (see SalesRepo.addSale).
+    String? requestId,
   });
 
   Future<List<ReturnModel>> getReturns({required String shopId});
@@ -18,7 +21,10 @@ abstract class ReturnsRepo {
   Stream<List<ReturnModel>> watchReturns({required String shopId});
 
   /// كل مرتجعات المحل بترقيم cursor (بلا حد صامت) — لحسابات التقارير.
-  Future<PagedResult<ReturnModel>> fetchAllReturns({required String shopId});
+  Future<PagedResult<ReturnModel>> fetchAllReturns({
+    required String shopId,
+    DateTime? from,
+  });
 
   /// حدث خفيف (أثر على أحدث مرتجع) يعيد تحميل التقارير live.
   Stream<void> watchLatestReturn({required String shopId});

@@ -15,6 +15,10 @@ abstract class SalesRepo {
     /// فاضيين. نفس الرقم الموحّد داخل المحل = نفس جهة الاتصال.
     String? customerName,
     String? customerPhone,
+
+    /// Optional idempotency key: used as the sale document id so a retry after
+    /// a lost response returns the existing sale instead of writing a duplicate.
+    String? requestId,
   });
 
   Future<List<SaleModel>> getSales({required String shopId});
@@ -31,7 +35,13 @@ abstract class SalesRepo {
   /// كل فواتير المحل بترقيم cursor (بلا حد صامت) — مصدر حسابات التقارير.
   /// [PagedResult.isComplete] = false يعني أن الجلب توقف قبل النهاية
   /// فيجب عرض الإجماليات كـ"غير مكتملة" لا كأرقام نهائية.
-  Future<PagedResult<SaleModel>> fetchAllSales({required String shopId});
+  Future<PagedResult<SaleModel>> fetchAllSales({
+    required String shopId,
+
+    /// Server-side lower bound on `createdAt`; avoids downloading full history
+    /// when the report only covers recent periods.
+    DateTime? from,
+  });
 
   /// حدث خفيف (أثر على أحدث فاتورة) يُعيد تحميل التقارير — بدل الاشتراك
   /// في كل الفواتير. يقرأ مستنداً واحداً فقط.

@@ -17,6 +17,9 @@ abstract class ExpensesRepo {
 
     /// 'HH:mm' موعد الاستحقاق (مطلوب عندما recurrence != 'none').
     String dueTime,
+
+    /// Optional idempotency key: used as the expense document id.
+    String? requestId,
   });
 
   Future<ExpenseModel> updateExpense({
@@ -47,7 +50,10 @@ abstract class ExpensesRepo {
   Stream<List<ExpenseModel>> watchExpenses({required String shopId});
 
   /// كل مصروفات المحل بترقيم cursor (بلا حد صامت) — لحسابات التقارير.
-  Future<PagedResult<ExpenseModel>> fetchAllExpenses({required String shopId});
+  Future<PagedResult<ExpenseModel>> fetchAllExpenses({
+    required String shopId,
+    DateTime? from,
+  });
 
   /// حدث خفيف (أثر على أحدث مصروف) يعيد تحميل التقارير live.
   Stream<void> watchLatestExpense({required String shopId});

@@ -1,5 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -13,11 +15,13 @@ class SubscriptionReceiptUpload extends StatelessWidget {
   const SubscriptionReceiptUpload({
     super.key,
     required this.receiptUrl,
+    this.receiptPath,
     required this.uploading,
     required this.onPick,
   });
 
   final String? receiptUrl;
+  final String? receiptPath;
   final bool uploading;
   final ValueChanged<ImageSource> onPick;
 
@@ -29,7 +33,7 @@ class SubscriptionReceiptUpload extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final done = receiptUrl != null;
+    final done = receiptUrl != null || receiptPath != null;
 
     return InkWell(
       onTap: uploading ? null : () => _chooseSource(context),
@@ -86,18 +90,31 @@ class SubscriptionReceiptUpload extends StatelessWidget {
                   if (done) ...[
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8.r),
-                      child: CachedNetworkImage(
-                        imageUrl: receiptUrl!,
-                        width: 46.w,
-                        height: 46.w,
-                        fit: BoxFit.cover,
-                        memCacheWidth: 200,
-                        errorWidget: (_, _, _) => Icon(
-                          Icons.receipt_long_rounded,
-                          size: 26.sp,
-                          color: AppTheme.successColor,
-                        ),
-                      ),
+                      child: receiptPath != null
+                          ? Image.file(
+                              File(receiptPath!),
+                              width: 46.w,
+                              height: 46.w,
+                              fit: BoxFit.cover,
+                              cacheWidth: 200,
+                              errorBuilder: (_, _, _) => Icon(
+                                Icons.receipt_long_rounded,
+                                size: 26.sp,
+                                color: AppTheme.successColor,
+                              ),
+                            )
+                          : CachedNetworkImage(
+                              imageUrl: receiptUrl!,
+                              width: 46.w,
+                              height: 46.w,
+                              fit: BoxFit.cover,
+                              memCacheWidth: 200,
+                              errorWidget: (_, _, _) => Icon(
+                                Icons.receipt_long_rounded,
+                                size: 26.sp,
+                                color: AppTheme.successColor,
+                              ),
+                            ),
                     ),
                     SizedBox(width: 12.w),
                   ] else

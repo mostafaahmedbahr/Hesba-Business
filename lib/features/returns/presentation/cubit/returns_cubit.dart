@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/services/app_events.dart';
 import '../../../../core/utils/error_message.dart';
+import '../../../../core/utils/request_id.dart';
 import '../../data/models/return_model.dart';
 import '../../data/repos/returns_repo.dart';
 import 'returns_state.dart';
@@ -9,10 +10,14 @@ import 'package:hesba/core/services/app_logger.dart';
 
 class ReturnsCubit extends Cubit<ReturnsState> {
   final ReturnsRepo returnsRepo;
+  String? _requestId;
 
   ReturnsCubit({required this.returnsRepo}) : super(const ReturnsState());
 
-  void reset() => emit(const ReturnsState());
+  void reset() {
+    _requestId = null;
+    emit(const ReturnsState());
+  }
 
   Future<void> addReturn({
     required String ownerId,
@@ -44,6 +49,7 @@ class ReturnsCubit extends Cubit<ReturnsState> {
       return;
     }
 
+    _requestId ??= newRequestId();
     emit(state.copyWith(status: ReturnsStatus.loading, errorMessage: null));
 
     try {
@@ -54,7 +60,8 @@ class ReturnsCubit extends Cubit<ReturnsState> {
         items: items,
         reason: reason,
         note: note,
-      );
+        requestId: _requestId,
+      ).timeout(const Duration(seconds: 20));
 
       AppEvents.instance.returnCreated({
         'total': ret.total,
@@ -65,6 +72,7 @@ class ReturnsCubit extends Cubit<ReturnsState> {
       });
       AppEvents.instance.productChanged();
 
+      _requestId = null;
       if (!isClosed) {
         emit(ReturnsState(status: ReturnsStatus.success, ret: ret));
       }

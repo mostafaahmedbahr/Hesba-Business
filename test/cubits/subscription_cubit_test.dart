@@ -36,7 +36,13 @@ void main() {
 
   void stubCommon() {
     when(
-      () => repo.uploadPaymentReceipt(source: any(named: 'source')),
+      () => repo.pickPaymentReceipt(source: any(named: 'source')),
+    ).thenAnswer((_) async => XFile('/tmp/receipt.png'));
+    when(
+      () => repo.uploadPaymentReceipt(
+        source: any(named: 'source'),
+        file: any(named: 'file'),
+      ),
     ).thenAnswer((_) async => receipt);
     when(() => repo.getSubscription()).thenAnswer((_) async => const SubscriptionModel());
   }
@@ -45,7 +51,8 @@ void main() {
     cubit.selectPlan(SubscriptionPlan.monthly);
     cubit.selectPaymentMethod(SubscriptionPaymentMethod.instapay);
     await cubit.pickReceipt(ImageSource.gallery);
-    expect(cubit.state.receiptUrl, receipt);
+    expect(cubit.state.receiptPath, '/tmp/receipt.png');
+    expect(cubit.state.receiptUrl, isNull);
   }
 
   void stubSubmit() {
@@ -62,6 +69,7 @@ void main() {
     registerFallbackValue(ImageSource.gallery);
     registerFallbackValue(SubscriptionPlan.monthly);
     registerFallbackValue(SubscriptionPaymentMethod.instapay);
+    registerFallbackValue(XFile('/tmp/fallback.png'));
   });
 
   setUp(() {
@@ -132,7 +140,11 @@ void main() {
 
     final first = cubit.submit();
     final second = cubit.submit();
-    expect(cubit.state.phase, SubscriptionRequestPhase.submitting);
+    expect(
+      cubit.state.phase == SubscriptionRequestPhase.submitting ||
+          cubit.state.phase == SubscriptionRequestPhase.uploadingReceipt,
+      isTrue,
+    );
     completer.complete(makeRequest());
     await Future.wait([first, second]);
 

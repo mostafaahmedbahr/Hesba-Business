@@ -24,6 +24,7 @@ void main() {
         debtId: any(named: 'debtId'),
         amount: any(named: 'amount'),
         note: any(named: 'note'),
+        requestId: any(named: 'requestId'),
       ),
     ).thenAnswer((_) async {});
   }
@@ -51,6 +52,7 @@ void main() {
         debtId: any(named: 'debtId'),
         amount: any(named: 'amount'),
         note: any(named: 'note'),
+        requestId: any(named: 'requestId'),
       ),
     ).thenThrow(Exception('overdue lock'));
 
@@ -68,6 +70,7 @@ void main() {
         debtId: any(named: 'debtId'),
         amount: any(named: 'amount'),
         note: any(named: 'note'),
+        requestId: any(named: 'requestId'),
       ),
     ).thenAnswer((_) => completer.future);
 
@@ -83,6 +86,7 @@ void main() {
         debtId: any(named: 'debtId'),
         amount: any(named: 'amount'),
         note: any(named: 'note'),
+        requestId: any(named: 'requestId'),
       ),
     ).called(1);
     expect(cubit.state.saving, isFalse);
@@ -97,6 +101,7 @@ void main() {
         debtId: any(named: 'debtId'),
         amount: any(named: 'amount'),
         note: any(named: 'note'),
+        requestId: any(named: 'requestId'),
       ),
     ).thenAnswer((_) => (calls++ == 0 ? a : b).future);
 
@@ -115,6 +120,7 @@ void main() {
         debtId: any(named: 'debtId'),
         amount: any(named: 'amount'),
         note: any(named: 'note'),
+        requestId: any(named: 'requestId'),
       ),
     ).thenAnswer((_) {
       calls++;
@@ -134,6 +140,7 @@ void main() {
         debtId: any(named: 'debtId'),
         amount: any(named: 'amount'),
         note: any(named: 'note'),
+        requestId: any(named: 'requestId'),
       ),
     ).thenAnswer((_) => completer.future);
 

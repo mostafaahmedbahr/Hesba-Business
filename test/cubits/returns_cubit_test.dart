@@ -49,6 +49,7 @@ void main() {
         items: any(named: 'items'),
         reason: any(named: 'reason'),
         note: any(named: 'note'),
+        requestId: any(named: 'requestId'),
       ),
     ).thenAnswer((_) async => makeReturn());
   }
@@ -88,6 +89,7 @@ void main() {
         items: any(named: 'items'),
         reason: any(named: 'reason'),
         note: any(named: 'note'),
+        requestId: any(named: 'requestId'),
       ),
     ).thenThrow(Exception('offline'));
     await submit();
@@ -120,6 +122,7 @@ void main() {
         items: any(named: 'items'),
         reason: any(named: 'reason'),
         note: any(named: 'note'),
+        requestId: any(named: 'requestId'),
       ),
     ).thenAnswer((_) => completer.future);
 
@@ -137,6 +140,7 @@ void main() {
         items: any(named: 'items'),
         reason: any(named: 'reason'),
         note: any(named: 'note'),
+        requestId: any(named: 'requestId'),
       ),
     ).called(1);
     expect(cubit.state.status, ReturnsStatus.success);
@@ -154,6 +158,7 @@ void main() {
         items: any(named: 'items'),
         reason: any(named: 'reason'),
         note: any(named: 'note'),
+        requestId: any(named: 'requestId'),
       ),
     ).thenAnswer((_) => (calls++ == 0 ? a : b).future);
 
@@ -175,6 +180,7 @@ void main() {
         items: any(named: 'items'),
         reason: any(named: 'reason'),
         note: any(named: 'note'),
+        requestId: any(named: 'requestId'),
       ),
     ).thenAnswer((_) {
       calls++;
@@ -199,6 +205,7 @@ void main() {
         items: any(named: 'items'),
         reason: any(named: 'reason'),
         note: any(named: 'note'),
+        requestId: any(named: 'requestId'),
       ),
     ).thenAnswer((_) => completer.future);
 
