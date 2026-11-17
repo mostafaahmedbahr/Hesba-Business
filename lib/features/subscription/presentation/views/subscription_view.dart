@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/toast.dart';
+import '../../../../core/widgets/loading_widget.dart';
 import '../../data/models/subscription_model.dart';
 import '../../data/models/subscription_plan.dart';
 import '../../data/repos/subscription_repo.dart';
@@ -34,7 +35,25 @@ class _SubscriptionBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('subscriptionTitle'.tr())),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+              colors: [
+                Color(0xFF0F2F7A),
+                AppTheme.primaryColor,
+                Color(0xFF4A7BFF),
+              ],
+            ),
+          ),
+        ),
+        title: Text('subscriptionTitle'.tr()),
+      ),
       body: BlocConsumer<SubscriptionCubit, SubscriptionState>(
         listener: (context, state) {
           if (state.hasError && state.messageKey != null) {
@@ -46,7 +65,7 @@ class _SubscriptionBody extends StatelessWidget {
         },
         builder: (context, state) {
           if (state.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return LoadingWidget(message: 'subscriptionLoading'.tr());
           }
           if (state.loadStatus == SubscriptionLoadStatus.error) {
             return _LoadFailed(onRetry: () {
@@ -213,8 +232,25 @@ class _WaitingCard extends StatelessWidget {
       width: double.infinity,
       padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
-        color: AppTheme.primarySoft,
-        borderRadius: BorderRadius.circular(18.r),
+        borderRadius: BorderRadius.circular(20.r),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppTheme.primarySoft,
+            AppTheme.primaryColor.withValues(alpha: 0.08),
+          ],
+        ),
+        border: Border.all(
+          color: AppTheme.primaryColor.withValues(alpha: 0.15),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryColor.withValues(alpha: 0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -249,8 +285,20 @@ class _SubmittedBody extends StatelessWidget {
             Container(
               padding: EdgeInsets.all(18.w),
               decoration: BoxDecoration(
-                color: AppTheme.successColor.withValues(alpha: 0.12),
+                gradient: RadialGradient(
+                  colors: [
+                    AppTheme.successColor.withValues(alpha: 0.18),
+                    AppTheme.successColor.withValues(alpha: 0.04),
+                  ],
+                ),
                 shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.successColor.withValues(alpha: 0.20),
+                    blurRadius: 20,
+                    spreadRadius: 2,
+                  ),
+                ],
               ),
               child: Icon(
                 Icons.check_rounded,

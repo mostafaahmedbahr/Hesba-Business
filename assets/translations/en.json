@@ -393,6 +393,7 @@
   "done": "Done",
   "subscriptionTitle": "Subscription",
   "subscriptionLoadFailed": "Could not load your subscription status. Check your connection and try again.",
+  "subscriptionLoading": "Loading subscription...",
   "subscriptionSubmitted": "Subscription request sent",
   "subscriptionStatusTrial": "Free trial",
   "subscriptionStatusActive": "Active subscription",

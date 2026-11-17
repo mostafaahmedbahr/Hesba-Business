@@ -37,16 +37,34 @@ class SubscriptionReceiptUpload extends StatelessWidget {
         width: double.infinity,
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
-          color: done
-              ? AppTheme.successColor.withValues(alpha: 0.06)
-              : theme.cardTheme.color ?? Colors.white,
-          borderRadius: BorderRadius.circular(18.r),
+          borderRadius: BorderRadius.circular(20.r),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: done
+                ? [
+                    AppTheme.successColor.withValues(alpha: 0.08),
+                    AppTheme.successColor.withValues(alpha: 0.03),
+                  ]
+                : [
+                    theme.cardTheme.color ?? Colors.white,
+                    (theme.cardTheme.color ?? Colors.white),
+                  ],
+          ),
           border: Border.all(
             color: done
                 ? AppTheme.successColor.withValues(alpha: 0.5)
                 : theme.colorScheme.outlineVariant.withValues(alpha: 0.7),
             width: 1.5,
           ),
+          boxShadow: [
+            BoxShadow(
+              color: (done ? AppTheme.successColor : Colors.black)
+                  .withValues(alpha: 0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: uploading
             ? Row(

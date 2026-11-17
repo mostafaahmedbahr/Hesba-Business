@@ -26,7 +26,8 @@ class SubscriptionBlockedDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
+      elevation: 12,
       title: Row(
         children: [
           Container(

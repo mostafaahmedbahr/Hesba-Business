@@ -94,136 +94,105 @@ class _SuppliersBody extends StatelessWidget {
         }
       },
       builder: (context, state) {
-        // بيحمل.
-        if (state.status == SuppliersStatus.loading &&
-            state.suppliers.isEmpty) {
-          return Scaffold(
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            body: CustomScrollView(
-              slivers: [
-                SupplierListHeader(count: 0, onAdd: () => _openForm(context)),
-                const SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: SupplierListLoading(),
-                ),
-              ],
-            ),
-          );
-        }
-        // خطأ.
-        if (state.status == SuppliersStatus.failure &&
-            state.suppliers.isEmpty) {
-          return Scaffold(
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            body: CustomScrollView(
-              slivers: [
-                SupplierListHeader(count: 0, onAdd: () => _openForm(context)),
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: SupplierListError(
-                    message: translateError(state.errorMessage),
-                    onRetry: () => context.read<SuppliersCubit>().refresh(),
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
         final cubit = context.read<SuppliersCubit>();
-        // فاضي خالص: زرار واحد بس.
-        if (state.suppliers.isEmpty) {
-          return Scaffold(
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            body: CustomScrollView(
-              slivers: [
-                SupplierListHeader(count: 0, onAdd: () => _openForm(context)),
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: SupplierListEmpty(onAdd: () => _openForm(context)),
-                ),
-              ],
+        final isLoading = state.status == SuppliersStatus.loading && state.suppliers.isEmpty;
+        final isError = state.status == SuppliersStatus.failure && state.suppliers.isEmpty;
+        final isEmpty = state.suppliers.isEmpty && !isLoading && !isError;
+        final filtered = state.filtered;
+
+        Widget body;
+        if (isLoading) {
+          body = const SliverFillRemaining(
+            hasScrollBody: false,
+            child: SupplierListLoading(),
+          );
+        } else if (isError) {
+          body = SliverFillRemaining(
+            hasScrollBody: false,
+            child: SupplierListError(
+              message: translateError(state.errorMessage),
+              onRetry: cubit.refresh,
+            ),
+          );
+        } else if (isEmpty) {
+          body = SliverFillRemaining(
+            hasScrollBody: false,
+            child: SupplierListEmpty(onAdd: () => _openForm(context)),
+          );
+        } else {
+          body = SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 0),
+              child: SupplierListSearch(
+                query: state.searchQuery,
+                onSearchChanged: cubit.setSearch,
+              ),
             ),
           );
         }
-        // فيه داتا.
-        final filtered = state.filtered;
+
         return Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           body: RefreshIndicator(
             color: AppTheme.violetDeep,
-            onRefresh: () => cubit.refresh(),
+            onRefresh: cubit.refresh,
             child: CustomScrollView(
-              // عشان RefreshIndicator يشتغل حتى لو المحتوى قصير.
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
                 SupplierListHeader(
                   count: state.suppliers.length,
                   onAdd: () => _openForm(context),
                 ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 0),
-                    child: SupplierListSearch(
-                      query: state.searchQuery,
-                      onSearchChanged: cubit.setSearch,
+                body,
+                if (!isLoading && !isError && !isEmpty) ...[
+                  if (filtered.isEmpty)
+                    SliverToBoxAdapter(
+                      child: SupplierListNoResults(
+                        onClear: () => cubit.setSearch(''),
+                      ),
+                    )
+                  else
+                    SliverPadding(
+                      padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 110.h),
+                      sliver: SliverList.separated(
+                        itemCount: filtered.length,
+                        separatorBuilder: (_, _) => SizedBox(height: 10.h),
+                        itemBuilder: (itemCtx, i) {
+                          final supplier = filtered[i];
+                          return Dismissible(
+                                key: ValueKey(supplier.id),
+                                direction: DismissDirection.endToStart,
+                                background: Container(
+                                  alignment: AlignmentDirectional.centerEnd,
+                                  padding: EdgeInsetsDirectional.only(end: 20.w),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.danger,
+                                    borderRadius: BorderRadius.circular(20.r),
+                                  ),
+                                  child: Icon(
+                                    Icons.delete_rounded,
+                                    color: Colors.white,
+                                    size: 26.sp,
+                                  ),
+                                ),
+                                confirmDismiss: (_) =>
+                                    _confirmDelete(itemCtx, supplier)
+                                        .then((_) => false),
+                                child: SupplierListCard(
+                                  supplier: supplier,
+                                  linkedCount: state.linkedCountOf(supplier.id),
+                                  onTap: () => _openDetails(itemCtx, supplier),
+                                  onCall: () => SupplierContact.call(itemCtx, supplier.phone),
+                                  onWhatsApp: () => SupplierContact.whatsapp(itemCtx, supplier.phone),
+                                ),
+                              )
+                              .animate(delay: (50 * i).ms)
+                              .fadeIn(duration: 320.ms)
+                              .slideY(begin: 0.06, end: 0);
+                        },
+                      ),
                     ),
-                  ),
-                ),
-                if (filtered.isEmpty)
-                  SliverToBoxAdapter(
-                    child: SupplierListNoResults(
-                      onClear: () => cubit.setSearch(''),
-                    ),
-                  )
-                else
-                  SliverPadding(
-                    padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 110.h),
-                    sliver: SliverList.separated(
-                      itemCount: filtered.length,
-                      separatorBuilder: (_, _) => SizedBox(height: 10.h),
-                      itemBuilder: (itemCtx, i) {
-                        final supplier = filtered[i];
-                        return Dismissible(
-                              key: ValueKey(supplier.id),
-                              direction: DismissDirection.endToStart,
-                              // Directional عشان يشتغل صح في RTL.
-                              background: Container(
-                                alignment: AlignmentDirectional.centerEnd,
-                                padding: EdgeInsetsDirectional.only(end: 20.w),
-                                decoration: BoxDecoration(
-                                  color: AppTheme.danger,
-                                  borderRadius: BorderRadius.circular(20.r),
-                                ),
-                                child: Icon(
-                                  Icons.delete_rounded,
-                                  color: Colors.white,
-                                  size: 26.sp,
-                                ),
-                              ),
-                              confirmDismiss: (_) => _confirmDelete(
-                                itemCtx,
-                                supplier,
-                              ).then((_) => false),
-                              child: SupplierListCard(
-                                supplier: supplier,
-                                linkedCount: state.linkedCountOf(supplier.id),
-                                onTap: () => _openDetails(itemCtx, supplier),
-                                onCall: () => SupplierContact.call(
-                                  itemCtx,
-                                  supplier.phone,
-                                ),
-                                onWhatsApp: () => SupplierContact.whatsapp(
-                                  itemCtx,
-                                  supplier.phone,
-                                ),
-                              ),
-                            )
-                            .animate(delay: (50 * i).ms)
-                            .fadeIn(duration: 320.ms)
-                            .slideY(begin: 0.06, end: 0);
-                      },
-                    ),
-                  ),
+                ],
               ],
             ),
           ),

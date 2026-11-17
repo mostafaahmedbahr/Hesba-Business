@@ -37,11 +37,30 @@ class SubscriptionPlanCard extends StatelessWidget {
             width: double.infinity,
             padding: EdgeInsets.all(14.w),
             decoration: BoxDecoration(
-              color: selected
-                  ? AppTheme.primarySoft
-                  : theme.cardTheme.color ?? Colors.white,
-              borderRadius: BorderRadius.circular(18.r),
+              borderRadius: BorderRadius.circular(20.r),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: selected
+                    ? [
+                        AppTheme.primarySoft,
+                        AppTheme.primaryColor.withValues(alpha: 0.08),
+                      ]
+                    : [
+                        theme.cardTheme.color ?? Colors.white,
+                        (theme.cardTheme.color ?? Colors.white),
+                      ],
+              ),
               border: Border.all(color: border, width: selected ? 2 : 1),
+              boxShadow: [
+                BoxShadow(
+                  color: selected
+                      ? AppTheme.primaryColor.withValues(alpha: 0.12)
+                      : Colors.black.withValues(alpha: 0.04),
+                  blurRadius: selected ? 16 : 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Row(
               children: [

@@ -397,6 +397,7 @@
   "done": "تم",
   "subscriptionTitle": "الاشتراك",
   "subscriptionLoadFailed": "تعذر تحميل حالة الاشتراك. تحقق من الاتصال وحاول مرة أخرى.",
+  "subscriptionLoading": "جاري تحميل الاشتراك...",
   "subscriptionSubmitted": "تم إرسال طلب الاشتراك",
   "subscriptionStatusTrial": "تجربة مجانية",
   "subscriptionStatusActive": "اشتراك فعال",
