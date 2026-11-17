@@ -18,6 +18,9 @@ import 'report_metrics.dart';
 ///    تُشتق من فاتورته الأصلية عبر `originalSaleId` فتُلغى من "التكلفة المباعة".
 ///  - سطر بلا تكلفة معروفة (ناقصة أو ≤ 0) لا يُعامل كتكلفة صفري مؤكَّد:
 ///    يُستثنى من التكلفة ويُعلَّم عبر `unknownCostLines` فيظهر الربح تقديرياً.
+///
+/// كل المعادلات المالية في التطبيق (التقارير + لوحة الأدمن + إشعار البيع)
+/// تمرّ عبر الدوال في هذه الفئة — لا تُعاد كتابتها في أي مكان آخر.
 class ReportsCalculator {
   ReportsCalculator._();
 
@@ -61,11 +64,9 @@ class ReportsCalculator {
         saleLinesTotal++;
         // costPrice > 0 فقط تُعتبر تكلفة مؤكدة؛ الفواتير القديمة تحفظ 0
         // كعنصر ناقص فلا تُعامل كتكلفة صفريّة.
-        if (item.costPrice > 0) {
-          saleLinesWithCost++;
-          rawCogsSold += item.costPrice * item.quantity;
-        }
+        if (item.costPrice > 0) saleLinesWithCost++;
       }
+      rawCogsSold += saleCogs(sale);
     }
 
     // ── المرتجعات: استرداد + إلغاء تكلفة البضاعة المرجعة ──
@@ -78,16 +79,17 @@ class ReportsCalculator {
 
       for (final item in ret.items) {
         returnLinesTotal++;
-        final cost = original == null
-            ? null
-            : _lineCost(original, item.productId, item.productName);
-        if (cost != null && cost > 0) {
-          returnLinesWithCost++;
-          rawCogsReturned += cost * item.quantity;
-        }
-        // لم نجد التكلفة → السطر يُعلَّم غير معروف ولا يُخصم شيء (لا نخترع
-        // تكلفة صفرياً ولا نخمّن).
+        final cost = returnedUnitCost(
+          original,
+          productId: item.productId,
+          productName: item.productName,
+        );
+        if (cost != null && cost > 0) returnLinesWithCost++;
       }
+      // كل مستند مرتجع يُقرأ مرة واحدة → تكلفته تُلغى مرة واحدة فقط.
+      rawCogsReturned += returnCogs(ret, original);
+      // لم نجد التكلفة → السطر يُعلَّم غير معروف ولا يُخصم شيء (لا نخترع
+      // تكلفة صفرياً ولا نخمّن).
     }
 
     // ── المصروفات (بحقل `date` — عرف التطبيق) ──
@@ -123,9 +125,38 @@ class ReportsCalculator {
     );
   }
 
-  /// تكلفة سطر المرتجع من فاتورته الأصلية: مطابقة بالـ productId ثم بالاسم
-  /// (نفس منطق التحقق في ReturnsRepoImpl).
-  static double? _lineCost(SaleModel sale, String productId, String productName) {
+  /// تكلفة سطر واحد من لقطة `costPrice`.
+  ///
+  /// التكلفة المجهولة (مفقودة أو ≤ 0) تُستثنى — لا تُعامل كتكلفة صفر مؤكدة.
+  static double lineCogs({
+    required double costPrice,
+    required double quantity,
+  }) =>
+      costPrice > 0 ? costPrice * quantity : 0;
+
+  /// تكلفة البضاعة المباعة لفاتورة واحدة — من لقطات `costPrice` فقط.
+  static double saleCogs(SaleModel sale) {
+    var cogs = 0.0;
+    for (final item in sale.items) {
+      cogs += lineCogs(costPrice: item.costPrice, quantity: item.quantity);
+    }
+    return cogs;
+  }
+
+  /// صافي ربح فاتورة واحدة بعد الخصم (وليس قبلَه كما في `SaleItemModel.profit`).
+  ///
+  /// مصدر الربح المعروض في إشعار البيع، ويستخدم نفس قاعدة التكلفة المستخدمة
+  /// في التقارير ولوحة الأدمن — معادلة واحدة لا تُكرَّر.
+  static double netProfitForSale(SaleModel sale) => _r2(sale.total - saleCogs(sale));
+
+  /// تكلفة وحدة سطر المرتجع من فاتورته الأصلية: مطابقة بالـ productId ثم بالاسم
+  /// (نفس منطق التحقق في ReturnsRepoImpl). `null` = تكلفة غير معروفة.
+  static double? returnedUnitCost(
+    SaleModel? sale, {
+    required String productId,
+    required String productName,
+  }) {
+    if (sale == null) return null;
     if (productId.isNotEmpty) {
       for (final item in sale.items) {
         if (item.productId == productId) return item.costPrice;
@@ -137,6 +168,22 @@ class ReportsCalculator {
       }
     }
     return null;
+  }
+
+  /// تكلفة البضاعة المرجعة لمرتجع واحد، مُشتقّة من لقطة الفاتورة الأصلية.
+  /// تُستخدم في الإجمالي وفي السلاسل الشهرية بنفس القاعدة.
+  static double returnCogs(ReturnModel ret, SaleModel? original) {
+    var cogs = 0.0;
+    for (final item in ret.items) {
+      final unitCost = returnedUnitCost(
+        original,
+        productId: item.productId,
+        productName: item.productName,
+      );
+      if (unitCost == null) continue;
+      cogs += lineCogs(costPrice: unitCost, quantity: item.quantity);
+    }
+    return cogs;
   }
 
   static double _r2(double v) => double.parse(v.toStringAsFixed(2));

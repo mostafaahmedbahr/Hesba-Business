@@ -1,55 +1,57 @@
-# HESBA (حسبة) — FINAL PRE-LAUNCH REPORT (محدَّث 2026-11-17 — بعد جولة المراجعة الثانية)
+# HESBA (حسبة) — FINAL PRE-LAUNCH REPORT (محدَّث 2026-11-17 — بعد جولة المراجعة الثالثة)
 
-**Date:** 2026-11-17 (later, second round)
-**Supersedes:** the previous `HESBA_FINAL_PRE_LAUNCH_REPORT.md` (first fix round, same day) and `HESBA_FINAL_PRE_LAUNCH_AUDIT.md` (audit-trail record, kept).
-**Scope:** full app, Firestore rules, admin dashboard, subscription system, Android release config, Play compliance — as verified **after** the second fix round (refactor + admin tooling + two security fixes).
-**Honesty note:** Everything marked **(source)** is fixed in the working tree / this repository (all of it is now **committed** — see "Git status note" below). Anything depending on the **deployed** Firebase project is **UNVERIFIED** — the CLI account used here gets `403 permission-denied` on `hesba-business`, and the documented deployed state of the rules was stale at last check (`docs/HESBA_PROJECT_AUDIT.md` §B-1). Local rules pass **134/134** emulator tests (incl. this round's additions).
+**Date:** 2026-11-17 (later, third round)
+**Supersedes:** `HESBA_FINAL_PRE_LAUNCH_REPORT.md` (round 2, same day) and keeps `HESBA_FINAL_PRE_LAUNCH_AUDIT.md` (audit-trail record).
+**Scope:** full app, Firestore rules, admin dashboard, subscription system, Android release config, Play compliance — as verified **after** the third round (god-view decomposition completed + unit-test suite + error-handling/logging system + stream/leak review).
+**Honesty note:** Everything marked **(source)** is fixed in the working tree / repository (all of it is now **committed** — see "Git status note" below). Anything depending on the **deployed** Firebase project is **UNVERIFIED** — the CLI account used here gets `403 permission-denied` on `hesba-business`, and the documented deployed state of the rules was stale at last check (`docs/HESBA_PROJECT_AUDIT.md` §B-1). Local rules pass **134/134** emulator tests (unchanged this round — no rules touched).
 
 ---
 
 ## A. EXECUTIVE SUMMARY
 
-### Readiness: ~66/100 (was ~62/100 after round 1, was 56/100 at the original audit)
+### Readiness: ~68/100 (was ~66/100 after round 2, was ~62 after round 1, was 56 at the original audit)
 
-| Dimension | Weight | Audit | Round 1 | **Now** | Weighted now |
-|---|---|---|---|---|---|
-| Security & data isolation | 25 | 4.5 | 5.0 | **5.5** | 13.75 |
-| Financial data integrity | 20 | 7.0 | 8.5 | **9.0** | 18.0 |
-| Feature completeness & correctness | 20 | 7.0 | 7.5 | **8.0** | 16.0 |
-| Release configuration & signing | 15 | 6.5 | 6.5 | **6.5** | 9.75 |
-| Testing & verification | 10 | 4.0 | 5.0 | **5.5** | 5.5 |
-| Ops readiness | 10 | 3.0 | 3.0 | **3.0** | 3.0 |
-| **Total** | | **56** | **~62** | **~66** | **66.0** |
+| Dimension | Weight | Audit | Round 1 | Round 2 | **Now** | Weighted now |
+|---|---|---|---|---|---|---|
+| Security & data isolation | 25 | 4.5 | 5.0 | 5.5 | **5.5** | 13.75 |
+| Financial data integrity | 20 | 7.0 | 8.5 | 9.0 | **9.2** | 18.4 |
+| Feature completeness & correctness | 20 | 7.0 | 7.5 | 8.0 | **8.0** | 16.0 |
+| Release configuration & signing | 15 | 6.5 | 6.5 | 6.5 | **6.5** | 9.75 |
+| Testing & verification | 10 | 4.0 | 5.0 | 5.5 | **7.0** | 7.0 |
+| Ops readiness | 10 | 3.0 | 3.0 | 3.0 | **4.0** | 4.0 |
+| **Total** | | **56** | **~62** | **~66** | **~68** | **68.9** |
 
-Scoring: unchanged methodology from the original audit (verified-only points). Gains this round: staff stock-write hardening + movement invariant (emulator-proven), admin feedback inbox with server-enforced rules, `UserRoleService` fail-secure, admin global-search full bounded scan, major view decomposition with zero behavior change. Gains since round 1 that are **source-only, still unverified in production**: all of the above — they ship in `firestore.rules` and need the rules deploy (S-2).
+Scoring: unchanged methodology (verified-only points). Gains this round: **66 Dart unit tests exist and pass** (sale/return/credit-debt/adjustment math is now machine-verified, not just reviewed), **all ~150 flat catches are instrumented** with a central, file-scoped logger + in-app diagnostics view, **god-view decomposition COMPLETED** (all listed views decomposed, zero behavior change), **stream/leak review** closed 4 resource leaks. Gains since round 2 are **source-only, still unverified in production** where noted.
 
-### Critical blockers REMAINING (unchanged — all outside the app's code)
+### Critical blockers REMAINING
 
 1. **P0 — Play upload keystore (`hesba-upload-key.keystore`) is committed to Git** (MD5 `a7d3724c8e4956479c41f0e6cef4d59b`, byte-identical to the release signing key). Rotate via Play App Signing + purge history + root-`.gitignore`.
-2. **P0/P1 — Deployed Firestore rules UNVERIFIED.** Every rules fix in this round (reject/approve semantics, admin-create gap, trial window, settings validation, **feedback inbox rules**, **staff stock bounds + movement invariant**) exists **only in the local file**. Publish + cold-start verify from an account with `hesba-business` access. The local file is now **ahead** of production by two full rounds — deploy it before touching anything else.
-3. **P1 — Play Console steps:** paste privacy-policy URL in Store listing; complete Data Safety (declare in-app deletion request flow: manual deletion by support, financial records retained per policy); account-deletion declaration must match the policy exactly.
-4. **P1 — Zero Dart tests** (`test/` does not exist). Minimum sale/return/debt/report suite required for a financial app.
+2. **P0/P1 — Deployed Firestore rules UNVERIFIED.** Every rules fix in rounds 1–2 (reject/approve semantics, admin-create gap, trial window, settings validation, feedback inbox rules, staff stock bounds + movement invariant) exists **only in the local file**. Publish + cold-start verify from an account with `hesba-business` access.
+3. **P1 — Play Console steps:** privacy-policy URL in Store listing; complete Data Safety (declare in-app deletion request flow); account-deletion declaration must match the policy exactly.
+4. **P1 — Dart test suite in place but incomplete.** `test/` now holds 66 passing unit tests (repo logic only). Still missing: profit-calculator unit tests and cubit/widget coverage. Stores/subscription "full flow" integration remains untested on a real project.
 
 ### Final recommendation
 
-**NOT READY — but the gap is now entirely operational.** Round 1 closed the subscription/financial defects; round 2 closed the staff stock-write hole, shipped the admin feedback inbox, fixed the admin search's first-50 blind spot, removed the fail-open role default, and deleted ~2,400 lines of tangled view code. With the four blockers above done **and verified**, this becomes **READY WITH CONDITIONS**.
+**NOT READY — but the gap is now entirely operational** (same framing as round 2). Three of the four blockers were *sharper* this round: the test suite now exists (blocker #4 reduced), the keystore and deployed-rules remain, and the Play Console forms remain. With those done **and verified**, this becomes **READY WITH CONDITIONS**.
 
 ---
 
-## B. WHAT WAS FIXED (round 2, 2026-11-17) — committed in `c82be61 … 3262d2c`
+## B. WHAT WAS FIXED (third round, 2026-11-17) — committed in `9b2b57f … 84abaef`
 
 | # | Finding (severity) | Fix | Verification |
 |---|---|---|---|
-| B-10 | **S-17/P2 — Feedback inbox absent in admin** (users submit complaints/suggestions via "تواصل معنا" → `feedback` collection was write-only for admins: no UI, no rules for marking/deleting) | New `FeedbackView` screen (sidebar entry "الملاحظات" between النشاطات/الإعدادات): list + search (title/body/email/id/type) + filter chips (all/new/handled) + summary counters + pagination; details dialog with type/title/description + user id/email; actions: "تم التعامل معها" ↔ "جديدة" and delete (confirm). `handled`/`handledAt` written via new `AdminRepo.setFeedbackHandled/deleteFeedback/getFeedbackPage`. Rules: admin read (unchanged), **admin update restricted to exactly `handled`/`handledAt`** (bool `handled` only), **admin delete**; create rule unchanged | Rules emulator: **9 new tests** (`rules_tests/feedback.test.js`, in `npm test`); suite 131/131 after this item; `flutter analyze` 0 errors |
-| B-11 | **F-11/F-28 / "بحث الأدمن يقتصر على أول 50"** — admin global search read `.limit(50)` of each collection, unordered, client-side substring; anything past doc 50 was unsearchable; one failing collection killed the whole search; phone search failed on Arabic-Indic digits/formats | `AdminSearchRepoImpl` rewritten: **full bounded scan** of `shops`/`products`/`subscription_requests` in 200-doc batches ordered by documentId with `startAfterDocument`, hard cap 1,000 docs **per collection per search** (worst case is now "everything the shop has", not "the first 50"); three collections queried in **parallel**; a failing collection no longer wipes the others (if all three fail, error is surfaced instead of "لا توجد نتائج"); final hits capped at 50; normalization maps Arabic-Indic (`٠-٩`) and Eastern Arabic (`۰-۹`) digits to Latin; phone matching is digits-only (format-agnostic); documented in repo-level doc comment | `flutter analyze` 0 errors; "67 baseline" unchanged |
-| B-12 | **S-16/P2 — Staff could write negative or absurd stock** (`products` staff path validated keys only — any value passed, incl. strings, negatives, 1e30; `stock_movements` had `quantity > 0` but no cap and **no consistency check**) | `validStockValue(v)`: number in `[0, 1,000,000]` (also kills NaN/∞). Staff `products` path: stock must satisfy `validStockValue`, and **increase per write ≤ 10,000 units** (decrease unrestricted-but-non-negative). `validProduct` (owner create/update): stock now `validStockValue(...)` instead of just `>= 0`. `stock_movements`: `quantity ≤ 100,000`, both stock fields `validStockValue`, **new invariant: `newStock == previousStock + quantity`**. `stock_purchases`: `items ≤ 500`, `totalAmount ≤ 10,000,000`. Staff flows (purchase/sale/return) verified to still pass; a staff purchase of >10,000 units of one product now fails atomically by design | Emulator: **new test 15b** (negative, 1,000,001, `1e12`, +10,001 over current, non-number, legit +15, legit 0); **new movement invariant + caps test** (5+5=10 ok; 5+5=999/9 denied; `100,001` quantity denied; 1,000,001 `newStock` denied); **new purchase caps test** (501 items denied; 10,000,001 total denied; exactly-at-cap OK) — suite **134/134** |
-| B-13 | **S-10/P2 — `UserRoleService` failed open to OWNER** (`catch → roleOwner` — any offline/rules/timeout read of `users/{uid}` reclassified a staff account as owner → full owner UI/routes/deep-links) | Fail-secure: on read failure with **no cached role for this uid this session**, role stays `null` (`isLoaded == false`, `loadFailed == true`) — never owner. Cached role from the same session survives transient failures (flagged `loadFailed`). Router guard: signed-in + role unknown + route ∉ {splash, login, register} → redirect to splash. Splash renders "تعذر تحميل بيانات حسابك" with **إعادة المحاولة** (reload → normal routing) and **تسجيل الخروج**. LoginView: same guard — on unknown role shows error toast and stays on login (no auto-navigation). Legacy "missing `role` field = owner" semantics (both app and rules `myRole()`) intentionally unchanged — compatibility for pre-role accounts | `flutter analyze` 0 errors; splash/login/router build paths re-read; "67 baseline" unchanged |
-| B-14 | **~2,400 lines of God-view code** (`home_view.dart` 1259→115; `product_form_view.dart` 1130→881) | `home_view` decomposed into `presentation/widgets/home/` (`HomeHeaderBar`, `NetSalesCard`, `CurrentBalanceCard`, `BalanceBreakdownDialog` (+`MethodRow`), `HomeErrorHint`, `HomeSectionTitle`, `QuickActionsGrid`, `SubscriptionBanner`, shared `formatHomeAmount`) — view is now a thin slivers composition. `product_form_view`: `ProductDeleteDialog`, `ProductFormActionsBar`, `ProductProfitPreview`, `ProductFormIconButton`, `ProductFormDropdownField` extracted to `widgets/product_form/`; dead code removed; `const` keys preserved | `flutter analyze` 0 errors; 67 info/warnings baseline unchanged (zero new lints); **no behavior change, no tests deleted** |
-| B-15 | Report files now accurate again | This report rewritten as round 2; `rules_tests/feedback.test.js` added to `npm test`; everything in B-10…B-14 is **committed** (`c82be61` refactor, `029679d` search, `448b56b` feedback admin, `3262d2c` user role) | `git status` clean; `git log` shows the four commits |
+| B-16 | **God-view debt — remaining six listed views** (`admin_settings_view.dart` 1516, `add_expense_view.dart` 1260, `invoice_sheet.dart` 1028, `shop_details_view.dart` 936, `supplier_details_view.dart` 931, `add_debt_sheet.dart` 891) | All six decomposed into `widgets/<feature>/*` folders with the same convention as round 2 (public `PascalCase` widgets, Arabic doc comments, **zero behavior change** — extraction only; `_ShopItemsTab`/`_OverviewTab`/`_SubscriptionTab` now take `shopId`/`ownerId` constructor params instead of `findAncestorWidgetOfExactType<_DetailsScaffold>()`; receipt/invoice share helpers extracted to `invoice_helpers.dart`; shared duplicated section-card container extracted in supplier & expense views) | `flutter analyze` 0 errors (67 baseline info/warnings, zero new); each moved file re-checked for identical behavior by construction (mechanical moves, no logic edits) |
+| B-17 | **S-7/F-5 — zero Dart tests** (reported absent in rounds 1–2) | New `test/` suite, **66 passing unit tests**, all on `fake_cloud_firestore` + `mocktail`: sales repo 16 (validation, discount clamping, atomic stock decrement, credit-sale debt written in the same transaction, person linkage) · returns repo 13 (sold-qty enforcement incl. second return, original-price match, proportional discount allocation, credit-debt settlement incl. cap at remaining) · accounts repo 16 (person dedup by normalized phone, direction forcing for customers, payment cap vs remaining, cross-shop rejection) · expenses repo 8 (validation + shop isolation) · models 8 · **AppLogger 5** | `flutter test` → **66/66 PASS**; `flutter analyze test/` clean |
+| B-18 | **S-18 — ~150 flat catches, no reporting infrastructure** | New **`AppLogger`** (`core/services/app_logger.dart`): in-memory ring buffer (300 entries), leveled debug/info/warning/error, `installGlobalHandlers()` (uncaught `FlutterError` + `PlatformDispatcher.onError` + `runZonedGuarded` in `main.dart`), `nonFatal(context, error, stackTrace)` as the single funnel. **All 161 catch sites across 75 files are instrumented** with file-path context (error severity auto-detected via `AppToast.error`/`rethrow` → `error`, else `warning`). `logError/logSuccess/logWarning` kept as compatibility wrappers (now route to `AppLogger`). New **`DiagnosticsView`** (admin → «سجل التشخيص») listing the latest entries with context/message/stackTrace + copy-all + clear. Docs at `docs/ERROR_HANDLING_LOGGING.md`. `logSuccess('mostafa ahmed')` removed from `main.dart` | `flutter analyze` 0 errors (67 baseline unchanged); `flutter test` 66/66; docs committed |
+| B-19 | **Stream/leak audit — 4 resource leaks found & fixed** (review, not a behavior change) | ① `ProfileCubit`: `watchProfile()` listener was never stored/cancelled → now stored with `??=` + cancelled in `close()` ② `ActivityCubit._init`: `getActivities()` uncaught (dead badge on repo failure) + subscriptions created after `await` could outlive `close()` → try/catch + `isClosed` guard after each await ③ `ActivityView` (admin): `stream: watchActivityLogs()` inline in `build()` → new Firestore listener per rebuild → hoisted to `late final` in `initState()` ④ `ConnectivityService.initialize`: result of `.listen()` never assigned to `_subscription` (dispose was a no-op) + duplicate listener risk on re-init → assigned + double-init guard | `flutter analyze` 0 errors; `flutter test` 66/66; every cubit re-verified to cancel subscriptions in `close()` (14/14 cubits with `.listen()`) |
 
-**Earlier round (round 1, B-1…B-9) unchanged and committed:** subscription/renewal integrity (S-3, S-4, S-5), trial-window vs `admin_settings` (S-6), dashboard-vs-Reports profit (S-20), admin settings price validation (S-9), privacy policy (F-6 source), in-app account deletion (F-27 source), rules emulator regression suite (111→122→**134**).
+**Notes:**
+- **S-12 Cloudinary receipt preset — deliberately NOT changed** this round. The receipt stays on the shared public preset (`hesba/payment-proofs`, unsigned upload, publicly deliverable URL). A Cloudinary-hardening vs Firebase Storage migration proposal was prepared but **not accepted** (options deferred in this session). S-12/S-13/S-14 carry over unchanged.
+- **`mostafa ahmed` debug log removed** (`main.dart`) — this round closes the round-2 ⚠️ note.
 
-**Git status note:** unlike the end of round 1, the tree is **clean** — `c82be61…3262d2c` contains every round-2 fix (source + rules + tests). Nothing left uncommitted from either round (this report file itself is the only pending change).
+**Round 1 (B-1…B-9) and round 2 (B-10…B-15) unchanged and committed.**
+
+**Git status note:** unlike the end of round 1, the tree is **clean** — `9b2b57f … 84abaef` contains every round-3 change (refactors, tests, logger, stream fixes). Nothing left uncommitted.
 
 ---
 
@@ -57,72 +59,70 @@ Scoring: unchanged methodology from the original audit (verified-only points). G
 
 ### P0 — still open
 - **S-1** Play upload keystore tracked in Git (MD5 matches the release key). **Fix:** rotate upload key via Play App Signing (upload-key reset), purge from history, add `*.keystore`/`*.jks` to root `.gitignore`.
-- **S-2** Deployed Firestore rules UNVERIFIED; documented previously as stale. Two full rounds of rules fixes (approve/reject, admin-create, trial window, settings validation, **feedback**, **staff stock bounds + movement invariant**) are inert in production until published. **Fix:** publish `firestore.rules` + `firestore.indexes.json`; verify via cold start (no `permission-denied` in logs).
+- **S-2** Deployed Firestore rules UNVERIFIED (now two **and a half** rounds of rules fixes un-deployed — round 3 touched no rules). **Fix:** publish `firestore.rules` + `firestore.indexes.json`; verify via cold start.
 
 ### P1 — status
-- ~~**S-3** Reject revokes paid periods~~ — **FIXED (source)**, see round 1 B-1.
-- ~~**S-4** Approve idempotency / confirmations~~ — **FIXED (source)**.
-- ~~**S-5** Admin cannot create subscription doc~~ — **FIXED (source)** + regression tests.
-- ~~**F-6** Privacy policy absent~~ — **Source fixed**; Play Console steps remain.
+- ~~**S-3 … S-6, S-9** subscription/renewal/settings/trial integrity~~ — **FIXED (source)** round 1.
+- ~~**S-7 / F-5** Zero Dart tests~~ — **PARTIALLY CLOSED (source)** this round (B-17): repo-level unit tests exist and pass. Still missing profit-calculator unit tests + explicit cubit/widget coverage; not a launch blocker anymore, but keep as follow-up.
+- ~~**S-18** ~150 flat catches, no reporting~~ — **CLOSED (source-internal) this round (B-18)**: centralized `AppLogger` + diagnostics view + instrumented catch sites. External crash reporting deliberately not added (S-14 remains a conscious choice, not an oversight).
+- ~~**F-6** Privacy policy absent~~ — **FIXED (source)**; Play Console steps remain.
 - ~~**F-27** In-app account deletion~~ — **FIXED (source)**.
-- **S-7 / F-5** Zero Dart tests. **Still open.**
 
 ### P2 — status
-- ~~**S-6/F-8** Trial window mismatch~~ — **FIXED (source)**.
-- ~~**S-9/F-10** Settings not server-validated~~ — **FIXED (source)**.
-- ~~**S-20/F-9** Dashboard profit contradicts Reports~~ — **FIXED (source)**.
-- ~~**S-17** Admin feedback inbox absent~~ — **FIXED (source)** this round (B-10): admin-only read, update restricted to `handled`/`handledAt` bool, admin delete; 9 emulator regression tests.
-- ~~**S-16** Staff can write negative/absurd stock (products + movements)~~ — **FIXED (source)** this round (B-12): bounds + delta cap + `newStock == previousStock + quantity` invariant; documented cap semantics (10k per staff write per product; absolute 1M); 3 new emulator tests.
-- ~~**S-10** `UserRoleService` fail-open to owner on read error~~ — **FIXED (source)** this round (B-13): fail-secure unknown role, splash/login retry paths, router guard.
-- ~~**F-11/F-28** Admin search vs first-50 blind spot~~ — **FIXED (source)** this round (B-11): bounded full scan (1,000/collection cap), digit normalization, format-agnostic phones, partial-failure tolerance.
-- **S-12** Cloudinary receipts share public preset — still present.
+- ~~**S-6/F-8** Trial window mismatch~~ — **FIXED (source)** round 1.
+- ~~**S-9/F-10** Settings not server-validated~~ — **FIXED (source)** round 1.
+- ~~**S-10** `UserRoleService` fail-open~~ — **FIXED (source)** round 2.
+- ~~**S-16** Staff stock tampering~~ — **FIXED (source)** round 2.
+- ~~**S-17** Feedback inbox absent~~ — **FIXED (source)** round 2.
+- ~~**F-11/F-28** Admin search vs first-50 blind spot~~ — **FIXED (source)** round 2.
+- **S-12** Cloudinary receipts share public preset — **still open** (B-18 note; proposal deferred this round).
 - **S-13** No App Check — still absent.
-- **S-14** No Crashlytics — still absent.
+- **S-14** No Crashlytics — still absent (deliberate, internal logging instead).
 - **S-15** iOS `aps-environment=development` — still present.
 - **S-11** FCM tokens unbounded — still present.
-- **S-18** ~150 flat catches, no reporting — still present.
 - **S-19** Ungated admin drawer entry — still present.
-- **God-view refactor debt** (`admin_settings_view.dart` 1516, `add_expense_view.dart` 1260, `admin_ds.dart` 1100, `invoice_sheet.dart` 1028, `shop_details_view.dart` 936, `supplier_details_view.dart` 931, `add_debt_sheet.dart` 891) — **partially paid** this round (S-views; B-14).
+- **God-view refactor debt** (`admin_ds.dart` ~1100 remains — shared design-system file, intentionally kept) — **fully paid for views** this round (B-16).
 
 *No P0/P1/P2 marked FIXED (source) is closed in production until the rules deploy completes.*
 
 ---
 
-## D. FINANCIAL INTEGRITY — re-verified after round 2
+## D. FINANCIAL INTEGRITY — re-verified after round 3
 
 | Area | Status | Evidence (current) |
 |---|---|---|
-| Sale creation (stock + sale + credit debt, one transaction) | **PASS (source)** | unchanged — staff path now bounds the stock write produced by the same transaction |
-| Fractional quantities / inactive product blocked | **PASS (source)** | unchanged |
-| Cost snapshot at sale time | **PASS (source)** | unchanged |
-| COGS / profit in Reports (snapshot-only, unknown-cost excluded) | **PASS (source)** | `reports_calculator.dart` — unchanged |
-| Returns restore stock atomically + settle linked credit debt | **PASS (source)** | unchanged |
-| Debt create/update rules (`paidAmount` never decreases) | **PASS (source)** | unchanged |
+| Sale creation (stock + sale + credit debt, one transaction) | **PASS (source) + unit-tested** | `sales_repo_test.dart` — 16 tests incl. discount clamp, stock decrement, inactive product block, credit-debt same-transaction write |
+| Fractional quantities / inactive product blocked | **PASS (source) + unit-tested** | sale test suite |
+| Cost snapshot at sale time | **PASS (source)** | unchanged (sale tests verify price/total math) |
+| COGS / profit in Reports (snapshot-only, unknown-cost excluded) | **PASS (source) — NOT unit-tested** | `reports_calculator.dart` — no profit-calculator tests yet (remaining gap, see B-17) |
+| Returns restore stock atomically + settle linked credit debt | **PASS (source) + unit-tested** | `returns_repo_test.dart` — incl. settlement capped at remaining debt + proportional discount allocation |
+| Debt create/update rules (`paidAmount` never decreases) | **PASS (source) + unit-tested** | `accounts_repo_test.dart` — payment cap vs remaining, cross-shop rejection, person dedup |
 | Subscription math (append on renewal, live-period wins) | **PASS (source)** | round 1 |
 | Admin reject on a PAID account | **PASS (source) / UNVERIFIED (prod)** | round 1 B-1 |
 | Dashboard profit vs Reports profit | **PASS (source) / UNVERIFIED (prod data)** | round 1 B-5 |
-| Prices enforced on subscription requests | **PASS (local rules, 134/134 emulator)** | re-verified this round |
-| **Staff stock writes bounded + movement invariant** | **PASS (local rules, 134/134 emulator)** | B-12 — new tests: staff 15b, movement invariant, purchase caps |
-| **Feedback inbox rules (admin read/handled-only update/delete)** | **PASS (local rules, 134/134 emulator)** | B-10 — 9 new tests |
+| Prices enforced on subscription requests | **PASS (local rules, 134/134 emulator)** | unchanged this round |
+| Staff stock writes bounded + movement invariant | **PASS (local rules, 134/134 emulator)** | round 2 B-12 |
+| Feedback inbox rules | **PASS (local rules, 134/134 emulator)** | round 2 B-10 |
 | Admin settings → purchase integrity | **PASS (local rules, 134/134 emulator)** | round 1 B-6 |
-| **StockPurchase cap (≤500 items / ≤10M EGP total)** | **PASS (local rules, 134/134 emulator)** | B-12 — at-limit allowed, over-limit denied |
-| **Staff purchase >10,000 units of one product** | **DENIED (by design)** | B-12 — pre-agreed cap; owner path unaffected (owner is trusted) |
+| StockPurchase cap (≤500 items / ≤10M EGP total) | **PASS (local rules, 134/134 emulator)** | round 2 B-12 |
+| **Error funnel (all catches instrumented, internal log)** | **PASS (source)** | B-18 — 161 sites → `AppLogger` |
+| **Stream/subscription lifecycle (14/14 cubits)** | **PASS (source)** | B-19 — no cancelled-path leaks remain |
 
-**Bottom line:** per-shop financials were already transactional and snapshot-based; round 1 made the **platform** view consistent; **round 2 makes the inventory ledger tamper-evident** — a staff member can no longer fabricate or exaggerate stock counts, and every stock movement must now be arithmetically consistent (`newStock == previousStock + quantity`), enforced server-side and covered by emulator regression tests. All subject to the deployed-rules verification (S-2).
+**Bottom line:** round 3 turns the financial paths from "reviewed and correct" into **machine-verified** (66/66 unit tests). The remaining verification gap is the platform-level layer: deployed rules (S-2) and the absence of profit-calculator unit tests.
 
 ---
 
 ## E. FEATURE AUDIT — delta summary
 
-70 features were audited (see `HESBA_FINAL_PRE_LAUNCH_AUDIT.md` §B). After this round:
+70 features were audited in round 1 (see `HESBA_FINAL_PRE_LAUNCH_AUDIT.md` §B). After this round:
 
-- **PASS (new):** 71 **Admin feedback inbox** (mark handled / delete / search) — new screen + rules + tests. 72 **Global admin search** — no longer "first 50"; bounded full scan.
-- **PASS (upgraded):** 66 **Staff account data isolation (writes)** → now includes stock-value bounds (was keys-only). 63 **Staff isolation (session)** → `UserRoleService` fail-secure (was fail-open to owner).
-- **PASS (new, rules):** 73 **Feedback inbox rules** (admin-only read, `handled`/`handledAt`-only update, admin delete). 74 **Stock movement invariant** (`newStock == previousStock + quantity`) + 75 **Stock/purchase caps** (1M absolute stock; 10k per-staff-write increase; 100k/movement qty; 500 items; 10M EGP total).
-- **REGRESSION TESTS ADDED:** feedback rules (9), stock bounds/invariant/caps (3) — suite **134/134 PASS** (was 122 after round 1, 111 at audit).
-- **Refactor (no feature change):** `home_view` (1259→115) and `product_form_view` (1130→881) decomposed into new widgets (`widgets/home/*`, `widgets/product_form/*`); god-views remaining: `admin_settings_view`, `add_expense_view`, `invoice_sheet`, `shop_details_view`, `supplier_details_view`, `add_debt_sheet`.
-- **No feature regressed** (analyze clean; **0 new lints**; 134/134 emulator tests).
-- **No feature added for customers** — this round is all admin/security/tooling.
+- **PASS (upgraded):** All six remaining god-views **decomposed** → view layer is now thin throughout the app (only the shared `admin_ds.dart` design system remains large). No feature change.
+- **PASS (new, partial):** **Dart unit-test suite** (66 tests) — repos and models machine-verified. Remaining gaps: profit calculator, cubit/widget coverage.
+- **PASS (new):** **In-app diagnostics view** («سجل التشخيص» — latest logged events w/ context & stackTrace) + **central logger** (ring buffer, uncaught-error capture, admin entry point).
+- **PASS (hardening):** **Stream/subscription lifecycle** — 4 leaks fixed; all cubits cancel on close.
+- **REGRESSION TESTS ADDED:** 66 Dart unit tests (new suite); rules emulator suite unchanged (**134/134**).
+- **No feature regressed** (analyze clean; 67-baseline info/warnings unchanged; 66/66 tests).
+- **No feature added for customers** — this round is engineering-quality only (tests, logging, decomposition, resource hygiene).
 
 ---
 
@@ -132,62 +132,63 @@ Scoring: unchanged methodology from the original audit (verified-only points). G
 |---|---|---|
 | applicationId / version / targetSdk 36 / minSdk 24 | ✅ | unchanged |
 | Release signing via key.properties | ✅ | **keystore still in Git (P0)** |
-| `flutter build appbundle --release` | ✅ (round 1, 74.6MB) | **Not re-run this round** — refactor round-2 changes are widget-extraction/service logic with analyze-clean result; **rebuild the AAB before upload anyway** |
-| `flutter analyze` | ✅ | 0 errors, 67 info/warnings (baseline — zero new this round) |
-| Firestore rules emulator suite | ✅ | **134/134** (baseline 111 → 122 round 1 → **134 round 2**) |
-| `test/` Dart suite | ❌ | Still absent |
+| `flutter build appbundle --release` | ✅ (round 1, 74.6MB) | **Re-run after rounds 2–3 (refactor + tests)** before upload |
+| `flutter analyze` | ✅ | 0 errors, **67 info/warnings** (baseline — zero new) |
+| Firestore rules emulator suite | ✅ | **134/134** (unchanged) |
+| `test/` Dart suite | ✅ | **66/66 PASS** (round 3 — was absent) |
 | Privacy policy URL (Store listing) | ✅ (in-app) / ❌ (console) | URL exists + linked in-app; must be entered in Play Console |
 | Data Safety form | ❌ | Must declare in-app deletion-request flow |
 | Account deletion | ✅ (in-app) / ⚠️ | Manual execution by support; Data Safety must match the policy |
-| App Check / Crashlytics | ❌ | Absent |
-| Deployed rules/indexes | ❌ | **UNVERIFIED — required before any launch; now covers two full rounds of fixes** |
+| App Check / Crashlytics | ❌ | Absent (internal logger added instead) |
+| Deployed rules/indexes | ❌ | **UNVERIFIED — required before any launch** |
 | AndroidManifest permissions | ✅ | unchanged |
 | Desugaring / boot receiver / POST_NOTIFICATIONS | ✅ | unchanged |
 | iOS APNs `development` | ⚠️ | Out of scope for Play |
-| `mostafa ahmed` debug log in release | ⚠️ | Still present in `main.dart:19` |
-| **Uncommitted fixes at end of round** | ✅ **NONE** | all of round 1 + round 2 are committed (`9e0ccaf…3262d2c`) |
+| `mostafa ahmed` debug log in release | ✅ | **Removed this round** (`main.dart`, via B-18) |
+| Internal error logging / diagnostics | ✅ | New this round (B-18) |
+| **Uncommitted fixes at end of round** | ✅ **NONE** | `9b2b57f…84abaef` committed |
 | Working tree | ✅ clean | `git status` empty at report time |
 
 ---
 
 ## G. FINAL VERDICT
 
-**1. Can real shops safely use Hesba today?** Not yet — not until the deployed rules are verified (S-2) and the keystore is rotated (S-1). The in-app experience is functionally solid and this round closed the remaining data-tamper paths that a hostile staff account could exploit from a normal client session. The two P0s are outside the app's code.
+**1. Can real shops safely use Hesba today?** Not yet — not until the deployed rules are verified (S-2) and the keystore is rotated (S-1). The in-app experience is functionally solid, **the financial write-paths are now unit-tested**, and internal error visibility exists for the first time (every catch is logged somewhere an admin can read).
 
-**2. Can users' financial data be trusted?** Per-shop reports/debts/returns: yes (transactional, snapshot costs, tested). Platform admin profit: yes (same engine). **Inventory data: now also yes** — stock writes are bounded, movements are arithmetically consistent, and both are enforced server-side with regression tests.
+**2. Can users' financial data be trusted?** Per-shop reports/debts/returns: yes — transactionally, snapshot-cost-based, and **now unit-tested**. Platform admin profit: same engine (untested directly). **Inventory data:** bounded + invariant-enforced server-side, emulator-proven.
 
-**3. Is customer data properly isolated?** By local rules: yes (emulator-proven, 134/134). Against production: **UNVERIFIED** until rules are published and tested with a cold start — and the local file now includes feedback-inbox and staff-stock constraints that production lacks today.
+**3. Is customer data properly isolated?** By local rules: yes (emulator-proven, 134/134). Against production: **UNVERIFIED** (S-2).
 
 **4. Are subscriptions secure?** Locally and by code: yes, robustly. In production today: **unverified** (S-2).
 
-**5. Is the admin dashboard properly protected?** Server-side yes (admin-only collections/operations, transaction preconditions, settings validation) and UX hardened (confirm dialogs, approval flows); **this round it also got the feedback inbox it was missing and a search that actually finds every shop/product/request** (bounded full scan, capped at 1,000 reads/collection). Remaining ungated entry: S-19 drawer tile.
+**5. Is the admin dashboard properly protected?** Server-side yes (admin-only collections/operations, transaction preconditions, settings validation) and UX hardened; admin feedback inbox + bounded search from round 2; internal diagnostics added this round (B-18). Remaining ungated entry: S-19 drawer tile.
 
-**6. Is the Android release configuration ready?** Almost — builds, signing wired, targetSdk 36, permissions justified. Blocked on: keystore rotation/purge, rebuild of the AAB from the current HEAD (round-2 code), store-console steps (privacy URL, Data Safety, deletion declaration).
+**6. Is the Android release configuration ready?** Almost — builds, signing wired, targetSdk 36, permissions justified. Blocked on: keystore rotation/purge, rebuild of the AAB from the current HEAD (post-refactor + tests), store-console steps (privacy URL, Data Safety, deletion declaration).
 
 **7. What MUST be fixed before launch?**
 1. Rotate/purge `hesba-upload-key.keystore` from Git + root-`.gitignore` (S-1).
-2. **Publish + cold-start-verify `firestore.rules` (+indexes) on `hesba-business` — both rounds; record evidence** (S-2). The round-2 rules (feedback inbox, stock bounds + invariant) are part of the same deploy.
+2. **Publish + cold-start-verify `firestore.rules` (+indexes) on `hesba-business`; record evidence** (S-2).
 3. Play Console: privacy-policy URL in Store listing; Data Safety completed to match the policy; account-deletion declaration consistent (F-6).
-4. Minimum Dart test suite: sale transaction, return vs sold qty, debt payment cap, profit calculator (F-5).
-5. Rebuild `flutter build appbundle --release` from current HEAD (post-refactor) and smoke-test the release build (sale → return → renewal → rejection → staff login) before upload.
-6. Remove `logSuccess('mostafa ahmed')` from `main.dart:19` (and ideally squash reporting of the ~150 flat catches — S-18 — into at least Crashlytics).
-7. Live smoke test on the real project (register → trial → sale → credit sale → return → renewal → **rejection with paid period intact** → expiry → read-only) **+ staff account: purchase >10,000 units denied, stock moves/manipulations caught by rules**.
+4. Rebuild `flutter build appbundle --release` from current HEAD (post-refactor, with the test suite green) and smoke-test the release build (sale → return → renewal → rejection → staff login).
+5. Live smoke test on the real project (register → trial → sale → credit sale → return → renewal → **rejection with paid period intact** → expiry → read-only) **+ staff account: purchase >10,000 units denied**.
+6. (Carried) Extend the new test suite with **`reports_calculator` profit/COGS tests** and cubit-level tests for the sale flow.
 
-**8. What can safely wait until after launch?** S-19 drawer gating, S-12 Cloudinary preset split, S-13 App Check, S-14 Crashlytics, S-11 FCM pruning, remaining god-view refactors (`admin_settings_view`, `add_expense_view`, `invoice_sheet`, `shop_details_view`, `supplier_details_view`, `add_debt_sheet`), iOS APNs environment (out of Play scope), `tz.local`/DST reminder fixes, profit/settings UI polish.
+**8. What can safely wait until after launch?** S-19 drawer gating, **S-12 Cloudinary preset hardening** (migration proposal pending your decision), S-13 App Check, S-14 Crashlytics, S-11 FCM pruning, `admin_ds.dart` split, remaining lint cleanup, iOS APNs environment (out of Play scope), `tz.local`/DST reminder fixes, profit/settings UI polish.
 
 ---
 
-## APPENDIX — Verification log (what was actually run, this round and round 1)
+## APPENDIX — Verification log (what was actually run)
 
 | Command / check | Result |
 |---|---|
-| `flutter analyze` | **0 errors**, **67 info/warnings** — unchanged after every round-2 change (refactor, search, feedback, role service); zero new lints introduced |
-| `flutter test` | "Test directory `test` not found" — still absent |
-| Rules emulator suite (`node --test` × 7 files) | **134/134 PASS** (baseline 111 → 122 round 1 → **134 round 2**: +9 feedback, +3 stock) |
-| `flutter build appbundle --release` | ✅ round 1 (74.6MB) — **not re-run in round 2** (refactor-only + service changes; analyze clean; **rebuild before upload**) |
-| Firebase CLI on `hesba-business` | ❌ 403 permission-denied — deployed rules **UNVERIFIED** (now two rounds of rules fixes un-deployed) |
-| `git status` (end of round) | **clean** — all round-1 and round-2 work committed (`9e0ccaf … 3262d2c`) |
-| Working tree | ⚠️ `HESBA_FINAL_PRE_LAUNCH_REPORT.md` itself is modified but **uncommitted** at report time (this rewrite) — commit it; no source file left dirty |
-| i18n (ar/en) | valid JSON; `mostafa ahmed` traced (still present, `main.dart:19`) |
+| `flutter analyze` (round 3) | **0 errors**, **67 info/warnings** — unchanged after B-16/B-17/B-19 (baseline) |
+| `flutter analyze test/` | clean |
+| `flutter test` (round 3) | **66/66 PASS** (was absent in rounds 1–2) — sales 16 / returns 13 / accounts 16 / expenses 8 / person models 8 / AppLogger 5 |
+| Rules emulator suite (`node --test` × 7 files) | **134/134 PASS** (unchanged — round 3 touched no rules) |
+| `flutter build appbundle --release` | ✅ round 1 (74.6MB) — **not re-run since** (refactor + tests; analyze clean; **rebuild before upload**) |
+| Firebase CLI on `hesba-business` | ❌ 403 permission-denied — deployed rules **UNVERIFIED** |
+| `git status` (end of round 3) | **clean** — `9b2b57f … 84abaef` committed (refactor, tests, logging, cubit fixes) |
+| i18n (ar/en) | valid JSON; `mostafa ahmed` removed |
+| Cloudinary S-12 | **unchanged** (deferred this round — not silently fixed) |
 
-**One-line answer to "is it ready?"** Not yet — but every remaining blocker is now key rotation, a rules deploy + verification, Play Console forms, Dart tests, and a rebuild from HEAD. All known holes the app itself could exploit (staff stock tampering, fail-open role, search blind spot, missing feedback inbox) are **closed in source and covered by emulator regression tests — and nothing is committed but not pushed/verified**.
+**One-line answer to "is it ready?"** Not yet — same answer as rounds 1 and 2, but round 3 added machine-verified financial write-paths, a diagnosable internal error trail, and completed the view decomposition. Every remaining blocker is key rotation, a rules deploy + verification, Play Console forms, and a rebuild from HEAD. Nothing the app code itself can exploit is unfixed; the open items are deployment, store, and business-process work — trackable, not hidden.

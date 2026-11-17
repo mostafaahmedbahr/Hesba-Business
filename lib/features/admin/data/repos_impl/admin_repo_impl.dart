@@ -245,15 +245,14 @@ class AdminRepoImpl implements AdminRepo {
     String monthKey(DateTime dt) =>
         '${dt.year}-${dt.month.toString().padLeft(2, '0')}';
 
+    // نفس معادلات ReportsCalculator بالضبط (لا نسخة ثانية من القواعد):
+    // تكلفة الفاتورة/المرتجع تُقرأ من دوال المصدر الوحيد، والفرق الوحيد هنا
+    // أننا نجمع حسب شهر الحدوث ونقرّب للعدد الصحيح قبل رسم البياني.
     for (final sale in sales) {
       final key = monthKey(sale.createdAt);
-      var saleCogs = 0.0;
-      for (final item in sale.items) {
-        if (item.costPrice > 0) saleCogs += item.costPrice * item.quantity;
-      }
       revenueByMonth[key] = (revenueByMonth[key] ?? 0) + sale.total.round();
-      profitByMonth[key] =
-          (profitByMonth[key] ?? 0) + (sale.total - saleCogs).round();
+      profitByMonth[key] = (profitByMonth[key] ?? 0) +
+          (sale.total - ReportsCalculator.saleCogs(sale)).round();
     }
 
     for (final ret in returns) {
@@ -261,33 +260,9 @@ class AdminRepoImpl implements AdminRepo {
       final original = ret.originalSaleId == null
           ? null
           : salesById[ret.originalSaleId!];
-      var returnedCogs = 0.0;
-      for (final item in ret.items) {
-        double? unitCost;
-        if (original != null) {
-          for (final saleItem in original.items) {
-            if (item.productId.isNotEmpty &&
-                saleItem.productId == item.productId) {
-              unitCost = saleItem.costPrice;
-              break;
-            }
-          }
-          if (unitCost == null && item.productName.isNotEmpty) {
-            for (final saleItem in original.items) {
-              if (saleItem.productName == item.productName) {
-                unitCost = saleItem.costPrice;
-                break;
-              }
-            }
-          }
-        }
-        if (unitCost != null && unitCost > 0) {
-          returnedCogs += unitCost * item.quantity;
-        }
-      }
       revenueByMonth[key] = (revenueByMonth[key] ?? 0) - ret.total.round();
-      profitByMonth[key] =
-          (profitByMonth[key] ?? 0) - (ret.total - returnedCogs).round();
+      profitByMonth[key] = (profitByMonth[key] ?? 0) -
+          (ret.total - ReportsCalculator.returnCogs(ret, original)).round();
     }
 
     return ProfitSummary(

@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/services/app_events.dart';
+import '../../../reports/data/reports_calculator.dart';
 import '../../data/models/sale_model.dart';
 import '../../data/repos/sales_repo.dart';
 import 'sales_state.dart';
@@ -97,14 +98,15 @@ class SalesCubit extends Cubit<SalesState> {
         'total': sale.total,
         'discount': sale.discount,
         'paymentMethod': sale.paymentMethod,
-        'profit': sale.items.fold<double>(0, (s, i) => s + i.profit),
+        // صافي الربح بعد الخصم (من لقطة التكلفة) — نفس معادلة التقارير،
+        // وليس مجموع أرباح الأسطر الذي يتجاهل خصم الفاتورة.
+        'profit': ReportsCalculator.netProfitForSale(sale),
         'items': sale.items
             .map((i) => {
                   'name': i.productName,
                   'qty': i.quantity,
                   'price': i.unitPrice,
                   'total': i.total,
-                  'profit': i.profit,
                 })
             .toList(),
       });

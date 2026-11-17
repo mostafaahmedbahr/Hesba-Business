@@ -79,9 +79,16 @@ class ReturnsRepoImpl implements ReturnsRepo {
       final pid = it['productId'] as String? ?? '';
       final qty = (it['quantity'] as num?)?.toDouble() ?? 0;
       final name = it['productName'] as String? ?? '';
-      if (pid.isNotEmpty) soldQtyByKey[pid] = qty;
+      // نفس المنتج قد يظهر في أكثر من سطر بالفاتورة: يجب الجمع، لا الاستبدال
+      // بآخر سطر — وإلا تُحسب الكمية القابلة للإرجاع أقل من المباعة فعلياً
+      // (فيُرفض مرتجع كامل قانوني) وتختل مطابقة التكلفة في التقارير.
+      if (pid.isNotEmpty) {
+        soldQtyByKey[pid] = (soldQtyByKey[pid] ?? 0) + qty;
+      }
       soldQtyByKey['idx::$i'] = qty;
-      if (name.isNotEmpty) soldQtyByKey['name::$name'] = qty;
+      if (name.isNotEmpty) {
+        soldQtyByKey['name::$name'] = (soldQtyByKey['name::$name'] ?? 0) + qty;
+      }
     }
 
     // Scoped by shopId: Firestore rules only allow reads that prove

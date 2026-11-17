@@ -21,7 +21,11 @@ class SaleItemModel {
 
   double get total => quantity * unitPrice;
 
-  /// Profit of this line: (sale price − cost price) × quantity.
+  /// Gross profit of this line **before** the invoice discount:
+  /// (sale price − cost price) × quantity. Stored as a historical snapshot
+  /// only. The real (net) profit is `sale.total − Σ costPrice×quantity`,
+  /// computed once in `ReportsCalculator.netProfitForSale` — never use this
+  /// getter as the profit shown to users on a discounted invoice.
   double get profit => (unitPrice - costPrice) * quantity;
 
   Map<String, dynamic> toJson() {
