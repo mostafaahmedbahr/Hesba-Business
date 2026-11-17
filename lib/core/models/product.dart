@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 class Product {
   final String id;
@@ -205,7 +206,8 @@ class Product {
     if (raw is Map) {
       try {
         return Map<String, dynamic>.from(raw);
-      } catch (_) {
+      } catch (logErr, logSt) {
+        AppLogger.nonFatal('core/models/product.dart', logErr, logSt, severity: LoggingSeverity.warning);
         return const {};
       }
     }

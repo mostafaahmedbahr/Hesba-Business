@@ -4,6 +4,7 @@ import '../../../../core/services/app_events.dart';
 import '../../data/models/return_model.dart';
 import '../../data/repos/returns_repo.dart';
 import 'returns_state.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 class ReturnsCubit extends Cubit<ReturnsState> {
   final ReturnsRepo returnsRepo;
@@ -61,7 +62,8 @@ class ReturnsCubit extends Cubit<ReturnsState> {
       AppEvents.instance.productChanged();
 
       emit(ReturnsState(status: ReturnsStatus.success, ret: ret));
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/returns/presentation/cubit/returns_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       final msg = e.toString().replaceAll('Exception: ', '');
       emit(ReturnsState(status: ReturnsStatus.error, errorMessage: msg));
     }

@@ -13,6 +13,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../constants/app_constants.dart';
 import '../extensions/log_util.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// Upload errors with a machine-readable [code] for localized UI messages.
 class CloudinaryUploadException implements Exception {
@@ -192,9 +193,11 @@ Transformation get shopImageTransformation =>
       return secureUrl;
     } on CloudinaryUploadException {
       rethrow;
-    } on TimeoutException catch (e) {
+    } on TimeoutException catch (e, logSt) {
+      AppLogger.nonFatal('core/services/cloudinary_image_service.dart', e, logSt, severity: LoggingSeverity.warning);
       throw CloudinaryUploadException(uploadFailed, e.toString());
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('core/services/cloudinary_image_service.dart', e, logSt, severity: LoggingSeverity.warning);
       throw CloudinaryUploadException(uploadFailed, e.toString());
     }
   }

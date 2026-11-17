@@ -6,6 +6,7 @@ import '../../../../core/extensions/log_util.dart';
 import '../../data/models/supplier_model.dart';
 import '../../data/repos/suppliers_repo.dart';
 import '../states/suppliers_state.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// يدير شاشة الموردين: القائمة الحيّة، البحث المحلي/عن بعد، عدّاد
 /// المنتجات المرتبطة، والحذف.
@@ -70,7 +71,8 @@ class SuppliersCubit extends Cubit<SuppliersState> {
       final results = await _repo.searchSuppliers(q);
       if (isClosed) return;
       emit(state.copyWith(searching: false, remoteResults: results));
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/suppliers/presentation/cubit/suppliers_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       logWarning('[SuppliersCubit] search failed: $e');
       if (isClosed) return;
       emit(state.copyWith(searching: false, remoteResults: const []));
@@ -91,7 +93,8 @@ class SuppliersCubit extends Cubit<SuppliersState> {
       await _repo.deleteSupplier(supplierId);
       emit(state.copyWith(clearError: true));
       return true;
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/suppliers/presentation/cubit/suppliers_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       final msg = e.toString().replaceAll('Exception: ', '');
       logWarning('[SuppliersCubit] delete failed: $msg');
       emit(state.copyWith(errorMessage: msg));

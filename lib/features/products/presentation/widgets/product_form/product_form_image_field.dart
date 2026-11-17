@@ -8,6 +8,7 @@ import '../../../../../core/services/cloudinary_image_service.dart';
 import '../../../../../core/theme/app_theme.dart';
 import '../../../../../core/utils/shop_image_upload.dart';
 import '../../../../../core/utils/toast.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// حقل صورة المنتج: اختيار من المعرض/الكاميرا + رفع Cloudinary + معاينة + حذف.
 class ProductFormImageField extends StatefulWidget {
@@ -44,11 +45,13 @@ class _ProductFormImageFieldState extends State<ProductFormImageField> {
         widget.onChanged(url);
         AppToast.success(context, 'productFormImageUploaded'.tr());
       }
-    } on CloudinaryUploadException catch (e) {
+    } on CloudinaryUploadException catch (e, logSt) {
+      AppLogger.nonFatal('features/products/presentation/widgets/product_form/product_form_image_field.dart', e, logSt, severity: LoggingSeverity.error);
       if (mounted) {
         AppToast.error(context, shopImageUploadErrorMessage(e));
       }
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/products/presentation/widgets/product_form/product_form_image_field.dart', logErr, logSt, severity: LoggingSeverity.error);
       if (mounted) {
         AppToast.error(context, 'shopImageFailed'.tr());
       }

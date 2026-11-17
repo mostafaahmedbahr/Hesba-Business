@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/services/notification_service.dart';
 import '../models/local_reminder.dart';
 import '../repos/notification_repo.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// تنفيذ التخزين (SharedPreferences + جدولة).
 class NotificationRepoImpl implements NotificationRepo {
@@ -28,7 +29,8 @@ class NotificationRepoImpl implements NotificationRepo {
     try {
       await _service.setupFcm();
       return true;
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/notifications/data/repos_impl/notification_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning);
       return false;
     }
   }

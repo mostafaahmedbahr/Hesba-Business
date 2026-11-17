@@ -8,6 +8,7 @@ import 'package:hesba/core/models/admin_settings.dart';
 import 'package:hesba/features/admin/data/repos/admin_repo.dart';
 import 'package:hesba/features/admin/presentation/cubit/admin_settings_cubit.dart';
 import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
+import 'package:hesba/features/admin/presentation/views/diagnostics_view.dart';
 import 'package:hesba/features/admin/presentation/widgets/admin_settings/hero.dart';
 import 'package:hesba/features/admin/presentation/widgets/admin_settings/payment_method_card.dart';
 import 'package:hesba/features/admin/presentation/widgets/admin_settings/plan_card.dart';
@@ -407,6 +408,22 @@ class _SettingsFormState extends State<_SettingsForm> {
                 RestoreDefaultsButton(
                   enabled: !widget.saving,
                   onTap: _restoreDefaults,
+                ),
+                const SizedBox(height: AdminSpace.sm),
+                Center(
+                  child: TextButton.icon(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const DiagnosticsView(),
+                      ),
+                    ),
+                    icon: const Icon(Icons.bug_report_outlined, size: 18),
+                    label: const Text(
+                      'سجل التشخيص (الأخطاء الأخيرة)',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                    ),
+                  ),
                 ),
               ],
             ),

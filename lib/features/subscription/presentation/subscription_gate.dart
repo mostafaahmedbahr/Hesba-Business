@@ -7,6 +7,7 @@ import '../../../core/router/app_routes.dart';
 import '../data/models/subscription_model.dart';
 import '../data/repos/subscription_repo.dart';
 import 'widgets/subscription_blocked_dialog.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// The one check every Add / Edit / Delete goes through before it runs.
 ///
@@ -26,7 +27,8 @@ class SubscriptionGate {
     SubscriptionModel subscription;
     try {
       subscription = await _repo.getSubscription();
-    } catch (error) {
+    } catch (error, logSt) {
+      AppLogger.nonFatal('features/subscription/presentation/subscription_gate.dart', error, logSt, severity: LoggingSeverity.warning);
       // The status could not be read. Let the action continue rather than
       // freeze the app on a flaky connection; the security rules are the
       // authoritative check server side.

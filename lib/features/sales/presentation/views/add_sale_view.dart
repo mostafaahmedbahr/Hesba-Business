@@ -33,6 +33,7 @@ import '../widgets/add_sale/add_sale_bottom_bar.dart';
 import '../widgets/add_sale/sale_items_section.dart';
 import '../widgets/add_sale/sale_extras_section.dart';
 import '../../../subscription/presentation/subscription_gate.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// شاشة بيع جديد (فورم + ملخص live + شريط حفظ ثابت).
 class AddSaleView extends StatefulWidget {
@@ -139,7 +140,8 @@ class _AddSaleViewState extends State<AddSaleView> {
           setState(() => _loadingProducts = false);
         }
       });
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/sales/presentation/views/add_sale_view.dart', logErr, logSt, severity: LoggingSeverity.warning);
       _loadingProducts = false;
     }
   }
@@ -154,7 +156,7 @@ class _AddSaleViewState extends State<AddSaleView> {
         },
         onError: (_) {},
       );
-    } catch (_) {}
+    } catch (logErr, logSt) { AppLogger.nonFatal('features/sales/presentation/views/add_sale_view.dart', logErr, logSt, severity: LoggingSeverity.warning); }
   }
 
   void _onRecalc() => setState(() {});

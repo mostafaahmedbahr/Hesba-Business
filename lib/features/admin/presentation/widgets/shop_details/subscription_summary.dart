@@ -6,6 +6,7 @@ import 'package:hesba/core/widgets/dialogs.dart';
 import 'package:hesba/features/admin/data/repos/admin_repo.dart';
 import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
 import 'package:hesba/features/subscription/data/models/subscription_model.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// ملخص الاشتراك في تبويب «نظرة عامة» + زر إيقاف/تفعيل المحل.
 class ShopSubscriptionSummary extends StatefulWidget {
@@ -143,7 +144,8 @@ class _ShopSubscriptionSummaryState extends State<ShopSubscriptionSummary> {
       AppDialogs.showSnackBar(
           context, suspended ? 'تم إيقاف المحل' : 'تم إعادة تفعيل المحل');
       _reload();
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/admin/presentation/widgets/shop_details/subscription_summary.dart', logErr, logSt, severity: LoggingSeverity.warning);
       if (!mounted) return;
       AppDialogs.showSnackBar(context, 'تعذر تنفيذ العملية', isError: true);
     } finally {

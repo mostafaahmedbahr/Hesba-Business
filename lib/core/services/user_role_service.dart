@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../constants/app_constants.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// مصدر واحد لمعرفة "مين المستخدم الحالي؟" — يُستخدم لتوجيه الموظف
 /// لشاشة الإدخال المقيّدة بدل الواجهة الكاملة، ولحظر المسارات الحساسة.
@@ -69,7 +70,8 @@ class UserRoleService {
       _shopId = (shop != null && shop.isNotEmpty) ? shop : null;
       _uidForCache = uid;
       _loadFailed = false;
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('core/services/user_role_service.dart', logErr, logSt, severity: LoggingSeverity.warning);
       if (_uidForCache == uid && _role != null) {
         // انقطاع مؤقت — نكمّل بالدور المخزّن من نفس الجلسة ولا نخترع دورًا جديدًا.
         _loadFailed = true;

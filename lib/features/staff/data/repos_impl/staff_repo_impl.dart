@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../models/staff_model.dart';
 import '../repos/staff_repo.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// إدارة الحسابات الفرعية. إنشاء حساب الموظف يتم عبر تطبيق Firebase
 /// مؤقت حتى لا يتم تسجيل الدخول تلقائيًا بحساب الموظف ويُطرد صاحب المحل.
@@ -55,7 +56,8 @@ class StaffRepoImpl implements StaffRepo {
     FirebaseApp? tempApp;
     try {
       tempApp = Firebase.apps.firstWhere((a) => a.name == _tempAppName);
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/staff/data/repos_impl/staff_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning);
       tempApp = await Firebase.initializeApp(
         name: _tempAppName,
         options: Firebase.app().options,
@@ -88,13 +90,14 @@ class StaffRepoImpl implements StaffRepo {
         'updatedAt': now,
       });
       await tempAuth.signOut();
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/staff/data/repos_impl/staff_repo_impl.dart', e, logSt, severity: LoggingSeverity.error);
       rethrow;
     } finally {
       // حذف التطبيق المؤقت يمنع أي أثر لجلسة الموظف على جهاز الصاحب.
       try {
         await tempApp.delete();
-      } catch (_) {}
+      } catch (logErr, logSt) { AppLogger.nonFatal('features/staff/data/repos_impl/staff_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning); }
     }
   }
 

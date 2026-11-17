@@ -5,6 +5,7 @@ import '../../../../core/extensions/log_util.dart';
 import '../../../subscription/data/repos/subscription_repo.dart';
 import '../models/register_model.dart';
 import '../repos/auth_repo.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 class AuthRepoImpl implements AuthRepo {
   final FirebaseAuth firebaseAuth;
@@ -30,7 +31,8 @@ class AuthRepoImpl implements AuthRepo {
         email: email.trim(),
         password: password,
       );
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/auth/data/repos_impl/auth_repo_impl.dart', e, logSt, severity: LoggingSeverity.error);
       rethrow;
     }
   }
@@ -91,7 +93,8 @@ class AuthRepoImpl implements AuthRepo {
           .collection('users')
           .doc(user.uid)
           .set(_ownerJson(registerModel));
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/auth/data/repos_impl/auth_repo_impl.dart', e, logSt, severity: LoggingSeverity.error);
       await _rollbackAccount(user);
       rethrow;
     }
@@ -103,7 +106,8 @@ class AuthRepoImpl implements AuthRepo {
         userId: user.uid,
         createdAt: now,
       );
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/auth/data/repos_impl/auth_repo_impl.dart', e, logSt, severity: LoggingSeverity.warning);
       logWarning('[AuthRepoImpl] trial could not be created now: $e');
     }
 
@@ -127,7 +131,8 @@ class AuthRepoImpl implements AuthRepo {
         'updatedAt': Timestamp.fromDate(now),
         'isActive': true,
       });
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/auth/data/repos_impl/auth_repo_impl.dart', e, logSt, severity: LoggingSeverity.error);
       await _rollbackAccount(user);
       rethrow;
     }
@@ -148,10 +153,11 @@ class AuthRepoImpl implements AuthRepo {
   Future<void> _rollbackAccount(User user) async {
     try {
       await firestore.collection('users').doc(user.uid).delete();
-    } catch (_) {}
+    } catch (logErr, logSt) { AppLogger.nonFatal('features/auth/data/repos_impl/auth_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning); }
     try {
       await user.delete();
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/auth/data/repos_impl/auth_repo_impl.dart', e, logSt, severity: LoggingSeverity.warning);
       logWarning('[AuthRepoImpl] rollback incomplete (manual cleanup needed): $e');
     }
   }

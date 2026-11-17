@@ -5,6 +5,7 @@ import '../../../../core/extensions/log_util.dart';
 import '../models/product_fields_catalog.dart';
 import '../models/product_form_config.dart';
 import '../repos/product_config_repo.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// يقرأ businessType من shops/{shopId} ويبني إعدادات حقول المنتج منه.
 class ProductConfigRepoImpl implements ProductConfigRepo {
@@ -22,7 +23,8 @@ class ProductConfigRepoImpl implements ProductConfigRepo {
     String? businessType;
     try {
       businessType = await _readBusinessType();
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/products/data/repos_impl/product_config_repo_impl.dart', e, logSt, severity: LoggingSeverity.warning);
       // القراءة فشلت → نكمل بإعدادات عامة بدل ما الشاشة تفشل.
       logWarning('[ProductConfigRepo] read businessType failed: $e');
     }

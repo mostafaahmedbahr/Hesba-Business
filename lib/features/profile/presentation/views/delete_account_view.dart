@@ -7,6 +7,7 @@ import '../../../../core/services/user_role_service.dart';
 import '../../../../core/utils/error_message.dart';
 import '../../data/repos/account_repo.dart';
 import '../widgets/app_scaffold.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// طلب حذف الحساب — متطلب Google Play للتطبيقات التي تتيح إنشاء حساب.
 ///
@@ -157,13 +158,15 @@ class _DeleteAccountViewState extends State<DeleteAccountView> {
         ),
       );
       Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false);
-    } on FirebaseAuthException catch (e) {
+    } on FirebaseAuthException catch (e, logSt) {
+      AppLogger.nonFatal('features/profile/presentation/views/delete_account_view.dart', e, logSt, severity: LoggingSeverity.warning);
       setState(() => _loading = false);
       final message = e.code == 'wrong-password' || e.code == 'invalid-credential'
           ? 'كلمة المرور غير صحيحة'
           : translateError(e.toString());
       messenger.showSnackBar(SnackBar(content: Text(message)));
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/profile/presentation/views/delete_account_view.dart', e, logSt, severity: LoggingSeverity.warning);
       setState(() => _loading = false);
       messenger.showSnackBar(SnackBar(content: Text(translateError(e.toString()))));
     }

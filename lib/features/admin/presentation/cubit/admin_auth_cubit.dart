@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/repos/admin_repo.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 abstract class AdminAuthState extends Equatable {
   const AdminAuthState();
@@ -35,7 +36,8 @@ class AdminAuthCubit extends Cubit<AdminAuthState> {
     try {
       final ok = await repo.isAdmin();
       emit(ok ? AdminAuthAuthenticated() : AdminAuthDenied());
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/admin/presentation/cubit/admin_auth_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       emit(AdminAuthError(e.toString()));
     }
   }

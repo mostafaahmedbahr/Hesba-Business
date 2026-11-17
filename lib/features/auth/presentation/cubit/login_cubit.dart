@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/repos/auth_repo.dart';
 import '../states/login_state.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 class LoginCubit extends Cubit<LoginState> {
   final AuthRepo _authRepo;
@@ -21,7 +22,8 @@ class LoginCubit extends Cubit<LoginState> {
     try {
       await _authRepo.login(email: email, password: password);
       emit(state.copyWith(status: LoginStatus.success));
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/auth/presentation/cubit/login_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       emit(state.copyWith(
         status: LoginStatus.failure,
         errorMessage: _mapError(e),

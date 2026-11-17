@@ -9,6 +9,7 @@ import '../models/subscription_model.dart';
 import '../models/subscription_plan.dart';
 import '../models/subscription_request_model.dart';
 import '../repos/subscription_repo.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// Firestore implementation of the manual subscription system.
 ///
@@ -278,7 +279,8 @@ class SubscriptionRepoImpl implements SubscriptionRepo {
       await _subscriptionRef(uid).set(expired.toJson(), SetOptions(merge: true));
       await _mirrorSubscription(uid, expired);
       logSuccess('[Subscription] $stored rolled over to expired');
-    } catch (error) {
+    } catch (error, logSt) {
+      AppLogger.nonFatal('features/subscription/data/repos_impl/subscription_repo_impl.dart', error, logSt, severity: LoggingSeverity.warning);
       // The read still answers correctly, only the stored flag lags behind.
       logWarning('[Subscription] could not persist expiry: $error');
     }
@@ -294,7 +296,8 @@ class SubscriptionRepoImpl implements SubscriptionRepo {
         shopName: data['shopName'] as String? ?? '',
         phone: data['phone'] as String? ?? '',
       );
-    } catch (error) {
+    } catch (error, logSt) {
+      AppLogger.nonFatal('features/subscription/data/repos_impl/subscription_repo_impl.dart', error, logSt, severity: LoggingSeverity.warning);
       // The request must still go through with whatever we know.
       logWarning('[Subscription] profile lookup failed: $error');
       return const _ProfileFields(ownerName: '', shopName: '', phone: '');
@@ -320,7 +323,8 @@ class SubscriptionRepoImpl implements SubscriptionRepo {
         'endDate': model.endDate == null ? null : Timestamp.fromDate(model.endDate!),
         'updatedAt': Timestamp.fromDate(model.updatedAt ?? DateTime.now()),
       }, SetOptions(merge: true));
-    } catch (error) {
+    } catch (error, logSt) {
+      AppLogger.nonFatal('features/subscription/data/repos_impl/subscription_repo_impl.dart', error, logSt, severity: LoggingSeverity.warning);
       logWarning('[Subscription] mirror write failed: $error');
     }
   }

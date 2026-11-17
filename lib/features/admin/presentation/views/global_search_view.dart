@@ -9,6 +9,7 @@ import 'package:hesba/features/admin/presentation/views/product_details_view.dar
 import 'package:hesba/features/admin/presentation/views/shop_details_view.dart';
 import 'package:hesba/features/admin/presentation/views/subscription_requests_view.dart';
 import 'package:hesba/features/subscription/data/models/subscription_request_model.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 class GlobalSearchView extends StatelessWidget {
   const GlobalSearchView({super.key});
@@ -198,7 +199,8 @@ class GlobalSearchView extends StatelessWidget {
         final request = SubscriptionRequestModel.fromJson(hit.id, data);
         await RequestDetailsDialog.show(context, request);
       }
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/admin/presentation/views/global_search_view.dart', e, logSt, severity: LoggingSeverity.warning);
       messenger.showSnackBar(
         SnackBar(content: Text('تعذر فتح التفاصيل: $e'), behavior: SnackBarBehavior.floating),
       );

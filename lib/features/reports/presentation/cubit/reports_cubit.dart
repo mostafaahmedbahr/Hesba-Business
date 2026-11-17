@@ -7,6 +7,7 @@ import '../../../returns/data/repos/returns_repo.dart';
 import '../../../sales/data/repos/sales_repo.dart';
 import '../../data/reports_calculator.dart';
 import 'reports_state.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// لوجيك التقارير: يجلب **كل** سجلات المحل بترقيم cursor (بلا قيود 300)
 /// ويفلتر محلياً حسب الفترة (تبديل الفترة فوري)، ثم يحسب المؤشرات مرة
@@ -136,7 +137,8 @@ class ReportsCubit extends Cubit<ReportsState> {
         ),
         clearError: true,
       ));
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/reports/presentation/cubit/reports_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       _fail(e);
     } finally {
       _busy = false;

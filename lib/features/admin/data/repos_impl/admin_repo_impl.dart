@@ -9,6 +9,7 @@ import '../../../../features/sales/data/models/sale_model.dart';
 import '../../../../core/models/admin_settings.dart';
 import '../models/profit_summary.dart';
 import '../repos/admin_repo.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 class AdminRepoImpl implements AdminRepo {
   AdminRepoImpl({required this.auth, required this.firestore});
@@ -31,7 +32,8 @@ class AdminRepoImpl implements AdminRepo {
       final doc = await firestore.collection(_users).doc(uid).get();
       final data = doc.data() ?? const {};
       return (data['role'] as String?) == 'admin';
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/admin/data/repos_impl/admin_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning);
       return false;
     }
   }
@@ -43,7 +45,8 @@ class AdminRepoImpl implements AdminRepo {
     try {
       final agg = await query.count().get();
       return agg.count ?? 0;
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/admin/data/repos_impl/admin_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning);
       // Fallback: scan a capped page (older rules / missing index).
       final snap = await query.limit(1000).get();
       return snap.size;
@@ -353,7 +356,8 @@ class AdminRepoImpl implements AdminRepo {
       }
       if (startAfter != null) query = query.startAfterDocument(startAfter);
       return await query.limit(_page).get();
-    } on FirebaseException catch (e) {
+    } on FirebaseException catch (e, logSt) {
+      AppLogger.nonFatal('features/admin/data/repos_impl/admin_repo_impl.dart', e, logSt, severity: LoggingSeverity.error);
       if (e.code != 'failed-precondition') rethrow;
       // Fallback أخير: where فقط بدون أي ترتيب سيرفر.
       Query<Map<String, dynamic>> fallback = firestore.collection(_subscriptions);
@@ -378,7 +382,8 @@ class AdminRepoImpl implements AdminRepo {
       }
       if (startAfter != null) query = query.startAfterDocument(startAfter);
       return await query.limit(_page).get();
-    } on FirebaseException catch (e) {
+    } on FirebaseException catch (e, logSt) {
+      AppLogger.nonFatal('features/admin/data/repos_impl/admin_repo_impl.dart', e, logSt, severity: LoggingSeverity.error);
       if (e.code != 'failed-precondition') rethrow;
       Query<Map<String, dynamic>> fallback = firestore.collection(_requests);
       if (hasFilter) fallback = fallback.where('status', isEqualTo: status);
@@ -562,7 +567,8 @@ class AdminRepoImpl implements AdminRepo {
         description: 'Admin approved ${request.plan.id} for ${request.shopName}',
         extra: {'userId': request.userId, 'requestId': request.requestId},
       );
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/admin/data/repos_impl/admin_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning);
       // The approval itself committed; the activity log is best effort.
     }
   }
@@ -629,7 +635,8 @@ class AdminRepoImpl implements AdminRepo {
         description: 'Admin rejected a request for ${request.shopName}${reason.isEmpty ? '' : ': $reason'}',
         extra: {'userId': request.userId, 'requestId': request.requestId},
       );
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/admin/data/repos_impl/admin_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning);
       // The rejection itself committed; the activity log is best effort.
     }
   }
@@ -657,7 +664,8 @@ class AdminRepoImpl implements AdminRepo {
       final data = snap.data();
       if (data == null) return AdminSettings.defaults;
       return AdminSettings.fromJson(data);
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/admin/data/repos_impl/admin_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning);
       return AdminSettings.defaults;
     }
   }

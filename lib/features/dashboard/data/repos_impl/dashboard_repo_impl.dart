@@ -8,6 +8,7 @@ import '../../../expenses/data/models/expense_model.dart';
 import '../../../returns/data/models/return_model.dart';
 import '../../../sales/data/models/sale_model.dart';
 import '../repos/dashboard_repo.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 class DashboardRepoImpl implements DashboardRepo {
   final FirebaseAuth _auth;
@@ -257,7 +258,8 @@ class DashboardRepoImpl implements DashboardRepo {
       if (snap.docs.isEmpty) return null;
       try {
         return SaleModel.fromJson(snap.docs.first.data());
-      } catch (_) {
+      } catch (logErr, logSt) {
+        AppLogger.nonFatal('features/dashboard/data/repos_impl/dashboard_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning);
         return null;
       }
     });
@@ -275,7 +277,8 @@ class DashboardRepoImpl implements DashboardRepo {
       if (snap.docs.isEmpty) return null;
       try {
         return ReturnModel.fromJson(snap.docs.first.data());
-      } catch (_) {
+      } catch (logErr, logSt) {
+        AppLogger.nonFatal('features/dashboard/data/repos_impl/dashboard_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning);
         return null;
       }
     });
@@ -290,7 +293,8 @@ class DashboardRepoImpl implements DashboardRepo {
           // القوالب المتكررة ليست حركات فعلية — نتخطاها.
           if (expense.isTemplate) continue;
           if (expense.shopId == shopId) return expense;
-        } catch (_) {
+        } catch (logErr, logSt) {
+          AppLogger.nonFatal('features/dashboard/data/repos_impl/dashboard_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning);
           // Corrupt doc: skipped instead of breaking the stream.
         }
       }
@@ -311,7 +315,8 @@ class DashboardRepoImpl implements DashboardRepo {
           .snapshots()) {
         yield snap.docs;
       }
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/dashboard/data/repos_impl/dashboard_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning);
       await for (final snap
           in col.orderBy('date', descending: true).limit(20).snapshots()) {
         yield snap.docs;

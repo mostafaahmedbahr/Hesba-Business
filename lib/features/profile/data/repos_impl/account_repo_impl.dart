@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 
 import '../models/user_profile.dart';
 import '../repos/account_repo.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 class AccountRepoImpl implements AccountRepo {
   final FirebaseAuth _auth;
@@ -160,7 +161,7 @@ class AccountRepoImpl implements AccountRepo {
     // not receive the previous owner's pushes. Best effort only.
     try {
       await FirebaseMessaging.instance.deleteToken();
-    } catch (_) {}
+    } catch (logErr, logSt) { AppLogger.nonFatal('features/profile/data/repos_impl/account_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning); }
     await _auth.signOut();
   }
 
@@ -170,7 +171,8 @@ class AccountRepoImpl implements AccountRepo {
       final doc = await _firestore.collection('users').doc(uid).get();
       if (!doc.exists) return false;
       return doc.data()?['isActive'] as bool? ?? true;
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/profile/data/repos_impl/account_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning);
       return null;
     }
   }

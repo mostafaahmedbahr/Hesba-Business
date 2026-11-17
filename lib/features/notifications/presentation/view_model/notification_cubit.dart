@@ -9,6 +9,7 @@ import '../widgets/reminder_delete_dialog.dart';
 import '../widgets/reminder_form_sheet.dart';
 import '../../../subscription/presentation/subscription_gate.dart';
 import 'notification_state.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// فيو موديل التذكيرات (كل لوجيك الشاشة هنا).
 class NotificationCubit extends Cubit<NotificationState> {
@@ -33,7 +34,8 @@ class NotificationCubit extends Cubit<NotificationState> {
         final freshToken = await _repo.getFcmToken();
         emit(state.copyWith(fcmToken: freshToken));
       }
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/notifications/presentation/view_model/notification_cubit.dart', logErr, logSt, severity: LoggingSeverity.warning);
       // أي خلل في FCM (APNS لسه، شبكة، صلاحية) — التذكيرات المحلية تكمل.
     }
   }
@@ -60,7 +62,8 @@ class NotificationCubit extends Cubit<NotificationState> {
           isLoading: false,
         ),
       );
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/notifications/presentation/view_model/notification_cubit.dart', logErr, logSt, severity: LoggingSeverity.warning);
       // لو فشل: يطفي اللودر وتعرض الفاضي.
       if (!isClosed) emit(state.copyWith(isLoading: false));
     }
@@ -72,7 +75,7 @@ class NotificationCubit extends Cubit<NotificationState> {
     if (isClosed) return;
     try {
       await _activityRepo.markAllRead();
-    } catch (_) {}
+    } catch (logErr, logSt) { AppLogger.nonFatal('features/notifications/presentation/view_model/notification_cubit.dart', logErr, logSt, severity: LoggingSeverity.warning); }
   }
 
   /// يتأكد إن الإذن مفتوح (يطلبه لو مقفول).
@@ -92,7 +95,8 @@ class NotificationCubit extends Cubit<NotificationState> {
         body: r.body.isEmpty ? 'تذكير حسبة' : r.body,
       );
       return true;
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/notifications/presentation/view_model/notification_cubit.dart', logErr, logSt, severity: LoggingSeverity.warning);
       return false;
     }
   }

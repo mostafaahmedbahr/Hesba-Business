@@ -4,6 +4,7 @@ import 'package:hesba/core/theme/app_theme.dart';
 import 'package:hesba/core/widgets/dialogs.dart';
 import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// عنوان الموقع + زر فتحه على خرائط جوجل.
 ///
@@ -121,7 +122,8 @@ class ShopLocationRow extends StatelessWidget {
       if (uri != null && _isSafeMapUrl(url) && await canLaunchUrl(uri)) {
         opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/admin/presentation/widgets/shop_details/shop_location_row.dart', logErr, logSt, severity: LoggingSeverity.warning);
       opened = false;
     }
     if (!context.mounted) return;

@@ -7,6 +7,7 @@ import '../../../../core/services/app_events.dart';
 import '../activity_message.dart';
 import '../models/activity_model.dart';
 import '../repos/activity_repo.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// تنفيذ سجل النشاطات (SharedPreferences + ستريم).
 class ActivityRepoImpl implements ActivityRepo {
@@ -26,7 +27,8 @@ class ActivityRepoImpl implements ActivityRepo {
       final decoded = jsonDecode(raw) as List<dynamic>;
       return decoded.map((e) => ActivityModel.fromJson(e as Map<String, dynamic>)).toList()
         ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/notifications/data/repos_impl/activity_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning);
       return [];
     }
   }

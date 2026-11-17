@@ -15,6 +15,7 @@ import 'drawer_language_tile.dart';
 import 'drawer_theme_tile.dart';
 import 'drawer_tile.dart';
 import 'section_label.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// عناصر الـ Drawer (تركيب بس — من غير المبيعات).
 class DrawerItemsList extends StatelessWidget {
@@ -54,7 +55,8 @@ class DrawerItemsList extends StatelessWidget {
           const SnackBar(content: Text('تعذر فتح سياسة الخصوصية — راجع الرابط من المتصفح')),
         );
       }
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/main/presentation/widgets/drawer_items_list.dart', logErr, logSt, severity: LoggingSeverity.warning);
       messenger.showSnackBar(
         const SnackBar(content: Text('تعذر فتح سياسة الخصوصية — راجع الرابط من المتصفح')),
       );

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/models/staff_model.dart';
 import '../../data/repos/staff_repo.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 class StaffState {
   final List<StaffModel> staff;
@@ -46,7 +47,8 @@ class StaffCubit extends Cubit<StaffState> {
         phone: phone,
         password: password,
       );
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/staff/presentation/cubit/staff_cubit.dart', e, logSt, severity: LoggingSeverity.error);
       emit(state.copyWith(error: _mapError(e.toString())));
       rethrow;
     }
@@ -65,7 +67,8 @@ class StaffCubit extends Cubit<StaffState> {
         phone: phone,
         isActive: isActive,
       );
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/staff/presentation/cubit/staff_cubit.dart', e, logSt, severity: LoggingSeverity.error);
       emit(state.copyWith(error: _mapError(e.toString())));
       rethrow;
     }
@@ -74,7 +77,8 @@ class StaffCubit extends Cubit<StaffState> {
   Future<void> resetPassword(String email) async {
     try {
       await _repo.sendPasswordReset(email: email);
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/staff/presentation/cubit/staff_cubit.dart', e, logSt, severity: LoggingSeverity.error);
       emit(state.copyWith(error: _mapError(e.toString())));
       rethrow;
     }

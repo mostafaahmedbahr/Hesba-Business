@@ -12,6 +12,7 @@ import '../widgets/add_debt_sheet.dart';
 import '../widgets/debt_card.dart';
 import '../widgets/filter_sheet.dart';
 import 'debt_details_view.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// شاشة الحسابات — ذمم العملاء والموردين مع إجماليات Premium في الأعلى.
 class AccountsView extends StatelessWidget {
@@ -61,7 +62,8 @@ class _AccountsBody extends StatelessWidget {
             AppToast.success(context, 'تم حفظ المديونية بنجاح');
           }
           return null;
-        } catch (e) {
+        } catch (e, logSt) {
+          AppLogger.nonFatal('features/accounts/presentation/views/accounts_view.dart', e, logSt, severity: LoggingSeverity.warning);
           return e.toString().replaceAll('Exception: ', '');
         }
       },

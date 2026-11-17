@@ -14,6 +14,7 @@ import '../../../subscription/presentation/subscription_gate.dart';
 import '../../data/models/stock_purchase_item.dart';
 import '../../data/repos/products_repo.dart';
 import '../../data/repos/stock_purchase_repo.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// شاشة تسجيل فاتورة شراء مخزون. متاحة لصاحب المحل وللحساب الفرعي
 /// (النسخة المقيّدة لا تعرض أي بيانات سوى أسماء الأصناف المطلوبة للإدخال).
@@ -132,7 +133,8 @@ class _AddStockPurchaseViewState extends State<AddStockPurchaseView> {
         AppToast.success(context, 'تم تسجيل فاتورة الشراء');
         Navigator.pop(context, true);
       }
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/products/presentation/views/add_stock_purchase_view.dart', e, logSt, severity: LoggingSeverity.error);
       if (mounted) AppToast.error(context, _friendlyError(e.toString()));
     } finally {
       if (mounted) setState(() => _saving = false);

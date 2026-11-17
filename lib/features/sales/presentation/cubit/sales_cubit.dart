@@ -4,6 +4,7 @@ import '../../../../core/services/app_events.dart';
 import '../../data/models/sale_model.dart';
 import '../../data/repos/sales_repo.dart';
 import 'sales_state.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 class SalesCubit extends Cubit<SalesState> {
   final SalesRepo salesRepo;
@@ -115,7 +116,8 @@ class SalesCubit extends Cubit<SalesState> {
           sale: sale,
         ),
       );
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/sales/presentation/cubit/sales_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       final msg = e.toString().replaceAll('Exception: ', '');
       emit(
         SalesState(

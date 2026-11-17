@@ -8,6 +8,7 @@ import '../../../../profile/data/models/user_profile.dart';
 import '../../../data/models/sale_model.dart';
 import '../../cubit/sales_list_state.dart';
 import 'invoice_helpers.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// بطاقة الفاتورة بهيئة الفواتير المتعارف عليها — ثابتة الألوان (أبيض)
 /// عشان تطلع واضحة في الصورة سواء التطبيق فاتح أو غامق.
@@ -32,7 +33,8 @@ class InvoiceCard extends StatelessWidget {
     final locale = context.locale.languageCode;
     try {
       return DateFormat(pattern, locale).format(sale.createdAt);
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/sales/presentation/widgets/invoice/invoice_card.dart', logErr, logSt, severity: LoggingSeverity.warning);
       return DateFormat(pattern).format(sale.createdAt);
     }
   }

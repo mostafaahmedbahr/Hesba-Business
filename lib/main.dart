@@ -8,6 +8,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:hesba/common_imports.dart';
 import 'package:hesba/core/router/notification_router.dart';
 import 'package:hesba/core/di/service_locator.dart';
+import 'package:hesba/core/services/app_logger.dart';
 import 'package:hesba/core/services/user_role_service.dart';
 import 'package:hesba/features/expenses/data/repos/expenses_repo.dart';
 import 'package:hesba/features/notifications/data/repos/activity_repo.dart';
@@ -16,31 +17,42 @@ import 'package:hesba/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:hesba/features/settings/presentation/states/settings_state.dart';
 
  Future<void> main() async {
-  logSuccess('mostafa ahmed');
   WidgetsFlutterBinding.ensureInitialized();
-  await    Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await NotificationService().initialize(onTap: _handleNotificationTap);
-  await initDependencies();
-  SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
-  // مزامنة المصروفات المتكررة: يسجل تلقائيًا أي موعد فات (أو يوصل)
-  // ويعيد ضبط التذكيرات — يعمل في الخلفية بأمان.
-  unawaited(_syncRecurringExpensesSafely());
-  // تحميل الدور قبل تشغيل الـ router عشان حظر مسارات الموظف يشتغل
-  // من أول إطار حتى لو جاء الـ navigation من إشعار أو deep link.
-  if (FirebaseAuth.instance.currentUser != null) {
-    await sl<UserRoleService>().load();
-  }
-  runApp(TranslationProvider(child: const HesbaApp()));
+  // التقاط كل خطأ غير ملتقط (FlutterError + async) في سجل واحد.
+  AppLogger.installGlobalHandlers();
+  await runZonedGuarded(() async {
+    await    Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    await NotificationService().initialize(onTap: _handleNotificationTap);
+    await initDependencies();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+    // مزامنة المصروفات المتكررة: يسجل تلقائيًا أي موعد فات (أو يوصل)
+    // ويعيد ضبط التذكيرات — يعمل في الخلفية بأمان.
+    unawaited(_syncRecurringExpensesSafely());
+    // تحميل الدور قبل تشغيل الـ router عشان حظر مسارات الموظف يشتغل
+    // من أول إطار حتى لو جاء الـ navigation من إشعار أو deep link.
+    if (FirebaseAuth.instance.currentUser != null) {
+      await sl<UserRoleService>().load();
+    }
+    runApp(TranslationProvider(child: const HesbaApp()));
+  }, (error, stackTrace) {
+    AppLogger.error(
+      'خطأ غير متزامن غير ملتقط',
+      context: 'zone',
+      error: error,
+      stackTrace: stackTrace,
+    );
+  });
 }
 
 /// مزامنة المصروفات المتكررة بدون رمي أي خطأ (best effort عند الإقلاع).
 Future<void> _syncRecurringExpensesSafely() async {
   try {
     await sl<ExpensesRepo>().syncRecurringExpenses();
-  } catch (_) {
+  } catch (logErr, logSt) {
+    AppLogger.nonFatal('main.dart', logErr, logSt, severity: LoggingSeverity.warning);
     // فشل المزامنة ما يمنعش التطبيق يفتح — هتتعمل تاني عند فتح شاشة المصاريف.
   }
 }

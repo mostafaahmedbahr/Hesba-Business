@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/services/app_events.dart';
 import '../../data/repos/dashboard_repo.dart';
 import '../states/dashboard_state.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 class DashboardCubit extends Cubit<DashboardState> {
   final DashboardRepo _repo;
@@ -128,7 +129,8 @@ class DashboardCubit extends Cubit<DashboardState> {
         clearError: true,
         hasLoaded: true,
       ));
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/dashboard/presentation/cubit/dashboard_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       if (isClosed) return;
       emit(state.copyWith(
         status: DashboardStatus.failure,

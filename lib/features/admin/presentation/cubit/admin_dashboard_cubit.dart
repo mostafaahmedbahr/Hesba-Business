@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/models/profit_summary.dart';
 import '../../data/repos/admin_repo.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 abstract class AdminDashboardState extends Equatable {
   const AdminDashboardState();
@@ -94,7 +95,8 @@ class AdminDashboardCubit extends Cubit<AdminDashboardState> {
         revenueByMonth: results[10] as Map<String, int>,
         profitSummary: results[11] as ProfitSummary,
       ));
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/admin/presentation/cubit/admin_dashboard_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       emit(AdminDashboardError(e.toString()));
     }
   }

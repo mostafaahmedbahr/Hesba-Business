@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/models/register_model.dart';
 import '../../data/repos/auth_repo.dart';
 import '../states/register_state.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 class RegisterCubit extends Cubit<RegisterState> {
   final AuthRepo _authRepo;
@@ -41,7 +42,8 @@ class RegisterCubit extends Cubit<RegisterState> {
     try {
       await _authRepo.register(model: model, password: password);
       emit(state.copyWith(status: RegisterStatus.success));
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/auth/presentation/cubit/register_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       emit(state.copyWith(
         status: RegisterStatus.failure,
         errorMessage: _mapError(e),

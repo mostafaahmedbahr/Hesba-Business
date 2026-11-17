@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hesba/core/theme/app_theme.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 enum ToastType { success, error, warning, info }
 
@@ -15,7 +16,7 @@ class AppToast {
     // يشيل القديم لو موجود.
     try {
       _currentEntry?.remove();
-    } catch (_) {}
+    } catch (logErr, logSt) { AppLogger.nonFatal('core/utils/toast.dart', logErr, logSt, severity: LoggingSeverity.warning); }
     _currentEntry = null;
 
     final overlay = Overlay.of(context);
@@ -30,7 +31,7 @@ class AppToast {
       if (_currentEntry == entry) {
         try {
           entry.remove();
-        } catch (_) {}
+        } catch (logErr, logSt) { AppLogger.nonFatal('core/utils/toast.dart', logErr, logSt, severity: LoggingSeverity.warning); }
         _currentEntry = null;
       }
     });

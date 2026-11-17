@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/repos/admin_repo.dart';
 import '../../../../features/subscription/data/models/subscription_request_model.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 abstract class RequestReviewState extends Equatable {
   const RequestReviewState();
@@ -36,7 +37,8 @@ class RequestReviewCubit extends Cubit<RequestReviewState> {
     try {
       await repo.approveRequest(request);
       emit(const ReviewDone(true));
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/admin/presentation/cubit/request_review_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       emit(ReviewError(e.toString()));
     }
   }
@@ -46,7 +48,8 @@ class RequestReviewCubit extends Cubit<RequestReviewState> {
     try {
       await repo.rejectRequest(request, reason);
       emit(const ReviewDone(false));
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/admin/presentation/cubit/request_review_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       emit(ReviewError(e.toString()));
     }
   }

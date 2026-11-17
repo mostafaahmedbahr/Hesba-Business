@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 class AdminListState extends Equatable {
   const AdminListState({
@@ -52,7 +53,8 @@ class AdminListCubit extends Cubit<AdminListState> {
         lastDoc: snap.docs.isEmpty ? null : snap.docs.last,
         hasMore: snap.docs.length >= 20,
       ));
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/admin/presentation/cubit/admin_list_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       emit(AdminListState(error: e.toString()));
     }
   }
@@ -68,7 +70,8 @@ class AdminListCubit extends Cubit<AdminListState> {
         lastDoc: snap.docs.isEmpty ? current.lastDoc : snap.docs.last,
         hasMore: snap.docs.length >= 20,
       ));
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/admin/presentation/cubit/admin_list_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       emit(current.copyWith(loading: false, error: e.toString()));
     }
   }

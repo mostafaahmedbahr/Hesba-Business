@@ -1,13 +1,9 @@
-import 'package:flutter/foundation.dart';
+import '../services/app_logger.dart';
 
-void logError(String msg) {
-  if (kDebugMode) debugPrint('\x1B[31m$msg\x1B[0m');
-}
+/// غلافات توافقية فوق [AppLogger] — تُبقي الاستخدامات القديمة شغالة
+/// وتوجّه كلها للسجل المركزي. لا تستخدم الألوان المباشرة هنا.
+void logError(String msg) => AppLogger.error(msg);
 
-void logSuccess(String msg) {
-  if (kDebugMode) debugPrint('\x1B[32m$msg\x1B[0m');
-}
+void logSuccess(String msg) => AppLogger.info(msg);
 
-void logWarning(String msg) {
-  if (kDebugMode) debugPrint('\x1B[33m$msg\x1B[0m');
-}
+void logWarning(String msg) => AppLogger.warning(msg);

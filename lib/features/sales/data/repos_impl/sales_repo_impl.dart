@@ -8,6 +8,7 @@ import '../../../accounts/data/models/person_model.dart';
 import '../../../accounts/data/repos/accounts_repo.dart';
 import '../models/sale_model.dart';
 import '../repos/sales_repo.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 class SalesRepoImpl implements SalesRepo {
   final FirebaseFirestore firestore;
@@ -67,7 +68,8 @@ class SalesRepoImpl implements SalesRepo {
       _cachedShopNameFor = shopId;
       _cachedShopName = name;
       return name;
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/sales/data/repos_impl/sales_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning);
       return '';
     }
   }

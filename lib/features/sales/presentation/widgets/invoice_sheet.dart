@@ -20,6 +20,7 @@ import 'invoice/action_button.dart';
 import 'invoice/invoice_card.dart';
 import 'invoice/invoice_helpers.dart';
 import 'invoice/sheet_header.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 export 'invoice/ask_issue_invoice.dart' show askIssueInvoice;
 export 'invoice/invoice_helpers.dart' show invoiceShareText;
@@ -78,7 +79,8 @@ class _InvoiceSheetState extends State<_InvoiceSheet> {
           .getProfile()
           .timeout(const Duration(seconds: 6));
       if (mounted) setState(() => _profile = p);
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/sales/presentation/widgets/invoice_sheet.dart', logErr, logSt, severity: LoggingSeverity.warning);
       // نكمّل بدون بيانات المحل (الفاتورة هتطلع باسم المحل من البيع).
     } finally {
       if (!_profileReady.isCompleted) _profileReady.complete();
@@ -91,7 +93,8 @@ class _InvoiceSheetState extends State<_InvoiceSheet> {
     setState(() => _busyBtn = target);
     try {
       await action();
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/sales/presentation/widgets/invoice_sheet.dart', logErr, logSt, severity: LoggingSeverity.error);
       if (mounted) AppToast.error(context, 'errorGeneric'.tr());
     } finally {
       if (mounted) setState(() => _busyBtn = null);
@@ -106,7 +109,8 @@ class _InvoiceSheetState extends State<_InvoiceSheet> {
     try {
       await precacheImage(NetworkImage(url), context)
           .timeout(const Duration(seconds: 5));
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/sales/presentation/widgets/invoice_sheet.dart', logErr, logSt, severity: LoggingSeverity.warning);
       // لو الصورة مش متاحة هتظهر أيقونة بديلة في الصورة.
     }
   }
@@ -116,7 +120,7 @@ class _InvoiceSheetState extends State<_InvoiceSheet> {
     // استنى بيانات المحل (لو لسه بتيجي) — أقصى 5 ثواني.
     try {
       await _profileReady.future.timeout(const Duration(seconds: 5));
-    } catch (_) {}
+    } catch (logErr, logSt) { AppLogger.nonFatal('features/sales/presentation/widgets/invoice_sheet.dart', logErr, logSt, severity: LoggingSeverity.warning); }
     if (!mounted) return null;
     await _preloadLogo();
     // استنى أول رسم بعد تحميل البيانات.
@@ -173,7 +177,8 @@ class _InvoiceSheetState extends State<_InvoiceSheet> {
         bytes,
         name: 'invoice_${shortInvoiceId(widget.sale.saleId)}',
       ).timeout(const Duration(seconds: 10));
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/sales/presentation/widgets/invoice_sheet.dart', logErr, logSt, severity: LoggingSeverity.warning);
       // الحفش فشل (إذن مرفوض...) → المشاركة العادية بالصورة والنص.
       if (mounted) AppToast.warning(context, 'invoiceGalleryError'.tr());
       await _share();

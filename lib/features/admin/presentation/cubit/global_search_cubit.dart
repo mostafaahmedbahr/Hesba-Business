@@ -4,6 +4,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/repos/admin_search_repo.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 abstract class GlobalSearchState extends Equatable {
   const GlobalSearchState();
@@ -69,7 +70,8 @@ class GlobalSearchCubit extends Cubit<GlobalSearchState> {
       final hits = await _searchRepo.search(q);
       emit(SearchResults(
           hits.map((h) => SearchHit(h.kind, h.title, h.id)).toList()));
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/admin/presentation/cubit/global_search_cubit.dart', logErr, logSt, severity: LoggingSeverity.warning);
       emit(const SearchError('تعذر تنفيذ البحث، حاول مرة أخرى'));
     }
   }
@@ -82,7 +84,8 @@ class GlobalSearchCubit extends Cubit<GlobalSearchState> {
         'product' => await _searchRepo.fetchProduct(hit.id),
         _ => await _searchRepo.fetchRequest(hit.id),
       };
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/admin/presentation/cubit/global_search_cubit.dart', logErr, logSt, severity: LoggingSeverity.warning);
       return null;
     }
   }

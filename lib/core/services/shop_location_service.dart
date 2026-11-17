@@ -4,6 +4,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../models/shop_location.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// Why a location attempt failed — mapped to a translation key by the
 /// presentation layer.
@@ -66,7 +67,8 @@ class ShopLocationService {
       );
     } on TimeoutException {
       throw const ShopLocationException(ShopLocationFailure.timeout);
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('core/services/shop_location_service.dart', logErr, logSt, severity: LoggingSeverity.warning);
       throw const ShopLocationException(ShopLocationFailure.failed);
     }
 
@@ -95,7 +97,8 @@ class ShopLocationService {
       );
       if (placemarks.isEmpty) return '';
       return formatPlacemark(placemarks.first);
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('core/services/shop_location_service.dart', logErr, logSt, severity: LoggingSeverity.warning);
       return '';
     }
   }
@@ -114,7 +117,8 @@ class ShopLocationService {
         first.longitude,
         address: query,
       );
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('core/services/shop_location_service.dart', logErr, logSt, severity: LoggingSeverity.warning);
       return null;
     }
   }
@@ -129,7 +133,8 @@ class ShopLocationService {
         position.latitude,
         position.longitude,
       );
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('core/services/shop_location_service.dart', logErr, logSt, severity: LoggingSeverity.warning);
       return null;
     }
   }

@@ -6,6 +6,7 @@ import '../../../../core/utils/paged_fetch.dart';
 import '../models/expense_model.dart';
 import '../expense_reminder_scheduler.dart';
 import '../repos/expenses_repo.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 class ExpensesRepoImpl implements ExpensesRepo {
   final FirebaseFirestore firestore;
@@ -202,7 +203,8 @@ class ExpensesRepoImpl implements ExpensesRepo {
       }
       final snap = await query.orderBy('createdAt', descending: true).limit(500).get();
       return snap.docs.map((d) => ExpenseModel.fromJson(d.data())).toList();
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/expenses/data/repos_impl/expenses_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning);
       // fallback بدون index — حمّل الكل وفلتر محلياً (للمالك فقط، أبداً الكل).
       if (_uid == null) throw Exception('يجب تسجيل الدخول أولاً');
       final snap = await firestore.collection(AppConstants.expensesCollection).orderBy('createdAt', descending: true).limit(500).get();
@@ -246,7 +248,8 @@ class ExpensesRepoImpl implements ExpensesRepo {
           in query.orderBy('createdAt', descending: true).limit(500).snapshots()) {
         yield _toFiltered(snap, resolvedShopId);
       }
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/expenses/data/repos_impl/expenses_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning);
       // الـ index ناقص: fallback لقراءة بدون where + فلترة محلية.
       await for (final snap in firestore
           .collection(AppConstants.expensesCollection)

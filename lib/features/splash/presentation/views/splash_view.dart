@@ -4,6 +4,7 @@ import 'package:hesba/core/services/user_role_service.dart';
 import '../../../../common_imports.dart';
 import '../widgets/splash_background.dart';
 import '../widgets/splash_body_content.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
@@ -68,7 +69,7 @@ class _SplashViewState extends State<SplashView> {
   Future<void> _logout() async {
     try {
       await sl<AccountRepo>().logout();
-    } catch (_) {}
+    } catch (logErr, logSt) { AppLogger.nonFatal('features/splash/presentation/views/splash_view.dart', logErr, logSt, severity: LoggingSeverity.warning); }
     sl<UserRoleService>().clear();
     if (!mounted) return;
     Navigator.pushReplacementNamed(context, AppRoutes.login);

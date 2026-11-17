@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 
 import '../extensions/log_util.dart';
 import '../models/admin_settings.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// الإعدادات الحية للتطبيق: أسعار الاشتراكات، الفترة التجريبية، وأرقام المحافظ.
 ///
@@ -34,7 +35,8 @@ class AppSettingsService {
       if (data != null && data.isNotEmpty) {
         _current = AdminSettings.fromJson(data);
       }
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('core/services/app_settings_service.dart', e, logSt, severity: LoggingSeverity.warning);
       logWarning('[AppSettings] refresh failed: $e');
     }
   }

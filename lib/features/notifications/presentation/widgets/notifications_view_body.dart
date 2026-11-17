@@ -10,6 +10,7 @@ import '../view_model/activity_cubit.dart';
 import '../view_model/activity_state.dart';
 import '../view_model/notification_state.dart';
 import '../view_model/notification_cubit.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// جسم الشاشة (تاب تذكيراتي | تاب سجل العمليات).
 class NotificationsViewBody extends StatefulWidget {
@@ -37,7 +38,7 @@ class _NotificationsViewBodyState extends State<NotificationsViewBody> {
     // ضمان إضافي عند الخروج.
     try {
       context.read<ActivityCubit>().markAllRead();
-    } catch (_) {}
+    } catch (logErr, logSt) { AppLogger.nonFatal('features/notifications/presentation/widgets/notifications_view_body.dart', logErr, logSt, severity: LoggingSeverity.warning); }
     super.dispose();
   }
 

@@ -7,6 +7,7 @@ import '../../../../core/services/notification_service.dart';
 import '../../data/models/activity_model.dart';
 import '../../data/repos/activity_repo.dart';
 import 'activity_state.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// فيو موديل سجل النشاطات (شارة الجرس).
 class ActivityCubit extends Cubit<ActivityState> {
@@ -40,7 +41,8 @@ class ActivityCubit extends Cubit<ActivityState> {
           body: msg.body,
           payload: msg.payload,
         );
-      } catch (e) {
+      } catch (e, logSt) {
+        AppLogger.nonFatal('features/notifications/presentation/view_model/activity_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
         // إشعار فاشل ما يكسرش تسجيل العملية.
       }
     });

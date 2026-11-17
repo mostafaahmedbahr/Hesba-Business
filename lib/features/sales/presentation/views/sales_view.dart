@@ -11,6 +11,7 @@ import '../widgets/sales_list_header.dart';
 import '../widgets/sales_list_placeholders.dart';
 import '../widgets/sales_list_search.dart';
 import '../../../subscription/presentation/subscription_gate.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// شاشة المبيعات (عرض بس — اللوجيك في Cubit).
 class SalesView extends StatelessWidget {
@@ -38,7 +39,7 @@ class _SalesBody extends StatelessWidget {
     if (result == true) {
       try {
         context.read<DashboardCubit>().refresh();
-      } catch (_) {}
+      } catch (logErr, logSt) { AppLogger.nonFatal('features/sales/presentation/views/sales_view.dart', logErr, logSt, severity: LoggingSeverity.warning); }
     }
   }
 

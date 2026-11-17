@@ -5,6 +5,7 @@ import '../../../../core/services/app_settings_service.dart';
 import '../../data/models/subscription_plan.dart';
 import '../../data/repos/subscription_repo.dart';
 import '../states/subscription_state.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// Drives the subscription screen: reads the current state, then walks the
 /// user through plan -> payment channel -> receipt -> submit.
@@ -27,7 +28,8 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
         loadStatus: SubscriptionLoadStatus.ready,
         subscription: subscription,
       ));
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/subscription/presentation/cubit/subscription_cubit.dart', logErr, logSt, severity: LoggingSeverity.warning);
       emit(state.copyWith(
         loadStatus: SubscriptionLoadStatus.error,
         messageKey: 'subscriptionLoadFailed',
@@ -60,7 +62,8 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
         phase: SubscriptionRequestPhase.idle,
         receiptUrl: url,
       ));
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/subscription/presentation/cubit/subscription_cubit.dart', logErr, logSt, severity: LoggingSeverity.warning);
       emit(state.copyWith(
         phase: SubscriptionRequestPhase.error,
         messageKey: 'subscriptionReceiptFailed',
@@ -113,7 +116,8 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
         phase: SubscriptionRequestPhase.submitted,
         subscription: subscription,
       ));
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/subscription/presentation/cubit/subscription_cubit.dart', logErr, logSt, severity: LoggingSeverity.warning);
       emit(state.copyWith(
         phase: SubscriptionRequestPhase.error,
         messageKey: 'subscriptionSubmitFailed',

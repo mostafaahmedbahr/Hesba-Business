@@ -38,6 +38,7 @@ import '../widgets/product_form/product_form_text_field.dart';
 import '../widgets/product_form/product_form_toggle.dart';
 import '../widgets/product_form/product_form_variants_editor.dart';
 import '../widgets/product_form/product_profit_preview.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// نموذج إضافة/تعديل منتج — الحقول تُبنى بالكامل من ProductFieldsCatalog
 /// حسب نوع نشاط المتجر (لا توجد قوائم حقول ثابتة في الواجهة).
@@ -186,7 +187,7 @@ class _ProductFormViewState extends State<ProductFormView> {
           });
         }
       });
-    } catch (_) {}
+    } catch (logErr, logSt) { AppLogger.nonFatal('features/products/presentation/views/product_form_view.dart', logErr, logSt, severity: LoggingSeverity.warning); }
   }
 
   String get _otherOption =>
@@ -348,7 +349,8 @@ class _ProductFormViewState extends State<ProductFormView> {
       if (liveName.isNotEmpty && liveName != _formCubit.state.supplierName) {
         _formCubit.setSupplier(id, liveName);
       }
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/products/presentation/views/product_form_view.dart', logErr, logSt, severity: LoggingSeverity.warning);
       // أفضل جهد فقط.
     }
   }

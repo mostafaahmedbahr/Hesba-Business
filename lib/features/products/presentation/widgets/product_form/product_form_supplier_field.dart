@@ -8,6 +8,7 @@ import '../../../../suppliers/data/repos/suppliers_repo.dart';
 import '../../../../suppliers/presentation/widgets/supplier_picker_sheet.dart';
 import '../../../../suppliers/presentation/views/supplier_details_view.dart';
 import 'product_form_section.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// حقل المورد داخل نموذج المنتج (إضافة/تعديل).
 ///
@@ -62,7 +63,8 @@ class _ProductSupplierFieldState extends State<ProductSupplierField> {
       final supplier = await sl<SuppliersRepo>().getSupplierById(id);
       if (!mounted) return;
       setState(() => _phone = supplier?.phone ?? '');
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/products/presentation/widgets/product_form/product_form_supplier_field.dart', logErr, logSt, severity: LoggingSeverity.warning);
       // الرقم اختياري — لو مقدرناش نقرأه بنعرض الاسم بس.
     } finally {
       _loadingPhone = false;

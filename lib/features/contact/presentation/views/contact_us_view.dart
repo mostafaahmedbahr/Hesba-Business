@@ -11,6 +11,7 @@ import '../../../profile/presentation/widgets/app_scaffold.dart';
 import '../widgets/contact_header.dart';
 import '../widgets/contact_tile.dart';
 import '../widgets/feedback_form.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 class ContactUsView extends StatefulWidget {
   const ContactUsView({super.key});
@@ -93,7 +94,8 @@ class _ContactUsViewState extends State<ContactUsView> {
         queryParameters: {'subject': 'contactEmailSubject'.tr()},
       );
       await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/contact/presentation/views/contact_us_view.dart', logErr, logSt, severity: LoggingSeverity.error);
       if (mounted) AppToast.error(context, 'contactEmailError'.tr());
     }
   }
@@ -102,7 +104,8 @@ class _ContactUsViewState extends State<ContactUsView> {
     try {
       final uri = Uri.parse('https://wa.me/$_whatsapp');
       await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/contact/presentation/views/contact_us_view.dart', logErr, logSt, severity: LoggingSeverity.error);
       if (mounted) AppToast.error(context, 'contactWhatsAppError'.tr());
     }
   }
@@ -111,7 +114,8 @@ class _ContactUsViewState extends State<ContactUsView> {
     try {
       final uri = Uri(scheme: 'tel', path: _phone);
       await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/contact/presentation/views/contact_us_view.dart', logErr, logSt, severity: LoggingSeverity.error);
       if (mounted) AppToast.error(context, 'contactCallError'.tr());
     }
   }
@@ -132,7 +136,8 @@ class _ContactUsViewState extends State<ContactUsView> {
       if (!mounted) return;
       AppToast.success(context, 'contactFormSuccess'.tr());
       Navigator.pop(context);
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/contact/presentation/views/contact_us_view.dart', e, logSt, severity: LoggingSeverity.error);
       if (!mounted) return;
       AppToast.error(context, 'contactFormError'.tr());
     }

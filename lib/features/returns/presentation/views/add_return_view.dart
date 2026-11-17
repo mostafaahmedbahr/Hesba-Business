@@ -24,6 +24,7 @@ import '../widgets/return_item_card.dart';
 import '../widgets/return_reason_chips.dart';
 import '../widgets/return_summary.dart';
 import '../../../subscription/presentation/subscription_gate.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// شاشة إضافة مرتجع (اختيار فاتورة + أصناف + ملخص حي + شريط حفظ ثابت).
 class AddReturnView extends StatefulWidget {
@@ -100,7 +101,7 @@ class _AddReturnViewState extends State<AddReturnView> {
       final repo = sl<ProductsRepo>();
       _shopBusinessType = await repo.getShopBusinessType();
       _shopBusinessType ??= await resolver.getShopBusinessType();
-    } catch (_) {}
+    } catch (logErr, logSt) { AppLogger.nonFatal('features/returns/presentation/views/add_return_view.dart', logErr, logSt, severity: LoggingSeverity.warning); }
     _updateReasons();
     if (mounted) setState(() {});
   }
@@ -113,7 +114,7 @@ class _AddReturnViewState extends State<AddReturnView> {
         setState(() => _availableProducts = products.where((p) => p.isActive).toList());
         _updateReasons();
       });
-    } catch (_) {}
+    } catch (logErr, logSt) { AppLogger.nonFatal('features/returns/presentation/views/add_return_view.dart', logErr, logSt, severity: LoggingSeverity.warning); }
   }
 
   void _loadSales() {
@@ -138,7 +139,7 @@ class _AddReturnViewState extends State<AddReturnView> {
             try {
               final found = sales.firstWhere((s) => s.saleId == widget.originalSaleId);
               _selectSale(found);
-            } catch (_) {}
+            } catch (logErr, logSt) { AppLogger.nonFatal('features/returns/presentation/views/add_return_view.dart', logErr, logSt, severity: LoggingSeverity.warning); }
           }
         });
       }, onError: (_) {
@@ -188,7 +189,8 @@ class _AddReturnViewState extends State<AddReturnView> {
       final map = await sl<ReturnsRepo>().getAlreadyReturnedQuantities(saleId);
       _alreadyReturned.clear();
       _alreadyReturned.addAll(map);
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/returns/presentation/views/add_return_view.dart', e, logSt, severity: LoggingSeverity.warning);
       // Fail closed: without history the editable max is unreliable.
       debugPrint('getAlreadyReturnedQuantities failed: $e');
       _historyFailed = true;
@@ -205,7 +207,7 @@ class _AddReturnViewState extends State<AddReturnView> {
         if (item.productId.isNotEmpty) {
           try {
             prod = _availableProducts.firstWhere((p) => p.id == item.productId);
-          } catch (_) {}
+          } catch (logErr, logSt) { AppLogger.nonFatal('features/returns/presentation/views/add_return_view.dart', logErr, logSt, severity: LoggingSeverity.warning); }
         }
         if (prod != null && prod.category.isNotEmpty) categories.add(prod.category);
       }

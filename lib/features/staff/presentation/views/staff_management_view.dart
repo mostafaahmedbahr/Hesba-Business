@@ -9,6 +9,7 @@ import '../../../../core/widgets/loading_widget.dart';
 import '../../data/models/staff_model.dart';
 import '../../data/repos/staff_repo.dart';
 import '../cubit/staff_cubit.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// شاشة يستخدمها صاحب المحل فقط لإنشاء وإدارة الحسابات الفرعية.
 class StaffManagementView extends StatelessWidget {
@@ -218,7 +219,8 @@ class _StaffCard extends StatelessWidget {
                         if (context.mounted) {
                           AppToast.success(context, 'تم إرسال رابط تغيير كلمة المرور');
                         }
-                      } catch (e) {
+                      } catch (e, logSt) {
+                        AppLogger.nonFatal('features/staff/presentation/views/staff_management_view.dart', e, logSt, severity: LoggingSeverity.error);
                         if (context.mounted) {
                           AppToast.error(context, 'تعذر إرسال الرابط');
                         }
@@ -271,7 +273,7 @@ class _StaffCard extends StatelessWidget {
             phone: phone.text.trim(),
             isActive: staff.isActive,
           );
-    } catch (_) {}
+    } catch (logErr, logSt) { AppLogger.nonFatal('features/staff/presentation/views/staff_management_view.dart', logErr, logSt, severity: LoggingSeverity.warning); }
   }
 
   Future<void> _toggleActive(BuildContext context) async {
@@ -296,7 +298,7 @@ class _StaffCard extends StatelessWidget {
             phone: staff.phone,
             isActive: !staff.isActive,
           );
-    } catch (_) {}
+    } catch (logErr, logSt) { AppLogger.nonFatal('features/staff/presentation/views/staff_management_view.dart', logErr, logSt, severity: LoggingSeverity.warning); }
   }
 }
 
@@ -542,7 +544,8 @@ class _AddStaffSheetState extends State<_AddStaffSheet> {
             password: _password.text,
           );
       if (mounted) Navigator.pop(context, true);
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/staff/presentation/views/staff_management_view.dart', e, logSt, severity: LoggingSeverity.error);
       if (mounted) {
         setState(() => _saving = false);
         AppToast.error(context, 'تعذر إنشاء الحساب: ${e.toString()}');

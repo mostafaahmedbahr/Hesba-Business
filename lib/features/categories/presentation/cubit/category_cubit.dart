@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/repos/category_repo.dart';
 import 'category_state.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// لوجيك الأقسام (الـ View غبية — بتنادي بس).
 class CategoryCubit extends Cubit<CategoryState> {
@@ -92,7 +93,8 @@ class CategoryCubit extends Cubit<CategoryState> {
       await _repo.addCategory(state.shopId, trimmed);
       emit(state.copyWith(status: CategoryStatus.success, successMessage: 'تمت إضافة القسم', clearError: true));
       return true;
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/categories/presentation/cubit/category_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       emit(state.copyWith(status: CategoryStatus.failure, errorMessage: e.toString().replaceAll('Exception: ', '')));
       return false;
     }
@@ -105,7 +107,8 @@ class CategoryCubit extends Cubit<CategoryState> {
       await _repo.removeCategory(state.shopId, category);
       emit(state.copyWith(successMessage: 'تم حذف القسم', clearError: true));
       return true;
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/categories/presentation/cubit/category_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       emit(state.copyWith(errorMessage: e.toString().replaceAll('Exception: ', ''), status: CategoryStatus.failure));
       return false;
     }

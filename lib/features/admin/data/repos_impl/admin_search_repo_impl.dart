@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../repos/admin_search_repo.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// بحث شامل للأدمن (محل / منتج / طلب اشتراك).
 ///
@@ -94,7 +95,8 @@ class AdminSearchRepoImpl implements AdminSearchRepo {
       Future<List<AdminSearchHit>> Function() scan) async {
     try {
       return await scan();
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/admin/data/repos_impl/admin_search_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning);
       return null; // نتخطى الـ collection ده ونكمل الباقي
     }
   }

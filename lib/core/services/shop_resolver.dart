@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// Single place that answers "who is the current owner, and what is
 /// their shop?".
@@ -24,7 +25,8 @@ class ShopResolver {
       final doc = await _firestore.collection('users').doc(uid).get();
       final shopId = doc.data()?['shopId'] as String?;
       return (shopId == null || shopId.isEmpty) ? null : shopId;
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('core/services/shop_resolver.dart', logErr, logSt, severity: LoggingSeverity.warning);
       return null;
     }
   }
@@ -44,7 +46,8 @@ class ShopResolver {
         if (sName != null && sName.trim().isNotEmpty) return sName.trim();
       }
       return null;
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('core/services/shop_resolver.dart', logErr, logSt, severity: LoggingSeverity.warning);
       return null;
     }
   }
@@ -55,7 +58,8 @@ class ShopResolver {
       if (shopId == null) return null;
       final doc = await _firestore.collection('shops').doc(shopId).get();
       return doc.data()?['businessType'] as String?;
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('core/services/shop_resolver.dart', logErr, logSt, severity: LoggingSeverity.warning);
       return null;
     }
   }

@@ -11,6 +11,7 @@ import '../../../../../core/utils/toast.dart';
 import '../../../../../core/widgets/loading_widget.dart';
 import '../../../../../core/widgets/shop_image_picker.dart';
 import '../../../../../core/widgets/shop_location_field.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 class RegisterExtraStep extends StatefulWidget {
   final TextEditingController shopImageUrlController;
@@ -194,7 +195,8 @@ class _RegisterExtraStepState extends State<RegisterExtraStep> {
     CloudinaryUploadException? failure;
     try {
       imageUrl = await sl<CloudinaryImageService>().uploadShopImage(file: file);
-    } on CloudinaryUploadException catch (error) {
+    } on CloudinaryUploadException catch (error, logSt) {
+      AppLogger.nonFatal('features/auth/presentation/widgets/register_widgets/register_extra_step.dart', error, logSt, severity: LoggingSeverity.warning);
       failure = error;
     } finally {
       navigator.pop();
@@ -229,7 +231,8 @@ class _RegisterExtraStepState extends State<RegisterExtraStep> {
         return 'extraUrlBad'.tr();
       }
       return null;
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/auth/presentation/widgets/register_widgets/register_extra_step.dart', logErr, logSt, severity: LoggingSeverity.warning);
       return 'extraUrlBad'.tr();
     }
   }

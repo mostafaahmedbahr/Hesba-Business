@@ -8,6 +8,7 @@ import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../features/notifications/data/models/local_reminder.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// Remote (FCM) + local notification service.
 ///
@@ -195,7 +196,7 @@ final channel = AndroidNotificationChannel(
           fcmSettings.authorizationStatus == AuthorizationStatus.provisional) {
         granted = true;
       }
-    } catch (_) {}
+    } catch (logErr, logSt) { AppLogger.nonFatal('core/services/notification_service.dart', logErr, logSt, severity: LoggingSeverity.warning); }
 
     final android = _local.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
@@ -228,7 +229,8 @@ final channel = AndroidNotificationChannel(
       try {
         final token = await _messaging.getAPNSToken();
         if (token != null && token.isNotEmpty) return true;
-      } catch (_) {
+      } catch (logErr, logSt) {
+        AppLogger.nonFatal('core/services/notification_service.dart', logErr, logSt, severity: LoggingSeverity.warning);
         // لسه ما جهش — نحاول تاني.
       }
       await Future.delayed(delay);
@@ -243,7 +245,8 @@ final channel = AndroidNotificationChannel(
     if (!ready) return null;
     try {
       return await _messaging.getToken();
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('core/services/notification_service.dart', logErr, logSt, severity: LoggingSeverity.warning);
       return null;
     }
   }
@@ -269,7 +272,7 @@ final channel = AndroidNotificationChannel(
     // this device (no need to paste a token).
     try {
       await _messaging.subscribeToTopic(appTopic);
-    } catch (_) {/* best effort */}
+    } catch (logErr, logSt) { AppLogger.nonFatal('core/services/notification_service.dart', logErr, logSt, severity: LoggingSeverity.warning); }
 
     final token = await getToken();
     if (token != null) {

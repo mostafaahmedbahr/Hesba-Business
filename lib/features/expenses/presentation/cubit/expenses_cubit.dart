@@ -6,6 +6,7 @@ import '../../../../core/services/app_events.dart';
 import '../../data/models/expense_model.dart';
 import '../../data/repos/expenses_repo.dart';
 import 'expenses_state.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 class ExpensesCubit extends Cubit<ExpensesState> {
   final ExpensesRepo expensesRepo;
@@ -45,7 +46,7 @@ class ExpensesCubit extends Cubit<ExpensesState> {
     // الستريم فتظهر أي مصروفات جديدة فورًا.
     try {
       await expensesRepo.syncRecurringExpenses();
-    } catch (_) {}
+    } catch (logErr, logSt) { AppLogger.nonFatal('features/expenses/presentation/cubit/expenses_cubit.dart', logErr, logSt, severity: LoggingSeverity.warning); }
     // حتى لو الـ shopId فاضي، اعرض الكل (repo بيعمل fallback)
     final effectiveShopId = resolvedShopId ?? shopId;
     _expensesSubscription = expensesRepo.watchExpenses(shopId: effectiveShopId).listen(
@@ -113,7 +114,8 @@ class ExpensesCubit extends Cubit<ExpensesState> {
       });
       AppEvents.instance.productChanged();
       emit(state.copyWith(status: ExpensesStatus.success, addedExpense: expense, errorMessage: null));
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/expenses/presentation/cubit/expenses_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       final msg = e.toString().replaceAll('Exception: ', '');
       emit(state.copyWith(status: ExpensesStatus.error, errorMessage: msg));
     }
@@ -167,7 +169,8 @@ class ExpensesCubit extends Cubit<ExpensesState> {
       });
       AppEvents.instance.productChanged();
       emit(state.copyWith(status: ExpensesStatus.success, addedExpense: expense, errorMessage: null));
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/expenses/presentation/cubit/expenses_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       final msg = e.toString().replaceAll('Exception: ', '');
       emit(state.copyWith(status: ExpensesStatus.error, errorMessage: msg));
     }
@@ -203,7 +206,8 @@ class ExpensesCubit extends Cubit<ExpensesState> {
       });
       AppEvents.instance.productChanged();
       emit(state.copyWith(status: ExpensesStatus.success));
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/expenses/presentation/cubit/expenses_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       final msg = e.toString().replaceAll('Exception: ', '');
       emit(state.copyWith(status: ExpensesStatus.error, errorMessage: msg));
     }

@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../models/category_shop_context.dart';
 import '../repos/category_repo.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// تنفيذ Firestore لعقد الأقسام.
 class CategoryRepoImpl implements CategoryRepo {
@@ -51,7 +52,8 @@ class CategoryRepoImpl implements CategoryRepo {
         businessType = shopDoc.data()?['businessType'] as String?;
       }
       return CategoryShopContext(shopId: shopId, businessType: businessType);
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/categories/data/repos_impl/category_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning);
       return const CategoryShopContext(shopId: '');
     }
   }

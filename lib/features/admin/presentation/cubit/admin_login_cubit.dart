@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/repos/admin_repo.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 abstract class AdminLoginState extends Equatable {
   const AdminLoginState();
@@ -41,9 +42,11 @@ class AdminLoginCubit extends Cubit<AdminLoginState> {
         await repo.signOutAdmin();
         emit(const AdminLoginDenied());
       }
-    } on FirebaseAuthException catch (e) {
+    } on FirebaseAuthException catch (e, logSt) {
+      AppLogger.nonFatal('features/admin/presentation/cubit/admin_login_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       emit(AdminLoginFailure(e.message ?? 'خطأ في تسجيل الدخول'));
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/admin/presentation/cubit/admin_login_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       emit(AdminLoginFailure(e.toString()));
     }
   }

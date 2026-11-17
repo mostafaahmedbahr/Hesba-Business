@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../common_imports.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// أزرار التعامل مع رقم هاتف أي جهة اتصال (عميل / مورد):
 /// اتصال + واتساب + نسخ الرقم.
@@ -76,7 +77,8 @@ abstract class PhoneContact {
       if (await canLaunchUrl(uri)) {
         opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('core/utils/phone_contact.dart', logErr, logSt, severity: LoggingSeverity.warning);
       opened = false;
     }
     if (!context.mounted) return opened;

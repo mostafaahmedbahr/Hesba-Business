@@ -7,6 +7,7 @@ import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
 import 'package:hesba/features/admin/data/repos/admin_repo.dart';
 import 'package:hesba/features/admin/presentation/cubit/admin_list_cubit.dart';
 import 'package:hesba/features/subscription/data/models/subscription_plan.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 class SubscriptionsView extends StatefulWidget {
   const SubscriptionsView({super.key});
@@ -361,7 +362,8 @@ class _SubDetailsSheet extends StatelessWidget {
     SubscriptionPlan? plan;
     try {
       plan = SubscriptionPlan.fromId(planId);
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/admin/presentation/views/subscriptions_view.dart', logErr, logSt, severity: LoggingSeverity.warning);
       plan = null;
     }
 

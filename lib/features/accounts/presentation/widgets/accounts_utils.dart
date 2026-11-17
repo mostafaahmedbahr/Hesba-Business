@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../common_imports.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// تنسيق المبالغ: أرقام لاتينية بفواصل آلاف، بدون كسور لو العدد صحيح.
 String formatMoney(double value) {
@@ -97,7 +98,8 @@ abstract class AccountContact {
       if (await canLaunchUrl(uri)) {
         opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/accounts/presentation/widgets/accounts_utils.dart', logErr, logSt, severity: LoggingSeverity.warning);
       opened = false;
     }
     if (!context.mounted) return opened;

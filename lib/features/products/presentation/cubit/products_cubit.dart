@@ -7,6 +7,7 @@ import '../../../../core/models/product.dart';
 import '../../../../core/services/app_events.dart';
 import '../../data/repos/products_repo.dart';
 import '../states/products_state.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 class ProductsCubit extends Cubit<ProductsState> {
   final ProductsRepo _repo;
@@ -56,7 +57,8 @@ class ProductsCubit extends Cubit<ProductsState> {
       AppEvents.instance.productAdded(_productData(product));
       AppEvents.instance.productChanged();
       return true;
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/products/presentation/cubit/products_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       logWarning('[ProductsCubit] addProduct failed: $e');
       return false;
     }
@@ -68,7 +70,8 @@ class ProductsCubit extends Cubit<ProductsState> {
       AppEvents.instance.productUpdated(_productData(product));
       AppEvents.instance.productChanged();
       return true;
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/products/presentation/cubit/products_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       logWarning('[ProductsCubit] updateProduct failed: $e');
       return false;
     }
@@ -88,7 +91,8 @@ class ProductsCubit extends Cubit<ProductsState> {
       AppEvents.instance.productDeleted({'name': name});
       AppEvents.instance.productChanged();
       return true;
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/products/presentation/cubit/products_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       logWarning('[ProductsCubit] deleteProduct failed: $e');
       return false;
     }

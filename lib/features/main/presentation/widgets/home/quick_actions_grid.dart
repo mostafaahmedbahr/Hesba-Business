@@ -13,6 +13,7 @@ import '../../../../products/data/repos/products_repo.dart';
 import '../../../../products/presentation/cubit/products_cubit.dart';
 import '../../../../products/presentation/views/product_form_view.dart';
 import '../../../../subscription/presentation/subscription_gate.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// شبكة "الإجراءات السريعة" في الـ Home: بيع جديد / إضافة منتج / مرتجع / مصروف.
 ///
@@ -58,7 +59,7 @@ class QuickActionsGrid extends StatelessWidget {
                   if (!await SubscriptionGate.ensureCanModify(context)) return;
                   final r = await Navigator.pushNamed(context, AppRoutes.addSaleView);
                   if (r == true && context.mounted) {
-                    try { context.read<DashboardCubit>().refresh(); } catch (_) {}
+                    try { context.read<DashboardCubit>().refresh(); } catch (logErr, logSt) { AppLogger.nonFatal('features/main/presentation/widgets/home/quick_actions_grid.dart', logErr, logSt, severity: LoggingSeverity.warning); }
                   }
                 }).animate().fadeIn(delay: 0.ms).scale(begin: const Offset(0.96, 0.96), end: const Offset(1, 1))),
         SizedBox(width: 10.w),
@@ -82,7 +83,7 @@ class QuickActionsGrid extends StatelessWidget {
                     ),
                   );
                   if (context.mounted) {
-                    try { context.read<DashboardCubit>().refresh(); } catch (_) {}
+                    try { context.read<DashboardCubit>().refresh(); } catch (logErr, logSt) { AppLogger.nonFatal('features/main/presentation/widgets/home/quick_actions_grid.dart', logErr, logSt, severity: LoggingSeverity.warning); }
                   }
                 }).animate().fadeIn(delay: 70.ms).scale(begin: const Offset(0.96, 0.96), end: const Offset(1, 1))),
       ]),
@@ -96,7 +97,7 @@ class QuickActionsGrid extends StatelessWidget {
                   if (!await SubscriptionGate.ensureCanModify(context)) return;
                   final r = await Navigator.pushNamed(context, AppRoutes.addReturnView);
                   if (r == true && context.mounted) {
-                    try { context.read<DashboardCubit>().refresh(); } catch (_) {}
+                    try { context.read<DashboardCubit>().refresh(); } catch (logErr, logSt) { AppLogger.nonFatal('features/main/presentation/widgets/home/quick_actions_grid.dart', logErr, logSt, severity: LoggingSeverity.warning); }
                   }
                 }).animate().fadeIn(delay: 140.ms).scale(begin: const Offset(0.96, 0.96), end: const Offset(1, 1))),
         SizedBox(width: 10.w),
@@ -108,7 +109,7 @@ class QuickActionsGrid extends StatelessWidget {
                   if (!await SubscriptionGate.ensureCanModify(context)) return;
                   final r = await Navigator.pushNamed(context, AppRoutes.addExpenseView);
                   if (r == true && context.mounted) {
-                    try { context.read<DashboardCubit>().refresh(); } catch (_) {}
+                    try { context.read<DashboardCubit>().refresh(); } catch (logErr, logSt) { AppLogger.nonFatal('features/main/presentation/widgets/home/quick_actions_grid.dart', logErr, logSt, severity: LoggingSeverity.warning); }
                   }
                 }).animate().fadeIn(delay: 210.ms).scale(begin: const Offset(0.96, 0.96), end: const Offset(1, 1))),
       ]),

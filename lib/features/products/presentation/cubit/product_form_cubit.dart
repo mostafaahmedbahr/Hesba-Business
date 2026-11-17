@@ -7,6 +7,7 @@ import '../../data/models/product_field.dart';
 import '../../data/models/product_fields_catalog.dart';
 import '../../data/repos/product_config_repo.dart';
 import '../states/product_form_state.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// يدير نموذج إضافة/تعديل المنتج:
 /// - تحميل إعدادات الحقول حسب نشاط المتجر من Firebase.
@@ -47,7 +48,8 @@ class ProductFormCubit extends Cubit<ProductFormState> {
           supplierName: existing?.supplierName,
         ),
       );
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/products/presentation/cubit/product_form_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       // فشل غير متوقع → نكمل بإعدادات عامة حتى لا تتعطل الشاشة.
       logWarning('[ProductFormCubit] load config failed: $e');
       emit(

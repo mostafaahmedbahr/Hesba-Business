@@ -6,6 +6,7 @@ import '../../../../core/extensions/log_util.dart';
 import '../../../../core/models/product.dart';
 import '../models/supplier_model.dart';
 import '../repos/suppliers_repo.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// تنفيذ ميزة الموردين على Firestore.
 ///
@@ -365,7 +366,8 @@ class SuppliersRepoImpl implements SuppliersRepo {
         }
       }
       if (pending > 0) await batch.commit();
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/suppliers/data/repos_impl/suppliers_repo_impl.dart', e, logSt, severity: LoggingSeverity.warning);
       logWarning('[SuppliersRepo] supplierName sync failed: $e');
     }
   }

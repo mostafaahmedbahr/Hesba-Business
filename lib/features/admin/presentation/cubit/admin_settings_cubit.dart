@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/models/admin_settings.dart';
 import '../../data/repos/admin_repo.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 abstract class AdminSettingsState extends Equatable {
   const AdminSettingsState();
@@ -56,7 +57,8 @@ class AdminSettingsCubit extends Cubit<AdminSettingsState> {
     emit(SettingsLoading());
     try {
       emit(SettingsLoaded(await repo.getSettings()));
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/admin/presentation/cubit/admin_settings_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       emit(SettingsError(e.toString()));
     }
   }
@@ -67,7 +69,8 @@ class AdminSettingsCubit extends Cubit<AdminSettingsState> {
       await repo.saveSettings(settings);
       emit(SettingsSaved(settings));
       emit(SettingsLoaded(settings));
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/admin/presentation/cubit/admin_settings_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       emit(SettingsSaveFailed(settings, e.toString()));
     }
   }

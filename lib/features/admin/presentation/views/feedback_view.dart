@@ -9,6 +9,7 @@ import '../../../contact/data/models/feedback_entry.dart';
 import '../../data/repos/admin_repo.dart';
 import '../cubit/admin_list_cubit.dart';
 import 'admin_ds.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// إدارة ملاحظات المستخدمين (شكاوى / اقتراحات / استفسارات).
 ///
@@ -197,7 +198,8 @@ class _FeedbackViewState extends State<FeedbackView> {
       if (!context.mounted) return;
       AppToast.success(context, handled ? 'تم تعليم الملاحظة كـ "تم التعامل معها"' : 'رجعت الملاحظة "جديدة"');
       context.read<AdminListCubit>().firstPage();
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/admin/presentation/views/feedback_view.dart', logErr, logSt, severity: LoggingSeverity.error);
       if (!context.mounted) return;
       AppToast.error(context, 'تعذر تحديث الملاحظة');
     }
@@ -218,7 +220,8 @@ class _FeedbackViewState extends State<FeedbackView> {
       AppToast.success(context, 'تم حذف الملاحظة');
       context.read<AdminListCubit>().firstPage();
       return true;
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/admin/presentation/views/feedback_view.dart', logErr, logSt, severity: LoggingSeverity.error);
       if (!context.mounted) return true;
       AppToast.error(context, 'تعذر حذف الملاحظة');
       return true;

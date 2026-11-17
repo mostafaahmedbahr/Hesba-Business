@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/repos/auth_repo.dart';
 import '../states/forgot_password_state.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// Sends the password reset email for the login screen.
 class ForgotPasswordCubit extends Cubit<ForgotPasswordState> {
@@ -14,7 +15,8 @@ class ForgotPasswordCubit extends Cubit<ForgotPasswordState> {
     try {
       await _authRepo.sendPasswordResetEmail(email: email);
       emit(state.copyWith(status: ForgotPasswordStatus.success));
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/auth/presentation/cubit/forgot_password_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       emit(state.copyWith(
         status: ForgotPasswordStatus.failure,
         errorMessage: mapResetError(e),

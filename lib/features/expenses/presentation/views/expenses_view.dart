@@ -11,6 +11,7 @@ import '../widgets/expense_list_placeholders.dart';
 import '../widgets/expense_list_search.dart';
 import 'add_expense_view.dart';
 import '../../../subscription/presentation/subscription_gate.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// شاشة المصروفات (عرض بس — اللوجيك في Cubit).
 class ExpensesView extends StatelessWidget {
@@ -43,7 +44,7 @@ class _ExpensesBody extends StatelessWidget {
     if (res == true && context.mounted) {
       try {
         context.read<ExpensesCubit>().loadExpenses(shopId: shopId ?? '');
-      } catch (_) {}
+      } catch (logErr, logSt) { AppLogger.nonFatal('features/expenses/presentation/views/expenses_view.dart', logErr, logSt, severity: LoggingSeverity.warning); }
     }
   }
 

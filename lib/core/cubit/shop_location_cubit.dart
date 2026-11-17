@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../models/shop_location.dart';
 import '../services/shop_location_service.dart';
 import 'shop_location_state.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// Presentation-layer state of the shop-location picker.
 ///
@@ -25,13 +26,15 @@ class ShopLocationCubit extends Cubit<ShopLocationState> {
     try {
       final location = await _locationService.detectCurrentLocation();
       emit(_success(location));
-    } on ShopLocationException catch (error) {
+    } on ShopLocationException catch (error, logSt) {
+      AppLogger.nonFatal('core/cubit/shop_location_cubit.dart', error, logSt, severity: LoggingSeverity.warning);
       emit(state.copyWith(
         status: ShopLocationStatus.failure,
         messageKey: _errorKey(error.failure),
         messageSeverity: ShopLocationMessageSeverity.error,
       ));
-    } catch (_) {
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('core/cubit/shop_location_cubit.dart', logErr, logSt, severity: LoggingSeverity.warning);
       emit(state.copyWith(
         status: ShopLocationStatus.failure,
         messageKey: 'locationFailed',

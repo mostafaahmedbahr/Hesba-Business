@@ -5,6 +5,7 @@ import '../../../../core/utils/validators.dart';
 import '../../data/models/supplier_model.dart';
 import '../../data/repos/suppliers_repo.dart';
 import '../states/supplier_form_state.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// يدير نموذج إضافة/تعديل المورد: تعبئة القيم، التحقق، الحفظ،
 /// والحماية من إرسال مزدوج أثناء الحفظ.
@@ -205,7 +206,8 @@ class SupplierFormCubit extends Cubit<SupplierFormState> {
         ),
       );
       return saved;
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/suppliers/presentation/cubit/supplier_form_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       final msg = e.toString().replaceAll('Exception: ', '');
       logWarning('[SupplierFormCubit] save failed: $msg');
       emit(

@@ -11,6 +11,7 @@ import '../widgets/returns_list_header.dart';
 import '../widgets/returns_list_placeholders.dart';
 import '../widgets/returns_list_search.dart';
 import '../../../subscription/presentation/subscription_gate.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// شاشة المرتجعات (صفحة داخلية لوحدها — اللوجيك في Cubit).
 class ReturnsView extends StatelessWidget {
@@ -38,7 +39,7 @@ class _ReturnsBody extends StatelessWidget {
     if (result == true) {
       try {
         context.read<DashboardCubit>().refresh();
-      } catch (_) {}
+      } catch (logErr, logSt) { AppLogger.nonFatal('features/returns/presentation/views/returns_view.dart', logErr, logSt, severity: LoggingSeverity.warning); }
     }
   }
 

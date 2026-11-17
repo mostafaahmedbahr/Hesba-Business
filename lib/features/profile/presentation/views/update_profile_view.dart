@@ -21,6 +21,7 @@ import '../../data/repos/account_repo.dart';
 import '../cubit/profile_cubit.dart';
 import '../states/profile_state.dart';
 import '../widgets/app_scaffold.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// تعديل كل بيانات التسجيل (ما عدا الإيميل والباسورد).
 class UpdateProfileView extends StatefulWidget {
@@ -353,7 +354,8 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
     String? imageUrl;
     try {
       imageUrl = await sl<CloudinaryImageService>().uploadShopImage(file: file);
-    } on CloudinaryUploadException catch (error) {
+    } on CloudinaryUploadException catch (error, logSt) {
+      AppLogger.nonFatal('features/profile/presentation/views/update_profile_view.dart', error, logSt, severity: LoggingSeverity.error);
       if (!mounted) return;
       AppToast.error(context, shopImageUploadErrorMessage(error));
       return;

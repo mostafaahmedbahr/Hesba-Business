@@ -14,6 +14,7 @@ import '../../../expenses/data/models/expense_model.dart';
 import '../../../expenses/presentation/views/expenses_view.dart';
 import '../../../returns/data/models/return_model.dart';
 import '../../../sales/data/models/sale_model.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// "آخر الحركات" section of the home page (last sale / return / expense).
 ///
@@ -40,7 +41,7 @@ class RecentMovementsSectionState extends State<RecentMovementsSection> {
   Future<void> _loadShopId() async {
     try {
       _shopId = await sl<DashboardRepo>().getShopId();
-    } catch (_) {}
+    } catch (logErr, logSt) { AppLogger.nonFatal('features/main/presentation/widgets/home_recent_movements.dart', logErr, logSt, severity: LoggingSeverity.warning); }
     if (mounted) setState(() => _loadingShop = false);
   }
 

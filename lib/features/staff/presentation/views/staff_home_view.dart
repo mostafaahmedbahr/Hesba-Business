@@ -15,6 +15,7 @@ import '../../../expenses/presentation/views/add_expense_view.dart';
 import '../../../returns/presentation/views/add_return_view.dart';
 import '../../../sales/presentation/views/add_sale_view.dart';
 import '../../../products/presentation/views/add_stock_purchase_view.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// الواجهة الوحidade التي يراها الحساب الفرعي. لا تحتوي على أي من
 /// تقارير أو أرباح أو بيانات — أربع عمليات إدخال فقط.
@@ -57,7 +58,7 @@ class _StaffHomeBodyState extends State<_StaffHomeBody> {
         await sl<AccountRepo>().logout();
         Navigator.pushNamedAndRemoveUntil(context, AppRoutes.login, (_) => false);
       }
-    } catch (_) {}
+    } catch (logErr, logSt) { AppLogger.nonFatal('features/staff/presentation/views/staff_home_view.dart', logErr, logSt, severity: LoggingSeverity.warning); }
   }
 
   void _open(BuildContext context, Widget page) {
@@ -207,7 +208,8 @@ class _StaffHomeBodyState extends State<_StaffHomeBody> {
         final s = sub.data() ?? {};
         lines.add('حالة اشتراك صاحب المحل: ${s['status'] ?? '(مفقود)'}');
       }
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/staff/presentation/views/staff_home_view.dart', e, logSt, severity: LoggingSeverity.warning);
       lines.add('تعذر القراءة: $e');
     }
     if (!mounted) return;

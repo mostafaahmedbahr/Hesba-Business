@@ -7,6 +7,7 @@ import '../../data/models/debt_model.dart';
 import '../../data/models/payment_model.dart';
 import '../../data/repos/accounts_repo.dart';
 import '../states/debt_details_state.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// يدير شاشة كشف الحساب: ستريم المديونية وسجل الدفعات،
 /// وتسجيل دفعة جديدة داخل transaction.
@@ -62,7 +63,8 @@ class DebtDetailsCubit extends Cubit<DebtDetailsState> {
       await _repo.addPayment(debtId: debtId, amount: amount, note: note);
       emit(state.copyWith(saving: false));
       return true;
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/accounts/presentation/cubit/debt_details_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       final msg = e.toString().replaceAll('Exception: ', '');
       logWarning('[DebtDetailsCubit] payment failed: $msg');
       emit(state.copyWith(saving: false, errorMessage: msg));

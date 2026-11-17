@@ -15,6 +15,7 @@ import 'register_navigation.dart';
 import 'register_owner_step.dart';
 import 'register_shop_step.dart';
 import 'register_extra_step.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// كارت إنشاء الحساب: هيدر ملوّن + مؤشر خطوات + مساحة النموذج + أزرار.
 class RegisterForm extends StatelessWidget {
@@ -234,7 +235,8 @@ class _PrivacyFooter extends StatelessWidget {
                   Uri.parse(_privacyPolicyUrl),
                   mode: LaunchMode.externalApplication,
                 );
-              } catch (_) {
+              } catch (logErr, logSt) {
+                AppLogger.nonFatal('features/auth/presentation/widgets/register_widgets/register_form.dart', logErr, logSt, severity: LoggingSeverity.warning);
                 // لا نمنع التسجيل لمجرد تعذر فتح الرابط — السياسة متاحة دائمًا بالرابط.
               }
             },

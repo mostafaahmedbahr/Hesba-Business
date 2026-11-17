@@ -4,6 +4,7 @@ import '../../../../core/di/service_locator.dart';
 import '../../../../core/services/user_role_service.dart';
 import '../../data/repos/account_repo.dart';
 import '../states/profile_state.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 class ProfileCubit extends Cubit<ProfileState> {
   final AccountRepo _repo;
@@ -60,7 +61,8 @@ class ProfileCubit extends Cubit<ProfileState> {
         locationAddress: locationAddress,
       );
       return null;
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/profile/presentation/cubit/profile_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       return _mapError(e);
     }
   }
@@ -75,7 +77,8 @@ class ProfileCubit extends Cubit<ProfileState> {
         newPassword: newPassword,
       );
       return null;
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/profile/presentation/cubit/profile_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       return _mapError(e);
     }
   }
@@ -85,7 +88,8 @@ class ProfileCubit extends Cubit<ProfileState> {
       await _repo.logout();
       sl<UserRoleService>().clear();
       return true;
-    } catch (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/profile/presentation/cubit/profile_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       return false;
     }
   }
