@@ -11,6 +11,7 @@ import '../../../../core/services/cloudinary_image_service.dart';
 import '../../../../core/services/shop_location_service.dart';
 import '../../../../core/utils/shop_image_upload.dart';
 import '../../../../core/utils/toast.dart';
+import '../../../../core/widgets/loading_widget.dart';
 import '../../../../core/widgets/shop_image_picker.dart';
 import '../../../../core/widgets/shop_location_field.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -148,7 +149,7 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
             child: BlocBuilder<ProfileCubit, ProfileState>(
               builder: (context, state) {
                 if (state.status == ProfileStatus.loading && state.profile == null) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const LoadingWidget();
                 }
                 return Form(
                   key: _formKey,

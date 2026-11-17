@@ -4,6 +4,7 @@ import 'package:hesba/core/di/service_locator.dart';
 import 'package:hesba/core/models/shop_location.dart';
 import 'package:hesba/core/theme/app_theme.dart';
 import 'package:hesba/core/widgets/dialogs.dart';
+import 'package:hesba/core/widgets/loading_widget.dart';
 import 'package:hesba/features/admin/data/repos/admin_repo.dart';
 import 'package:hesba/features/subscription/data/models/subscription_model.dart';
 import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
@@ -24,7 +25,7 @@ class ShopDetailsView extends StatelessWidget {
         if (shopSnap.connectionState == ConnectionState.waiting) {
           return Scaffold(
             appBar: AppBar(title: const Text('تفاصيل المحل')),
-            body: adminSkeletonList(context),
+            body: const LoadingWidget(),
           );
         }
         if (shopSnap.hasError) {
@@ -623,7 +624,7 @@ class _ShopItemsTab extends StatelessWidget {
     return FutureBuilder<List<QueryDocumentSnapshot<Map<String, dynamic>>>>(
       future: sl<AdminRepo>().getShopItems(collection: collection, shopId: shopId),
       builder: (context, snap) {
-        if (snap.connectionState == ConnectionState.waiting) return adminSkeletonList(context, count: 4);
+        if (snap.connectionState == ConnectionState.waiting) return const LoadingWidget();
         if (snap.hasError) return adminError('تعذر تحميل البيانات', () => (context as Element).markNeedsBuild());
         final docs = [...(snap.data ?? [])]
           ..sort((a, b) {
@@ -887,7 +888,7 @@ class _SubscriptionTab extends StatelessWidget {
     return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       future: sl<AdminRepo>().getUserSubscription(ownerId),
       builder: (context, snap) {
-        if (snap.connectionState == ConnectionState.waiting) return adminSkeletonList(context, count: 3);
+        if (snap.connectionState == ConnectionState.waiting) return const LoadingWidget();
         final sub = snap.data?.data();
         if (sub == null || sub.isEmpty) {
           return adminEmpty(Icons.workspace_premium_outlined, 'لا يوجد اشتراك لهذا المحل');

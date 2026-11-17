@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/loading_widget.dart';
 import '../../../dashboard/data/repos/dashboard_repo.dart';
 import '../../../subscription/presentation/subscription_gate.dart';
 import '../../../expenses/data/models/expense_model.dart';
@@ -67,7 +68,7 @@ class RecentMovementsSectionState extends State<RecentMovementsSection> {
         ),
         SizedBox(height: 12.h),
         if (_loadingShop)
-          _shimmerList(isDark)
+          const LoadingWidget()
         else if (_shopId == null)
           _emptyShop(isDark)
         else
@@ -80,15 +81,6 @@ class RecentMovementsSectionState extends State<RecentMovementsSection> {
           ]),
       ],
     );
-  }
-
-  Widget _shimmerList(bool isDark) {
-    return Column(children: List.generate(3, (_) => Container(
-      height: 78.h,
-      margin: EdgeInsets.only(bottom: 10.h),
-      decoration: BoxDecoration(color: isDark ? AppTheme.darkSurface : Colors.white, borderRadius: BorderRadius.circular(18.r), border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.hairline)),
-      child: Center(child: SizedBox(width: 22.w, height: 22.w, child: CircularProgressIndicator(strokeWidth: 2.2, color: AppTheme.primaryColor))),
-    )));
   }
 
   Widget _emptyShop(bool isDark) {
@@ -130,7 +122,7 @@ class _LastSaleCardState extends State<_LastSaleCard> {
       stream: _stream,
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) {
-          return _recentSkeleton(isDark, AppTheme.primaryColor);
+          return const LoadingWidget(size: 18, compact: true);
         }
         final sale = snap.data;
         if (sale == null) {
@@ -194,7 +186,7 @@ class _LastReturnCardState extends State<_LastReturnCard> {
       stream: _stream,
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) {
-          return _recentSkeleton(isDark, AppTheme.warningAmber);
+          return const LoadingWidget(size: 18, compact: true);
         }
         final ret = snap.data;
         if (ret == null) {
@@ -256,7 +248,7 @@ class _LastExpenseCardState extends State<_LastExpenseCard> {
       stream: _stream,
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) {
-          return _recentSkeleton(isDark, AppTheme.danger);
+          return const LoadingWidget(size: 18, compact: true);
         }
         final exp = snap.data;
         if (exp == null) {
@@ -393,14 +385,6 @@ class RecentEmpty extends StatelessWidget {
       ]),
     );
   }
-}
-
-Widget _recentSkeleton(bool isDark, Color accent) {
-  return Container(
-    height: 74.h,
-    decoration: BoxDecoration(color: isDark ? AppTheme.darkSurface : Colors.white, borderRadius: BorderRadius.circular(18.r), border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.hairline)),
-    child: Center(child: SizedBox(width: 18.w, height: 18.w, child: CircularProgressIndicator(strokeWidth: 2.2, color: accent))),
-  );
 }
 
 String _fmt(double v) => v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(2);

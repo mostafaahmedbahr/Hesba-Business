@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/shop_image_upload.dart';
+import '../../../../core/widgets/loading_widget.dart';
 
 /// Last step of the purchase: attach the transfer screenshot.
 class SubscriptionReceiptUpload extends StatelessWidget {
@@ -69,11 +70,7 @@ class SubscriptionReceiptUpload extends StatelessWidget {
         child: uploading
             ? Row(
                 children: [
-                  SizedBox(
-                    width: 20.w,
-                    height: 20.w,
-                    child: const CircularProgressIndicator(strokeWidth: 2.4),
-                  ),
+                  const LoadingWidget(size: 16, compact: true),
                   SizedBox(width: 12.w),
                   Text(
                     'receiptUploading'.tr(),

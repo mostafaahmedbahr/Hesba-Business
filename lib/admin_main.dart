@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'firebase_options.dart';
 import 'package:hesba/core/di/service_locator.dart';
 import 'package:hesba/core/theme/app_theme.dart';
+import 'package:hesba/core/widgets/loading_widget.dart';
 import 'package:hesba/features/admin/data/repos/admin_repo.dart';
 import 'package:hesba/features/admin/presentation/cubit/admin_auth_cubit.dart';
 import 'package:hesba/features/admin/presentation/views/admin_login_view.dart';
@@ -34,7 +35,7 @@ class AdminHome extends StatelessWidget {
             return const AdminShell();
           }
           if (state is AdminAuthLoading || state is AdminAuthInitial) {
-            return const Scaffold(body: Center(child: CircularProgressIndicator()));
+            return const Scaffold(body: LoadingWidget());
           }
           return const AdminLoginView();
         },

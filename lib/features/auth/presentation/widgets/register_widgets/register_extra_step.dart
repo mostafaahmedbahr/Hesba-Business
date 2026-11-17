@@ -8,6 +8,7 @@ import '../../../../../core/services/cloudinary_image_service.dart';
 import '../../../../../core/theme/app_theme.dart';
 import '../../../../../core/utils/shop_image_upload.dart';
 import '../../../../../core/utils/toast.dart';
+import '../../../../../core/widgets/loading_widget.dart';
 import '../../../../../core/widgets/shop_image_picker.dart';
 import '../../../../../core/widgets/shop_location_field.dart';
 
@@ -183,13 +184,7 @@ class _RegisterExtraStepState extends State<RegisterExtraStep> {
         child: Dialog(
           child: Padding(
             padding: EdgeInsets.all(20.w),
-            child: Row(
-              children: [
-                const CircularProgressIndicator(),
-                SizedBox(width: 16.w),
-                Expanded(child: Text('shopImageUploading'.tr())),
-              ],
-            ),
+            child: LoadingWidget(message: 'shopImageUploading'.tr()),
           ),
         ),
       ),

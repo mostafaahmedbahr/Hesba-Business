@@ -6,15 +6,30 @@ class LoadingWidget extends StatelessWidget {
   final String? message;
   final double size;
 
+  /// للأماكن الضيقة (صف داخل كارت): الدائرة فقط بدون الكارت الخارجي.
+  final bool compact;
+
   const LoadingWidget({
     super.key,
     this.message,
     this.size = 40,
+    this.compact = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    if (compact) {
+      return SizedBox(
+        width: size,
+        height: size,
+        child: CircularProgressIndicator(
+          strokeWidth: size <= 20 ? 2.4 : 4,
+          color: isDark ? const Color(0xFF8FB0FF) : const Color(0xFF0F2D8A),
+          backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.15),
+        ),
+      );
+    }
     final ring = size * 2.2;
     return Center(
       child: Column(

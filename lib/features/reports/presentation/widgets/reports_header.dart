@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart';
+import 'package:hesba/core/widgets/loading_widget.dart';
 
 import '../../../../common_imports.dart';
 import '../cubit/reports_state.dart';
@@ -66,13 +67,13 @@ class ReportsHeader extends StatelessWidget {
                   Row(children: [
                     Expanded(
                       child: loading
-                          ? _GlassSkeleton()
+                          ? const LoadingWidget(size: 16, compact: true)
                           : _HeaderGlass(icon: Icons.trending_up_rounded, label: 'reportsNetSales'.tr(), value: '${fmtReport(state.netSales)} ج.م'),
                     ),
                     SizedBox(width: 10.w),
                     Expanded(
                       child: loading
-                          ? _GlassSkeleton()
+                          ? const LoadingWidget(size: 16, compact: true)
                           : _HeaderGlass(icon: Icons.account_balance_wallet_rounded, label: 'reportsNetProfit'.tr(), value: '${fmtReport(balance)} ج.م', danger: balance < 0),
                     ),
                   ]),
@@ -111,24 +112,3 @@ class _HeaderGlass extends StatelessWidget {
   }
 }
 
-/// هيكل لامع مكان الأرقام أثناء التحميل.
-class _GlassSkeleton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(14.r)),
-      child: Row(children: [
-        Container(width: 32.w, height: 32.w, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.18), borderRadius: BorderRadius.circular(10.r))),
-        SizedBox(width: 8.w),
-        Expanded(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Container(width: 60.w, height: 8.h, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.25), borderRadius: BorderRadius.circular(6.r))),
-            SizedBox(height: 6.h),
-            Container(width: 90.w, height: 12.h, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.30), borderRadius: BorderRadius.circular(6.r))),
-          ]),
-        ),
-      ]),
-    );
-  }
-}

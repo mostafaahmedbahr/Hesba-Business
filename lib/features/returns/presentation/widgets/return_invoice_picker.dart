@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/widgets/loading_widget.dart';
 
 import '../../../../common_imports.dart';
 import '../../../sales/data/models/sale_model.dart';
@@ -35,7 +36,7 @@ class ReturnInvoicePicker extends StatelessWidget {
           borderRadius: BorderRadius.circular(18.r),
           border: Border.all(color: isDark ? AppTheme.darkBorder : AppTheme.hairline),
         ),
-        child: Center(child: SizedBox(width: 26.w, height: 26.w, child: CircularProgressIndicator(strokeWidth: 2.5, color: AppTheme.warningAmber))),
+        child: const LoadingWidget(size: 18, compact: true),
       );
     }
     if (sales.isEmpty) {

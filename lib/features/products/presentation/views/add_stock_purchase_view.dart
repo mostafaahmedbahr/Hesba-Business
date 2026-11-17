@@ -9,6 +9,7 @@ import '../../../../core/services/shop_resolver.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/number_parser.dart';
 import '../../../../core/utils/toast.dart';
+import '../../../../core/widgets/loading_widget.dart';
 import '../../../subscription/presentation/subscription_gate.dart';
 import '../../data/models/stock_purchase_item.dart';
 import '../../data/repos/products_repo.dart';
@@ -181,7 +182,7 @@ class _AddStockPurchaseViewState extends State<AddStockPurchaseView> {
                 Text('الأصناف', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900)),
                 const Spacer(),
                 if (_loadingProducts)
-                  SizedBox(width: 16.w, height: 16.w, child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primaryColor)),
+                  const LoadingWidget(size: 16, compact: true),
               ],
             ),
             SizedBox(height: 10.h),

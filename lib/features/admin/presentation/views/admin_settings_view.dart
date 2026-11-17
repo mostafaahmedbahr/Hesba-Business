@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hesba/core/di/service_locator.dart';
 import 'package:hesba/core/theme/app_theme.dart';
 import 'package:hesba/core/utils/toast.dart';
+import 'package:hesba/core/widgets/loading_widget.dart';
 import 'package:hesba/core/models/admin_settings.dart';
 import 'package:hesba/features/admin/data/repos/admin_repo.dart';
 import 'package:hesba/features/admin/presentation/cubit/admin_settings_cubit.dart';
@@ -26,7 +27,7 @@ class AdminSettingsView extends StatelessWidget {
         },
         builder: (context, state) {
           if (state is SettingsLoading) {
-            return adminSkeletonList(context, count: 4);
+            return const LoadingWidget();
           }
           if (state is SettingsError) {
             return adminError(

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import '../../../../common_imports.dart';
 import '../../../../core/models/product.dart';
 import '../../../../core/utils/error_message.dart';
+import '../../../../core/widgets/loading_widget.dart';
 import '../../data/models/supplier_model.dart';
 import '../cubit/supplier_details_cubit.dart';
 import '../states/supplier_details_state.dart';
@@ -91,7 +92,7 @@ class _SupplierDetailsBody extends StatelessWidget {
           return Scaffold(
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             appBar: _appBar(context, null),
-            body: const Center(child: CircularProgressIndicator()),
+            body: const LoadingWidget(),
           );
         }
         final supplier = state.supplier;

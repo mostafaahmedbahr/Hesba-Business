@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 
 import '../../../../common_imports.dart';
+import '../../../../core/widgets/loading_widget.dart';
 import '../../../subscription/presentation/subscription_gate.dart';
 import '../../data/models/debt_model.dart';
 import '../../data/repos/accounts_repo.dart';
@@ -528,9 +529,7 @@ class _LoadingState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: CircularProgressIndicator(color: AppTheme.primaryColor),
-    );
+    return const LoadingWidget();
   }
 }
 

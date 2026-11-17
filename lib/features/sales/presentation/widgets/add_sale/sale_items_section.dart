@@ -1,4 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/widgets/loading_widget.dart';
+
 import '../../../../../common_imports.dart';
 import '../../../../../core/models/product.dart';
 import '../../widgets/sale_product_card.dart';
@@ -63,14 +65,7 @@ class SaleItemsSection extends StatelessWidget {
             ),
             const Spacer(),
             if (loadingProducts)
-              SizedBox(
-                width: 16.w,
-                height: 16.w,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: AppTheme.primaryColor,
-                ),
-              )
+              const LoadingWidget(size: 16, compact: true)
             else
               Text(
                 'saleAvailableStock'.tr(

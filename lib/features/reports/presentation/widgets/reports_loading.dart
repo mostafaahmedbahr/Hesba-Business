@@ -8,26 +8,8 @@ class ReportsLoadingGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Column(children: [
-      Row(children: [Expanded(child: _box(90.h, isDark)), SizedBox(width: 10.w), Expanded(child: _box(90.h, isDark))]),
-      SizedBox(height: 10.h),
-      Row(children: [Expanded(child: _box(90.h, isDark)), SizedBox(width: 10.w), Expanded(child: _box(90.h, isDark))]),
-      SizedBox(height: 14.h),
-      _box(120.h, isDark),
-      SizedBox(height: 14.h),
-      _box(180.h, isDark),
-    ]);
+    return const LoadingWidget();
   }
-
-  /// مربع لامع واحد.
-  Widget _box(double h, bool isDark) => Container(
-        height: h,
-        decoration: BoxDecoration(
-          color: isDark ? AppTheme.darkSurfaceAlt : AppTheme.mist,
-          borderRadius: BorderRadius.circular(18.r),
-        ),
-      );
 }
 
 /// لودر ملء الشاشة (قبل أول داتا).

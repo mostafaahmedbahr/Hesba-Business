@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../common_imports.dart';
+import '../../../../core/widgets/loading_widget.dart';
 import '../../data/models/supplier_model.dart';
 import '../states/suppliers_state.dart';
 import '../cubit/suppliers_cubit.dart';
@@ -138,12 +139,7 @@ class _SheetBody extends StatelessWidget {
                 child: state.searching
                     ? const Padding(
                         padding: EdgeInsets.all(24),
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.4,
-                            color: AppTheme.violetDeep,
-                          ),
-                        ),
+                        child: LoadingWidget(size: 16, compact: true),
                       )
                     : list.isEmpty
                     ? _Empty(

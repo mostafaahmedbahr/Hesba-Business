@@ -10,6 +10,7 @@ import '../cubit/shop_location_state.dart';
 import '../models/shop_location.dart';
 import '../theme/app_theme.dart';
 import '../utils/toast.dart';
+import 'loading_widget.dart';
 import 'shop_location_picker_sheet.dart';
 
 /// "تحديد موقع المحل" control shared by registration and profile editing.
@@ -108,26 +109,7 @@ class ShopLocationField extends StatelessWidget {
     final label = state.status == ShopLocationStatus.locating
         ? 'locationPicking'.tr()
         : 'locationGeocoding'.tr();
-    return Row(
-      children: [
-        const SizedBox(
-          width: 18,
-          height: 18,
-          child: CircularProgressIndicator(strokeWidth: 2.4),
-        ),
-        SizedBox(width: 10.w),
-        Expanded(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12.5.sp,
-              fontWeight: FontWeight.w700,
-              color: isDark ? AppTheme.darkTextSecondary : AppTheme.textSecondary,
-            ),
-          ),
-        ),
-      ],
-    );
+    return LoadingWidget(size: 12, message: label);
   }
 
   Widget _empty(

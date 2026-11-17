@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../core/di/service_locator.dart';
+import '../../../../core/widgets/loading_widget.dart';
 import '../../../../core/widgets/shop_image_view.dart';
 import '../../data/models/user_profile.dart';
 import '../../data/repos/account_repo.dart';
@@ -27,7 +28,7 @@ class ProfileView extends StatelessWidget {
       child: BlocBuilder<ProfileCubit, ProfileState>(
         builder: (context, state) {
           if (state.status == ProfileStatus.loading) {
-            return const Center(child: CircularProgressIndicator());
+            return const LoadingWidget();
           }
           final profile = state.profile;
           if (profile == null) {

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hesba/core/di/service_locator.dart';
+import 'package:hesba/core/widgets/loading_widget.dart';
 import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
 import 'package:hesba/features/admin/data/repos/admin_repo.dart';
 import 'package:hesba/features/admin/presentation/cubit/admin_list_cubit.dart';
@@ -37,7 +38,7 @@ class _SalesViewState extends State<SalesView> {
             return Column(
               children: [
                 AdminSearchField(controller: _searchCtrl, hint: 'ابحث برقم العملية أو المحل...', enabled: false),
-                Expanded(child: adminSkeletonList(context)),
+                Expanded(child: LoadingWidget()),
               ],
             );
           }

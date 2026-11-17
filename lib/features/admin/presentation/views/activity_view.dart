@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:hesba/core/di/service_locator.dart';
 import 'package:hesba/core/theme/app_theme.dart';
 import 'package:hesba/core/utils/toast.dart';
+import 'package:hesba/core/widgets/loading_widget.dart';
 import 'package:hesba/features/admin/data/repos/admin_repo.dart';
 
 import 'admin_ds.dart';
@@ -42,7 +43,7 @@ class _ActivityViewState extends State<ActivityView> {
                 title: 'سجل النشاطات',
                 description: 'متابعة كل إجراءات الأدمن داخل لوحة التحكم',
               ),
-              Expanded(child: adminSkeletonList(context)),
+              Expanded(child: LoadingWidget()),
             ],
           );
         }

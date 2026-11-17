@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../common_imports.dart';
+import '../../../../core/widgets/loading_widget.dart';
 import '../../../subscription/presentation/subscription_gate.dart';
 import '../../data/models/debt_model.dart';
 import '../cubit/debt_details_cubit.dart';
@@ -65,11 +66,7 @@ class _DebtDetailsBody extends StatelessWidget {
         final debt = state.debt;
 
         if (state.status == DebtDetailsStatus.loading || debt == null) {
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(color: AppTheme.primaryColor),
-            ),
-          );
+          return const Scaffold(body: LoadingWidget());
         }
 
         final isSupplier = debt.partyType == DebtParty.supplier;

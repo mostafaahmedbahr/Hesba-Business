@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hesba/core/theme/app_theme.dart';
+import 'package:hesba/core/widgets/loading_widget.dart';
 import 'package:intl/intl.dart';
 
 // ─────────────────────────────────────────────────────────────
@@ -1093,33 +1094,7 @@ Widget adminError(String message, VoidCallback onRetry) {
   );
 }
 
-/// A lightweight skeleton row for lists (no package dependency).
-Widget adminSkeleton(BuildContext context) {
-  final base = Theme.of(context).brightness == Brightness.dark ? AppTheme.darkSurfaceAlt : Colors.grey[200];
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: AdminSpace.lg, vertical: AdminSpace.md),
-    child: Row(
-      children: [
-        Container(width: 44, height: 44, decoration: BoxDecoration(color: base, borderRadius: BorderRadius.circular(AdminRadius.tile))),
-        const SizedBox(width: AdminSpace.md),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(height: 12, width: 160, decoration: BoxDecoration(color: base, borderRadius: BorderRadius.circular(4))),
-              const SizedBox(height: AdminSpace.sm),
-              Container(height: 10, width: 100, decoration: BoxDecoration(color: base, borderRadius: BorderRadius.circular(4))),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
-}
+/// Unified loading indicator for admin states (delegates to [LoadingWidget]).
+Widget adminSkeleton(BuildContext context) => const LoadingWidget();
 
-Widget adminSkeletonList(BuildContext context, {int count = 6}) {
-  return ListView.builder(
-    itemCount: count,
-    itemBuilder: (_, _) => adminSkeleton(context),
-  );
-}
+Widget adminSkeletonList(BuildContext context, {int count = 6}) => const LoadingWidget();

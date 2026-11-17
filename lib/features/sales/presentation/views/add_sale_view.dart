@@ -14,6 +14,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/error_message.dart';
 import '../../../../core/utils/number_parser.dart';
 import '../../../../core/utils/toast.dart';
+import '../../../../core/widgets/loading_widget.dart';
 import '../../../products/data/repos/products_repo.dart';
 import '../../../accounts/data/models/person_model.dart';
 import '../../../accounts/data/repos/accounts_repo.dart';
@@ -381,7 +382,7 @@ class _AddSaleViewState extends State<AddSaleView> {
                                   ),
                                   const Spacer(),
                                   if (_loadingProducts)
-                                    SizedBox(width: 16.w, height: 16.w, child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primaryColor))
+                                    const LoadingWidget(size: 16, compact: true)
                                   else
                                     Text('saleAvailableStock'.tr(namedArgs: {'n': '${_availableProducts.where((p) => p.isActive).length}'}), style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600)),
                                 ],

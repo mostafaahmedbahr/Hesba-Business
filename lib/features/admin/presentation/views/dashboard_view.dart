@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:hesba/core/theme/app_theme.dart';
+import 'package:hesba/core/widgets/loading_widget.dart';
 import 'package:hesba/features/admin/presentation/cubit/admin_dashboard_cubit.dart';
 import 'package:hesba/features/admin/presentation/cubit/admin_nav_cubit.dart';
 
@@ -16,15 +17,7 @@ class DashboardView extends StatelessWidget {
     return BlocBuilder<AdminDashboardCubit, AdminDashboardState>(
       builder: (context, state) {
         if (state is AdminDashboardLoading || state is AdminDashboardEmpty) {
-          return ListView(
-            padding: const EdgeInsets.all(AdminSpace.lg),
-            children: [
-              for (var i = 0; i < 6; i++) ...[
-                adminSkeleton(context),
-                if (i != 5) const SizedBox(height: AdminSpace.sm),
-              ],
-            ],
-          );
+          return const LoadingWidget();
         }
         if (state is AdminDashboardError) {
           return adminError(state.message, () => context.read<AdminDashboardCubit>().load());

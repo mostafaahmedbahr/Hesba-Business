@@ -13,6 +13,7 @@ import '../../../../core/services/shop_resolver.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/number_parser.dart';
 import '../../../../core/utils/toast.dart';
+import '../../../../core/widgets/loading_widget.dart';
 import '../../../categories/data/repos/category_repo.dart';
 import '../../../categories/presentation/views/category_management_view.dart';
 import '../../../subscription/presentation/subscription_gate.dart';
@@ -476,16 +477,7 @@ class _ProductFormViewState extends State<ProductFormView> {
         bloc: _formCubit,
         builder: (context, state) {
           if (!state.isReady) {
-            return Center(
-              child: SizedBox(
-                width: 26.w,
-                height: 26.w,
-                child: const CircularProgressIndicator(
-                  strokeWidth: 2.6,
-                  color: AppTheme.primaryColor,
-                ),
-              ),
-            );
+            return const LoadingWidget();
           }
           _ensureDropdownInitials(state.config);
           return Form(
