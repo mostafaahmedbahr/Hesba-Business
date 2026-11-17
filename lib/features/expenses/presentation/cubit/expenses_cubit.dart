@@ -14,6 +14,12 @@ class ExpensesCubit extends Cubit<ExpensesState> {
   StreamSubscription<AppEvent>? _eventSub;
   String? _lastShopId;
 
+  /// Dedicated write guard. Do NOT reuse `state.status == loading`: the list
+  /// subscription also sets `loading`, and a submit made while the list is
+  /// loading must not be silently dropped.
+  bool _saving = false;
+  int _loadGeneration = 0;
+
   ExpensesCubit({required this.expensesRepo}) : super(const ExpensesState()) {
     // أي إضافة/تعديل/حذف من أي Cubit تاني يحدّث القائمة فوراً
     _eventSub = AppEvents.instance.stream.listen((event) {
@@ -37,20 +43,24 @@ class ExpensesCubit extends Cubit<ExpensesState> {
   }
 
   Future<void> loadExpenses({required String shopId}) async {
+    final generation = ++_loadGeneration;
     _lastShopId = shopId;
     _expensesSubscription?.cancel();
     _expensesSubscription = null;
     emit(state.copyWith(status: ExpensesStatus.loading, errorMessage: null));
     final resolvedShopId = await _resolveShopId(shopId);
+    if (isClosed || generation != _loadGeneration) return;
     // مزامنة المصروفات المتكررة (تسجيل أي موعد فات) قبل الاشتراك في
     // الستريم فتظهر أي مصروفات جديدة فورًا.
     try {
       await expensesRepo.syncRecurringExpenses();
     } catch (logErr, logSt) { AppLogger.nonFatal('features/expenses/presentation/cubit/expenses_cubit.dart', logErr, logSt, severity: LoggingSeverity.warning); }
+    if (isClosed || generation != _loadGeneration) return;
     // حتى لو الـ shopId فاضي، اعرض الكل (repo بيعمل fallback)
     final effectiveShopId = resolvedShopId ?? shopId;
     _expensesSubscription = expensesRepo.watchExpenses(shopId: effectiveShopId).listen(
       (expenses) {
+        if (isClosed) return;
         // القوالب المتكررة ليست مصروفات فعلية — لا تُحتسب في الإجمالي.
         final total = expenses
             .where((e) => !e.isTemplate)
@@ -62,6 +72,7 @@ class ExpensesCubit extends Cubit<ExpensesState> {
         ));
       },
       onError: (e) {
+        if (isClosed) return;
         final msg = e.toString().replaceAll('Exception: ', '');
         emit(state.copyWith(status: ExpensesStatus.error, errorMessage: msg));
       },
@@ -80,6 +91,7 @@ class ExpensesCubit extends Cubit<ExpensesState> {
     String recurrence = 'none',
     String dueTime = '',
   }) async {
+    if (_saving) return;
     if (title.trim().isEmpty) {
       emit(state.copyWith(status: ExpensesStatus.error, errorMessage: 'عنوان المصروف مطلوب'));
       return;
@@ -93,6 +105,7 @@ class ExpensesCubit extends Cubit<ExpensesState> {
       return;
     }
 
+    _saving = true;
     emit(state.copyWith(status: ExpensesStatus.loading, errorMessage: null));
     try {
       final expense = await expensesRepo.addExpense(
@@ -113,11 +126,15 @@ class ExpensesCubit extends Cubit<ExpensesState> {
         'category': category,
       });
       AppEvents.instance.productChanged();
-      emit(state.copyWith(status: ExpensesStatus.success, addedExpense: expense, errorMessage: null));
+      if (!isClosed) {
+        emit(state.copyWith(status: ExpensesStatus.success, addedExpense: expense, errorMessage: null));
+      }
     } catch (e, logSt) {
       AppLogger.nonFatal('features/expenses/presentation/cubit/expenses_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       final msg = e.toString().replaceAll('Exception: ', '');
-      emit(state.copyWith(status: ExpensesStatus.error, errorMessage: msg));
+      if (!isClosed) emit(state.copyWith(status: ExpensesStatus.error, errorMessage: msg));
+    } finally {
+      _saving = false;
     }
   }
 
@@ -134,6 +151,7 @@ class ExpensesCubit extends Cubit<ExpensesState> {
     String recurrence = 'none',
     String dueTime = '',
   }) async {
+    if (_saving) return;
     if (title.trim().isEmpty) {
       emit(state.copyWith(status: ExpensesStatus.error, errorMessage: 'عنوان المصروف مطلوب'));
       return;
@@ -147,6 +165,7 @@ class ExpensesCubit extends Cubit<ExpensesState> {
       return;
     }
 
+    _saving = true;
     emit(state.copyWith(status: ExpensesStatus.loading, errorMessage: null));
     try {
       final expense = await expensesRepo.updateExpense(
@@ -168,11 +187,15 @@ class ExpensesCubit extends Cubit<ExpensesState> {
         'category': category,
       });
       AppEvents.instance.productChanged();
-      emit(state.copyWith(status: ExpensesStatus.success, addedExpense: expense, errorMessage: null));
+      if (!isClosed) {
+        emit(state.copyWith(status: ExpensesStatus.success, addedExpense: expense, errorMessage: null));
+      }
     } catch (e, logSt) {
       AppLogger.nonFatal('features/expenses/presentation/cubit/expenses_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       final msg = e.toString().replaceAll('Exception: ', '');
-      emit(state.copyWith(status: ExpensesStatus.error, errorMessage: msg));
+      if (!isClosed) emit(state.copyWith(status: ExpensesStatus.error, errorMessage: msg));
+    } finally {
+      _saving = false;
     }
   }
 

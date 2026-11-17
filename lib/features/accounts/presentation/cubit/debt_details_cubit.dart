@@ -29,9 +29,10 @@ class DebtDetailsCubit extends Cubit<DebtDetailsState> {
 
     _debtSub ??= _repo.watchDebt(debtId).listen(
       (debt) {
+        if (isClosed) return;
         if (debt == null) {
           // السجل الأصلي يفضل محفوظًا دائمًا — لو اختفى يبقى خطأ واضح.
-          emit(state.copyWith(
+          emit(DebtDetailsState(
             status: DebtDetailsStatus.failure,
             errorMessage: 'تعذر قراءة الحساب',
           ));
@@ -43,16 +44,34 @@ class DebtDetailsCubit extends Cubit<DebtDetailsState> {
           clearError: true,
         ));
       },
-      onError: (Object e) => emit(state.copyWith(
-        status: DebtDetailsStatus.failure,
-        errorMessage: '$e',
-      )),
+      onError: (Object e) {
+        if (isClosed) return;
+        // Clear the stale debt so the UI cannot keep showing old amounts and
+        // an enabled payment button after a failed refresh.
+        emit(DebtDetailsState(
+          status: DebtDetailsStatus.failure,
+          errorMessage: '$e',
+        ));
+      },
     );
 
     _paymentsSub ??= _repo.watchPayments(debtId).listen(
-      (list) => emit(state.copyWith(payments: list)),
+      (list) {
+        if (!isClosed) emit(state.copyWith(payments: list));
+      },
       onError: (Object e) => logWarning('[DebtDetailsCubit] payments: $e'),
     );
+  }
+
+  /// إعادة الاشتراك بعد فشل القراءة (retry من شاشة الخطأ).
+  Future<void> refresh() async {
+    await _debtSub?.cancel();
+    await _paymentsSub?.cancel();
+    _debtSub = null;
+    _paymentsSub = null;
+    if (isClosed) return;
+    emit(const DebtDetailsState(status: DebtDetailsStatus.loading));
+    init();
   }
 
   /// تسجيل دفعة (جزئي أو كامل) — يرجع true عند النجاح.
@@ -61,13 +80,13 @@ class DebtDetailsCubit extends Cubit<DebtDetailsState> {
     emit(state.copyWith(saving: true, clearError: true));
     try {
       await _repo.addPayment(debtId: debtId, amount: amount, note: note);
-      emit(state.copyWith(saving: false));
+      if (!isClosed) emit(state.copyWith(saving: false));
       return true;
     } catch (e, logSt) {
       AppLogger.nonFatal('features/accounts/presentation/cubit/debt_details_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       final msg = e.toString().replaceAll('Exception: ', '');
       logWarning('[DebtDetailsCubit] payment failed: $msg');
-      emit(state.copyWith(saving: false, errorMessage: msg));
+      if (!isClosed) emit(state.copyWith(saving: false, errorMessage: msg));
       return false;
     }
   }

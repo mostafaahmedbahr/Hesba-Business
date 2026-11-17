@@ -64,7 +64,13 @@ class AdminDashboardCubit extends Cubit<AdminDashboardState> {
   AdminDashboardCubit({required this.repo}) : super(AdminDashboardLoading());
   final AdminRepo repo;
 
+  /// Concurrent loads can otherwise resolve out of order and a slower, older
+  /// snapshot overwrites the newer one.
+  bool _loading = false;
+
   Future<void> load() async {
+    if (_loading) return;
+    _loading = true;
     emit(AdminDashboardLoading());
     try {
       final results = await Future.wait([
@@ -81,6 +87,7 @@ class AdminDashboardCubit extends Cubit<AdminDashboardState> {
         repo.revenueByMonth(months: 12),
         repo.profitSummary(),
       ]);
+      if (isClosed) return;
       emit(AdminDashboardLoaded(
         shops: results[0] as int,
         active: results[1] as int,
@@ -97,7 +104,10 @@ class AdminDashboardCubit extends Cubit<AdminDashboardState> {
       ));
     } catch (e, logSt) {
       AppLogger.nonFatal('features/admin/presentation/cubit/admin_dashboard_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
+      if (isClosed) return;
       emit(AdminDashboardError(e.toString()));
+    } finally {
+      _loading = false;
     }
   }
 }

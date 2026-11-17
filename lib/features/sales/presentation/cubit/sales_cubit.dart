@@ -112,21 +112,25 @@ class SalesCubit extends Cubit<SalesState> {
       });
       AppEvents.instance.productChanged();
 
-      emit(
-        SalesState(
-          status: SalesStatus.success,
-          sale: sale,
-        ),
-      );
+      if (!isClosed) {
+        emit(
+          SalesState(
+            status: SalesStatus.success,
+            sale: sale,
+          ),
+        );
+      }
     } catch (e, logSt) {
       AppLogger.nonFatal('features/sales/presentation/cubit/sales_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       final msg = e.toString().replaceAll('Exception: ', '');
-      emit(
-        SalesState(
-          status: SalesStatus.error,
-          errorMessage: msg,
-        ),
-      );
+      if (!isClosed) {
+        emit(
+          SalesState(
+            status: SalesStatus.error,
+            errorMessage: msg,
+          ),
+        );
+      }
     }
   }
 }

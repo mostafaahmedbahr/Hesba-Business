@@ -65,6 +65,34 @@ class _DebtDetailsBody extends StatelessWidget {
         final isDark = Theme.of(context).brightness == Brightness.dark;
         final debt = state.debt;
 
+        // A failed refresh clears the stale debt in the cubit — surface the
+        // error with an explicit retry instead of an endless loader.
+        if (state.status == DebtDetailsStatus.failure) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('كشف الحساب')),
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      state.errorMessage ?? 'تعذر قراءة الحساب',
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () =>
+                          context.read<DebtDetailsCubit>().refresh(),
+                      child: const Text('إعادة المحاولة'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+
         if (state.status == DebtDetailsStatus.loading || debt == null) {
           return const Scaffold(body: LoadingWidget());
         }

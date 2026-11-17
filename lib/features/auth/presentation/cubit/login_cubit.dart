@@ -18,16 +18,19 @@ class LoginCubit extends Cubit<LoginState> {
     required String email,
     required String password,
   }) async {
+    if (state.status == LoginStatus.loading) return;
     emit(state.copyWith(status: LoginStatus.loading));
     try {
       await _authRepo.login(email: email, password: password);
-      emit(state.copyWith(status: LoginStatus.success));
+      if (!isClosed) emit(state.copyWith(status: LoginStatus.success));
     } catch (e, logSt) {
       AppLogger.nonFatal('features/auth/presentation/cubit/login_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
-      emit(state.copyWith(
-        status: LoginStatus.failure,
-        errorMessage: _mapError(e),
-      ));
+      if (!isClosed) {
+        emit(state.copyWith(
+          status: LoginStatus.failure,
+          errorMessage: _mapError(e),
+        ));
+      }
     }
   }
 

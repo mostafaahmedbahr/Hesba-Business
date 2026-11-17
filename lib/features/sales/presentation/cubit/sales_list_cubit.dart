@@ -18,6 +18,7 @@ class SalesListCubit extends Cubit<SalesListState> {
   Future<void> bootstrap() async {
     emit(state.copyWith(status: SalesListStatus.loading, clearError: true));
     final shopId = await _repo.getShopId();
+    if (isClosed) return;
     // مفيش محل.
     if (shopId == null || shopId.isEmpty) {
       emit(state.copyWith(

@@ -26,6 +26,8 @@ class CustomerSalesCubit extends Cubit<CustomerSalesState> {
       personId: personId,
       personName: personName,
       personPhone: personPhone,
+      // Don't keep the previous customer's purchases visible while this one loads.
+      sales: const [],
       clearError: true,
     ));
     if (personId.isEmpty) {
@@ -39,15 +41,21 @@ class CustomerSalesCubit extends Cubit<CustomerSalesState> {
     _sub = _repo
         .watchSalesForPerson(shopId: shopId, personId: personId)
         .listen(
-      (list) => emit(state.copyWith(
-        status: CustomerSalesStatus.success,
-        sales: list,
-        clearError: true,
-      )),
-      onError: (Object e) => emit(state.copyWith(
-        status: CustomerSalesStatus.failure,
-        errorMessage: '$e',
-      )),
+      (list) {
+        if (isClosed) return;
+        emit(state.copyWith(
+          status: CustomerSalesStatus.success,
+          sales: list,
+          clearError: true,
+        ));
+      },
+      onError: (Object e) {
+        if (isClosed) return;
+        emit(state.copyWith(
+          status: CustomerSalesStatus.failure,
+          errorMessage: '$e',
+        ));
+      },
     );
   }
 

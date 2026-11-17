@@ -38,16 +38,19 @@ class RegisterCubit extends Cubit<RegisterState> {
     required RegisterModel model,
     required String password,
   }) async {
+    if (state.status == RegisterStatus.loading) return;
     emit(state.copyWith(status: RegisterStatus.loading));
     try {
       await _authRepo.register(model: model, password: password);
-      emit(state.copyWith(status: RegisterStatus.success));
+      if (!isClosed) emit(state.copyWith(status: RegisterStatus.success));
     } catch (e, logSt) {
       AppLogger.nonFatal('features/auth/presentation/cubit/register_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
-      emit(state.copyWith(
-        status: RegisterStatus.failure,
-        errorMessage: _mapError(e),
-      ));
+      if (!isClosed) {
+        emit(state.copyWith(
+          status: RegisterStatus.failure,
+          errorMessage: _mapError(e),
+        ));
+      }
     }
   }
 

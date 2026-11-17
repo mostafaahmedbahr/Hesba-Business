@@ -15,6 +15,7 @@ class SuppliersCubit extends Cubit<SuppliersState> {
   StreamSubscription<List<SupplierModel>>? _suppliersSub;
   StreamSubscription<Map<String, int>>? _countsSub;
   Timer? _debounce;
+  int _searchGeneration = 0;
 
   SuppliersCubit({required this._repo}) : super(const SuppliersState());
 
@@ -56,25 +57,26 @@ class SuppliersCubit extends Cubit<SuppliersState> {
   /// حتى لا نُرسل طلباً لكل حرف — نفس نمط GlobalSearchCubit.
   void searchRemote(String query) {
     _debounce?.cancel();
+    final generation = ++_searchGeneration;
     final q = query.trim();
     if (q.isEmpty) {
       emit(state.copyWith(remoteResults: null, searching: false));
       return;
     }
-    _debounce = Timer(const Duration(milliseconds: 400), () => _runRemote(q));
+    _debounce = Timer(const Duration(milliseconds: 400), () => _runRemote(q, generation));
   }
 
-  Future<void> _runRemote(String q) async {
-    if (isClosed) return;
+  Future<void> _runRemote(String q, int generation) async {
+    if (isClosed || generation != _searchGeneration) return;
     emit(state.copyWith(searching: true));
     try {
       final results = await _repo.searchSuppliers(q);
-      if (isClosed) return;
+      if (isClosed || generation != _searchGeneration) return;
       emit(state.copyWith(searching: false, remoteResults: results));
     } catch (e, logSt) {
       AppLogger.nonFatal('features/suppliers/presentation/cubit/suppliers_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       logWarning('[SuppliersCubit] search failed: $e');
-      if (isClosed) return;
+      if (isClosed || generation != _searchGeneration) return;
       emit(state.copyWith(searching: false, remoteResults: const []));
     }
   }

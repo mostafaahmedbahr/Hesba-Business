@@ -47,6 +47,10 @@ class GlobalSearchCubit extends Cubit<GlobalSearchState> {
   final AdminSearchRepo _searchRepo;
   Timer? _debounce;
 
+  /// Monotonic request id: a slower response for an older query must never
+  /// overwrite results of a newer one.
+  int _generation = 0;
+
   @override
   Future<void> close() {
     _debounce?.cancel();
@@ -55,23 +59,27 @@ class GlobalSearchCubit extends Cubit<GlobalSearchState> {
 
   Future<void> search(String query) async {
     _debounce?.cancel();
+    final generation = ++_generation;
     final q = query.trim();
     if (q.isEmpty) {
       emit(SearchIdle());
       return;
     }
     // Debounced: one Firestore round-trip per pause in typing, not per keystroke.
-    _debounce = Timer(const Duration(milliseconds: 400), () => _run(q));
+    _debounce = Timer(const Duration(milliseconds: 400), () => _run(q, generation));
   }
 
-  Future<void> _run(String q) async {
+  Future<void> _run(String q, int generation) async {
+    if (isClosed || generation != _generation) return;
     emit(SearchLoading());
     try {
       final hits = await _searchRepo.search(q);
+      if (isClosed || generation != _generation) return;
       emit(SearchResults(
           hits.map((h) => SearchHit(h.kind, h.title, h.id)).toList()));
     } catch (logErr, logSt) {
       AppLogger.nonFatal('features/admin/presentation/cubit/global_search_cubit.dart', logErr, logSt, severity: LoggingSeverity.warning);
+      if (isClosed || generation != _generation) return;
       emit(const SearchError('تعذر تنفيذ البحث، حاول مرة أخرى'));
     }
   }

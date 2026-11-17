@@ -25,14 +25,17 @@ class NotificationCubit extends Cubit<NotificationState> {
   Future<void> init() async {
     try {
       final granted = await _repo.requestPermissions();
+      if (isClosed) return;
       emit(state.copyWith(permissionGranted: granted));
 
       final token = await _repo.getFcmToken();
+      if (isClosed) return;
       emit(state.copyWith(fcmToken: token));
       if (granted) {
         await _repo.setupFcm();
+        if (isClosed) return;
         final freshToken = await _repo.getFcmToken();
-        emit(state.copyWith(fcmToken: freshToken));
+        if (!isClosed) emit(state.copyWith(fcmToken: freshToken));
       }
     } catch (logErr, logSt) {
       AppLogger.nonFatal('features/notifications/presentation/view_model/notification_cubit.dart', logErr, logSt, severity: LoggingSeverity.warning);
@@ -54,7 +57,9 @@ class NotificationCubit extends Cubit<NotificationState> {
       final public = await _repo.loadPublicReminders(
         defaults: buildDefaultReminders(),
       );
+      if (isClosed) return;
       final personal = await _repo.loadPersonalReminders();
+      if (isClosed) return;
       emit(
         state.copyWith(
           publicReminders: public,

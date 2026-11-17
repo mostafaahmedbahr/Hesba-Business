@@ -44,10 +44,18 @@ class AdminListCubit extends Cubit<AdminListState> {
     DocumentSnapshot? startAfter,
   ) fetch;
 
+  /// One in-flight page request at a time. Without this, a pull-to-refresh
+  /// (firstPage) landing while nextPage awaits lets the older nextPage response
+  /// append onto a stale snapshot and overwrite the refreshed list.
+  bool _inFlight = false;
+
   Future<void> firstPage() async {
+    if (_inFlight) return;
+    _inFlight = true;
     emit(const AdminListState(loading: true));
     try {
       final snap = await fetch(null);
+      if (isClosed) return;
       emit(AdminListState(
         docs: snap.docs,
         lastDoc: snap.docs.isEmpty ? null : snap.docs.last,
@@ -55,16 +63,20 @@ class AdminListCubit extends Cubit<AdminListState> {
       ));
     } catch (e, logSt) {
       AppLogger.nonFatal('features/admin/presentation/cubit/admin_list_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
-      emit(AdminListState(error: e.toString()));
+      if (!isClosed) emit(AdminListState(error: e.toString()));
+    } finally {
+      _inFlight = false;
     }
   }
 
   Future<void> nextPage() async {
     final current = state;
-    if (current.loading || !current.hasMore || current.lastDoc == null) return;
+    if (_inFlight || current.loading || !current.hasMore || current.lastDoc == null) return;
+    _inFlight = true;
     emit(current.copyWith(loading: true));
     try {
       final snap = await fetch(current.lastDoc);
+      if (isClosed) return;
       emit(AdminListState(
         docs: [...current.docs, ...snap.docs],
         lastDoc: snap.docs.isEmpty ? current.lastDoc : snap.docs.last,
@@ -72,7 +84,9 @@ class AdminListCubit extends Cubit<AdminListState> {
       ));
     } catch (e, logSt) {
       AppLogger.nonFatal('features/admin/presentation/cubit/admin_list_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
-      emit(current.copyWith(loading: false, error: e.toString()));
+      if (!isClosed) emit(current.copyWith(loading: false, error: e.toString()));
+    } finally {
+      _inFlight = false;
     }
   }
 }

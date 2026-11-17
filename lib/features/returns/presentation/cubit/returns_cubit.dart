@@ -21,6 +21,9 @@ class ReturnsCubit extends Cubit<ReturnsState> {
     required String reason,
     required String note,
   }) async {
+    // Re-entrancy guard: a second tap while the first write is in flight must
+    // never reach the repo (two returns would double-refund and double-reverse COGS).
+    if (state.status == ReturnsStatus.loading) return;
     if (items.isEmpty) {
       emit(state.copyWith(status: ReturnsStatus.error, errorMessage: 'retErrMinOne'));
       return;
@@ -61,11 +64,15 @@ class ReturnsCubit extends Cubit<ReturnsState> {
       });
       AppEvents.instance.productChanged();
 
-      emit(ReturnsState(status: ReturnsStatus.success, ret: ret));
+      if (!isClosed) {
+        emit(ReturnsState(status: ReturnsStatus.success, ret: ret));
+      }
     } catch (e, logSt) {
       AppLogger.nonFatal('features/returns/presentation/cubit/returns_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       final msg = e.toString().replaceAll('Exception: ', '');
-      emit(ReturnsState(status: ReturnsStatus.error, errorMessage: msg));
+      if (!isClosed) {
+        emit(ReturnsState(status: ReturnsStatus.error, errorMessage: msg));
+      }
     }
   }
 }

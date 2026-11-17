@@ -32,22 +32,24 @@ class AdminLoginCubit extends Cubit<AdminLoginState> {
   final AdminRepo repo;
 
   Future<void> login(String email, String password) async {
+    if (state is AdminLoginLoading) return;
     emit(AdminLoginLoading());
     try {
       await repo.signInAdmin(email, password);
       final ok = await repo.isAdmin();
+      if (isClosed) return;
       if (ok) {
         emit(AdminLoginSuccess());
       } else {
         await repo.signOutAdmin();
-        emit(const AdminLoginDenied());
+        if (!isClosed) emit(const AdminLoginDenied());
       }
     } on FirebaseAuthException catch (e, logSt) {
       AppLogger.nonFatal('features/admin/presentation/cubit/admin_login_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
-      emit(AdminLoginFailure(e.message ?? 'خطأ في تسجيل الدخول'));
+      if (!isClosed) emit(AdminLoginFailure(e.message ?? 'خطأ في تسجيل الدخول'));
     } catch (e, logSt) {
       AppLogger.nonFatal('features/admin/presentation/cubit/admin_login_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
-      emit(AdminLoginFailure(e.toString()));
+      if (!isClosed) emit(AdminLoginFailure(e.toString()));
     }
   }
 }

@@ -20,26 +20,36 @@ class AccountsCubit extends Cubit<AccountsState> {
   /// يشترك في مديونيات المحل والأشخاص المحفوظين.
   void init() {
     _debtsSub ??= _repo.watchDebts().listen(
-      (list) => emit(
-        state.copyWith(
+      (list) {
+        if (isClosed) return;
+        emit(state.copyWith(
           status: AccountsStatus.success,
           debts: list,
           clearError: true,
-        ),
-      ),
-      onError: (Object e) => emit(
-        state.copyWith(status: AccountsStatus.failure, errorMessage: '$e'),
-      ),
+        ));
+      },
+      onError: (Object e) {
+        if (isClosed) return;
+        // Without clearing the old list the view keeps showing stale totals
+        // while its error widget only renders for an empty list.
+        emit(state.copyWith(
+          status: AccountsStatus.failure,
+          errorMessage: '$e',
+          debts: const [],
+        ));
+      },
     );
 
     _personsSub ??= _repo.watchPersons().listen(
-      (list) => emit(state.copyWith(persons: list)),
+      (list) {
+        if (!isClosed) emit(state.copyWith(persons: list));
+      },
       onError: (Object e) => logWarning('[AccountsCubit] persons: $e'),
     );
 
-    if (state.status == AccountsStatus.loading) {
-      emit(state.copyWith(status: AccountsStatus.success, clearError: true));
-    }
+    // Do NOT flip loading → success here. `refresh()` sets loading and calls
+    // init(); flipping immediately presented the old debts as fresh data.
+    // The live stream emits current data (or onError sets failure) on its own.
   }
 
   /// تبديل التبويب (عملاء / موردين) — يحتفظ بإعدادات البحث والفلاتر.
