@@ -345,12 +345,27 @@ class ExpensesRepoImpl implements ExpensesRepo {
             DateTime(anchor.year, anchor.month, anchor.day, t.hour, t.minute);
       }
 
+      // Load ALL existing occurrences of this template in ONE query instead
+      // of issuing a query per missed slot (the previous T×O N+1 pattern).
+      // Matching is on the same `date` field the old per-slot query used, so
+      // legacy rows with random ids remain protected from duplication.
+      final generatedSnap = await firestore
+          .collection(AppConstants.expensesCollection)
+          .where('shopId', isEqualTo: shopId)
+          .where('generatedFrom', isEqualTo: doc.id)
+          .get();
+      final generatedDueMicros = <int>{
+        for (final g in generatedSnap.docs)
+          if (g.data()['date'] is Timestamp)
+            (g.data()['date'] as Timestamp).toDate().microsecondsSinceEpoch,
+      };
+
       // يولّد كل موعد فات — مع تخطي أي موعد سُجّل فعلًا (idempotent).
       var hop = 0;
       var cursor = nextDue;
       while (!cursor.isAfter(now) && hop < 500) {
         hop++;
-        final already = await _occurrenceExists(shopId, doc.id, cursor);
+        final already = generatedDueMicros.contains(cursor.microsecondsSinceEpoch);
         if (!already) {
           // Deterministic id: a second sync (or two devices syncing at once)
           // writes the SAME document instead of creating a duplicate charge.
@@ -372,6 +387,7 @@ class ExpensesRepoImpl implements ExpensesRepo {
             generatedFrom: doc.id,
           );
           await ref.set(occ.toJson());
+          generatedDueMicros.add(cursor.microsecondsSinceEpoch);
           created++;
         }
         cursor = ExpenseModel.advanceNextDue(cursor, recurrence);
@@ -393,19 +409,6 @@ class ExpensesRepoImpl implements ExpensesRepo {
   /// scheduler initialization requires one).
   static String occurrenceId(String templateId, DateTime due) =>
       '${templateId}_${due.microsecondsSinceEpoch}';
-
-  /// هل يوجد مصروف مولّد من القالب [templateId] في [due]؟
-  Future<bool> _occurrenceExists(
-      String shopId, String templateId, DateTime due) async {
-    final snap = await firestore
-        .collection(AppConstants.expensesCollection)
-        .where('shopId', isEqualTo: shopId)
-        .where('generatedFrom', isEqualTo: templateId)
-        .where('date', isEqualTo: Timestamp.fromDate(due))
-        .limit(1)
-        .get();
-    return snap.docs.isNotEmpty;
-  }
 
   /// يقرأ 'HH:mm' ويرجع (ساعة، دقيقة) أو null لو الصيغة خاطئة.
   _DueTime? _parseDueTime(String value) {

@@ -348,6 +348,10 @@ class ProductThumb extends StatelessWidget {
         imageUrl: product.imageUrl,
         width: 66.w,
         height: 66.w,
+        // Decode at ~2x the displayed size; full-resolution photos in a
+        // 500-item list otherwise blow up the in-memory image cache.
+        memCacheWidth: 132,
+        memCacheHeight: 132,
         fit: BoxFit.cover,
         placeholder: (_, _) => placeholder,
         errorWidget: (_, _, _) => placeholder,

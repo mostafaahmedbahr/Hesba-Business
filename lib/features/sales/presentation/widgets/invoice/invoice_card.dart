@@ -71,6 +71,9 @@ class InvoiceCard extends StatelessWidget {
                 url,
                 width: 60,
                 height: 60,
+                // Decode at 2x the displayed size to keep invoice lists light.
+                cacheWidth: 120,
+                cacheHeight: 120,
                 fit: BoxFit.cover,
                 errorBuilder: (_, _, _) => Container(
                   color: AppTheme.primarySoft,

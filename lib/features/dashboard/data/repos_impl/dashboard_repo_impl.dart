@@ -47,14 +47,18 @@ class DashboardRepoImpl implements DashboardRepo {
   @override
   Future<String?> getShopId() => _getShopIdInternal();
 
+  /// Use a shopId the caller already resolved, otherwise look it up once.
+  Future<String?> _resolveShop(String? shopId) =>
+      shopId != null ? Future.value(shopId) : _getShopIdInternal();
+
   @override
-  Future<double> getTodaySalesTotal() async {
-    final shopId = await _getShopIdInternal();
-    if (shopId == null) return 0;
+  Future<double> getTodaySalesTotal({String? shopId}) async {
+    final resolved = await _resolveShop(shopId);
+    if (resolved == null) return 0;
 
     final snapshot = await _firestore
         .collection('sales')
-        .where('shopId', isEqualTo: shopId)
+        .where('shopId', isEqualTo: resolved)
         .where('createdAt', isGreaterThanOrEqualTo: _todayStart)
         .where('createdAt', isLessThanOrEqualTo: _todayEnd)
         .get();
@@ -67,13 +71,13 @@ class DashboardRepoImpl implements DashboardRepo {
   }
 
   @override
-  Future<Map<String, double>> getTodaySalesByMethod() async {
-    final shopId = await _getShopIdInternal();
-    if (shopId == null) return {};
+  Future<Map<String, double>> getTodaySalesByMethod({String? shopId}) async {
+    final resolved = await _resolveShop(shopId);
+    if (resolved == null) return {};
 
     final snapshot = await _firestore
         .collection('sales')
-        .where('shopId', isEqualTo: shopId)
+        .where('shopId', isEqualTo: resolved)
         .where('createdAt', isGreaterThanOrEqualTo: _todayStart)
         .where('createdAt', isLessThanOrEqualTo: _todayEnd)
         .get();
@@ -90,13 +94,13 @@ class DashboardRepoImpl implements DashboardRepo {
   }
 
   @override
-  Future<double> getTodayReturnsTotal() async {
-    final shopId = await _getShopIdInternal();
-    if (shopId == null) return 0;
+  Future<double> getTodayReturnsTotal({String? shopId}) async {
+    final resolved = await _resolveShop(shopId);
+    if (resolved == null) return 0;
 
     final snapshot = await _firestore
         .collection('returns')
-        .where('shopId', isEqualTo: shopId)
+        .where('shopId', isEqualTo: resolved)
         .where('createdAt', isGreaterThanOrEqualTo: _todayStart)
         .where('createdAt', isLessThanOrEqualTo: _todayEnd)
         .get();
@@ -109,12 +113,12 @@ class DashboardRepoImpl implements DashboardRepo {
   }
 
   @override
-  Future<int> getTodayReturnsCount() async {
-    final shopId = await _getShopIdInternal();
-    if (shopId == null) return 0;
+  Future<int> getTodayReturnsCount({String? shopId}) async {
+    final resolved = await _resolveShop(shopId);
+    if (resolved == null) return 0;
     final snapshot = await _firestore
         .collection('returns')
-        .where('shopId', isEqualTo: shopId)
+        .where('shopId', isEqualTo: resolved)
         .where('createdAt', isGreaterThanOrEqualTo: _todayStart)
         .where('createdAt', isLessThanOrEqualTo: _todayEnd)
         .count()
@@ -123,13 +127,13 @@ class DashboardRepoImpl implements DashboardRepo {
   }
 
   @override
-  Future<double> getTodayExpensesTotal() async {
-    final shopId = await _getShopIdInternal();
-    if (shopId == null) return 0;
+  Future<double> getTodayExpensesTotal({String? shopId}) async {
+    final resolved = await _resolveShop(shopId);
+    if (resolved == null) return 0;
 
     final snapshot = await _firestore
         .collection('expenses')
-        .where('shopId', isEqualTo: shopId)
+        .where('shopId', isEqualTo: resolved)
         .where('date', isGreaterThanOrEqualTo: _todayStart)
         .where('date', isLessThanOrEqualTo: _todayEnd)
         .get();
@@ -145,13 +149,13 @@ class DashboardRepoImpl implements DashboardRepo {
   }
 
   @override
-  Future<int> getProductsCount() async {
-    final shopId = await _getShopIdInternal();
-    if (shopId == null) return 0;
+  Future<int> getProductsCount({String? shopId}) async {
+    final resolved = await _resolveShop(shopId);
+    if (resolved == null) return 0;
 
     final snapshot = await _firestore
         .collection('products')
-        .where('shopId', isEqualTo: shopId)
+        .where('shopId', isEqualTo: resolved)
         .where('isActive', isEqualTo: true)
         .count()
         .get();
@@ -160,13 +164,13 @@ class DashboardRepoImpl implements DashboardRepo {
   }
 
   @override
-  Future<int> getLowStockProductsCount() async {
-    final shopId = await _getShopIdInternal();
-    if (shopId == null) return 0;
+  Future<int> getLowStockProductsCount({String? shopId}) async {
+    final resolved = await _resolveShop(shopId);
+    if (resolved == null) return 0;
 
     final snapshot = await _firestore
         .collection('products')
-        .where('shopId', isEqualTo: shopId)
+        .where('shopId', isEqualTo: resolved)
         .where('isActive', isEqualTo: true)
         .get();
 

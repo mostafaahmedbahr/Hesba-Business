@@ -37,10 +37,14 @@ class ShopResolver {
     if (uid == null) return null;
     try {
       final userDoc = await _firestore.collection('users').doc(uid).get();
-      final name = userDoc.data()?['shopName'] as String?;
+      final data = userDoc.data();
+      final name = data?['shopName'] as String?;
       if (name != null && name.trim().isNotEmpty) return name.trim();
-      final shopId = await getShopId();
-      if (shopId != null && shopId.isNotEmpty) {
+      // Reuse the shopId already present on the document we just read instead
+      // of calling getShopId(), which would read users/{uid} a second time.
+      final rawShopId = data?['shopId'] as String?;
+      final shopId = (rawShopId == null || rawShopId.isEmpty) ? null : rawShopId;
+      if (shopId != null) {
         final shopDoc = await _firestore.collection('shops').doc(shopId).get();
         final sName = shopDoc.data()?['shopName'] as String?;
         if (sName != null && sName.trim().isNotEmpty) return sName.trim();

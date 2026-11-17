@@ -97,13 +97,18 @@ class DashboardCubit extends Cubit<DashboardState> {
     emit(state.copyWith(status: DashboardStatus.loading));
 
     try {
+      // Resolve the user's shop once per load. Previously all six calls below
+      // re-read users/{uid}, i.e. six identical reads on every dashboard refresh.
+      // Pass a non-null sentinel when signed out so the repo methods never
+      // re-read users/{uid}; an empty shopId simply matches no documents.
+      final shopId = await _repo.getShopId() ?? '';
       final results = await Future.wait([
-        _repo.getTodaySalesByMethod(),
-        _repo.getTodayReturnsTotal(),
-        _repo.getTodayReturnsCount(),
-        _repo.getTodayExpensesTotal(),
-        _repo.getProductsCount(),
-        _repo.getLowStockProductsCount(),
+        _repo.getTodaySalesByMethod(shopId: shopId),
+        _repo.getTodayReturnsTotal(shopId: shopId),
+        _repo.getTodayReturnsCount(shopId: shopId),
+        _repo.getTodayExpensesTotal(shopId: shopId),
+        _repo.getProductsCount(shopId: shopId),
+        _repo.getLowStockProductsCount(shopId: shopId),
       ]);
 
       // الإجمالي = مجموع كل وسائل الدفع (فواتير بلا وسيلة مدخلة تحت '').

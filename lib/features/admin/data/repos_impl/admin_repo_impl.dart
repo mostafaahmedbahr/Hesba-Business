@@ -170,59 +170,71 @@ class AdminRepoImpl implements AdminRepo {
   /// underlying documents, up to the scan caps ([capped]).
   @override
   Future<ProfitSummary> profitSummary() async {
-    final sales = <SaleModel>[];
     var capped = false;
 
-    Query<Map<String, dynamic>> query = firestore
-        .collection('sales')
-        .orderBy(FieldPath.documentId)
-        .limit(_profitPageSize);
-
-    while (true) {
-      final snap = await query.get();
-      if (snap.docs.isEmpty) break;
-
-      for (final doc in snap.docs) {
-        sales.add(SaleModel.fromJson(doc.data()));
-        if (sales.length >= _profitMaxSales) {
-          capped = true;
-          break;
-        }
-      }
-
-      if (capped || snap.docs.length < _profitPageSize) break;
-      query = firestore
+    Future<List<SaleModel>> loadSales() async {
+      final sales = <SaleModel>[];
+      Query<Map<String, dynamic>> query = firestore
           .collection('sales')
           .orderBy(FieldPath.documentId)
-          .startAfterDocument(snap.docs.last)
           .limit(_profitPageSize);
+
+      while (true) {
+        final snap = await query.get();
+        if (snap.docs.isEmpty) break;
+
+        for (final doc in snap.docs) {
+          sales.add(SaleModel.fromJson(doc.data()));
+          if (sales.length >= _profitMaxSales) {
+            capped = true;
+            break;
+          }
+        }
+
+        if (capped || snap.docs.length < _profitPageSize) break;
+        query = firestore
+            .collection('sales')
+            .orderBy(FieldPath.documentId)
+            .startAfterDocument(snap.docs.last)
+            .limit(_profitPageSize);
+      }
+      return sales;
     }
 
-    final returns = <ReturnModel>[];
-    Query<Map<String, dynamic>> rQuery = firestore
-        .collection('returns')
-        .orderBy(FieldPath.documentId)
-        .limit(_profitPageSize);
-
-    while (true) {
-      final snap = await rQuery.get();
-      if (snap.docs.isEmpty) break;
-
-      for (final doc in snap.docs) {
-        returns.add(ReturnModel.fromJson(doc.data()));
-        if (returns.length >= _profitMaxReturns) {
-          capped = true;
-          break;
-        }
-      }
-
-      if (capped || snap.docs.length < _profitPageSize) break;
-      rQuery = firestore
+    Future<List<ReturnModel>> loadReturns() async {
+      final returns = <ReturnModel>[];
+      Query<Map<String, dynamic>> rQuery = firestore
           .collection('returns')
           .orderBy(FieldPath.documentId)
-          .startAfterDocument(snap.docs.last)
           .limit(_profitPageSize);
+
+      while (true) {
+        final snap = await rQuery.get();
+        if (snap.docs.isEmpty) break;
+
+        for (final doc in snap.docs) {
+          returns.add(ReturnModel.fromJson(doc.data()));
+          if (returns.length >= _profitMaxReturns) {
+            capped = true;
+            break;
+          }
+        }
+
+        if (capped || snap.docs.length < _profitPageSize) break;
+        rQuery = firestore
+            .collection('returns')
+            .orderBy(FieldPath.documentId)
+            .startAfterDocument(snap.docs.last)
+            .limit(_profitPageSize);
+      }
+      return returns;
     }
+
+    // The two scans read independent collections — run them concurrently so
+    // latency is max(sales, returns) instead of their sum. Same reads, same math.
+    final results = await Future.wait<Object>([loadSales(), loadReturns()]);
+    final sales = results[0] as List<SaleModel>;
+    final returns = results[1] as List<ReturnModel>;
 
     // Exact same math as the per-shop Reports screen, over the whole book.
     final metrics = ReportsCalculator.calculate(
@@ -395,12 +407,14 @@ class AdminRepoImpl implements AdminRepo {
   @override
   Future<int> countShopDocs(
       {required String collection, required String shopId}) async {
+    // A count aggregation costs 1 read regardless of collection size; reading
+    // 100 full documents just to display "100+" was wasteful.
     final snap = await firestore
         .collection(collection)
         .where('shopId', isEqualTo: shopId)
-        .limit(100)
+        .count()
         .get();
-    return snap.size;
+    return snap.count ?? 0;
   }
 
   @override

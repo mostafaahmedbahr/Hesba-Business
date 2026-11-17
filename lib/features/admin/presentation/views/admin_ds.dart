@@ -836,6 +836,10 @@ class AdminThumbnail extends StatelessWidget {
         imageUrl: url,
         width: size,
         height: size,
+        // Thumbnails are shown at `size` px in dense admin lists; never decode
+        // the full uploaded image (often thousands of px) for these cells.
+        memCacheWidth: (size * 2).round(),
+        memCacheHeight: (size * 2).round(),
         fit: BoxFit.cover,
         placeholder: (_, _) => Container(
           width: size,

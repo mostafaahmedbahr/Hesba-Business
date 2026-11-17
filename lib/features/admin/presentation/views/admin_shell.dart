@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hesba/core/di/service_locator.dart';
@@ -174,11 +175,23 @@ class _TopBar extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-class _PendingBell extends StatelessWidget {
+class _PendingBell extends StatefulWidget {
+  const _PendingBell();
+
+  @override
+  State<_PendingBell> createState() => _PendingBellState();
+}
+
+class _PendingBellState extends State<_PendingBell> {
+  // Create the live listener ONCE. Previously it was built inline in build(),
+  // so every nav/sidebar rebuild tore down and re-attached a Firestore listener.
+  late final Stream<QuerySnapshot<Map<String, dynamic>>> _pendingStream =
+      sl<AdminRepo>().watchPendingRequestsOnce();
+
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-      stream: sl<AdminRepo>().watchPendingRequestsOnce(),
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: _pendingStream,
       builder: (context, snap) {
         final count = snap.data?.docs.length ?? 0;
         return IconButton(
