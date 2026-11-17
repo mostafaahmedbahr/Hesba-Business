@@ -292,3 +292,146 @@ test('settings document reads work for signed-in customers (live prices)', async
   assert.equal(snap.exists(), true);
   assert.equal(snap.data().monthlyPrice, 99);
 });
+
+// ── 11: admin may CREATE the subscription doc for a sub-less account ───
+// Regression for the gap where approve/reject/suspend (set-merge) failed
+// entirely on accounts whose users/{uid}/subscription/current did not exist,
+// because the create branch allowed only an owner's own 7-day trial.
+test('11. admin can create the subscription doc for an account that has none', async () => {
+  const admin = env.authenticatedContext('admin1');
+  // Seed has NO users/u1/subscription/current — exactly the sub-less case.
+  await assertSucceeds(
+    setDoc(doc(admin.firestore(), 'users/u1/subscription/current'), {
+      status: 'active',
+      plan: 'monthly',
+      startDate: new Date(),
+      endDate: new Date(Date.now() + 30 * 24 * 3600 * 1000),
+      isTrial: false,
+      suspended: false,
+      updatedAt: new Date(),
+    }),
+  );
+});
+
+test('11b. non-admin is denied creating a non-trial doc, even for themselves', async () => {
+  const alice = env.authenticatedContext('u1');
+  const bob = env.authenticatedContext('u2');
+  // Bob is an owner but may not create u1's subscription doc.
+  await assertFails(
+    setDoc(doc(bob.firestore(), 'users/u1/subscription/current'), {
+      status: 'active', plan: 'monthly', isTrial: false,
+      startDate: new Date(), endDate: new Date(Date.now() + 30 * 24 * 3600 * 1000),
+    }),
+  );
+  // Alice may create her OWN doc only if it is the 7-day trial shape — not 'active'.
+  await assertFails(
+    setDoc(doc(alice.firestore(), 'users/u1/subscription/current'), {
+      status: 'active', plan: 'monthly', isTrial: false,
+      startDate: new Date(), endDate: new Date(Date.now() + 30 * 24 * 3600 * 1000),
+      suspended: false,
+    }),
+  );
+});
+
+test('11c. owner can still create their own 7-day trial (unchanged)', async () => {
+  const alice = env.authenticatedContext('u1');
+  const now = Date.now();
+  await assertSucceeds(
+    setDoc(doc(alice.firestore(), 'users/u1/subscription/current'), {
+      status: 'trial',
+      isTrial: true,
+      suspended: false,
+      startDate: new Date(now),
+      endDate: new Date(now + 7 * 24 * 3600 * 1000),
+      trialStartDate: new Date(now),
+      trialEndDate: new Date(now + 7 * 24 * 3600 * 1000),
+      updatedAt: new Date(now),
+    }),
+  );
+});
+
+// ── 12-15: trial length must track admin_settings/settings.trialDays ───
+// Regression for the mismatch where the rule hardcoded a 7-day window while
+// the dashboard exposes trialDays (0..365) as editable.
+function trialPayload(now, days) {
+  return {
+    status: 'trial',
+    isTrial: true,
+    suspended: false,
+    startDate: new Date(now),
+    endDate: new Date(now + days * 24 * 3600 * 1000),
+    trialStartDate: new Date(now),
+    trialEndDate: new Date(now + days * 24 * 3600 * 1000),
+    updatedAt: new Date(now),
+  };
+}
+
+test('12. default settings (7 days): 7-day trial accepted, 8-day rejected', async () => {
+  const alice = env.authenticatedContext('u1');
+  const now = Date.now();
+  await assertSucceeds(
+    setDoc(doc(alice.firestore(), 'users/u1/subscription/current'),
+      trialPayload(now, 7)),
+  );
+  const bob = env.authenticatedContext('u2');
+  await assertFails(
+    setDoc(doc(bob.firestore(), 'users/u2/subscription/current'),
+      trialPayload(now, 8)),
+  );
+});
+
+test('13. trialDays=30 in settings: 30-day trial accepted, 31-day rejected', async () => {
+  await seed(async (db) => {
+    await setDoc(doc(db, 'admin_settings/settings'),
+      { ...DEFAULT_SETTINGS, trialDays: 30 });
+  });
+  const alice = env.authenticatedContext('u1');
+  const now = Date.now();
+  await assertSucceeds(
+    setDoc(doc(alice.firestore(), 'users/u1/subscription/current'),
+      trialPayload(now, 30)),
+  );
+  const bob = env.authenticatedContext('u2');
+  await assertFails(
+    setDoc(doc(bob.firestore(), 'users/u2/subscription/current'),
+      trialPayload(now, 31)),
+  );
+});
+
+test('14. trialDays=0 in settings: 0-day trial (starts already expired) accepted', async () => {
+  await seed(async (db) => {
+    await setDoc(doc(db, 'admin_settings/settings'),
+      { ...DEFAULT_SETTINGS, trialDays: 0 });
+  });
+  const alice = env.authenticatedContext('u1');
+  const now = Date.now();
+  // Same day trial: end == start, allowed when the admin chose "no trial".
+  await assertSucceeds(
+    setDoc(doc(alice.firestore(), 'users/u1/subscription/current'),
+      trialPayload(now, 0)),
+  );
+  // Any positive-length trial is refused while trialDays is 0.
+  const bob = env.authenticatedContext('u2');
+  await assertFails(
+    setDoc(doc(bob.firestore(), 'users/u2/subscription/current'),
+      trialPayload(now, 1)),
+  );
+});
+
+test('15. out-of-range trialDays falls back to 7 (1000 → 8-day rejected, 7-day ok)', async () => {
+  await seed(async (db) => {
+    await setDoc(doc(db, 'admin_settings/settings'),
+      { ...DEFAULT_SETTINGS, trialDays: 1000 });
+  });
+  const alice = env.authenticatedContext('u1');
+  const now = Date.now();
+  await assertFails(
+    setDoc(doc(alice.firestore(), 'users/u1/subscription/current'),
+      trialPayload(now, 8)),
+  );
+  const bob = env.authenticatedContext('u2');
+  await assertSucceeds(
+    setDoc(doc(bob.firestore(), 'users/u2/subscription/current'),
+      trialPayload(now, 7)),
+  );
+});

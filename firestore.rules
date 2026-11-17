@@ -298,6 +298,27 @@ service cloud.firestore {
         (sameShop(shopId) && isActiveAccount() && subscriptionLive());
     }
 
+    // الفترة التجريبية تُقرأ من نفس مستند الإعدادات الذي يعدّله الأدمن —
+    // لا قيمة ثابتة هنا. لو المستند ناقص أو القيمة غير صالحة، يقع الحل
+    // على الافتراضي (7 أيام) نفسه الذي يشحنه التطبيق. أي قيمة 0..365 تُقبل.
+    // تكلفة هذه القاعدة: exists() + get() واحدة (داخل ميزانية العشرة).
+    function configuredTrialDays() {
+      let settings = /databases/$(database)/documents/admin_settings/settings;
+      let raw = exists(settings) ? get(settings).data.get('trialDays', 7) : 7;
+      return raw is int && raw >= 0 && raw <= 365 ? raw : 7;
+    }
+
+    /// بداية التجربة ضمن ±يوم من الآن، ونهايتها لا تتجاوز المدة المعدّة.
+    function trialWindowOk(trialStart, trialEnd) {
+      let days = configuredTrialDays();
+      return trialStart is timestamp
+        && trialEnd is timestamp
+        && trialStart >= request.time - duration.value(1, 'd')
+        && trialStart <= request.time + duration.value(1, 'd')
+        && trialEnd >= trialStart
+        && trialEnd <= trialStart + duration.value(days, 'd');
+    }
+
     // ── users ────────────────────────────────────────────────
     match /users/{userId} {
       allow read: if signedIn() && (
@@ -352,19 +373,19 @@ service cloud.firestore {
         (isStaffUser() && myUserDoc().get('ownerId', '') == userId)
       );
 
-      // The only thing a regular client may create is its own 7 day trial,
-      // once, starting about now — never pre-suspended. Admins may also
-      // create the doc (approve/reject/suspend via set-merge on an account
-      // whose subscription doc is missing).
+      // The only thing a regular client may create is its own trial, once,
+      // starting about now — never pre-suspended. Trial length comes from
+      // `admin_settings/settings.trialDays` (default 7) so the dashboard
+      // value and the rule can never diverge. Admins may also create the
+      // doc (approve/reject/suspend via set-merge on an account whose
+      // subscription doc is missing).
       allow create: if isAdmin() || (signedIn() && isOwnerUser()
         && myUid() == userId
         && request.resource.data.status == 'trial'
         && request.resource.data.get('suspended', false) == false
         && request.resource.data.isTrial == true
-        && request.resource.data.trialStartDate >= request.time - duration.value(1, 'd')
-        && request.resource.data.trialStartDate <= request.time + duration.value(1, 'd')
-        && request.resource.data.trialEndDate <=
-           request.resource.data.trialStartDate + duration.value(7, 'd'));
+        && trialWindowOk(request.resource.data.trialStartDate,
+                         request.resource.data.trialEndDate));
 
       // Owner may move to expired / pending / rejected freely. Reaching
       // `active` requires the admin-approved request it points at.
