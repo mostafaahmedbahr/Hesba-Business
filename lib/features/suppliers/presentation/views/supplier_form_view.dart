@@ -96,12 +96,25 @@ class _SupplierFormBody extends StatelessWidget {
         return Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
-            backgroundColor: AppTheme.violetDeep,
+            backgroundColor: Colors.transparent,
             foregroundColor: Colors.white,
             elevation: 0,
             scrolledUnderElevation: 0,
             surfaceTintColor: Colors.transparent,
             centerTitle: true,
+            flexibleSpace: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topRight,
+                  end: Alignment.bottomLeft,
+                  colors: [
+                    Color(0xFF3B0764),
+                    AppTheme.violetDeep,
+                    AppTheme.violetSoft,
+                  ],
+                ),
+              ),
+            ),
             title: Text(
               _isEdit ? 'suppliersEdit'.tr() : 'suppliersAdd'.tr(),
               style: const TextStyle(
@@ -244,6 +257,13 @@ class _SupplierFormBody extends StatelessWidget {
                         color: isDark ? AppTheme.darkBorder : AppTheme.hairline,
                       ),
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.06),
+                        blurRadius: 12,
+                        offset: const Offset(0, -4),
+                      ),
+                    ],
                   ),
                   child: SizedBox(
                     width: double.infinity,

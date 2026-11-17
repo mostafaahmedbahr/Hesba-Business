@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/extensions/log_util.dart';
+import '../../data/models/supplier_model.dart';
 import '../../data/repos/suppliers_repo.dart';
 import '../states/suppliers_state.dart';
 
@@ -10,7 +11,7 @@ import '../states/suppliers_state.dart';
 /// المنتجات المرتبطة، والحذف.
 class SuppliersCubit extends Cubit<SuppliersState> {
   final SuppliersRepo _repo;
-  StreamSubscription<List<dynamic>>? _suppliersSub;
+  StreamSubscription<List<SupplierModel>>? _suppliersSub;
   StreamSubscription<Map<String, int>>? _countsSub;
   Timer? _debounce;
 
@@ -22,13 +23,18 @@ class SuppliersCubit extends Cubit<SuppliersState> {
       (list) => emit(
         state.copyWith(
           status: SuppliersStatus.success,
-          suppliers: list.cast(),
+          suppliers: list,
           clearError: true,
         ),
       ),
       onError: (Object e) => emit(
         state.copyWith(status: SuppliersStatus.failure, errorMessage: '$e'),
       ),
+      onDone: () {
+        if (state.status == SuppliersStatus.loading) {
+          emit(state.copyWith(status: SuppliersStatus.success, suppliers: const []));
+        }
+      },
     );
 
     _countsSub ??= _repo.watchLinkedProductCounts().listen(
@@ -36,10 +42,7 @@ class SuppliersCubit extends Cubit<SuppliersState> {
       onError: (Object e) => logWarning('[SuppliersCubit] counts: $e'),
     );
 
-    // أول حالة قبل وصول أول قيمة من الستريم.
-    if (state.status == SuppliersStatus.loading) {
-      emit(state.copyWith(status: SuppliersStatus.success, clearError: true));
-    }
+    // نبقي status = loading حتى يصل أول انبعاث من الستريم (لعرض مؤشر التحميل).
   }
 
   /// تحديث البحث المحلي في القائمة.

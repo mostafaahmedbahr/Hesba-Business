@@ -116,6 +116,20 @@ class _SupplierFieldState extends State<SupplierField> {
   }
 
   @override
+  void didUpdateWidget(covariant SupplierField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // نحدّث النص فقط لو تغيّر initialValue من الخارج (مثلاً إعادة
+    // تعبئة) وبدون إلغاء ما يكتبه المستخدم حالياً.
+    final next = widget.initialValue ?? '';
+    if (next != (oldWidget.initialValue ?? '') && next != _controller.text) {
+      _controller.value = TextEditingValue(
+        text: next,
+        selection: TextSelection.collapsed(offset: next.length),
+      );
+    }
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();

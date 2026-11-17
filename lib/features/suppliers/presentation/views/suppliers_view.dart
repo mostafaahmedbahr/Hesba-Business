@@ -149,18 +149,6 @@ class _SuppliersBody extends StatelessWidget {
         final filtered = state.filtered;
         return Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          floatingActionButton: FloatingActionButton.extended(
-            heroTag: 'suppliers_fab',
-            onPressed: () => _openForm(context),
-            elevation: 0,
-            backgroundColor: AppTheme.violetDeep,
-            foregroundColor: Colors.white,
-            icon: const Icon(Icons.add_rounded),
-            label: Text(
-              'suppliersAdd'.tr(),
-              style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800),
-            ),
-          ),
           body: RefreshIndicator(
             color: AppTheme.violetDeep,
             onRefresh: () => cubit.refresh(),

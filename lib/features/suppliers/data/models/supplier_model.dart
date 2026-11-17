@@ -101,6 +101,7 @@ class SupplierModel {
     String? address,
     String? city,
     String? notes,
+    DateTime? updatedAt,
   }) {
     return SupplierModel(
       id: id,
@@ -115,7 +116,7 @@ class SupplierModel {
       city: city ?? this.city,
       notes: notes ?? this.notes,
       createdAt: createdAt,
-      updatedAt: updatedAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 

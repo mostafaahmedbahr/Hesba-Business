@@ -175,12 +175,25 @@ class _SupplierDetailsBody extends StatelessWidget {
 
   PreferredSizeWidget _appBar(BuildContext context, SupplierModel? supplier) {
     return AppBar(
-      backgroundColor: AppTheme.violetDeep,
+      backgroundColor: Colors.transparent,
       foregroundColor: Colors.white,
       elevation: 0,
       scrolledUnderElevation: 0,
       surfaceTintColor: Colors.transparent,
       centerTitle: true,
+      flexibleSpace: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
+            colors: [
+              Color(0xFF3B0764),
+              AppTheme.violetDeep,
+              AppTheme.violetSoft,
+            ],
+          ),
+        ),
+      ),
       title: Text(
         'suppliersDetails'.tr(),
         style: const TextStyle(
@@ -259,12 +272,31 @@ class _SupplierInfoCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: isDark ? AppTheme.darkSurface : Colors.white,
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(
-          color: isDark ? AppTheme.darkBorder : const Color(0xFFE8ECF3),
+        borderRadius: BorderRadius.circular(22.r),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDark
+              ? [AppTheme.darkSurface, AppTheme.darkSurfaceAlt]
+              : [Colors.white, const Color(0xFFF7F5FF)],
         ),
-        boxShadow: AppTheme.cardShadow(context),
+        border: Border.all(
+          color: isDark
+              ? AppTheme.darkBorder
+              : AppTheme.violetDeep.withValues(alpha: 0.08),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.violetDeep.withValues(alpha: 0.08),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -377,12 +409,31 @@ class _LinkedProductsSection extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: isDark ? AppTheme.darkSurface : Colors.white,
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(
-          color: isDark ? AppTheme.darkBorder : const Color(0xFFE8ECF3),
+        borderRadius: BorderRadius.circular(22.r),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDark
+              ? [AppTheme.darkSurface, AppTheme.darkSurfaceAlt]
+              : [Colors.white, const Color(0xFFF7F5FF)],
         ),
-        boxShadow: AppTheme.cardShadow(context),
+        border: Border.all(
+          color: isDark
+              ? AppTheme.darkBorder
+              : AppTheme.violetDeep.withValues(alpha: 0.08),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.violetDeep.withValues(alpha: 0.08),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -601,6 +652,7 @@ class _NotesSection extends StatefulWidget {
 
 class _NotesSectionState extends State<_NotesSection> {
   late final TextEditingController _controller;
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
@@ -616,7 +668,7 @@ class _NotesSectionState extends State<_NotesSection> {
     final next = widget.state.supplier?.notes ?? '';
     // نحدّث النص فقط لو المورد نفسه اتغيّر (تعديل ناجح من شاشة تانية).
     if (widget.state.supplier?.id != oldWidget.state.supplier?.id ||
-        (next.isNotEmpty && next != _controller.text)) {
+        (!_focusNode.hasFocus && next != _controller.text)) {
       _controller.text = next;
     }
   }
@@ -624,6 +676,7 @@ class _NotesSectionState extends State<_NotesSection> {
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -634,12 +687,31 @@ class _NotesSectionState extends State<_NotesSection> {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: isDark ? AppTheme.darkSurface : Colors.white,
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(
-          color: isDark ? AppTheme.darkBorder : const Color(0xFFE8ECF3),
+        borderRadius: BorderRadius.circular(22.r),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDark
+              ? [AppTheme.darkSurface, AppTheme.darkSurfaceAlt]
+              : [Colors.white, const Color(0xFFF7F5FF)],
         ),
-        boxShadow: AppTheme.cardShadow(context),
+        border: Border.all(
+          color: isDark
+              ? AppTheme.darkBorder
+              : AppTheme.violetDeep.withValues(alpha: 0.08),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.violetDeep.withValues(alpha: 0.08),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -665,6 +737,7 @@ class _NotesSectionState extends State<_NotesSection> {
           SizedBox(height: 10.h),
           TextField(
             controller: _controller,
+            focusNode: _focusNode,
             maxLines: 4,
             textInputAction: TextInputAction.newline,
             style: TextStyle(fontSize: 13.sp),

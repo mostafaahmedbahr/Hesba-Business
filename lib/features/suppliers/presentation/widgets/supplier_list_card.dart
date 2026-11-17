@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../common_imports.dart';
-import '../../../../core/utils/error_message.dart';
 import '../../data/models/supplier_model.dart';
 
 /// كارت مورد: الاسم + الشركة + الهاتف + المدينة + عدد المنتجات المرتبطة
@@ -42,11 +41,31 @@ class SupplierListCard extends StatelessWidget {
         child: Container(
           padding: EdgeInsets.all(14.w),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20.r),
+            borderRadius: BorderRadius.circular(22.r),
             border: Border.all(
-              color: isDark ? AppTheme.darkBorder : const Color(0xFFE8ECF3),
+              color: isDark
+                  ? AppTheme.darkBorder
+                  : AppTheme.violetDeep.withValues(alpha: 0.08),
             ),
-            boxShadow: AppTheme.cardShadow(context),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: isDark
+                  ? [AppTheme.darkSurface, AppTheme.darkSurfaceAlt]
+                  : [Colors.white, const Color(0xFFF7F5FF)],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.violetDeep.withValues(alpha: 0.08),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -291,5 +310,4 @@ class _CardAction extends StatelessWidget {
   }
 }
 
-/// يحوّل رسالة `supplierErr*` لنص مقروء للمستخدم.
-String supplierErrorText(String? key) => translateError(key);
+

@@ -14,10 +14,33 @@ class SupplierDeleteDialog extends StatelessWidget {
       backgroundColor: Colors.transparent,
       insetPadding: EdgeInsets.symmetric(horizontal: 28.w),
       child: Container(
-        padding: EdgeInsets.all(20.w),
+        padding: EdgeInsets.all(22.w),
         decoration: BoxDecoration(
-          color: isDark ? AppTheme.darkSurface : Colors.white,
-          borderRadius: BorderRadius.circular(22.r),
+          borderRadius: BorderRadius.circular(26.r),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: isDark
+                ? [AppTheme.darkSurface, AppTheme.darkSurfaceAlt]
+                : [Colors.white, const Color(0xFFFDF2F2)],
+          ),
+          border: Border.all(
+            color: isDark
+                ? AppTheme.darkBorder
+                : AppTheme.danger.withValues(alpha: 0.12),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.danger.withValues(alpha: 0.10),
+              blurRadius: 24,
+              offset: const Offset(0, 10),
+            ),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,

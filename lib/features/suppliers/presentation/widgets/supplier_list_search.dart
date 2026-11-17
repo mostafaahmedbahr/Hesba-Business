@@ -22,6 +22,17 @@ class _SupplierListSearchState extends State<SupplierListSearch> {
   final _controller = TextEditingController();
 
   @override
+  void didUpdateWidget(covariant SupplierListSearch oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.query != oldWidget.query && widget.query != _controller.text) {
+      _controller.value = TextEditingValue(
+        text: widget.query,
+        selection: TextSelection.collapsed(offset: widget.query.length),
+      );
+    }
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();

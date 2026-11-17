@@ -187,12 +187,9 @@ class SuppliersRepoImpl implements SuppliersRepo {
       notes: notes.trim(),
     );
 
-    // الحقول القابلة للتعديل + معرّفات الملكية + توقيت الخادم.
+    // المستند الكامل (معرّفات + حقول + توقيت الخادم).
     await ref.set({
-      ...supplier.toJson(),
-      'id': ref.id,
-      'ownerId': uid,
-      'shopId': shopId,
+      ...supplier.toFirestore(),
       'createdAt': now,
       'updatedAt': now,
     });
@@ -259,10 +256,7 @@ class SuppliersRepoImpl implements SuppliersRepo {
       );
     }
 
-    return SupplierModel(
-      id: existing.id,
-      ownerId: existing.ownerId,
-      shopId: existing.shopId,
+    return existing.copyWith(
       name: nextName.trim(),
       phone: nextPhone.trim(),
       companyName: (fields['companyName'] as String?) ?? existing.companyName,
@@ -272,7 +266,6 @@ class SuppliersRepoImpl implements SuppliersRepo {
       address: (fields['address'] as String?) ?? existing.address,
       city: (fields['city'] as String?) ?? existing.city,
       notes: (fields['notes'] as String?) ?? existing.notes,
-      createdAt: existing.createdAt,
       updatedAt: DateTime.now(),
     );
   }
