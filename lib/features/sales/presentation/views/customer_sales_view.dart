@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../common_imports.dart';
 import '../../../../core/utils/phone_contact.dart';
+import '../../../../core/widgets/loading_widget.dart';
 import '../../data/repos/sales_repo.dart';
 import '../cubit/customer_sales_cubit.dart';
 import '../cubit/customer_sales_state.dart';
@@ -110,11 +111,9 @@ class _CustomerSalesBody extends StatelessWidget {
     if (state.status == CustomerSalesStatus.loading ||
         state.status == CustomerSalesStatus.initial) {
       return [
-        const SliverFillRemaining(
+        SliverFillRemaining(
           hasScrollBody: false,
-          child: Center(
-            child: CircularProgressIndicator(color: AppTheme.primaryColor),
-          ),
+          child: LoadingWidget(message: 'salesLoading'.tr()),
         ),
       ];
     }
