@@ -267,6 +267,25 @@ test('15. staff can only touch stock fields on a product', async () => {
   );
 });
 
+test('15b. staff cannot write negative or exaggerated stock', async () => {
+  const staff = env.authenticatedContext('s1');
+  // قيم سالبة مرفوضة
+  await assertFails(updateDoc(doc(staff.firestore(), 'products/p1'), { stock: -1 }));
+  await assertFails(updateDoc(doc(staff.firestore(), 'products/p1'), { stock: -1000 }));
+  // قيم مبالغ فيها مرفوضة (سقف مطلق مليون وحدة)
+  await assertFails(updateDoc(doc(staff.firestore(), 'products/p1'), { stock: 1000001 }));
+  await assertFails(updateDoc(doc(staff.firestore(), 'products/p1'), { stock: 1e12 }));
+  // زيادة عن الحالي (20) بأكثر من 10,000 وحدة مرفوضة حتى تحت السقف المطلق
+  await assertFails(updateDoc(doc(staff.firestore(), 'products/p1'), { stock: 20 + 10001 }));
+  // أي نوع غير رقم مرفوض
+  await assertFails(updateDoc(doc(staff.firestore(), 'products/p1'), { stock: 'كثير' }));
+  // زيادة مشروعة تحت الحدين تُقبل
+  await assertSucceeds(updateDoc(doc(staff.firestore(), 'products/p1'), { stock: 35 }));
+  // نقص المخزون (بيع) مرفوض لو بقى سالب، مقبول وهي فوق الصفر
+  await assertFails(updateDoc(doc(staff.firestore(), 'products/p1'), { stock: -0.5 }));
+  await assertSucceeds(updateDoc(doc(staff.firestore(), 'products/p1'), { stock: 0 }));
+});
+
 test('16. staff cannot create person / supplier / debt', async () => {
   const staff = env.authenticatedContext('s1');
   await assertFails(

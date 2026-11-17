@@ -37,6 +37,17 @@ class AppRouter {
       return _buildRoute(const LoginView(), settings);
     }
 
+    // أمان: مستخدم مسجّل لكن دوره غير معروف (فشل قراءة مستند users/{uid})
+    // لا يفتح أي مسار محمي — شاشة البداية تقرر: إعادة المحاولة أو تسجيل الخروج.
+    // (ممنوع افتراض دور "مالك" عند فشل القراءة).
+    if (sl<FirebaseAuth>().currentUser != null &&
+        !sl<UserRoleService>().isLoaded &&
+        settings.name != AppRoutes.splash &&
+        settings.name != AppRoutes.login &&
+        settings.name != AppRoutes.register) {
+      return _buildRoute(const SplashView(), settings);
+    }
+
     // الحساب الفرعي محصور في شاشة الإدخال + فورمات الإضافة فقط.
     // أي مسار آخر (لوحة تحكم/تقارير/منتجات/حسابات/موردين) يُعاد توجيهه.
     if (sl<UserRoleService>().isStaff &&

@@ -72,10 +72,19 @@ class _LoginBodyState extends State<_LoginBody> {
     if (state.status == LoginStatus.success) {
       await sl<UserRoleService>().reload();
       if (!context.mounted) return;
+      final role = sl<UserRoleService>();
+      if (!role.isLoaded && role.loadFailed) {
+        // فشل تحميل الدور — لا نوجّه (قد يكون موظفًا). نطلب إعادة المحاولة.
+        AppToast.error(
+          context,
+          'تعذر تحميل بيانات حسابك، تحقق من الاتصال وحاول مرة أخرى',
+        );
+        return;
+      }
       AppToast.success(context, 'loginSuccess'.tr());
       Navigator.pushNamedAndRemoveUntil(
         context,
-        sl<UserRoleService>().isStaff ? AppRoutes.staffHome : AppRoutes.dashboard,
+        role.isStaff ? AppRoutes.staffHome : AppRoutes.dashboard,
         (_) => false,
       );
     } else if (state.status == LoginStatus.failure) {

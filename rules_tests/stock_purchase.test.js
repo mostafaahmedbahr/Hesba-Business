@@ -327,6 +327,57 @@ test('rules: movement creation validates shape (type, qty, stocks)', async () =>
   );
 });
 
+test('rules: movement stock invariant + caps (newStock = previousStock + qty)', async () => {
+  const alice = env.authenticatedContext('u1');
+  // تُقبل: القيم السليمة حسابيًا (الافتراضي 5 + 5 = 10).
+  await assertSucceeds(
+    setDoc(doc(alice.firestore(), 'stock_movements/ok1'), movementPayload('u1', 'shop1')),
+  );
+  // مرفوضة: newStock لا يساوي previousStock + quantity (تزوير الحركة).
+  await assertFails(
+    setDoc(doc(alice.firestore(), 'stock_movements/badMath'),
+      movementPayload('u1', 'shop1', { quantity: 5, previousStock: 5, newStock: 999 })),
+  );
+  await assertFails(
+    setDoc(doc(alice.firestore(), 'stock_movements/badMath2'),
+      movementPayload('u1', 'shop1', { quantity: 5, previousStock: 5, newStock: 9 })),
+  );
+  // مرفوضة: كميات مبالغ فيها (أكثر من 100,000 وحدة في حركة واحدة).
+  await assertFails(
+    setDoc(doc(alice.firestore(), 'stock_movements/hugeQty'),
+      movementPayload('u1', 'shop1', { quantity: 100001, previousStock: 0, newStock: 100001 })),
+  );
+  // مرفوضة: newStock فوق السقف المطلق (مليون وحدة) حتى لو الحساب سليم.
+  await assertFails(
+    setDoc(doc(alice.firestore(), 'stock_movements/hugeNew'),
+      movementPayload('u1', 'shop1', { quantity: 1000000, previousStock: 1, newStock: 1000001 })),
+  );
+  // مرفوضة: previousStock فوق السقف المطلق.
+  await assertFails(
+    setDoc(doc(alice.firestore(), 'stock_movements/hugePrev'),
+      movementPayload('u1', 'shop1', { quantity: 1, previousStock: 1000001, newStock: 1000002 })),
+  );
+});
+
+test('rules: purchase invoice caps (items <= 500, totalAmount <= 10,000,000)', async () => {
+  const alice = env.authenticatedContext('u1');
+  const items = Array.from({ length: 501 }, (_, i) => ({ productId: `p${i}`, quantity: 1 }));
+  await assertFails(
+    setDoc(doc(alice.firestore(), 'stock_purchases/tooManyItems'),
+      purchasePayload('u1', 'shop1', { items })),
+  );
+  await assertFails(
+    setDoc(doc(alice.firestore(), 'stock_purchases/hugeTotal'),
+      purchasePayload('u1', 'shop1', { totalAmount: 10000001 })),
+  );
+  // الحدود السليمة تُقبل.
+  const okItems = Array.from({ length: 500 }, (_, i) => ({ productId: `p${i}`, quantity: 1 }));
+  await assertSucceeds(
+    setDoc(doc(alice.firestore(), 'stock_purchases/maxOk'),
+      purchasePayload('u1', 'shop1', { items: okItems, totalAmount: 10000000 })),
+  );
+});
+
 test('rules: movements are immutable from clients, admin may fix them', async () => {
   const alice = env.authenticatedContext('u1');
   const admin = env.authenticatedContext('admin1');
