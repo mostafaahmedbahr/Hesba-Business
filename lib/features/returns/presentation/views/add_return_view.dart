@@ -156,6 +156,8 @@ class _AddReturnViewState extends State<AddReturnView> {
       _reason = null;
     });
     await _loadAlreadyReturned(sale.saleId);
+    // The user may have navigated away during the Firestore lookup.
+    if (!mounted) return;
     // Initialize entries for each item in sale
     for (int i = 0; i < sale.items.length; i++) {
       final item = sale.items[i];

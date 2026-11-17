@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/extensions/log_util.dart';
+import '../../../../core/utils/error_message.dart';
 import '../../data/models/debt_model.dart';
 import '../../data/models/person_model.dart';
 import '../../data/repos/accounts_repo.dart';
@@ -34,7 +35,7 @@ class AccountsCubit extends Cubit<AccountsState> {
         // while its error widget only renders for an empty list.
         emit(state.copyWith(
           status: AccountsStatus.failure,
-          errorMessage: '$e',
+          errorMessage: friendlyError(e),
           debts: const [],
         ));
       },

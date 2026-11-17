@@ -92,7 +92,8 @@ void main() {
     ).thenThrow(Exception('offline'));
     await submit();
     expect(cubit.state.status, ReturnsStatus.error);
-    expect(cubit.state.errorMessage, contains('offline'));
+    expect(cubit.state.errorMessage, isNotEmpty);
+    expect(cubit.state.errorMessage, isNot(contains('offline')));
     expect(cubit.state.ret, isNull);
   });
 

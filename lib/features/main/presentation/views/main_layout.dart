@@ -1,8 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/service_locator.dart';
-import '../../../../core/services/notification_service.dart';
 import '../../../dashboard/presentation/cubit/dashboard_cubit.dart';
 import '../../../notifications/data/repos/activity_repo.dart';
 import '../../../notifications/data/repos/notification_repo.dart';
@@ -133,7 +134,9 @@ class _MainShellState extends State<_MainShell> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       context.read<NotificationCubit>().loadReminders();
-      NotificationService().setupFcm();
+      // setupFcm performs network/plugin calls — use the guarded repo wrapper
+      // so failures are logged instead of becoming unhandled async errors.
+      unawaited(context.read<NotificationRepo>().setupFcm());
     });
   }
 

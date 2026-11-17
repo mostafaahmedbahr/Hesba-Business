@@ -48,6 +48,8 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
   /// Picks the receipt and uploads it. Cancelling keeps whatever was already
   /// uploaded and returns the flow to its previous state.
   Future<void> pickReceipt(ImageSource source) async {
+    // A second tap during an upload would start a second paid Cloudinary upload.
+    if (state.phase == SubscriptionRequestPhase.uploadingReceipt) return;
     emit(state.copyWith(
       phase: SubscriptionRequestPhase.uploadingReceipt,
       messageKey: null,

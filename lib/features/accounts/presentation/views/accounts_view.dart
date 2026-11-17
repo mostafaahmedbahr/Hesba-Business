@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 
 import '../../../../common_imports.dart';
 import '../../../../core/widgets/loading_widget.dart';
+import '../../../../core/utils/error_message.dart';
 import '../../../subscription/presentation/subscription_gate.dart';
 import '../../data/models/debt_model.dart';
 import '../../data/repos/accounts_repo.dart';
@@ -64,7 +65,7 @@ class _AccountsBody extends StatelessWidget {
           return null;
         } catch (e, logSt) {
           AppLogger.nonFatal('features/accounts/presentation/views/accounts_view.dart', e, logSt, severity: LoggingSeverity.warning);
-          return e.toString().replaceAll('Exception: ', '');
+          return friendlyError(e);
         }
       },
     );

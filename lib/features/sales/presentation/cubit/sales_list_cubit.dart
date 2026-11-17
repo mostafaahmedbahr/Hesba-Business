@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/utils/error_message.dart';
 import '../../data/repos/sales_repo.dart';
 import 'sales_list_state.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// لوجيك قائمة المبيعات (الـ View غبية — بتنادي بس).
 class SalesListCubit extends Cubit<SalesListState> {
@@ -17,7 +19,21 @@ class SalesListCubit extends Cubit<SalesListState> {
   /// تجهيز القائمة: يجيب المحل + يشترك في المبيعات live.
   Future<void> bootstrap() async {
     emit(state.copyWith(status: SalesListStatus.loading, clearError: true));
-    final shopId = await _repo.getShopId();
+    String? shopId;
+    try {
+      shopId = await _repo.getShopId();
+    } catch (e, logSt) {
+      // Without this guard a failed shop lookup leaves the screen stuck in
+      // `loading` forever (Firestore get can throw when offline).
+      AppLogger.nonFatal('features/sales/presentation/cubit/sales_list_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
+      if (!isClosed) {
+        emit(state.copyWith(
+          status: SalesListStatus.failure,
+          errorMessage: friendlyError(e),
+        ));
+      }
+      return;
+    }
     if (isClosed) return;
     // مفيش محل.
     if (shopId == null || shopId.isEmpty) {
@@ -39,7 +55,7 @@ class SalesListCubit extends Cubit<SalesListState> {
         if (isClosed) return;
         emit(state.copyWith(
           status: SalesListStatus.failure,
-          errorMessage: e.toString().replaceAll('Exception: ', ''),
+          errorMessage: friendlyError(e),
         ));
       },
     );

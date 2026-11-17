@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/extensions/log_util.dart';
+import '../../../../core/utils/error_message.dart';
 import '../../data/models/supplier_model.dart';
 import '../../data/repos/suppliers_repo.dart';
 import '../states/suppliers_state.dart';
@@ -30,7 +31,7 @@ class SuppliersCubit extends Cubit<SuppliersState> {
         ),
       ),
       onError: (Object e) => emit(
-        state.copyWith(status: SuppliersStatus.failure, errorMessage: '$e'),
+        state.copyWith(status: SuppliersStatus.failure, errorMessage: friendlyError(e)),
       ),
       onDone: () {
         if (state.status == SuppliersStatus.loading) {
@@ -97,7 +98,7 @@ class SuppliersCubit extends Cubit<SuppliersState> {
       return true;
     } catch (e, logSt) {
       AppLogger.nonFatal('features/suppliers/presentation/cubit/suppliers_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
-      final msg = e.toString().replaceAll('Exception: ', '');
+      final msg = friendlyError(e);
       logWarning('[SuppliersCubit] delete failed: $msg');
       emit(state.copyWith(errorMessage: msg));
       return false;

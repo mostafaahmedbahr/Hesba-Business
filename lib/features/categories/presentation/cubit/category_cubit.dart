@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/utils/error_message.dart';
 import '../../data/repos/category_repo.dart';
 import 'category_state.dart';
 import 'package:hesba/core/services/app_logger.dart';
@@ -36,7 +37,7 @@ class CategoryCubit extends Cubit<CategoryState> {
       },
       onError: (Object e) {
         if (isClosed) return;
-        emit(state.copyWith(status: CategoryStatus.failure, errorMessage: e.toString().replaceAll('Exception: ', '')));
+        emit(state.copyWith(status: CategoryStatus.failure, errorMessage: friendlyError(e)));
       },
     );
   }
@@ -49,7 +50,7 @@ class CategoryCubit extends Cubit<CategoryState> {
     _sub = _repo.watchCustomCategories(shopId).listen((list) {
       if (!isClosed) emit(state.copyWith(status: CategoryStatus.success, customCategories: list, clearError: true));
     }, onError: (Object e) {
-      if (!isClosed) emit(state.copyWith(status: CategoryStatus.failure, errorMessage: e.toString()));
+      if (!isClosed) emit(state.copyWith(status: CategoryStatus.failure, errorMessage: friendlyError(e)));
     });
   }
 
@@ -95,7 +96,7 @@ class CategoryCubit extends Cubit<CategoryState> {
       return true;
     } catch (e, logSt) {
       AppLogger.nonFatal('features/categories/presentation/cubit/category_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
-      emit(state.copyWith(status: CategoryStatus.failure, errorMessage: e.toString().replaceAll('Exception: ', '')));
+      emit(state.copyWith(status: CategoryStatus.failure, errorMessage: friendlyError(e)));
       return false;
     }
   }
@@ -109,7 +110,7 @@ class CategoryCubit extends Cubit<CategoryState> {
       return true;
     } catch (e, logSt) {
       AppLogger.nonFatal('features/categories/presentation/cubit/category_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
-      emit(state.copyWith(errorMessage: e.toString().replaceAll('Exception: ', ''), status: CategoryStatus.failure));
+      emit(state.copyWith(errorMessage: friendlyError(e), status: CategoryStatus.failure));
       return false;
     }
   }

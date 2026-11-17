@@ -201,31 +201,34 @@ class DashboardRepoImpl implements DashboardRepo {
     String? shopId;
     final subs = <StreamSubscription>[];
 
+    void onListenError(Object e, StackTrace st) {
+      AppLogger.nonFatal(
+        'features/dashboard/data/repos_impl/dashboard_repo_impl.dart',
+        e,
+        st,
+        severity: LoggingSeverity.warning,
+      );
+    }
+
     void listenCollections(String sid) {
       for (final s in subs) {
         s.cancel();
       }
       subs.clear();
-      subs.add(_firestore
-          .collection(AppConstants.salesCollection)
-          .where('shopId', isEqualTo: sid)
-          .snapshots()
-          .listen((_) => controller.add(null), onError: (_) {}));
-      subs.add(_firestore
-          .collection(AppConstants.productsCollection)
-          .where('shopId', isEqualTo: sid)
-          .snapshots()
-          .listen((_) => controller.add(null), onError: (_) {}));
-      subs.add(_firestore
-          .collection(AppConstants.returnsCollection)
-          .where('shopId', isEqualTo: sid)
-          .snapshots()
-          .listen((_) => controller.add(null), onError: (_) {}));
-      subs.add(_firestore
-          .collection(AppConstants.expensesCollection)
-          .where('shopId', isEqualTo: sid)
-          .snapshots()
-          .listen((_) => controller.add(null), onError: (_) {}));
+      // These listeners are change triggers for the dashboard; an error used
+      // to be silently discarded, hiding permission/network failures.
+      for (final collection in [
+        AppConstants.salesCollection,
+        AppConstants.productsCollection,
+        AppConstants.returnsCollection,
+        AppConstants.expensesCollection,
+      ]) {
+        subs.add(_firestore
+            .collection(collection)
+            .where('shopId', isEqualTo: sid)
+            .snapshots()
+            .listen((_) => controller.add(null), onError: onListenError));
+      }
     }
 
     () async {

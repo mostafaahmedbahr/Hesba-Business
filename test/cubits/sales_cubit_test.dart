@@ -97,7 +97,9 @@ void main() {
     await submit();
 
     expect(cubit.state.status, SalesStatus.error);
-    expect(cubit.state.errorMessage, contains('boom'));
+    // Raw SDK/exception text must never reach the user.
+    expect(cubit.state.errorMessage, isNotEmpty);
+    expect(cubit.state.errorMessage, isNot(contains('boom')));
     expect(cubit.state.sale, isNull);
   });
 

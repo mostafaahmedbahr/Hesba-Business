@@ -91,8 +91,13 @@ class ExpensesRepoImpl implements ExpensesRepo {
 
     await ref.set(expense.toJson());
     if (isRecurring) {
-      // يولّد أي موعد استحق اليوم (ويعيد جدولة التذكيرات).
-      await syncRecurringExpenses();
+      // Best effort: the primary write is already committed. A sync failure
+      // must not look like a failed save (which would trigger a duplicate save).
+      try {
+        await syncRecurringExpenses();
+      } catch (logErr, logSt) {
+        AppLogger.nonFatal('features/expenses/data/repos_impl/expenses_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning);
+      }
     }
     return expense;
   }
@@ -186,7 +191,12 @@ class ExpensesRepoImpl implements ExpensesRepo {
     );
 
     await docRef.update(updated.toJson());
-    await syncRecurringExpenses();
+    // Same rationale as addExpense: never report a committed update as failed.
+    try {
+      await syncRecurringExpenses();
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/expenses/data/repos_impl/expenses_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning);
+    }
     return updated;
   }
 

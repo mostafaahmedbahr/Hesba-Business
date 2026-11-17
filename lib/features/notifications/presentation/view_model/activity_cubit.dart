@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/services/app_events.dart';
 import '../../../../core/services/notification_service.dart';
+import '../../data/activity_message.dart';
 import '../../data/models/activity_model.dart';
 import '../../data/repos/activity_repo.dart';
 import 'activity_state.dart';
@@ -45,7 +46,18 @@ class ActivityCubit extends Cubit<ActivityState> {
 
     // أي حدث عام يتسجل تلقائيًا (اللوجيك في الـ repo) + إشعار نظام بنفس النص.
     _eventSub = AppEvents.instance.stream.listen((event) async {
-      final msg = await _repo.logAppEvent(event);
+      ActivityMessage? msg;
+      try {
+        msg = await _repo.logAppEvent(event);
+      } catch (logErr, logSt) {
+        AppLogger.nonFatal(
+          'features/notifications/presentation/view_model/activity_cubit.dart',
+          logErr,
+          logSt,
+          severity: LoggingSeverity.warning,
+        );
+        return;
+      }
       if (msg == null || isClosed) return;
       try {
         await NotificationService().showActivity(

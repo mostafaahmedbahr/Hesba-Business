@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/models/sale_model.dart';
+import '../../../../core/utils/error_message.dart';
 import '../../data/repos/sales_repo.dart';
 import 'customer_sales_state.dart';
 
@@ -53,7 +54,7 @@ class CustomerSalesCubit extends Cubit<CustomerSalesState> {
         if (isClosed) return;
         emit(state.copyWith(
           status: CustomerSalesStatus.failure,
-          errorMessage: '$e',
+          errorMessage: friendlyError(e),
         ));
       },
     );

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/utils/error_message.dart';
 import '../../../expenses/data/repos/expenses_repo.dart';
 import '../../../returns/data/repos/returns_repo.dart';
 import '../../../sales/data/repos/sales_repo.dart';
@@ -154,7 +155,7 @@ class ReportsCubit extends Cubit<ReportsState> {
     if (isClosed) return;
     emit(state.copyWith(
       status: ReportsStatus.failure,
-      errorMessage: e.toString().replaceAll('Exception: ', ''),
+      errorMessage: friendlyError(e),
     ));
   }
 

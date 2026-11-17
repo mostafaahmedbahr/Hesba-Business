@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/services/app_events.dart';
+import '../../../../core/utils/error_message.dart';
 import '../../data/models/expense_model.dart';
 import '../../data/repos/expenses_repo.dart';
 import 'expenses_state.dart';
@@ -48,7 +49,19 @@ class ExpensesCubit extends Cubit<ExpensesState> {
     _expensesSubscription?.cancel();
     _expensesSubscription = null;
     emit(state.copyWith(status: ExpensesStatus.loading, errorMessage: null));
-    final resolvedShopId = await _resolveShopId(shopId);
+    String? resolvedShopId;
+    try {
+      resolvedShopId = await _resolveShopId(shopId);
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/expenses/presentation/cubit/expenses_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
+      if (!isClosed && generation == _loadGeneration) {
+        emit(state.copyWith(
+          status: ExpensesStatus.error,
+          errorMessage: friendlyError(e),
+        ));
+      }
+      return;
+    }
     if (isClosed || generation != _loadGeneration) return;
     // مزامنة المصروفات المتكررة (تسجيل أي موعد فات) قبل الاشتراك في
     // الستريم فتظهر أي مصروفات جديدة فورًا.
@@ -73,7 +86,7 @@ class ExpensesCubit extends Cubit<ExpensesState> {
       },
       onError: (e) {
         if (isClosed) return;
-        final msg = e.toString().replaceAll('Exception: ', '');
+        final msg = friendlyError(e);
         emit(state.copyWith(status: ExpensesStatus.error, errorMessage: msg));
       },
     );
@@ -131,7 +144,7 @@ class ExpensesCubit extends Cubit<ExpensesState> {
       }
     } catch (e, logSt) {
       AppLogger.nonFatal('features/expenses/presentation/cubit/expenses_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
-      final msg = e.toString().replaceAll('Exception: ', '');
+      final msg = friendlyError(e);
       if (!isClosed) emit(state.copyWith(status: ExpensesStatus.error, errorMessage: msg));
     } finally {
       _saving = false;
@@ -192,7 +205,7 @@ class ExpensesCubit extends Cubit<ExpensesState> {
       }
     } catch (e, logSt) {
       AppLogger.nonFatal('features/expenses/presentation/cubit/expenses_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
-      final msg = e.toString().replaceAll('Exception: ', '');
+      final msg = friendlyError(e);
       if (!isClosed) emit(state.copyWith(status: ExpensesStatus.error, errorMessage: msg));
     } finally {
       _saving = false;
@@ -220,6 +233,8 @@ class ExpensesCubit extends Cubit<ExpensesState> {
     double amount = 0,
     String category = '',
   }) async {
+    if (_saving) return;
+    _saving = true;
     try {
       await expensesRepo.deleteExpense(expenseId: expenseId, shopId: shopId);
       AppEvents.instance.expenseDeleted({
@@ -228,11 +243,15 @@ class ExpensesCubit extends Cubit<ExpensesState> {
         'category': category,
       });
       AppEvents.instance.productChanged();
-      emit(state.copyWith(status: ExpensesStatus.success));
+      if (!isClosed) emit(state.copyWith(status: ExpensesStatus.success));
     } catch (e, logSt) {
       AppLogger.nonFatal('features/expenses/presentation/cubit/expenses_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
-      final msg = e.toString().replaceAll('Exception: ', '');
-      emit(state.copyWith(status: ExpensesStatus.error, errorMessage: msg));
+      final msg = friendlyError(e);
+      if (!isClosed) {
+        emit(state.copyWith(status: ExpensesStatus.error, errorMessage: msg));
+      }
+    } finally {
+      _saving = false;
     }
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/services/app_events.dart';
+import '../../../../core/utils/error_message.dart';
 import '../../../reports/data/reports_calculator.dart';
 import '../../data/models/sale_model.dart';
 import '../../data/repos/sales_repo.dart';
@@ -122,7 +123,7 @@ class SalesCubit extends Cubit<SalesState> {
       }
     } catch (e, logSt) {
       AppLogger.nonFatal('features/sales/presentation/cubit/sales_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
-      final msg = e.toString().replaceAll('Exception: ', '');
+      final msg = friendlyError(e);
       if (!isClosed) {
         emit(
           SalesState(

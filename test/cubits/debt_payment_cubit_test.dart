@@ -57,7 +57,8 @@ void main() {
     final ok = await cubit.addPayment(amount: 50, note: '');
     expect(ok, isFalse);
     expect(cubit.state.saving, isFalse);
-    expect(cubit.state.errorMessage, contains('overdue lock'));
+    expect(cubit.state.errorMessage, isNotEmpty);
+    expect(cubit.state.errorMessage, isNot(contains('overdue lock')));
   });
 
   test('repeated submission while in flight writes only once', () async {

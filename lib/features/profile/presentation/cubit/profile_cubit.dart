@@ -3,6 +3,7 @@ import 'dart:async';
 
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/services/user_role_service.dart';
+import '../../../../core/utils/error_message.dart';
 import '../../data/repos/account_repo.dart';
 import '../../data/models/user_profile.dart';
 import '../states/profile_state.dart';
@@ -26,7 +27,7 @@ class ProfileCubit extends Cubit<ProfileState> {
       if (!isClosed) {
         emit(state.copyWith(
           status: ProfileStatus.failure,
-          errorMessage: e.toString(),
+          errorMessage: friendlyError(e),
         ));
       }
     });

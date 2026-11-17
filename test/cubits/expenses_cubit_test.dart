@@ -90,7 +90,8 @@ void main() {
     ).thenThrow(Exception('write failed'));
     await submit();
     expect(cubit.state.status, ExpensesStatus.error);
-    expect(cubit.state.errorMessage, contains('write failed'));
+    expect(cubit.state.errorMessage, isNotEmpty);
+    expect(cubit.state.errorMessage, isNot(contains('write failed')));
   });
 
   test('validation error never reaches the repo', () async {

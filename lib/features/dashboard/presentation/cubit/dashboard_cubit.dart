@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/services/app_events.dart';
+import '../../../../core/utils/error_message.dart';
 import '../../data/repos/dashboard_repo.dart';
 import '../states/dashboard_state.dart';
 import 'package:hesba/core/services/app_logger.dart';
@@ -139,7 +140,7 @@ class DashboardCubit extends Cubit<DashboardState> {
       if (isClosed) return;
       emit(state.copyWith(
         status: DashboardStatus.failure,
-        errorMessage: e.toString(),
+        errorMessage: friendlyError(e),
       ));
     } finally {
       _isLoading = false;

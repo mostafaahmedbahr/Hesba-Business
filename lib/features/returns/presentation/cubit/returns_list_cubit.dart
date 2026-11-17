@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/utils/error_message.dart';
 import '../../data/repos/returns_repo.dart';
 import 'returns_list_state.dart';
+import 'package:hesba/core/services/app_logger.dart';
 
 /// لوجيك قائمة المرتجعات (الـ View غبية — بتنادي بس).
 class ReturnsListCubit extends Cubit<ReturnsListState> {
@@ -17,7 +19,19 @@ class ReturnsListCubit extends Cubit<ReturnsListState> {
   /// تجهيز القائمة: يجيب المحل + يشترك في المرتجعات live.
   Future<void> bootstrap() async {
     emit(state.copyWith(status: ReturnsListStatus.loading, clearError: true));
-    final shopId = await _repo.getShopId();
+    String? shopId;
+    try {
+      shopId = await _repo.getShopId();
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/returns/presentation/cubit/returns_list_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
+      if (!isClosed) {
+        emit(state.copyWith(
+          status: ReturnsListStatus.failure,
+          errorMessage: friendlyError(e),
+        ));
+      }
+      return;
+    }
     if (isClosed) return;
     // مفيش محل.
     if (shopId == null || shopId.isEmpty) {
@@ -39,7 +53,7 @@ class ReturnsListCubit extends Cubit<ReturnsListState> {
         if (isClosed) return;
         emit(state.copyWith(
           status: ReturnsListStatus.failure,
-          errorMessage: e.toString().replaceAll('Exception: ', ''),
+          errorMessage: friendlyError(e),
         ));
       },
     );

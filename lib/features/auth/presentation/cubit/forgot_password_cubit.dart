@@ -11,6 +11,7 @@ class ForgotPasswordCubit extends Cubit<ForgotPasswordState> {
   ForgotPasswordCubit({required this._authRepo})
       : super(const ForgotPasswordState());
   Future<void> sendResetEmail({required String email}) async {
+    if (state.status == ForgotPasswordStatus.loading) return;
     emit(state.copyWith(status: ForgotPasswordStatus.loading));
     try {
       await _authRepo.sendPasswordResetEmail(email: email);

@@ -133,11 +133,9 @@ Transformation get shopImageTransformation =>
     required bool verify,
   }) async {
     if (!AppConstants.isCloudinaryConfigured) {
-      throw CloudinaryUploadException(
-        missingConfiguration,
-        'CLOUDINARY_CLOUD_NAME="${AppConstants.cloudinaryCloudName}", '
-            'CLOUDINARY_UPLOAD_PRESET="${AppConstants.cloudinaryUploadPreset}"',
-      );
+      // Do not embed cloud name / upload preset in the exception — it ends up
+      // in AppLogger and the in-app diagnostics screen.
+      throw const CloudinaryUploadException(missingConfiguration);
     }
 
     try {
@@ -166,10 +164,13 @@ Transformation get shopImageTransformation =>
           http.MultipartFile.fromBytes('file', bytes, filename: picked.name),
         );
 
-      final streamed = await _client
-          .send(request)
-          .timeout(const Duration(seconds: 90));
-      final response = await http.Response.fromStream(streamed);
+      // One deadline for the ENTIRE upload: the old timeout covered only
+      // `_client.send()` (up to headers). A server that stalled while sending
+      // the body could leave the UI spinner running forever.
+      final response = await () async {
+        final streamed = await _client.send(request);
+        return http.Response.fromStream(streamed);
+      }().timeout(const Duration(seconds: 90));
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw _uploadError(response);
       }
@@ -195,10 +196,10 @@ Transformation get shopImageTransformation =>
       rethrow;
     } on TimeoutException catch (e, logSt) {
       AppLogger.nonFatal('core/services/cloudinary_image_service.dart', e, logSt, severity: LoggingSeverity.warning);
-      throw CloudinaryUploadException(uploadFailed, e.toString());
+      throw const CloudinaryUploadException(uploadFailed);
     } catch (e, logSt) {
       AppLogger.nonFatal('core/services/cloudinary_image_service.dart', e, logSt, severity: LoggingSeverity.warning);
-      throw CloudinaryUploadException(uploadFailed, e.toString());
+      throw const CloudinaryUploadException(uploadFailed);
     }
   }
 
@@ -206,14 +207,17 @@ Transformation get shopImageTransformation =>
   /// explain what is wrong with the account setup.
 CloudinaryUploadException _uploadError(http.Response response) {
     final body = response.body;
-    logWarning('Cloudinary upload failed (${response.statusCode}): $body');
+    // Keep the body out of the typed exception's `details` (it is rendered in
+    // the diagnostics screen). Log a bounded, sanitized excerpt instead.
+    logWarning('Cloudinary upload failed (${response.statusCode}): '
+        '${body.length > 200 ? body.substring(0, 200) : body}');
     if (body.contains('upload_preset') || body.contains('preset')) {
-      return CloudinaryUploadException(presetNotFound, body);
+      return const CloudinaryUploadException(presetNotFound);
     }
     if (response.statusCode == 400 || response.statusCode == 403) {
-      return CloudinaryUploadException(uploadRejected, body);
+      return const CloudinaryUploadException(uploadRejected);
     }
-    return CloudinaryUploadException(uploadFailed, body);
+    return const CloudinaryUploadException(uploadFailed);
   }
 
 /// Confirms with the Cloudinary SDK that the stored URL is the eager

@@ -68,7 +68,9 @@ class ProductsRepoImpl implements ProductsRepo {
   @override
   Future<void> addProduct(Product product) async {
     final shopId = await _getShopId();
-    if (shopId == null) return;
+    // Never silently no-op: the caller would show success for a write that
+    // never happened. Surface a mapped error instead.
+    if (shopId == null) throw StateError('shop-not-resolved');
     await _assertSupplierInShop(product.supplierId, shopId);
     final ref = _firestore.collection(AppConstants.productsCollection).doc();
     final now = FieldValue.serverTimestamp();
@@ -98,7 +100,7 @@ class ProductsRepoImpl implements ProductsRepo {
 
   @override
   Future<void> updateProduct(Product product) async {
-    if (product.id.isEmpty) return;
+    if (product.id.isEmpty) throw StateError('invalid-id');
     await _assertOwnership(product.id);
     final shopId = await _getShopId();
     if (shopId == null) throw Exception('لم يتم العثور على المتجر');
@@ -114,7 +116,7 @@ class ProductsRepoImpl implements ProductsRepo {
 
   @override
   Future<void> deleteProduct(String productId) async {
-    if (productId.isEmpty) return;
+    if (productId.isEmpty) throw StateError('invalid-id');
     await _assertOwnership(productId);
     await _firestore
         .collection(AppConstants.productsCollection)

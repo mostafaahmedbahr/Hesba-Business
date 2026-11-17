@@ -140,7 +140,12 @@ final channel = AndroidNotificationChannel(
     });
 
     // Token refresh
-    _messaging.onTokenRefresh.listen(saveToken);
+    // A failed Firestore write here must not become an unhandled async error.
+    _messaging.onTokenRefresh.listen((token) {
+      saveToken(token).catchError((Object e, StackTrace st) {
+        AppLogger.nonFatal('core/services/notification_service.dart', e, st, severity: LoggingSeverity.warning);
+      });
+    });
 
     // Register the background handler
     FirebaseMessaging.onBackgroundMessage(
@@ -284,13 +289,19 @@ final channel = AndroidNotificationChannel(
   Future<void> saveToken(String token) async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return;
-    await _firestore
-        .collection('users')
-        .doc(uid)
-        .set({
-          'fcmTokens': FieldValue.arrayUnion([token]),
-          'fcmTokensUpdatedAt': FieldValue.serverTimestamp(),
-        }, SetOptions(merge: true));
+    try {
+      await _firestore
+          .collection('users')
+          .doc(uid)
+          .set({
+            'fcmTokens': FieldValue.arrayUnion([token]),
+            'fcmTokensUpdatedAt': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true));
+    } catch (e, logSt) {
+      // Token persistence is best effort — a network/permission failure must
+      // not crash the app or surface as an unhandled Future error.
+      AppLogger.nonFatal('core/services/notification_service.dart', e, logSt, severity: LoggingSeverity.warning);
+    }
   }
 
   void _onForegroundMessage(RemoteMessage message) {

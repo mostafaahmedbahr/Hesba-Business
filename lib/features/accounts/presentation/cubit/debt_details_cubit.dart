@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/extensions/log_util.dart';
+import '../../../../core/utils/error_message.dart';
 import '../../data/models/debt_model.dart';
 import '../../data/models/payment_model.dart';
 import '../../data/repos/accounts_repo.dart';
@@ -50,7 +51,7 @@ class DebtDetailsCubit extends Cubit<DebtDetailsState> {
         // an enabled payment button after a failed refresh.
         emit(DebtDetailsState(
           status: DebtDetailsStatus.failure,
-          errorMessage: '$e',
+          errorMessage: friendlyError(e),
         ));
       },
     );
@@ -84,7 +85,7 @@ class DebtDetailsCubit extends Cubit<DebtDetailsState> {
       return true;
     } catch (e, logSt) {
       AppLogger.nonFatal('features/accounts/presentation/cubit/debt_details_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
-      final msg = e.toString().replaceAll('Exception: ', '');
+      final msg = friendlyError(e);
       logWarning('[DebtDetailsCubit] payment failed: $msg');
       if (!isClosed) emit(state.copyWith(saving: false, errorMessage: msg));
       return false;

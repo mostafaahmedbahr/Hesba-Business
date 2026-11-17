@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/extensions/log_util.dart';
+import '../../../../core/utils/error_message.dart';
 import '../../data/repos/suppliers_repo.dart';
 import '../states/supplier_details_state.dart';
 import 'package:hesba/core/services/app_logger.dart';
@@ -38,7 +39,7 @@ class SupplierDetailsCubit extends Cubit<SupplierDetailsState> {
       );
     } catch (e, logSt) {
       AppLogger.nonFatal('features/suppliers/presentation/cubit/supplier_details_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
-      final msg = e.toString().replaceAll('Exception: ', '');
+      final msg = friendlyError(e);
       logWarning('[SupplierDetailsCubit] load failed: $msg');
       emit(
         state.copyWith(
@@ -73,7 +74,7 @@ class SupplierDetailsCubit extends Cubit<SupplierDetailsState> {
       return true;
     } catch (e, logSt) {
       AppLogger.nonFatal('features/suppliers/presentation/cubit/supplier_details_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
-      final msg = e.toString().replaceAll('Exception: ', '');
+      final msg = friendlyError(e);
       logWarning('[SupplierDetailsCubit] saveNotes failed: $msg');
       emit(state.copyWith(busy: false, errorMessage: msg));
       return false;
@@ -91,7 +92,7 @@ class SupplierDetailsCubit extends Cubit<SupplierDetailsState> {
       return true;
     } catch (e, logSt) {
       AppLogger.nonFatal('features/suppliers/presentation/cubit/supplier_details_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
-      final msg = e.toString().replaceAll('Exception: ', '');
+      final msg = friendlyError(e);
       logWarning('[SupplierDetailsCubit] delete failed: $msg');
       emit(state.copyWith(busy: false, errorMessage: msg));
       return false;

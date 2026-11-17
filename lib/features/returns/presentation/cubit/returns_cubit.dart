@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/services/app_events.dart';
+import '../../../../core/utils/error_message.dart';
 import '../../data/models/return_model.dart';
 import '../../data/repos/returns_repo.dart';
 import 'returns_state.dart';
@@ -69,7 +70,7 @@ class ReturnsCubit extends Cubit<ReturnsState> {
       }
     } catch (e, logSt) {
       AppLogger.nonFatal('features/returns/presentation/cubit/returns_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
-      final msg = e.toString().replaceAll('Exception: ', '');
+      final msg = friendlyError(e);
       if (!isClosed) {
         emit(ReturnsState(status: ReturnsStatus.error, errorMessage: msg));
       }

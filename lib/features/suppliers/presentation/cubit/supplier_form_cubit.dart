@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/extensions/log_util.dart';
+import '../../../../core/utils/error_message.dart';
 import '../../../../core/utils/validators.dart';
 import '../../data/models/supplier_model.dart';
 import '../../data/repos/suppliers_repo.dart';
@@ -208,7 +209,7 @@ class SupplierFormCubit extends Cubit<SupplierFormState> {
       return saved;
     } catch (e, logSt) {
       AppLogger.nonFatal('features/suppliers/presentation/cubit/supplier_form_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
-      final msg = e.toString().replaceAll('Exception: ', '');
+      final msg = friendlyError(e);
       logWarning('[SupplierFormCubit] save failed: $msg');
       emit(
         state.copyWith(
