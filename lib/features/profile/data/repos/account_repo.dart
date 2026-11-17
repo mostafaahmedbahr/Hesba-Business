@@ -41,6 +41,17 @@ abstract class AccountRepo {
     required String newPassword,
   });
 
+  /// طلب حذف الحساب (Google Play account-deletion requirement).
+  ///
+  /// يعيد التأكد من هوية المستخدم بكلمة المرور الحالية ثم يكتب طلب حذف
+  /// في `account_deletion_requests` — لا يحذف أي بيانات بنفسه (القواعد
+  /// تمنع حذف السجلات المالية من العميل أصلًا). الحذف الفعلي ينفذه الأدمن
+  /// يدويًا خلال المدة الموضحة في سياسة الخصوصية.
+  Future<void> requestAccountDeletion({
+    required String currentPassword,
+    String reason,
+  });
+
   /// Signs out the current user.
   Future<void> logout();
 

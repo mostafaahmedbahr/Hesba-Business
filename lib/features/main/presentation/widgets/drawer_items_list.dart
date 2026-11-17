@@ -7,6 +7,7 @@ import '../../../accounts/presentation/views/accounts_view.dart';
 import '../../../suppliers/presentation/views/suppliers_view.dart';
 import '../../../notifications/presentation/views/notifications_view.dart';
 import '../../../profile/presentation/views/change_password_view.dart';
+import '../../../profile/presentation/views/delete_account_view.dart';
 import '../../../profile/presentation/views/profile_view.dart';
 import '../../../profile/presentation/views/update_profile_view.dart';
 import 'package:hesba/admin_main.dart' show AdminHome;
@@ -146,6 +147,12 @@ class DrawerItemsList extends StatelessWidget {
             label: 'moreChangePassword'.tr(),
             color: const Color(0xFF7C4DFF),
             onTap: () => _open(context, const ChangePasswordView()),
+          ),
+          CustomDrawerTile(
+            icon: Icons.delete_forever_rounded,
+            label: 'moreDeleteAccount'.tr(),
+            color: const Color(0xFFE53935),
+            onTap: () => _open(context, const DeleteAccountView()),
           ),
           SizedBox(height: 10.h),
           Divider(

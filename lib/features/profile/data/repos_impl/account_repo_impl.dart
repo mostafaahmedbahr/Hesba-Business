@@ -122,6 +122,39 @@ class AccountRepoImpl implements AccountRepo {
   }
 
   @override
+  Future<void> requestAccountDeletion({
+    required String currentPassword,
+    String reason = '',
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('auth/user-not-logged-in');
+    }
+    final uid = user.uid;
+    // Re-authenticate: deletion requests must come from a verified session.
+    final credential = EmailAuthProvider.credential(
+      email: user.email ?? '',
+      password: currentPassword,
+    );
+    await user.reauthenticateWithCredential(credential);
+
+    final snap = await _firestore.collection('users').doc(uid).get();
+    final data = snap.data() ?? const {};
+    await _firestore.collection('account_deletion_requests').add({
+      'userId': uid,
+      'ownerName': data['ownerName'] ?? '',
+      'shopName': data['shopName'] ?? '',
+      'shopId': data['shopId'] ?? '',
+      'email': user.email ?? data['email'] ?? '',
+      'phone': data['phone'] ?? '',
+      'reason': reason.trim(),
+      'status': 'pending',
+      'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  @override
   Future<void> logout() async {
     // Drop the device token first so the next account on this device does
     // not receive the previous owner's pushes. Best effort only.

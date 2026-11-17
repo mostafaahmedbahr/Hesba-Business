@@ -693,6 +693,30 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // ── account deletion requests ────────────────────────────
+    // طلب حذف الحساب (متطلب نشر Google Play). كتابة من صاحب الحساب فقط،
+    // قراءة للأدمن فقط، ولا تعديل/حذف من أي عميل — الأدمن يعالجها عبر
+    // وحدة تحكم Firebase ويحذف كل بيانات المستخدم المالكة له.
+    match /account_deletion_requests/{docId} {
+      allow read: if isAdmin();
+      allow create: if signedIn() && isOwnerUser()
+        && request.resource.data.get('userId', null) == myUid()
+        && request.resource.data.get('status', '') == 'pending'
+        && request.resource.data.get('createdAt', null) == request.time
+        && request.resource.data.get('updatedAt', null) == request.time
+        && optionalString(request.resource.data, 'reason', 2000)
+        && optionalString(request.resource.data, 'ownerName', 200)
+        && optionalString(request.resource.data, 'shopName', 200)
+        && optionalString(request.resource.data, 'shopId', 128)
+        && optionalString(request.resource.data, 'phone', 30)
+        && optionalString(request.resource.data, 'email', 200)
+        && request.resource.data.keys().hasOnly([
+          'userId', 'ownerName', 'shopName', 'shopId', 'email', 'phone',
+          'reason', 'status', 'createdAt', 'updatedAt'
+        ]);
+      allow update, delete: if false;
+    }
+
     // ── admin-only ───────────────────────────────────────────
     match /activity_logs/{docId} {
       allow read, create: if isAdmin();
