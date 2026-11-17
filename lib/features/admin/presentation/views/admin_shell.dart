@@ -14,6 +14,7 @@ import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
 import 'package:hesba/features/admin/presentation/views/admin_settings_view.dart';
 import 'package:hesba/features/admin/presentation/views/dashboard_view.dart';
 import 'package:hesba/features/admin/presentation/views/expenses_view.dart';
+import 'package:hesba/features/admin/presentation/views/feedback_view.dart';
 import 'package:hesba/features/admin/presentation/views/global_search_view.dart';
 import 'package:hesba/features/admin/presentation/views/products_view.dart';
 import 'package:hesba/features/admin/presentation/views/sales_view.dart';
@@ -33,6 +34,7 @@ class AdminShell extends StatelessWidget {
     _NavItem('المبيعات', 'مبيعات جميع المحلات', Icons.point_of_sale_outlined, Icons.point_of_sale),
     _NavItem('المصروفات', 'مصروفات جميع المحلات', Icons.money_off_outlined, Icons.money_off),
     _NavItem('النشاطات', 'سجل عمليات النظام', Icons.history_outlined, Icons.history),
+    _NavItem('الملاحظات', 'شكاوى واقتراحات المستخدمين', Icons.feedback_outlined, Icons.feedback),
     _NavItem('الإعدادات', 'أسعار الباقات وطرق الدفع', Icons.settings_outlined, Icons.settings),
   ];
 
@@ -58,6 +60,8 @@ class AdminShell extends StatelessWidget {
       case 7:
         return const ActivityView();
       case 8:
+        return const FeedbackView();
+      case 9:
         return const AdminSettingsView();
       default:
         return const SizedBox();

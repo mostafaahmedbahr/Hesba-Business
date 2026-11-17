@@ -38,6 +38,12 @@ abstract class AdminRepo {
   Future<QuerySnapshot<Map<String, dynamic>>> getExpensesPage({DocumentSnapshot? startAfter});
   Future<QuerySnapshot<Map<String, dynamic>>> getSubscriptionsPage({DocumentSnapshot? startAfter, String? status});
   Future<QuerySnapshot<Map<String, dynamic>>> getRequestsPage({DocumentSnapshot? startAfter, String? status});
+  Future<QuerySnapshot<Map<String, dynamic>>> getFeedbackPage({DocumentSnapshot? startAfter});
+
+  // Feedback moderation
+  /// يحدد ملاحظة كـ "تم التعامل معها" (أو يرجعها "جديدة" لو handled=false).
+  Future<void> setFeedbackHandled(String id, bool handled);
+  Future<void> deleteFeedback(String id);
 
   // Details
   Future<DocumentSnapshot<Map<String, dynamic>>> getShop(String shopId);

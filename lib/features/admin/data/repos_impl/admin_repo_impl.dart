@@ -21,6 +21,7 @@ class AdminRepoImpl implements AdminRepo {
   static const String _requests = 'subscription_requests';
   static const String _activity = 'activity_logs';
   static const String _settings = 'admin_settings';
+  static const String _feedback = 'feedback';
 
   @override
   Future<bool> isAdmin() async {
@@ -384,6 +385,28 @@ class AdminRepoImpl implements AdminRepo {
       return fallback.limit(_page).get();
     }
   }
+
+  @override
+  Future<QuerySnapshot<Map<String, dynamic>>> getFeedbackPage({
+    DocumentSnapshot? startAfter,
+  }) {
+    // orderBy single field — no composite index needed.
+    var query = firestore.collection(_feedback).orderBy('createdAt', descending: true);
+    if (startAfter != null) query = query.startAfterDocument(startAfter);
+    return query.limit(_page).get();
+  }
+
+  @override
+  Future<void> setFeedbackHandled(String id, bool handled) {
+    return firestore.collection(_feedback).doc(id).update({
+      'handled': handled,
+      'handledAt': handled ? FieldValue.serverTimestamp() : null,
+    });
+  }
+
+  @override
+  Future<void> deleteFeedback(String id) =>
+      firestore.collection(_feedback).doc(id).delete();
 
   @override
   Future<DocumentSnapshot<Map<String, dynamic>>> getShop(String shopId) =>

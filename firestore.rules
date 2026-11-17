@@ -733,7 +733,13 @@ service cloud.firestore {
         && request.resource.data.description is string
         && request.resource.data.description.size() <= 2000;
       allow read: if isAdmin();
-      allow update, delete: if false;
+      // الأدمن يقدر يعلّم الملاحظة كـ "تم التعامل معها" أو يرجعها جديدة،
+      // والتحديث محصور في handled/handledAt فقط (محدش يعدّل كلام المستخدم).
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['handled', 'handledAt'])
+        && request.resource.data.handled is bool;
+      allow delete: if isAdmin();
     }
 
     // ── account deletion requests ────────────────────────────
