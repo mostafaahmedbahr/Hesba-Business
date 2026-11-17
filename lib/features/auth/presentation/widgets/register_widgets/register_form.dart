@@ -1,3 +1,4 @@
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -110,6 +111,8 @@ class RegisterForm extends StatelessWidget {
                   ),
                   SizedBox(height: 18.h),
                   const _LoginFooter(),
+                  SizedBox(height: 10.h),
+                  const _PrivacyFooter(),
                 ],
               ),
             ),
@@ -204,6 +207,53 @@ class _LoginFooter extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _PrivacyFooter extends StatelessWidget {
+  const _PrivacyFooter();
+
+  static const String _privacyPolicyUrl =
+      'https://www.freeprivacypolicy.com/live/b331026f-9deb-428d-8ad5-614ede1fdec5';
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        children: [
+          Text(
+            'بإنشائك حسابًا فأنت توافق على ',
+            style: TextStyle(fontSize: 11.5.sp, color: Colors.grey.shade500),
+          ),
+          InkWell(
+            onTap: () async {
+              try {
+                await launchUrl(
+                  Uri.parse(_privacyPolicyUrl),
+                  mode: LaunchMode.externalApplication,
+                );
+              } catch (_) {
+                // لا نمنع التسجيل لمجرد تعذر فتح الرابط — السياسة متاحة دائمًا بالرابط.
+              }
+            },
+            borderRadius: BorderRadius.circular(6.r),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 2.h),
+              child: Text(
+                'سياسة الخصوصية',
+                style: TextStyle(
+                  fontSize: 11.5.sp,
+                  fontWeight: FontWeight.w800,
+                  color: AppTheme.primaryColor,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

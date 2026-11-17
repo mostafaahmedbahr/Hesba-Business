@@ -8,7 +8,9 @@
 > - `firestore.rules` — `users/{uid}/subscription/current` create now allows `isAdmin()` (F-7). **Local file only — the deployed rules remain UNVERIFIED and must be published.**
 > - Verified after fix: `flutter analyze` 0 errors (67 info/warnings, unchanged), rules emulator suite **111/111 PASS**, no new analyzer issues.
 >
-> Still open after this fix: deployed-rules publish/verification, keystore rotation, Dart test suite, privacy policy/Data Safety/account deletion. F-3/F-4/F-7 below are marked FIXED (source); they still require the rules deploy to take effect in production.
+> **FIX LOG 2 — 2026-11-17:** Privacy policy adopted. URL: `https://www.freeprivacypolicy.com/live/b331026f-9deb-428d-8ad5-614ede1fdec5` ("Last updated: November 17, 2026", covers email/name/phone/address, location, camera/photos, usage data, retention, deletion-by-contact `hesbabusiness1@gmail.com`, Egypt, children 16+). In-app access added in two places: a "سياسة الخصوصية" drawer tile (opens the policy in the external browser) and a registration-consent line ("بإنشائك حسابًا فأنت توافق على سياسة الخصوصية"). New `morePrivacyPolicy` key added to `ar.json`/`en.json` (both valid JSON). `flutter analyze`: 0 errors, no new issues.
+>
+> Still open: deployed-rules publish/verification, keystore rotation, Dart test suite, Play Data Safety form submission (store-console side), in-app self-service account deletion (policy currently offers deletion by contacting `hesbabusiness1@gmail.com` — must match what Play Data Safety declares).
 
 **Date:** 2026-11-17
 **Auditor role:** Senior Flutter Engineer / Firebase Security Auditor / Mobile Release Reviewer
@@ -45,7 +47,7 @@ Scoring methodology (weighted, conservative — an item scores points only when 
 2. **P0/P1 — Deployed Firestore rules are UNVERIFIED, and the last documented state was stale.** The authenticated Firebase account used today gets **403** (`firestore:databases:list` → "The caller does not have permission") on project `hesba-business`; the project's own audit (`docs/HESBA_PROJECT_AUDIT.md` §B-1) documented that the deployed console rules were outdated and Firebase CLI deploy was blocked by the same 403. No evidence exists that the current `firestore.rules` has ever been published.
 3. ~~P1 — Admin "reject request" flow silently revokes a shop's paid subscription~~ **FIXED in source 2026-11-17** (see Fix Log at top). Awaiting deployed-rules publish for production effect.
 4. **P1 — Zero Dart-side automated tests.** Only rules tests exist; no sale/return/debt regression suite protects the money paths.
-5. **P1 — Google Play compliance:** no privacy policy (app collects name, phone, email, location, shop data, payment receipts), no Data Safety preparation, no App Check. Play will not accept a non-compliant listing.
+5. **P1 — Google Play compliance:** privacy policy now exists and is linked in-app (drawer + registration consent) — URL `https://www.freeprivacypolicy.com/live/b331026f-9deb-428d-8ad5-614ede1fdec5`. Still missing on the store-console side: the policy URL must be pasted into Play Console (Store listing), the Data Safety form must be completed, and account-deletion declaration must match the policy (deletion via `hesbabusiness1@gmail.com`; no self-service in-app deletion yet). No App Check. Play will not accept a non-compliant listing until the console steps are done.
 
 ### A.4 Final recommendation
 
@@ -238,7 +240,7 @@ Legend: **PASS** = verified working end-to-end in code with evidence. **PARTIAL*
 | Desugaring | ✅ `isCoreLibraryDesugaringEnabled` + `desugar_jdk_libs:2.1.4` | Required for flutter_local_notifications |
 | R8/ProGuard | N/A | No custom rules; Play default shrinking off in this config — acceptable; if enabled later, keep Firestore/Cloudinary models |
 | Debug logs in release | ⚠️ | 67 analyzer notes; `logSuccess('mostafa ahmed')` ships to production (S-21) |
-| **Privacy policy URL** | ❌ **MISSING** | No policy screen/URL anywhere (`grep -ri privacy lib assets android ios` → 0 hits). Mandatory for Play given collected data (name/email/phone/location/photos/receipts) |
+| **Privacy policy URL** | ✅ **PASS (source) / console step pending** | Policy live at `https://www.freeprivacypolicy.com/live/b331026f-9deb-428d-8ad5-614ede1fdec5`; in-app links added (drawer tile `drawer_items_list.dart`, registration consent `register_form.dart`); **must be entered in Play Console store listing manually**; in-app self-service deletion not implemented (policy: delete by emailing `hesbabusiness1@gmail.com`) |
 | Data Safety form (Play Console) | ❌ Not prepared | Must declare: personal info, device IDs/FCM tokens, photos, location; encrypted in transit; user can request deletion (app has **no account/data deletion path** — Play requires deletion request mechanism for apps with accounts) |
 | Content rating / target audience | ❌ Not prepared | Standard questionnaire |
 | Ads declaration | ✅ None | |
@@ -262,7 +264,7 @@ Legend: **PASS** = verified working end-to-end in code with evidence. **PARTIAL*
 | F-3 | Admin reject revokes paid access, non-transactional | **P1 — FIXED (source) 2026-11-17** | Subscriptions/Admin | `admin_repo_impl.dart` rewritten (transaction + pending precondition + live-period restoration + mirror fix); `subscription_model.dart`/`subscription_repo_impl.dart` healer restored | Done — awaits rules deploy | **YES (deploy)** |
 | F-4 | Approve lacks idempotency + confirm | **P1 — FIXED (source) 2026-11-17** | Subscriptions/Admin | transaction precondition on request status; confirms added to both buttons | Done — awaits rules deploy | **YES (deploy)** |
 | F-5 | Zero Dart tests | **P1** | All money paths | `flutter test` → `Test directory "test" not found` | Add sale/return/debt/report unit tests (`fake_cloud_firestore`, `mocktail` already in dev_deps) | **YES** (min. sale+return+debt suite) |
-| F-6 | Privacy policy + Play Data Safety + deletion path absent | **P1** | Store listing / legal | no `privacy` hits in repo; no account-deletion flow | Publish policy URL; add in-app deletion request (email/flow); complete Data Safety | **YES** |
+| F-6 | Privacy policy + Play Data Safety + deletion path | **P1 — PARTIALLY FIXED 2026-11-17** | Store listing / legal | policy URL adopted; in-app drawer tile + registration consent added (`morePrivacyPolicy` key ar/en) | Remaining: paste URL in Play Console; complete Data Safety declaration; build in-app deletion flow or rely on policy email (`hesbabusiness1@gmail.com`) and declare it consistently | **YES (console steps)** |
 | F-7 | Rules deny admin creating `subscription/current` | **P1 — FIXED (source) 2026-11-17** | Admin | rules create branch now allows `isAdmin()`; emulator 111/111 | Done — awaits rules deploy | **YES (deploy)** |
 | F-8 | Trial window hardcoded 7d vs editable `trialDays` | **P2** | Subscriptions | rules create branch vs `trialFor()`/`AdminSettings` | Clamp dashboard to ≤7 or read `trialDays` in rules | Strongly recommended (config time-bomb) |
 | F-9 | Dashboard profit ≠ reports profit | **P2** | Admin/Finance trust | `admin_repo_impl.dart:156-275` vs `reports_calculator.dart` | Unify on snapshot-cost methodology; subtract returns; treat missing cost as unknown | No (but fix before trusting KPI) |
@@ -306,14 +308,14 @@ Locally **well designed**, and the reject/approve integrity defects found in thi
 Server-side: yes (admin-only rules; client role gate is UX). UX/safety: **no** — one-tap irreversible approve/reject without confirmation, a broken reject path (S-3/S-4), first-50 search, and a settings screen that can brick all purchases (S-9). Also, the dashboard profit contradicts reports (S-20), so the owner of the dashboard cannot trust what he sees.
 
 **6. Is the Android release configuration ready?**
-Mostly: builds, signing wired, targetSdk 36, permissions justified, desugaring OK. **Not ready: keystore exposure (S-1), no privacy policy/Data Safety/deletion path, no App Check or Crashlytics, debug name log in release.** iOS entitlement is development-only (out of Play scope).
+Mostly: builds, signing wired, targetSdk 36, permissions justified, desugaring OK. **Not ready: keystore exposure (S-1), Data Safety form + Play Console privacy URL entry pending (policy now live and linked in-app), no App Check or Crashlytics, debug name log in release.** iOS entitlement is development-only (out of Play scope).
 
 **7. What MUST be fixed before launch?**
 1. Rotate/purge the exposed upload keystore; re-issue via Play App Signing; gitignore at root (F-1).
 2. Publish and cold-start-verify `firestore.rules` + indexes on `hesba-business`; record the verification evidence (F-2).
 3. ~~Fix the admin reject/approve flows~~ **Done in source (F-3, F-4)** — and it MUST be followed by a rules/app deploy + a live reject-with-paid-plan regression test on the real project.
 4. ~~Add `isAdmin()` to the subscription-doc create rule~~ **Done in source (F-7)** — must be published with the rest of `firestore.rules`.
-5. Privacy policy (URL + in-app link), Data Safety form, in-app account-deletion path (F-6/F-27).
+5. ~~Privacy policy (URL + in-app link)~~ **Added in-app; paste URL in Play Console + Data Safety form (F-6).** In-app account deletion still absent (policy: delete via `hesbabusiness1@gmail.com`).
 6. Minimum Dart test suite for sale/return/debt/report (F-5).
 7. Remove the personal-name debug log; verify no other release-inappropriate logs (S-21).
 8. Re-run: `flutter analyze` (0 errors), rules emulator suite (111/111), `flutter build appbundle --release`.

@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../common_imports.dart';
 import '../../../categories/presentation/views/category_management_view.dart';
 import '../../../contact/presentation/views/contact_us_view.dart';
@@ -33,6 +34,30 @@ class DrawerItemsList extends StatelessWidget {
   void _open(BuildContext context, Widget page) {
     Navigator.pop(context);
     Navigator.push(context, MaterialPageRoute(builder: (_) => page));
+  }
+
+  static const String _privacyPolicyUrl =
+      'https://www.freeprivacypolicy.com/live/b331026f-9deb-428d-8ad5-614ede1fdec5';
+
+  /// يفتح سياسة الخصوصية في المتصفح الخارجي (متطلب نشر Play).
+  Future<void> _openPrivacyPolicy(BuildContext context) async {
+    Navigator.pop(context);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final opened = await launchUrl(
+        Uri.parse(_privacyPolicyUrl),
+        mode: LaunchMode.externalApplication,
+      );
+      if (!opened) {
+        messenger.showSnackBar(
+          const SnackBar(content: Text('تعذر فتح سياسة الخصوصية — راجع الرابط من المتصفح')),
+        );
+      }
+    } catch (_) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('تعذر فتح سياسة الخصوصية — راجع الرابط من المتصفح')),
+      );
+    }
   }
 
   @override
@@ -142,6 +167,12 @@ class DrawerItemsList extends StatelessWidget {
             label: 'moreContactUs'.tr(),
             color: const Color(0xFF00ACC1),
             onTap: () => _open(context, const ContactUsView()),
+          ),
+          CustomDrawerTile(
+            icon: Icons.privacy_tip_outlined,
+            label: 'morePrivacyPolicy'.tr(),
+            color: const Color(0xFF6B7A90),
+            onTap: () => _openPrivacyPolicy(context),
           ),
           SizedBox(height: 10.h),
           Divider(
