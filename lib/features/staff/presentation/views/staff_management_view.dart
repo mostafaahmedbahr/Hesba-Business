@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/toast.dart';
+import '../../../../core/widgets/loading_widget.dart';
 import '../../data/models/staff_model.dart';
 import '../../data/repos/staff_repo.dart';
 import '../cubit/staff_cubit.dart';
@@ -30,8 +31,18 @@ class _StaffManagementBody extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('الحسابات الفرعية'),
-        backgroundColor: AppTheme.primaryColor,
+        backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+              colors: [Color(0xFF0F2F7A), AppTheme.primaryColor, Color(0xFF4A7BFF)],
+            ),
+          ),
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openAddSheet(context),
@@ -48,7 +59,7 @@ class _StaffManagementBody extends StatelessWidget {
         },
         builder: (context, state) {
           if (state.loading) {
-            return const Center(child: CircularProgressIndicator());
+            return LoadingWidget(message: 'جاري تحميل الحسابات...');
           }
           if (state.staff.isEmpty) {
             return Center(
@@ -114,12 +125,36 @@ class _StaffCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
       margin: EdgeInsets.only(bottom: 12.h),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
-      child: Padding(
-        padding: EdgeInsets.all(14.w),
-        child: Column(
+      padding: EdgeInsets.all(14.w),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20.r),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDark
+              ? [AppTheme.darkSurface, AppTheme.darkSurfaceAlt]
+              : [Colors.white, const Color(0xFFF0F4FF)],
+        ),
+        border: Border.all(
+          color: AppTheme.primaryColor.withValues(alpha: 0.08),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryColor.withValues(alpha: 0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
@@ -205,7 +240,6 @@ class _StaffCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
     );
   }
 

@@ -74,10 +74,20 @@ class _StaffHomeBodyState extends State<_StaffHomeBody> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.primaryColor,
+        backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
+        elevation: 0,
         title: const Text('لوحة الموظف'),
         automaticallyImplyLeading: false,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+              colors: [Color(0xFF0F2F7A), AppTheme.primaryColor, Color(0xFF4A7BFF)],
+            ),
+          ),
+        ),
         actions: [
           IconButton(
             tooltip: 'تشخيص الصلاحيات',
