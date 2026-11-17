@@ -10,9 +10,10 @@ class AdminSearchHit {
 
 /// Global search across shops, products and subscription requests.
 ///
-/// Firestore has no substring index, so the repo pages the most recent
-/// documents and filters client-side. Callers must debounce keystrokes —
-/// see [GlobalSearchCubit].
+/// Firestore has no substring index, so the search pages each collection in
+/// bounded batches and filters client-side (no document is "too far" to
+/// match, up to the repo's per-collection read cap). Callers must debounce
+/// keystrokes — see [GlobalSearchCubit].
 abstract class AdminSearchRepo {
   Future<List<AdminSearchHit>> search(String query);
 
