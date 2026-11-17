@@ -19,6 +19,15 @@ class ActivityView extends StatefulWidget {
 class _ActivityViewState extends State<ActivityView> {
   String _group = 'all';
 
+  // ننشئ الستريم مرة واحدة — إنشاؤه داخل build يعني listener جديد مع كل setState.
+  late final Stream<QuerySnapshot<Map<String, dynamic>>> _activityStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _activityStream = sl<AdminRepo>().watchActivityLogs();
+  }
+
   bool _matches(String action) {
     return switch (_group) {
       'all' => true,
@@ -34,7 +43,7 @@ class _ActivityViewState extends State<ActivityView> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: sl<AdminRepo>().watchActivityLogs(),
+      stream: _activityStream,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Column(

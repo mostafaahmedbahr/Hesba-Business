@@ -21,10 +21,22 @@ class ActivityCubit extends Cubit<ActivityState> {
 
   /// يحمل ويشترك (سجل + أحداث عامة).
   Future<void> _init() async {
-    final list = await _repo.getActivities();
-    if (!isClosed) {
-      emit(ActivityState(activities: list, unreadCount: list.where((e) => !e.isRead).length));
+    try {
+      final list = await _repo.getActivities();
+      if (!isClosed) {
+        emit(ActivityState(activities: list, unreadCount: list.where((e) => !e.isRead).length));
+      }
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal(
+        'features/notifications/presentation/view_model/activity_cubit.dart',
+        logErr,
+        logSt,
+        severity: LoggingSeverity.warning,
+      );
     }
+
+    // لو اتقفلت الـ cubit أثناء الـ await — لا تُنشئ اشتراكات بلا مالك.
+    if (isClosed) return;
 
     _sub = _repo.watchActivities().listen((list) {
       if (isClosed) return;

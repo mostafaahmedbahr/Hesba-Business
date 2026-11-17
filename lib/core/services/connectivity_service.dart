@@ -18,8 +18,10 @@ class ConnectivityService {
 
   void initialize(BuildContext context) {
     _context = context;
+    // لا نسمح بأكثر من مستمع واحد (initialize قد تُستدعى مع كل hot reload).
+    if (_subscription != null) return;
 
-    _connection.onStatusChange.listen((status) {
+    _subscription = _connection.onStatusChange.listen((status) {
       final wasConnected = _isConnected;
       _isConnected = status == InternetStatus.connected;
 

@@ -1,13 +1,16 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'dart:async';
 
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/services/user_role_service.dart';
 import '../../data/repos/account_repo.dart';
+import '../../data/models/user_profile.dart';
 import '../states/profile_state.dart';
 import 'package:hesba/core/services/app_logger.dart';
 
 class ProfileCubit extends Cubit<ProfileState> {
   final AccountRepo _repo;
+  StreamSubscription<UserProfile?>? _sub;
 
   ProfileCubit({required AccountRepo repo})
       : _repo = repo,
@@ -15,7 +18,7 @@ class ProfileCubit extends Cubit<ProfileState> {
 
   void loadProfile() {
     emit(state.copyWith(status: ProfileStatus.loading));
-    _repo.watchProfile().listen((profile) {
+    _sub ??= _repo.watchProfile().listen((profile) {
       if (!isClosed) {
         emit(ProfileState(status: ProfileStatus.success, profile: profile));
       }
@@ -27,6 +30,12 @@ class ProfileCubit extends Cubit<ProfileState> {
         ));
       }
     });
+  }
+
+  @override
+  Future<void> close() async {
+    await _sub?.cancel();
+    return super.close();
   }
 
   Future<String?> updateProfile({
