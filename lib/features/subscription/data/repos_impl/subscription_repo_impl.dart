@@ -40,6 +40,7 @@ class SubscriptionRepoImpl implements SubscriptionRepo {
 
   SubscriptionModel? _cache;
   DateTime? _cachedAt;
+  String? _uidForCache;
 
   @override
   SubscriptionModel? get cached => _cache;
@@ -47,6 +48,14 @@ class SubscriptionRepoImpl implements SubscriptionRepo {
   @override
   Future<SubscriptionModel> getSubscription({bool refresh = false}) async {
     final uid = _requireUid();
+    // The repo is a process-wide singleton. Without a uid check a new account
+    // could inherit the previous account's cached "allowed" subscription for
+    // up to _cacheTtl after a switch, before the server rules are consulted.
+    if (_uidForCache != null && _uidForCache != uid) {
+      _cache = null;
+      _cachedAt = null;
+    }
+    _uidForCache = uid;
     final cached = _cache;
     if (!refresh &&
         cached != null &&
@@ -86,6 +95,7 @@ class SubscriptionRepoImpl implements SubscriptionRepo {
     if (userId == _auth.currentUser?.uid) {
       _cache = trial;
       _cachedAt = DateTime.now();
+      _uidForCache = userId;
     }
     logSuccess('[Subscription] free trial started for $userId');
   }

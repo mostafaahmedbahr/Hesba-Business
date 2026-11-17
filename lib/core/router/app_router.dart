@@ -74,10 +74,15 @@ class AppRouter {
         );
       case AppRoutes.addSaleView:
         final args = settings.arguments as Map<String, dynamic>?;
+        // Named routes must preserve the staff restriction — otherwise a
+        // staff account reaching this route gets the owner-mode form with
+        // customers, credit sales and financial totals exposed.
+        final staffRestricted = sl<UserRoleService>().isStaff;
         return _buildRoute(
           AddSaleView(
             ownerId: args?['ownerId'] as String?,
             shopId: args?['shopId'] as String?,
+            restricted: staffRestricted,
           ),
           settings,
         );
@@ -90,6 +95,7 @@ class AppRouter {
             ownerId: rArgs?['ownerId'] as String?,
             shopId: rArgs?['shopId'] as String?,
             originalSaleId: rArgs?['originalSaleId'] as String?,
+            restricted: sl<UserRoleService>().isStaff,
           ),
           settings,
         );

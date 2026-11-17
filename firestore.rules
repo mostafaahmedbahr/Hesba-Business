@@ -304,6 +304,25 @@ service cloud.firestore {
         (sameShop(shopId) && isActiveAccount() && subscriptionLive());
     }
 
+    // Plan lengths (server-owned constants — the same values the app ships).
+    // Used to bound the endDate a CLIENT may write when it folds in an
+    // admin-approved request, so a user cannot buy a month and write a
+    // decade-long expiry straight to Firestore.
+    function planDays(planId) {
+      return planId == 'monthly' ? 30
+        : planId == 'threeMonths' ? 90
+        : planId == 'sixMonths' ? 180
+        : planId == 'yearly' ? 365
+        : 0;
+    }
+
+    /// The later of two timestamps (a null is treated as "not later").
+    function laterTimestamp(a, b) {
+      return a is timestamp && b is timestamp
+        ? (a > b ? a : b)
+        : (a is timestamp ? a : b);
+    }
+
     // ── admin settings validation ─────────────────────────────
     // الأدمن يملك صلاحية الكتابة على إعدادات الخطط، لكن أي قيمة غير
     // صالحة هنا (0 / سالب / غير رقم / تجربة متهورة) كان سيكسر كل طلبات
@@ -378,7 +397,7 @@ service cloud.firestore {
       // Owner may only edit limited fields of their own staff docs —
       // never role/ownerId/shopId, so a staff account cannot be escalated.
       allow update: if isAdmin()
-        || (signedIn() && myUid() == userId && unchangedRole()
+        || (signedIn() && isActiveAccount() && myUid() == userId && unchangedRole()
           && onlyOwnerFields())
         || (signedIn() && isActiveAccount() && isOwnerUser()
           && resource.data.get('role', '') == 'staff'
@@ -407,7 +426,7 @@ service cloud.firestore {
       // value and the rule can never diverge. Admins may also create the
       // doc (approve/reject/suspend via set-merge on an account whose
       // subscription doc is missing).
-      allow create: if isAdmin() || (signedIn() && isOwnerUser()
+      allow create: if isAdmin() || (signedIn() && isActiveAccount() && isOwnerUser()
         && myUid() == userId
         && request.resource.data.status == 'trial'
         && request.resource.data.get('suspended', false) == false
@@ -419,16 +438,41 @@ service cloud.firestore {
       // `active` requires the admin-approved request it points at.
       // `suspended` is admin-only: owners can never flip it either way.
       // Admin may write anything (approve / reject / suspend flows).
-      allow update: if isAdmin() || (signedIn()
+      allow update: if isAdmin() || (signedIn() && isActiveAccount()
         && myUid() == userId
         && request.resource.data.get('suspended', false) ==
           resource.data.get('suspended', false)
         && (
              request.resource.data.status in ['expired', 'pending', 'rejected']
              || (
+                  // Client-side folding in of an admin decision: only from a
+                  // genuinely pending state, using the SAME request already
+                  // stored here, owned by this user, actually approved, and
+                  // with an endDate bounded by that request's plan length.
                   request.resource.data.status == 'active'
+                  && resource.data.status == 'pending'
                   && request.resource.data.lastRequestId is string
+                  && (
+                       // Normal path: the pending doc already names its request.
+                       (resource.data.lastRequestId is string &&
+                        request.resource.data.lastRequestId ==
+                          resource.data.lastRequestId)
+                       // Legacy pending docs had no lastRequestId — allow it
+                       // to be filled once, still subject to all checks below.
+                       || resource.data.get('lastRequestId', null) == null
+                     )
+                  && get(/databases/$(database)/documents/subscription_requests/$(request.resource.data.lastRequestId)).data.userId == userId
                   && get(/databases/$(database)/documents/subscription_requests/$(request.resource.data.lastRequestId)).data.status == 'approved'
+                  && request.resource.data.endDate is timestamp
+                  && request.resource.data.endDate <=
+                       laterTimestamp(
+                         laterTimestamp(resource.data.get('endDate', null),
+                                        resource.data.get('trialEndDate', null)),
+                         request.time
+                       ) + duration.value(
+                         planDays(get(/databases/$(database)/documents/subscription_requests/$(request.resource.data.lastRequestId)).data.get('selectedPlan', '')),
+                         'd'
+                       )
                 )
            ));
 
@@ -441,7 +485,7 @@ service cloud.firestore {
     // approval transaction — a user can no longer spoof an active plan.
     match /subscriptions/{userId} {
       allow read: if signedIn() && (myUid() == userId || isAdmin());
-      allow create, update: if isAdmin() || (signedIn()
+      allow create, update: if isAdmin() || (signedIn() && isActiveAccount()
         && myUid() == userId
         && request.resource.data.get('status', '') in
           ['trial', 'pending', 'expired', 'rejected']);
@@ -453,7 +497,7 @@ service cloud.firestore {
       allow read: if signedIn()
         && (resource.data.userId == myUid() || isAdmin());
 
-      allow create: if signedIn()
+      allow create: if signedIn() && isOwnerUser()
         && request.resource.data.userId == myUid()
         && request.resource.data.status == 'pending'
         // Amount is NEVER trusted from the client: it must equal the price
@@ -508,8 +552,9 @@ service cloud.firestore {
       allow read: if signedIn() && (isAdmin()
         || resource.data.ownerId == myUid()
         || sameShop(resource.data.shopId));
-      allow create: if signedIn() && request.resource.data.ownerId == myUid();
-      allow update: if isAdmin() || (signedIn()
+      allow create: if signedIn() && isActiveAccount()
+        && request.resource.data.ownerId == myUid();
+      allow update: if isAdmin() || (signedIn() && isActiveAccount()
         && resource.data.ownerId == myUid()
         && request.resource.data.ownerId == myUid());
       allow delete: if false;

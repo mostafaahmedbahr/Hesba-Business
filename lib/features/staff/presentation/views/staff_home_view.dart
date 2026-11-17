@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/services/user_role_service.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/toast.dart';
 import '../../../profile/data/repos/account_repo.dart';
@@ -56,6 +57,10 @@ class _StaffHomeBodyState extends State<_StaffHomeBody> {
         await Future.delayed(const Duration(milliseconds: 400));
         if (!mounted) return;
         await sl<AccountRepo>().logout();
+        // Signing out does not by itself invalidate the role cache used by
+        // the router — clear it so the next account cannot inherit 'staff'.
+        sl<UserRoleService>().clear();
+        if (!mounted) return;
         Navigator.pushNamedAndRemoveUntil(context, AppRoutes.login, (_) => false);
       }
     } catch (logErr, logSt) { AppLogger.nonFatal('features/staff/presentation/views/staff_home_view.dart', logErr, logSt, severity: LoggingSeverity.warning); }

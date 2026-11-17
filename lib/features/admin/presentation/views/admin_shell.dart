@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hesba/core/di/service_locator.dart';
+import 'package:hesba/core/services/user_role_service.dart';
 import 'package:hesba/core/theme/app_theme.dart';
 
 import 'package:hesba/features/admin/data/repos/admin_repo.dart';
@@ -166,6 +167,8 @@ class _TopBar extends StatelessWidget implements PreferredSizeWidget {
     );
     if (ok && context.mounted) {
       await sl<AdminRepo>().signOutAdmin();
+      // Keep the shared role cache in sync with the sign-out.
+      sl<UserRoleService>().clear();
       if (context.mounted) context.read<AdminAuthCubit>().checkSession();
     }
   }
