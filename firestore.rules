@@ -298,6 +298,28 @@ service cloud.firestore {
         (sameShop(shopId) && isActiveAccount() && subscriptionLive());
     }
 
+    // ── admin settings validation ─────────────────────────────
+    // الأدمن يملك صلاحية الكتابة على إعدادات الخطط، لكن أي قيمة غير
+    // صالحة هنا (0 / سالب / غير رقم / تجربة متهورة) كان سيكسر كل طلبات
+    // الاشتراك بصمت لأن القاعدة تتطلب التطابق مع السعر المعدّ و
+    // amount > 0. نتحقق هنا فيمكن للواجهة منعه مبكرًا وللقواعد حظره.
+    function validPriceValue(field) {
+      return request.resource.data[field] is int
+        && request.resource.data[field] >= 1
+        && request.resource.data[field] <= 1000000000;
+    }
+
+    function validAdminSettings() {
+      return validPriceValue('monthlyPrice')
+        && validPriceValue('threeMonthsPrice')
+        && validPriceValue('sixMonthsPrice')
+        && validPriceValue('yearlyPrice')
+        && request.resource.data.trialDays is int
+        && request.resource.data.trialDays >= 0
+        && request.resource.data.trialDays <= 365
+        && request.resource.data.paymentMethods is list;
+    }
+
     // الفترة التجريبية تُقرأ من نفس مستند الإعدادات الذي يعدّله الأدمن —
     // لا قيمة ثابتة هنا. لو المستند ناقص أو القيمة غير صالحة، يقع الحل
     // على الافتراضي (7 أيام) نفسه الذي يشحنه التطبيق. أي قيمة 0..365 تُقبل.
@@ -746,9 +768,10 @@ service cloud.firestore {
 
     match /admin_settings/{docId} {
       // Customers read the settings (plan prices, trial days, wallet numbers)
-      // so dashboard edits apply live; only admins may write.
+      // so dashboard edits apply live; only admins may write — and only valid
+      // values: every plan price a positive int, trialDays within 0..365.
       allow read: if signedIn() && (isAdmin() || isOwnerUser());
-      allow write: if isAdmin();
+      allow write: if isAdmin() && validAdminSettings();
     }
   }
 }

@@ -24,8 +24,12 @@ import '../../data/repos/product_config_repo.dart';
 import '../cubit/product_form_cubit.dart';
 import '../cubit/products_cubit.dart';
 import '../states/product_form_state.dart';
+import '../widgets/product_form/product_delete_dialog.dart';
+import '../widgets/product_form/product_form_actions_bar.dart';
 import '../widgets/product_form/product_form_chips_field.dart';
 import '../widgets/product_form/product_form_date_field.dart';
+import '../widgets/product_form/product_form_dropdown_field.dart';
+import '../widgets/product_form/product_form_icon_button.dart';
 import '../widgets/product_form/product_form_image_field.dart';
 import '../widgets/product_form/product_form_optional_specs.dart';
 import '../widgets/product_form/product_form_section.dart';
@@ -33,6 +37,7 @@ import '../widgets/product_form/product_form_supplier_field.dart';
 import '../widgets/product_form/product_form_text_field.dart';
 import '../widgets/product_form/product_form_toggle.dart';
 import '../widgets/product_form/product_form_variants_editor.dart';
+import '../widgets/product_form/product_profit_preview.dart';
 
 /// نموذج إضافة/تعديل منتج — الحقول تُبنى بالكامل من ProductFieldsCatalog
 /// حسب نوع نشاط المتجر (لا توجد قوائم حقول ثابتة في الواجهة).
@@ -353,82 +358,7 @@ class _ProductFormViewState extends State<ProductFormView> {
     if (!mounted) return;
     final ok = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: EdgeInsets.symmetric(horizontal: 24.w),
-        child: Container(
-          padding: EdgeInsets.all(20.w),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(24.r),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 64.w,
-                height: 64.w,
-                decoration: BoxDecoration(
-                  color: AppTheme.dangerSoft,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.delete_rounded,
-                  color: AppTheme.danger,
-                  size: 28.sp,
-                ),
-              ),
-              SizedBox(height: 14.h),
-              Text(
-                'productDeleteConfirmTitle'.tr(),
-                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800),
-              ),
-              SizedBox(height: 8.h),
-              Text(
-                'productDeleteConfirmBody'.tr(),
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 12.5.sp,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  height: 1.5,
-                ),
-              ),
-              SizedBox(height: 18.h),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(dialogContext, false),
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                        padding: EdgeInsets.symmetric(vertical: 12.h),
-                      ),
-                      child: Text('cancel'.tr()),
-                    ),
-                  ),
-                  SizedBox(width: 10.w),
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: () => Navigator.pop(dialogContext, true),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AppTheme.danger,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                        padding: EdgeInsets.symmetric(vertical: 12.h),
-                      ),
-                      child: Text('productDelete'.tr()),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
+      builder: (_) => const ProductDeleteDialog(),
     );
     if (ok != true || !mounted) return;
     setState(() => _deleting = true);
@@ -506,83 +436,13 @@ class _ProductFormViewState extends State<ProductFormView> {
                   SizedBox(height: 14.h),
                 ],
                 SizedBox(height: 8.h),
-                SizedBox(
-                  height: 54.h,
-                  child: FilledButton(
-                    onPressed: _saving || _deleting ? null : _save,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppTheme.primaryColor,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16.r),
-                      ),
-                    ),
-                    child: _saving
-                        ? SizedBox(
-                            width: 22.w,
-                            height: 22.w,
-                            child: const CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              color: Colors.white,
-                            ),
-                          )
-                        : Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                _isEdit
-                                    ? Icons.check_rounded
-                                    : Icons.add_rounded,
-                                size: 18.sp,
-                              ),
-                              SizedBox(width: 8.w),
-                              Text(
-                                _isEdit
-                                    ? 'productFormUpdate'.tr()
-                                    : 'productFormSave'.tr(),
-                                style: TextStyle(
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ],
-                          ),
-                  ),
+                ProductFormActionsBar(
+                  isEdit: _isEdit,
+                  saving: _saving,
+                  deleting: _deleting,
+                  onSave: _save,
+                  onDelete: _delete,
                 ),
-                if (_isEdit) ...[
-                  SizedBox(height: 10.h),
-                  SizedBox(
-                    height: 50.h,
-                    child: OutlinedButton.icon(
-                      onPressed: _saving || _deleting ? null : _delete,
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppTheme.danger,
-                        side: const BorderSide(color: AppTheme.danger),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.r),
-                        ),
-                      ),
-                      icon: _deleting
-                          ? SizedBox(
-                              width: 18.w,
-                              height: 18.w,
-                              child: const CircularProgressIndicator(
-                                strokeWidth: 2.2,
-                                color: AppTheme.danger,
-                              ),
-                            )
-                          : const Icon(Icons.delete_outline_rounded, size: 18),
-                      label: Text(
-                        'productDelete'.tr(),
-                        style: TextStyle(
-                          fontSize: 13.5.sp,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
               ],
             ),
           );
@@ -612,7 +472,10 @@ class _ProductFormViewState extends State<ProductFormView> {
               _fieldsBody(fields),
               if (section == ProductFormSection.pricing) ...[
                 SizedBox(height: 12.h),
-                _profitPreview(),
+                ProductProfitPreview(
+                  costText: _ctrl(ProductFieldKeys.costPrice).text,
+                  priceText: _ctrl(ProductFieldKeys.price).text,
+                ),
               ],
             ],
           ),
@@ -687,10 +550,10 @@ class _ProductFormViewState extends State<ProductFormView> {
           label: f.labelKey.tr(),
           hint: f.hintKey?.tr(),
           icon: f.icon,
-          suffixIcon: _iconBtn(
-            Icons.autorenew_rounded,
-            AppTheme.primaryColor,
-            _regenerateCode,
+          suffixIcon: ProductFormIconButton(
+            icon: Icons.autorenew_rounded,
+            color: AppTheme.primaryColor,
+            onTap: _regenerateCode,
           ),
         );
       case ProductFieldType.dropdown:
@@ -858,7 +721,7 @@ class _ProductFormViewState extends State<ProductFormView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _dropdownField<String>(
+        ProductFormDropdownField<String>(
           label: f.labelKey.tr(),
           icon: f.icon,
           value: _category,
@@ -1010,118 +873,6 @@ class _ProductFormViewState extends State<ProductFormView> {
         _dropdownValues[f.key] = saved;
       }
     }
-  }
-
-  Widget _profitPreview() {
-    final cost = double.tryParse(
-      NumberParser.toLatin(_ctrl(ProductFieldKeys.costPrice).text),
-    );
-    final price = double.tryParse(
-      NumberParser.toLatin(_ctrl(ProductFieldKeys.price).text),
-    );
-    if (cost == null || price == null || cost <= 0 || price <= 0) {
-      return const SizedBox.shrink();
-    }
-    final profit = price - cost;
-    final margin = price > 0 ? (profit / price * 100) : 0;
-    final positive = profit >= 0;
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-      decoration: BoxDecoration(
-        color: positive ? const Color(0xFFECFDF5) : AppTheme.dangerSoft,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(
-          color: positive
-              ? AppTheme.successDark.withValues(alpha: 0.14)
-              : AppTheme.danger.withValues(alpha: 0.14),
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            positive ? Icons.trending_up_rounded : Icons.trending_down_rounded,
-            size: 16.sp,
-            color: positive ? AppTheme.successDark : AppTheme.danger,
-          ),
-          SizedBox(width: 8.w),
-          Expanded(
-            child: Text(
-              positive
-                  ? 'ربح ${_num(profit)} ج.م • هامش ${margin.toStringAsFixed(1)}%'
-                  : 'خسارة ${_num(profit.abs())} ج.م',
-              style: TextStyle(
-                fontSize: 11.5.sp,
-                fontWeight: FontWeight.w800,
-                color: positive ? AppTheme.successDark : AppTheme.danger,
-              ),
-            ),
-          ),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-            decoration: BoxDecoration(
-              color: positive ? AppTheme.successDark : AppTheme.danger,
-              borderRadius: BorderRadius.circular(20.r),
-            ),
-            child: Text(
-              positive ? 'مربح' : 'خسارة',
-              style: TextStyle(
-                fontSize: 10.sp,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _iconBtn(IconData icon, Color color, VoidCallback onTap) {
-    return Padding(
-      padding: EdgeInsets.only(left: 4.w, right: 6.w),
-      child: InkWell(
-        onTap: () {
-          HapticFeedback.lightImpact();
-          onTap();
-        },
-        borderRadius: BorderRadius.circular(10.r),
-        child: Container(
-          width: 36.w,
-          height: 36.w,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.10),
-            borderRadius: BorderRadius.circular(10.r),
-          ),
-          child: Icon(icon, size: 18.sp, color: color),
-        ),
-      ),
-    );
-  }
-
-  Widget _dropdownField<T>({
-    required String label,
-    required T? value,
-    required List<DropdownMenuItem<T>> items,
-    required void Function(T?) onChanged,
-    IconData? icon,
-  }) {
-    return DropdownButtonFormField<T>(
-      initialValue: value,
-      isExpanded: true,
-      decoration: productFormDecoration(context, label: label, icon: icon),
-      items: items,
-      onChanged: onChanged,
-      style: TextStyle(
-        fontSize: 13.5.sp,
-        color: Theme.of(context).colorScheme.onSurface,
-      ),
-      borderRadius: BorderRadius.circular(16.r),
-      icon: Icon(
-        Icons.keyboard_arrow_down_rounded,
-        size: 20.sp,
-        color: AppTheme.primaryColor,
-      ),
-    );
   }
 
   static String _num(double value) => value == value.roundToDouble()

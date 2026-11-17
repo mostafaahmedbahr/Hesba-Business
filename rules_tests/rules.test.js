@@ -435,3 +435,49 @@ test('15. out-of-range trialDays falls back to 7 (1000 → 8-day rejected, 7-day
       trialPayload(now, 7)),
   );
 });
+
+// ── 16-19: admin_settings writes must carry valid values ───────────────
+// Regression for: a bad (0 / negative / non-int price, out-of-range
+// trialDays) settings doc succeeding at the rules level and silently
+// bricking every subscription purchase (amount > 0 + exact price match).
+test('16. admin may write a fully valid settings doc', async () => {
+  const admin = env.authenticatedContext('admin1');
+  await assertSucceeds(
+    setDoc(doc(admin.firestore(), 'admin_settings/settings'),
+      { ...DEFAULT_SETTINGS, monthlyPrice: 149 }),
+  );
+});
+
+test('17. price of 0, negative, or a string is rejected', async () => {
+  const admin = env.authenticatedContext('admin1');
+  for (const bad of [0, -5, '149']) {
+    await assertFails(
+      setDoc(doc(admin.firestore(), 'admin_settings/settings'),
+        { ...DEFAULT_SETTINGS, monthlyPrice: bad }),
+    );
+  }
+});
+
+test('18. trialDays above 365 is rejected, 365 and 0 accepted', async () => {
+  const admin = env.authenticatedContext('admin1');
+  await assertFails(
+    setDoc(doc(admin.firestore(), 'admin_settings/settings'),
+      { ...DEFAULT_SETTINGS, trialDays: 366 }),
+  );
+  await assertSucceeds(
+    setDoc(doc(admin.firestore(), 'admin_settings/settings'),
+      { ...DEFAULT_SETTINGS, trialDays: 365 }),
+  );
+  await assertSucceeds(
+    setDoc(doc(admin.firestore(), 'admin_settings/settings'),
+      { ...DEFAULT_SETTINGS, trialDays: 0 }),
+  );
+});
+
+test('19. settings doc without paymentMethods list is rejected', async () => {
+  const admin = env.authenticatedContext('admin1');
+  const { paymentMethods, ...rest } = DEFAULT_SETTINGS;
+  await assertFails(
+    setDoc(doc(admin.firestore(), 'admin_settings/settings'), rest),
+  );
+});
