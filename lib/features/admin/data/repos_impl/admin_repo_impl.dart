@@ -3,6 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../../features/subscription/data/models/subscription_model.dart';
 import '../../../../features/subscription/data/models/subscription_request_model.dart';
+import '../../../../features/reports/data/reports_calculator.dart';
+import '../../../../features/returns/data/models/return_model.dart';
+import '../../../../features/sales/data/models/sale_model.dart';
 import '../../../../core/models/admin_settings.dart';
 import '../models/profit_summary.dart';
 import '../repos/admin_repo.dart';
@@ -150,18 +153,21 @@ class AdminRepoImpl implements AdminRepo {
 
   static const int _profitPageSize = 1000;
   static const int _profitMaxSales = 20000;
-  static const int _profitMaxProducts = 10000;
+  static const int _profitMaxReturns = 10000;
 
+  /// Platform-wide rollup computed with the SAME rules engine as the
+  /// per-shop Reports screen (`ReportsCalculator`):
+  ///  - revenue = Σ sale.total (بعد الخصم), returns deducted for profit;
+  ///  - COGS from the per-line snapshot ONLY — a missing snapshot is never
+  ///    back-filled with the product's current cost price;
+  ///  - returns cancel the cost of returned goods, looked up from the
+  ///    original sale.
+  /// Numbers therefore reconcile with the per-shop reports for the same
+  /// underlying documents, up to the scan caps ([capped]).
   @override
   Future<ProfitSummary> profitSummary() async {
-    final costs = await _productCostMap();
-
-    var revenue = 0.0;
-    var cost = 0.0;
-    var counted = 0;
+    final sales = <SaleModel>[];
     var capped = false;
-    final profitByMonth = <String, int>{};
-    final revenueByMonth = <String, int>{};
 
     Query<Map<String, dynamic>> query = firestore
         .collection('sales')
@@ -173,51 +179,8 @@ class AdminRepoImpl implements AdminRepo {
       if (snap.docs.isEmpty) break;
 
       for (final doc in snap.docs) {
-        final data = doc.data();
-        var saleCost = 0.0;
-        var itemsTotal = 0.0;
-
-        final rawItems = data['items'];
-        if (rawItems is List) {
-          for (final raw in rawItems) {
-            if (raw is! Map) continue;
-            final item = Map<String, dynamic>.from(raw);
-            final quantity = (item['quantity'] as num?)?.toDouble() ?? 0;
-            final unitPrice = (item['unitPrice'] as num?)?.toDouble() ?? 0;
-            itemsTotal += quantity * unitPrice;
-
-            // New sales store a cost snapshot; legacy sales fall back to the
-            // product's current cost price.
-            final double unitCost;
-            if (item.containsKey('costPrice')) {
-              unitCost = (item['costPrice'] as num?)?.toDouble() ?? 0;
-            } else {
-              final productId = item['productId'] as String? ?? '';
-              unitCost = costs[productId] ?? 0;
-            }
-            saleCost += quantity * unitCost;
-          }
-        }
-
-        final recordedTotal = (data['total'] as num?)?.toDouble();
-        final saleRevenue = (recordedTotal == null || recordedTotal <= 0 && itemsTotal > 0)
-            ? itemsTotal
-            : recordedTotal;
-        final saleProfit = saleRevenue - saleCost;
-
-        revenue += saleRevenue;
-        cost += saleCost;
-        counted++;
-
-        final created = data['createdAt'];
-        if (created is Timestamp) {
-          final date = created.toDate();
-          final key = '${date.year}-${date.month.toString().padLeft(2, '0')}';
-          profitByMonth[key] = (profitByMonth[key] ?? 0) + saleProfit.round();
-          revenueByMonth[key] = (revenueByMonth[key] ?? 0) + saleRevenue.round();
-        }
-
-        if (counted >= _profitMaxSales) {
+        sales.add(SaleModel.fromJson(doc.data()));
+        if (sales.length >= _profitMaxSales) {
           capped = true;
           break;
         }
@@ -231,47 +194,111 @@ class AdminRepoImpl implements AdminRepo {
           .limit(_profitPageSize);
     }
 
-    return ProfitSummary(
-      revenue: revenue,
-      cost: cost,
-      profit: revenue - cost,
-      salesCounted: counted,
-      capped: capped,
-      profitByMonth: profitByMonth,
-      revenueByMonth: revenueByMonth,
-    );
-  }
-
-  /// Document id → current purchase price, paged to stay under Firestore's
-  /// per-query limit. Used only for legacy sale items without a snapshot.
-  Future<Map<String, double>> _productCostMap() async {
-    final costs = <String, double>{};
-    Query<Map<String, dynamic>> query = firestore
-        .collection('products')
+    final returns = <ReturnModel>[];
+    Query<Map<String, dynamic>> rQuery = firestore
+        .collection('returns')
         .orderBy(FieldPath.documentId)
         .limit(_profitPageSize);
 
     while (true) {
-      final snap = await query.get();
+      final snap = await rQuery.get();
       if (snap.docs.isEmpty) break;
 
       for (final doc in snap.docs) {
-        costs[doc.id] =
-            (doc.data()['costPrice'] as num?)?.toDouble() ?? 0;
+        returns.add(ReturnModel.fromJson(doc.data()));
+        if (returns.length >= _profitMaxReturns) {
+          capped = true;
+          break;
+        }
       }
 
-      if (costs.length >= _profitMaxProducts ||
-          snap.docs.length < _profitPageSize) {
-        break;
-      }
-      query = firestore
-          .collection('products')
+      if (capped || snap.docs.length < _profitPageSize) break;
+      rQuery = firestore
+          .collection('returns')
           .orderBy(FieldPath.documentId)
           .startAfterDocument(snap.docs.last)
           .limit(_profitPageSize);
     }
 
-    return costs;
+    // Exact same math as the per-shop Reports screen, over the whole book.
+    final metrics = ReportsCalculator.calculate(
+      sales: sales,
+      returns: returns,
+      expenses: const [],
+      start: DateTime(1970),
+      end: DateTime(3000),
+    );
+
+    // Monthly series with the identical rules (returns attributed to the
+    // month they happened, COGS from the same snapshot logic).
+    final salesById = <String, SaleModel>{
+      for (final sale in sales)
+        if (sale.saleId.isNotEmpty) sale.saleId: sale,
+    };
+    final profitByMonth = <String, int>{};
+    final revenueByMonth = <String, int>{};
+
+    String monthKey(DateTime dt) =>
+        '${dt.year}-${dt.month.toString().padLeft(2, '0')}';
+
+    for (final sale in sales) {
+      final key = monthKey(sale.createdAt);
+      var saleCogs = 0.0;
+      for (final item in sale.items) {
+        if (item.costPrice > 0) saleCogs += item.costPrice * item.quantity;
+      }
+      revenueByMonth[key] = (revenueByMonth[key] ?? 0) + sale.total.round();
+      profitByMonth[key] =
+          (profitByMonth[key] ?? 0) + (sale.total - saleCogs).round();
+    }
+
+    for (final ret in returns) {
+      final key = monthKey(ret.createdAt);
+      final original = ret.originalSaleId == null
+          ? null
+          : salesById[ret.originalSaleId!];
+      var returnedCogs = 0.0;
+      for (final item in ret.items) {
+        double? unitCost;
+        if (original != null) {
+          for (final saleItem in original.items) {
+            if (item.productId.isNotEmpty &&
+                saleItem.productId == item.productId) {
+              unitCost = saleItem.costPrice;
+              break;
+            }
+          }
+          if (unitCost == null && item.productName.isNotEmpty) {
+            for (final saleItem in original.items) {
+              if (saleItem.productName == item.productName) {
+                unitCost = saleItem.costPrice;
+                break;
+              }
+            }
+          }
+        }
+        if (unitCost != null && unitCost > 0) {
+          returnedCogs += unitCost * item.quantity;
+        }
+      }
+      revenueByMonth[key] = (revenueByMonth[key] ?? 0) - ret.total.round();
+      profitByMonth[key] =
+          (profitByMonth[key] ?? 0) - (ret.total - returnedCogs).round();
+    }
+
+    return ProfitSummary(
+      revenue: metrics.netSales,
+      returnsTotal: metrics.returnsTotal,
+      cost: metrics.cogs,
+      profit: metrics.grossProfit,
+      salesCounted: sales.length,
+      returnsCounted: returns.length,
+      capped: capped,
+      unknownCostLines: (metrics.saleLinesTotal - metrics.saleLinesWithCost) +
+          (metrics.returnLinesTotal - metrics.returnLinesWithCost),
+      profitByMonth: profitByMonth,
+      revenueByMonth: revenueByMonth,
+    );
   }
 
   static const int _page = 20;

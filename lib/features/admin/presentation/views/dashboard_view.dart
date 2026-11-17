@@ -47,17 +47,24 @@ class DashboardView extends StatelessWidget {
             label: 'إجمالي الأرباح',
             value: AdminFmt.money(p.profit),
             color: AppTheme.successColor,
-            subtitle: p.capped
-                ? 'أحدث ${AdminFmt.number(p.salesCounted)} عملية بيع'
-                : 'كل المحلات • ${AdminFmt.number(p.salesCounted)} عملية بيع',
+            subtitle: [
+              if (p.capped)
+                'أحدث ${AdminFmt.number(p.salesCounted)} عملية بيع'
+              else
+                'كل المحلات • ${AdminFmt.number(p.salesCounted)} عملية بيع',
+              'قبل المصروفات',
+              if (p.unknownCostLines > 0)
+                'تقديري — ${AdminFmt.number(p.unknownCostLines)} سطر بلا تكلفة',
+            ].join(' • '),
             onTap: () => go(5),
           ),
           AdminStatCard(
             icon: Icons.payments_outlined,
-            label: 'إيرادات المبيعات',
+            label: 'صافي الإيرادات',
             value: AdminFmt.money(p.revenue),
             color: AppTheme.violetDeep,
-            subtitle: 'التكلفة: ${AdminFmt.money(p.cost)}',
+            subtitle:
+                'التكلفة: ${AdminFmt.money(p.cost)} • المرتجعات: ${AdminFmt.money(p.returnsTotal)}',
             onTap: () => go(5),
           ),
         ];
@@ -135,8 +142,8 @@ class _ChartsGrid extends StatelessWidget {
         color: AppTheme.secondaryColor,
       ),
       _ChartSpec(
-        title: 'إيرادات الاشتراكات',
-        description: 'إجمالي مبالغ الاشتراكات المقبولة شهريًا بالجنيه خلال آخر 12 شهرًا',
+        title: 'صافي الإيرادات',
+        description: 'صافي إيرادات المبيعات شهريًا (بعد الخصم والمرتجعات) بالجنيه خلال آخر 12 شهرًا',
         icon: Icons.payments_outlined,
         data: s.revenueByMonth,
         color: AppTheme.violetDeep,
@@ -144,7 +151,7 @@ class _ChartsGrid extends StatelessWidget {
       ),
       _ChartSpec(
         title: 'صافي الأرباح',
-        description: 'ربح المحلات الشهري بعد الخصومات (سعر البيع − سعر الشراء) بالجنيه خلال آخر 12 شهرًا',
+        description: 'ربح المحلات الشهري بعد الخصم والمرتجعات، محسوب بتكلفة البيع وقتها (سعر البيع − سعر الشراء وقت البيع) بالجنيه خلال آخر 12 شهرًا',
         icon: Icons.savings_outlined,
         data: s.profitSummary.profitByMonth,
         color: AppTheme.successColor,
