@@ -18,6 +18,9 @@ class DashboardState {
   final int lowStockCount;
   final String? errorMessage;
 
+  /// بيتميز أول تحميل للهوم عن التحديثات اللي بعدين، عشان اللودر يظهر مرة واحدة.
+  final bool hasLoaded;
+
   const DashboardState({
     this.status = DashboardStatus.initial,
     this.shopName = '',
@@ -31,6 +34,7 @@ class DashboardState {
     this.productsCount = 0,
     this.lowStockCount = 0,
     this.errorMessage,
+    this.hasLoaded = false,
   });
 
   DashboardState copyWith({
@@ -46,6 +50,7 @@ class DashboardState {
     int? productsCount,
     int? lowStockCount,
     String? errorMessage,
+    bool? hasLoaded,
     bool clearError = false,
   }) {
     return DashboardState(
@@ -61,6 +66,7 @@ class DashboardState {
       productsCount: productsCount ?? this.productsCount,
       lowStockCount: lowStockCount ?? this.lowStockCount,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      hasLoaded: hasLoaded ?? this.hasLoaded,
     );
   }
 }

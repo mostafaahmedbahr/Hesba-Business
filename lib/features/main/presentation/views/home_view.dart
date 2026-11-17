@@ -9,6 +9,7 @@ import '../../../../core/di/service_locator.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/services/app_settings_service.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/loading_widget.dart';
 import '../../../../core/widgets/shop_image_view.dart';
 import '../../../dashboard/presentation/cubit/dashboard_cubit.dart';
 import '../../../products/data/repos/products_repo.dart';
@@ -46,8 +47,14 @@ class HomeView extends StatelessWidget {
             p.todaySalesByMethod != c.todaySalesByMethod ||
             p.productsCount != c.productsCount ||
             p.lowStockCount != c.lowStockCount ||
-            p.errorMessage != c.errorMessage,
+            p.errorMessage != c.errorMessage ||
+            p.hasLoaded != c.hasLoaded,
         builder: (context, state) {
+          // أول تحميل للهوم بس: نعرض اللودر الموحد من core على الشاشة كاملة.
+          // التحديثات اللي بعدين بتفضل عرض البيانات الحالية.
+          if (state.status == DashboardStatus.loading && !state.hasLoaded) {
+            return LoadingWidget(message: 'homeLoading'.tr());
+          }
           return RefreshIndicator(
             color: AppTheme.primaryColor,
             backgroundColor: Theme.of(context).colorScheme.surface,

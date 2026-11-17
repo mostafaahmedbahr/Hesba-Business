@@ -126,6 +126,7 @@ class DashboardCubit extends Cubit<DashboardState> {
         productsCount: productsCount,
         lowStockCount: lowStockCount,
         clearError: true,
+        hasLoaded: true,
       ));
     } catch (e) {
       if (isClosed) return;
