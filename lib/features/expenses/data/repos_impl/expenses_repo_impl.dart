@@ -352,7 +352,12 @@ class ExpensesRepoImpl implements ExpensesRepo {
         hop++;
         final already = await _occurrenceExists(shopId, doc.id, cursor);
         if (!already) {
-          final ref = firestore.collection(AppConstants.expensesCollection).doc();
+          // Deterministic id: a second sync (or two devices syncing at once)
+          // writes the SAME document instead of creating a duplicate charge.
+          // The `_occurrenceExists` check above still protects legacy rows
+          // that were created with random ids before this guard existed.
+          final id = occurrenceId(doc.id, cursor);
+          final ref = firestore.collection(AppConstants.expensesCollection).doc(id);
           final occ = ExpenseModel(
             expenseId: ref.id,
             ownerId: data['ownerId'] as String,
@@ -380,6 +385,14 @@ class ExpensesRepoImpl implements ExpensesRepo {
     }
     return created;
   }
+
+  /// Stable, collision-free document id for one generated occurrence.
+  /// `microsecondsSinceEpoch` is unique per due slot; the template id prefixes
+  /// it so two templates never collide. Public + static so the idempotency
+  /// mechanism can be unit-tested without a Firebase app (notification
+  /// scheduler initialization requires one).
+  static String occurrenceId(String templateId, DateTime due) =>
+      '${templateId}_${due.microsecondsSinceEpoch}';
 
   /// هل يوجد مصروف مولّد من القالب [templateId] في [due]؟
   Future<bool> _occurrenceExists(

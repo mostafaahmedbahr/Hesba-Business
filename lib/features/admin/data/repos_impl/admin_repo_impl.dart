@@ -491,6 +491,13 @@ class AdminRepoImpl implements AdminRepo {
       final data = subSnap.data() ?? <String, dynamic>{};
       final stored = SubscriptionModel.fromJson(data);
 
+      // A newer request may have superseded this one while it sat in the
+      // admin list. Never let an old request overwrite the newer state.
+      if (stored.status != SubscriptionStatus.pending ||
+          stored.lastRequestId != request.requestId) {
+        throw StateError('هذا الطلب لم يعد قيد المراجعة');
+      }
+
       final liveEnd = stored.livePeriodEnd;
       final hasLive = liveEnd != null && liveEnd.isAfter(now);
       final duration = Duration(days: request.plan.days);
@@ -568,6 +575,13 @@ class AdminRepoImpl implements AdminRepo {
       }
       final subSnap = await tx.get(subRef);
       final stored = SubscriptionModel.fromJson(subSnap.data() ?? const {});
+
+      // Same staleness guard as approval: an old request must not overwrite
+      // a newer pending request's state on the subscription/mirror docs.
+      if (stored.status != SubscriptionStatus.pending ||
+          stored.lastRequestId != request.requestId) {
+        throw StateError('هذا الطلب لم يعد قيد المراجعة');
+      }
 
       // A live period (trial or paid) ALWAYS survives a rejection: the shop
       // keeps what it already paid for. Only an ended period becomes

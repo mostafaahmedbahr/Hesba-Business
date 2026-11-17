@@ -138,14 +138,23 @@ class SubscriptionRepoImpl implements SubscriptionRepo {
       createdAt: now,
     );
 
-    final batch = _firestore.batch();
-    batch.set(requestRef, request.toJson());
-    batch.update(_subscriptionRef(uid), {
-      'status': SubscriptionStatus.pending.id,
-      'lastRequestId': requestRef.id,
-      'updatedAt': Timestamp.fromDate(now),
+    // The query above is only a fast pre-check. Two concurrent submits can
+    // both pass it, so the authoritative "one pending request" check and the
+    // two writes happen in one transaction on the subscription document:
+    // the second transaction is retried, sees `pending`, and aborts.
+    await _firestore.runTransaction((tx) async {
+      final subSnap = await tx.get(_subscriptionRef(uid));
+      final storedStatus = subSnap.data()?['status'] ?? '';
+      if (storedStatus == SubscriptionStatus.pending.id) {
+        throw Exception('لديك طلب معلق بالفعل قيد المراجعة');
+      }
+      tx.set(requestRef, request.toJson());
+      tx.set(_subscriptionRef(uid), {
+        'status': SubscriptionStatus.pending.id,
+        'lastRequestId': requestRef.id,
+        'updatedAt': Timestamp.fromDate(now),
+      }, SetOptions(merge: true));
     });
-    await batch.commit();
     await _mirrorSubscription(uid, subscription.copyWith(
       status: SubscriptionStatus.pending,
       lastRequestId: requestRef.id,
