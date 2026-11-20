@@ -7,12 +7,17 @@ class Validators {
   /// نفس سياسة تسجيل الحساب: موبايل مصري (010/011/012/015) — 11 رقمًا.
   /// يتساهل مع الفواصل (مسافات/شرطات/أقواس/نقاط) والأرقام العربية (٠-٩)
   /// تُحوَّل لاتينية، وبيقبل رقم بصيغة `+20` أو `0020` أو `20XXXXXXXXXX`.
+  /// أي حروف أو كلمات مع الرقم مرفوضة (مثال غلط: واتحدث01110690299).
   /// مثال صحيح: 010XXXXXXXX
   static String? egyptianPhone(String? value) {
     if (value == null || value.trim().isEmpty) return 'اكتب رقم الهاتف';
-    var cleaned = _toLatinDigits(value.trim());
-    // شيل كل فاصل وسيب الأرقام و + فقط.
-    cleaned = cleaned.replaceAll(RegExp(r'[^0-9+]'), '');
+    final normalized = _toLatinDigits(value.trim());
+    // رفض أي حروف أو رموز قبل تنظيف الفواصل. قبل كده كان أي حرف بيشيل
+    // مع الفواصل، فالرقم "واتحدث01110690299" كان بيعتبر صحيح.
+    if (!RegExp(r'^[0-9+\s\-().]+$').hasMatch(normalized)) {
+      return 'رقم الهاتف غير صحيح (مثال: 010XXXXXXXX)';
+    }
+    var cleaned = normalized.replaceAll(RegExp(r'[^0-9+]'), '');
     if (cleaned.startsWith('+20')) {
       // +20 10XXXXXXXX → 010XXXXXXXX
       cleaned = '0${cleaned.substring(3)}';
