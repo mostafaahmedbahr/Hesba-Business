@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:hesba/core/router/notification_router.dart';
 import 'package:hesba/core/widgets/loading_widget.dart';
 import 'package:hesba/features/notifications/presentation/widgets/activity_card.dart';
@@ -24,6 +26,18 @@ class _NotificationsViewBodyState extends State<NotificationsViewBody> {
   /// 0 تذكيرات | 1 عمليات.
   int _tab = 0;
 
+  /// مرجع الـ Cubit محفوظ من didChangeDependencies.
+  /// ممنوع نستخدم context في dispose — بعد الـ deactivate شجرة الـ widgets
+  /// مبتكونش مستقرة وبيحصل "Looking up a deactivated widget's ancestor is unsafe".
+  ActivityCubit? _activityCubit;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // read() مش بيشترك في التحديثات، ف آمن نخزّنه هنا ونستخدمه في dispose.
+    _activityCubit ??= context.read<ActivityCubit>();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -35,11 +49,25 @@ class _NotificationsViewBodyState extends State<NotificationsViewBody> {
 
   @override
   void dispose() {
-    // ضمان إضافي عند الخروج.
-    try {
-      context.read<ActivityCubit>().markAllRead();
-    } catch (logErr, logSt) { AppLogger.nonFatal('features/notifications/presentation/widgets/notifications_view_body.dart', logErr, logSt, severity: LoggingSeverity.warning); }
+    // ضمان إضافي عند الخروج — من غير ما نلمس context بعد الـ deactivate.
+    final cubit = _activityCubit;
+    if (cubit != null && !cubit.isClosed) {
+      unawaited(_markAllReadSafely(cubit));
+    }
     super.dispose();
+  }
+
+  Future<void> _markAllReadSafely(ActivityCubit cubit) async {
+    try {
+      await cubit.markAllRead();
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal(
+        'features/notifications/presentation/widgets/notifications_view_body.dart',
+        logErr,
+        logSt,
+        severity: LoggingSeverity.warning,
+      );
+    }
   }
 
   void _setTab(int i) {
