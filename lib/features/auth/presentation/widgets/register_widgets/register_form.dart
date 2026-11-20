@@ -57,14 +57,17 @@ class RegisterForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppTheme.darkSurface : Colors.white,
         borderRadius: BorderRadius.circular(28.r),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primaryDark.withValues(alpha: 0.12),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.45)
+                : AppTheme.primaryDark.withValues(alpha: 0.12),
             blurRadius: 36,
             offset: const Offset(0, 16),
           ),
@@ -90,7 +93,7 @@ class RegisterForm extends StatelessWidget {
                         duration: const Duration(milliseconds: 280),
                         switchInCurve: Curves.easeOutCubic,
                         switchOutCurve: Curves.easeInCubic,
-                        child: _stepView(state.step),
+                        child: _stepView(context, state.step),
                       );
                     },
                   ),
@@ -123,18 +126,25 @@ class RegisterForm extends StatelessWidget {
     );
   }
 
-  Widget _stepView(int step) {
+  Widget _stepView(BuildContext context, int step) {
     final stepWidget = _step(step);
     // الخطوتان الأولى والثانية حقول — نحطهم على لوحة خفيفة،
     // والخطوة الثالثة فيها كروت جاهزة فتُترك كما هي.
     if (step == 2) return stepWidget;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
-        color: AppTheme.slatePale.withValues(alpha: 0.7),
+        color: isDark
+            ? AppTheme.darkSurfaceAlt
+            : AppTheme.slatePale.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: AppTheme.borderSoft.withValues(alpha: 0.7)),
+        border: Border.all(
+          color: isDark
+              ? AppTheme.darkBorder
+              : AppTheme.borderSoft.withValues(alpha: 0.7),
+        ),
       ),
       child: stepWidget,
     );
@@ -180,12 +190,16 @@ class _LoginFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
           'لديك حساب بالفعل؟',
-          style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade500),
+          style: TextStyle(
+            fontSize: 12.sp,
+            color: isDark ? AppTheme.darkTextSecondary : Colors.grey.shade500,
+          ),
         ),
         SizedBox(width: 4.w),
         InkWell(
@@ -220,13 +234,17 @@ class _PrivacyFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Center(
       child: Wrap(
         alignment: WrapAlignment.center,
         children: [
           Text(
             'بإنشائك حسابًا فأنت توافق على ',
-            style: TextStyle(fontSize: 11.5.sp, color: Colors.grey.shade500),
+            style: TextStyle(
+              fontSize: 11.5.sp,
+              color: isDark ? AppTheme.darkTextSecondary : Colors.grey.shade500,
+            ),
           ),
           InkWell(
             onTap: () async {

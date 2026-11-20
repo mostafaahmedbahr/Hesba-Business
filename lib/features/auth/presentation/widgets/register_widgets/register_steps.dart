@@ -14,6 +14,7 @@ class RegisterSteps extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return BlocBuilder<RegisterCubit, RegisterState>(
       builder: (context, state) {
         final current = state.step;
@@ -44,7 +45,7 @@ class RegisterSteps extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: i < current
                         ? AppTheme.successColor
-                        : const Color(0xFFE8ECF3),
+                        : (isDark ? AppTheme.darkBorder : const Color(0xFFE8ECF3)),
                     borderRadius: BorderRadius.circular(3.r),
                   ),
                 ),
@@ -73,6 +74,7 @@ class _StepItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final done = status == _StepStatus.done;
     final current = status == _StepStatus.current;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
       children: [
@@ -85,7 +87,9 @@ class _StepItem extends StatelessWidget {
             gradient: current
                 ? AppTheme.primaryGradient
                 : (done ? AppTheme.successGradient : null),
-            color: (!current && !done) ? const Color(0xFFEFF2F7) : null,
+            color: (!current && !done)
+                ? (isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFEFF2F7))
+                : null,
             boxShadow: current
                 ? [
                     BoxShadow(
@@ -96,7 +100,9 @@ class _StepItem extends StatelessWidget {
                   ]
                 : null,
             border: (!current && !done)
-                ? Border.all(color: const Color(0xFFE2E8F0))
+                ? Border.all(
+                    color: isDark ? AppTheme.darkBorder : const Color(0xFFE2E8F0),
+                  )
                 : null,
           ),
           child: Center(
@@ -105,7 +111,9 @@ class _StepItem extends StatelessWidget {
                 : Text(
                     '$number',
                     style: TextStyle(
-                      color: current ? Colors.white : Colors.grey.shade500,
+                      color: current
+                          ? Colors.white
+                          : (isDark ? AppTheme.darkTextSecondary : Colors.grey.shade500),
                       fontWeight: FontWeight.w900,
                       fontSize: 14.sp,
                     ),
@@ -122,8 +130,12 @@ class _StepItem extends StatelessWidget {
             fontSize: 10.5.sp,
             fontWeight: current ? FontWeight.w900 : FontWeight.w600,
             color: current
-                ? AppTheme.primaryColor
-                : (done ? AppTheme.successDark : Colors.grey.shade400),
+                ? (isDark ? AppTheme.primaryLight : AppTheme.primaryColor)
+                : (done
+                    ? (isDark ? AppTheme.successColor : AppTheme.successDark)
+                    : (isDark
+                        ? AppTheme.darkTextSecondary
+                        : Colors.grey.shade400)),
           ),
         ),
       ],

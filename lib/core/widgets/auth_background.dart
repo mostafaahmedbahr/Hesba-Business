@@ -11,21 +11,24 @@ class AuthBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Stack(
       children: [
         Positioned.fill(
           child: DecoratedBox(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [AppTheme.primaryDark, AppTheme.primaryColor, AppTheme.primaryLight],
+                colors: isDark
+                    ? [AppTheme.darkBackground, AppTheme.primaryDark, const Color(0xFF101B33)]
+                    : [AppTheme.primaryDark, AppTheme.primaryColor, AppTheme.primaryLight],
               ),
             ),
             child: Stack(
               children: [
                 Positioned(top: -80.w, right: -60.w, child: _GlowCircle(size: 240.w, color: AppTheme.secondaryColor)),
-                Positioned(bottom: -100.w, left: -80.w, child: _GlowCircle(size: 280.w, color: Colors.white)),
+                Positioned(bottom: -100.w, left: -80.w, child: _GlowCircle(size: 280.w, color: isDark ? AppTheme.primaryLight : Colors.white)),
               ],
             ),
           ),

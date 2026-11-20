@@ -6,6 +6,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/services/user_role_service.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/toast.dart';
 import '../../data/repos/auth_repo.dart';
 import '../cubit/login_cubit.dart';
@@ -45,10 +46,11 @@ class _LoginBodyState extends State<_LoginBody> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return BlocListener<LoginCubit, LoginState>(
       listener: _handleState,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF5F7FB),
+        backgroundColor: isDark ? AppTheme.darkBackground : const Color(0xFFF5F7FB),
         body: SafeArea(
           child: Center(
             child: SingleChildScrollView(

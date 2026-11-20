@@ -17,6 +17,7 @@ class RegisterSectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -33,10 +34,14 @@ class RegisterSectionTitle extends StatelessWidget {
           width: 34.w,
           height: 34.w,
           decoration: BoxDecoration(
-            color: AppTheme.primarySoft,
+            color: isDark ? AppTheme.darkSurfaceElevated : AppTheme.primarySoft,
             borderRadius: BorderRadius.circular(11.r),
           ),
-          child: Icon(icon, size: 18.sp, color: AppTheme.primaryColor),
+          child: Icon(
+            icon,
+            size: 18.sp,
+            color: isDark ? AppTheme.primaryLight : AppTheme.primaryColor,
+          ),
         ),
         SizedBox(width: 10.w),
         Expanded(
@@ -48,7 +53,7 @@ class RegisterSectionTitle extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w900,
-                  color: AppTheme.textPrimary,
+                  color: isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
                   height: 1.15,
                 ),
               ),
@@ -57,7 +62,7 @@ class RegisterSectionTitle extends StatelessWidget {
                 subtitle,
                 style: TextStyle(
                   fontSize: 11.5.sp,
-                  color: Colors.grey.shade500,
+                  color: isDark ? AppTheme.darkTextSecondary : Colors.grey.shade500,
                   height: 1.35,
                 ),
               ),

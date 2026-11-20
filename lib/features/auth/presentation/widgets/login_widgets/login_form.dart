@@ -29,14 +29,15 @@ class LoginForm extends StatefulWidget {
 class _LoginFormState extends State<LoginForm> {
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: EdgeInsets.all(32.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppTheme.darkSurface : Colors.white,
         borderRadius: BorderRadius.circular(28.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
             blurRadius: 30,
             offset: const Offset(0, 12),
           ),
@@ -116,6 +117,7 @@ class _LoginFormState extends State<LoginForm> {
   }
 
   Widget _buildForgotPassword() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Align(
       alignment: Alignment.centerLeft,
       child: TextButton(
@@ -127,7 +129,7 @@ class _LoginFormState extends State<LoginForm> {
           'loginForgotPassword'.tr(),
           style: TextStyle(
             fontSize: 12.sp,
-            color: AppTheme.deepBlue,
+            color: isDark ? AppTheme.primaryLight : AppTheme.deepBlue,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -140,15 +142,17 @@ class _LoginFormState extends State<LoginForm> {
       buildWhen: (prev, curr) => prev.status != curr.status,
       builder: (context, state) {
         final isLoading = state.status == LoginStatus.loading;
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final buttonColor = isDark ? AppTheme.primaryColor : AppTheme.deepBlue;
         return SizedBox(
           width: double.infinity,
           height: 52.h,
           child: ElevatedButton(
             onPressed: isLoading ? null : _onLogin,
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.deepBlue,
+              backgroundColor: buttonColor,
               foregroundColor: Colors.white,
-              disabledBackgroundColor: AppTheme.deepBlue.withValues(alpha: 0.5),
+              disabledBackgroundColor: buttonColor.withValues(alpha: 0.5),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14.r),
               ),
@@ -177,6 +181,7 @@ class _LoginFormState extends State<LoginForm> {
   }
 
   Widget _buildRegisterLink() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -184,7 +189,7 @@ class _LoginFormState extends State<LoginForm> {
           'loginNoAccount'.tr(),
           style: TextStyle(
             fontSize: 13.sp,
-            color: Colors.grey.shade600,
+            color: isDark ? AppTheme.darkTextSecondary : Colors.grey.shade600,
           ),
         ),
         GestureDetector(
@@ -194,7 +199,7 @@ class _LoginFormState extends State<LoginForm> {
             style: TextStyle(
               fontSize: 13.sp,
               fontWeight: FontWeight.w700,
-              color: AppTheme.deepBlue,
+              color: isDark ? AppTheme.primaryLight : AppTheme.deepBlue,
             ),
           ),
         ),

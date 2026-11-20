@@ -25,6 +25,8 @@ class RegisterTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accent = isDark ? AppTheme.primaryLight : AppTheme.primaryColor;
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
@@ -33,42 +35,53 @@ class RegisterTextField extends StatelessWidget {
       style: TextStyle(
         fontSize: 13.5.sp,
         fontWeight: FontWeight.w700,
-        color: AppTheme.textPrimary,
+        color: isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
       ),
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
-        hintStyle: TextStyle(fontSize: 12.sp, color: Colors.grey.shade400),
+        hintStyle: TextStyle(
+          fontSize: 12.sp,
+          color: isDark ? AppTheme.darkTextSecondary : Colors.grey.shade400,
+        ),
         labelStyle: TextStyle(
           fontSize: 12.5.sp,
-          color: AppTheme.primaryColor,
+          color: accent,
           fontWeight: FontWeight.w700,
         ),
-        prefixIcon: _IconChip(icon: icon),
+        prefixIcon: _IconChip(icon: icon, isDark: isDark),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: isDark ? AppTheme.darkSurfaceAlt : Colors.white,
         contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 17.h),
-        border: _border(),
-        enabledBorder: _border(),
-        focusedBorder: _border(color: AppTheme.primaryColor, width: 1.6),
-        errorBorder: _border(color: AppTheme.danger),
-        focusedErrorBorder: _border(color: AppTheme.danger, width: 1.6),
+        border: _border(isDark: isDark),
+        enabledBorder: _border(isDark: isDark),
+        focusedBorder: _border(isDark: isDark, color: accent, width: 1.6),
+        errorBorder: _border(isDark: isDark, color: AppTheme.danger),
+        focusedErrorBorder: _border(isDark: isDark, color: AppTheme.danger, width: 1.6),
       ),
     );
   }
 
-  OutlineInputBorder _border({Color? color, double width = 1}) {
+  OutlineInputBorder _border({
+    required bool isDark,
+    Color? color,
+    double width = 1,
+  }) {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(15.r),
-      borderSide: BorderSide(color: color ?? AppTheme.borderSoft, width: width),
+      borderSide: BorderSide(
+        color: color ?? (isDark ? AppTheme.darkBorder : AppTheme.borderSoft),
+        width: width,
+      ),
     );
   }
 }
 
 class _IconChip extends StatelessWidget {
   final IconData icon;
+  final bool isDark;
 
-  const _IconChip({required this.icon});
+  const _IconChip({required this.icon, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
@@ -78,10 +91,14 @@ class _IconChip extends StatelessWidget {
         width: 32.w,
         height: 32.w,
         decoration: BoxDecoration(
-          color: AppTheme.primarySoft,
+          color: isDark ? AppTheme.darkSurfaceElevated : AppTheme.primarySoft,
           borderRadius: BorderRadius.circular(10.r),
         ),
-        child: Icon(icon, size: 17.sp, color: AppTheme.primaryColor),
+        child: Icon(
+          icon,
+          size: 17.sp,
+          color: isDark ? AppTheme.primaryLight : AppTheme.primaryColor,
+        ),
       ),
     );
   }

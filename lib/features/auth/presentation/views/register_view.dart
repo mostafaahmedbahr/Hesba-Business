@@ -84,10 +84,11 @@ class _RegisterBodyState extends State<_RegisterBody> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return BlocListener<RegisterCubit, RegisterState>(
       listener: _handleState,
       child: Scaffold(
-        backgroundColor: AppTheme.primaryLight,
+        backgroundColor: isDark ? AppTheme.darkBackground : AppTheme.primaryLight,
         body: AuthBackground(
           child: SafeArea(
             child: Center(

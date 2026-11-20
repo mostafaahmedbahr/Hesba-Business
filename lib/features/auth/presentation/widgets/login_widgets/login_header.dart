@@ -9,6 +9,7 @@ class LoginHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       children: [
         Container(
@@ -16,7 +17,7 @@ class LoginHeader extends StatelessWidget {
           height: 64.w,
           padding: EdgeInsets.all(8.w),
           decoration: BoxDecoration(
-            color: const Color(0xFFEAF2FF),
+            color: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFEAF2FF),
             borderRadius: BorderRadius.circular(18.r),
           ),
           child: Image.asset(
@@ -25,7 +26,7 @@ class LoginHeader extends StatelessWidget {
             errorBuilder: (context, error, stackTrace) => Icon(
               Icons.calculate_rounded,
               size: 32.sp,
-              color: AppTheme.primaryColor,
+              color: isDark ? AppTheme.primaryLight : AppTheme.primaryColor,
             ),
           ),
         ),
@@ -35,7 +36,7 @@ class LoginHeader extends StatelessWidget {
           style: TextStyle(
             fontSize: 25.sp,
             fontWeight: FontWeight.w900,
-            color: const Color(0xFF102A43),
+            color: isDark ? AppTheme.darkTextPrimary : const Color(0xFF102A43),
           ),
         ),
         SizedBox(height: 6.h),
@@ -43,7 +44,7 @@ class LoginHeader extends StatelessWidget {
           'loginSubtitle'.tr(),
           style: TextStyle(
             fontSize: 13.sp,
-            color: Colors.grey.shade600,
+            color: isDark ? AppTheme.darkTextSecondary : Colors.grey.shade600,
           ),
         ),
       ],

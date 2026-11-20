@@ -26,6 +26,7 @@ class LoginTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
@@ -38,24 +39,29 @@ class LoginTextField extends StatelessWidget {
         prefixIcon: Icon(icon),
         suffixIcon: suffixIcon,
         filled: true,
-        fillColor: const Color(0xFFF8FAFD),
+        fillColor: isDark ? AppTheme.darkSurfaceAlt : const Color(0xFFF8FAFD),
         contentPadding: EdgeInsets.symmetric(
           horizontal: 16.w,
           vertical: 16.h,
         ),
-        border: _border(),
-        enabledBorder: _border(),
-        focusedBorder: _border(color: AppTheme.deepBlue),
-        errorBorder: _border(color: Colors.redAccent),
-        focusedErrorBorder: _border(color: Colors.redAccent),
+        border: _border(isDark: isDark),
+        enabledBorder: _border(isDark: isDark),
+        focusedBorder: _border(
+          isDark: isDark,
+          color: isDark ? AppTheme.primaryLight : AppTheme.deepBlue,
+        ),
+        errorBorder: _border(isDark: isDark, color: Colors.redAccent),
+        focusedErrorBorder: _border(isDark: isDark, color: Colors.redAccent),
       ),
     );
   }
 
-  OutlineInputBorder _border({Color? color}) {
+  OutlineInputBorder _border({required bool isDark, Color? color}) {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(14.r),
-      borderSide: BorderSide(color: color ?? Colors.grey.shade200),
+      borderSide: BorderSide(
+        color: color ?? (isDark ? AppTheme.darkBorder : Colors.grey.shade200),
+      ),
     );
   }
 }

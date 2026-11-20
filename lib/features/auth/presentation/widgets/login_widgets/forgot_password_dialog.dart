@@ -53,7 +53,9 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
       listener: _handleState,
       builder: (context, state) {
         final isLoading = state.status == ForgotPasswordStatus.loading;
+        final isDark = Theme.of(context).brightness == Brightness.dark;
         return AlertDialog(
+          backgroundColor: isDark ? AppTheme.darkSurface : null,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(22.r),
           ),
@@ -70,12 +72,12 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
                       width: 42.w,
                       height: 42.w,
                       decoration: BoxDecoration(
-                        color: AppTheme.deepBlue.withValues(alpha: 0.10),
+                        color: AppTheme.deepBlue.withValues(alpha: isDark ? 0.24 : 0.10),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.lock_reset_rounded,
-                        color: AppTheme.deepBlue,
+                        color: isDark ? AppTheme.primaryLight : AppTheme.deepBlue,
                         size: 22,
                       ),
                     ),
@@ -96,7 +98,7 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
                   'forgotPasswordDesc'.tr(),
                   style: TextStyle(
                     fontSize: 12.5.sp,
-                    color: Colors.grey.shade600,
+                    color: isDark ? AppTheme.darkTextSecondary : Colors.grey.shade600,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -128,7 +130,7 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
                 'cancel'.tr(),
                 style: TextStyle(
                   fontSize: 13.sp,
-                  color: Colors.grey.shade700,
+                  color: isDark ? AppTheme.darkTextSecondary : Colors.grey.shade700,
                 ),
               ),
             ),
@@ -137,7 +139,7 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
               child: ElevatedButton(
                 onPressed: isLoading ? null : _send,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.deepBlue,
+                  backgroundColor: isDark ? AppTheme.primaryColor : AppTheme.deepBlue,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(

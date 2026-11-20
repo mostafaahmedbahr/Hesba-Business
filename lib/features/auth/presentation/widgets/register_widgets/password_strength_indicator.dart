@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
 
+import 'package:hesba/core/theme/app_theme.dart';
+
 class PasswordStrengthIndicator extends StatelessWidget {
   final String password;
 
@@ -13,15 +15,16 @@ class PasswordStrengthIndicator extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(height: 8.h),
-        _buildRule('strength8Chars'.tr(), password.length >= 8),
+        _buildRule(context, 'strength8Chars'.tr(), password.length >= 8),
         SizedBox(height: 4.h),
-        _buildRule('strengthUpper'.tr(), RegExp(r'[A-Z]').hasMatch(password)),
+        _buildRule(context, 'strengthUpper'.tr(), RegExp(r'[A-Z]').hasMatch(password)),
         SizedBox(height: 4.h),
-        _buildRule('strengthLower'.tr(), RegExp(r'[a-z]').hasMatch(password)),
+        _buildRule(context, 'strengthLower'.tr(), RegExp(r'[a-z]').hasMatch(password)),
         SizedBox(height: 4.h),
-        _buildRule('strengthDigit'.tr(), RegExp(r'[0-9]').hasMatch(password)),
+        _buildRule(context, 'strengthDigit'.tr(), RegExp(r'[0-9]').hasMatch(password)),
         SizedBox(height: 4.h),
         _buildRule(
+          context,
           'strengthSpecial'.tr(),
           RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password),
         ),
@@ -29,20 +32,28 @@ class PasswordStrengthIndicator extends StatelessWidget {
     );
   }
 
-  Widget _buildRule(String text, bool passed) {
+  Widget _buildRule(BuildContext context, String text, bool passed) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ruleColor = isDark ? AppTheme.successColor : const Color(0xFF4CAF50);
     return Row(
       children: [
         Icon(
           passed ? Icons.check_circle_outline : Icons.radio_button_unchecked,
           size: 16.w,
-          color: passed ? const Color(0xFF4CAF50) : Colors.grey.shade400,
+          color: passed
+              ? ruleColor
+              : (isDark ? AppTheme.darkBorder : Colors.grey.shade400),
         ),
         SizedBox(width: 8.w),
         Text(
           text,
           style: TextStyle(
             fontSize: 12.sp,
-            color: passed ? const Color(0xFF4CAF50) : Colors.grey.shade500,
+            color: passed
+                ? ruleColor
+                : (isDark
+                    ? AppTheme.darkTextSecondary
+                    : Colors.grey.shade500),
             fontWeight: passed ? FontWeight.w600 : FontWeight.w400,
           ),
         ),

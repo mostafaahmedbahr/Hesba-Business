@@ -32,16 +32,17 @@ class _RegisterExtraStepState extends State<RegisterExtraStep> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildHeader(),
+        _buildHeader(isDark),
         SizedBox(height: 18.h),
         _buildImageField(),
         SizedBox(height: 12.h),
         _buildLocationField(),
         SizedBox(height: 14.h),
-        _buildEditLaterHint(),
+        _buildEditLaterHint(isDark),
       ],
     );
   }
@@ -49,11 +50,11 @@ class _RegisterExtraStepState extends State<RegisterExtraStep> {
   // ── Header ────────────────────────────────────────────────
 
   /// Quiet section header: soft icon chip, title and one calm line.
-  Widget _buildHeader() {
+  Widget _buildHeader(bool isDark) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _softIconChip(Icons.storefront_outlined),
+        _softIconChip(Icons.storefront_outlined, isDark: isDark),
         SizedBox(width: 12.w),
         Expanded(
           child: Column(
@@ -65,7 +66,7 @@ class _RegisterExtraStepState extends State<RegisterExtraStep> {
                   fontSize: 16.sp,
                   height: 1.2,
                   fontWeight: FontWeight.w800,
-                  color: AppTheme.textPrimary,
+                  color: isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
                 ),
               ),
               SizedBox(height: 3.h),
@@ -75,7 +76,7 @@ class _RegisterExtraStepState extends State<RegisterExtraStep> {
                   fontSize: 11.5.sp,
                   height: 1.4,
                   fontWeight: FontWeight.w500,
-                  color: Colors.grey.shade500,
+                  color: isDark ? AppTheme.darkTextSecondary : Colors.grey.shade500,
                 ),
               ),
             ],
@@ -136,14 +137,14 @@ class _RegisterExtraStepState extends State<RegisterExtraStep> {
   }
 
   /// Quiet one-liner instead of a highlighted banner.
-  Widget _buildEditLaterHint() {
+  Widget _buildEditLaterHint(bool isDark) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(
           Icons.tips_and_updates_outlined,
           size: 14,
-          color: Colors.grey.shade400,
+          color: isDark ? AppTheme.darkTextSecondary : Colors.grey.shade400,
         ),
         SizedBox(width: 6.w),
         Expanded(
@@ -153,7 +154,7 @@ class _RegisterExtraStepState extends State<RegisterExtraStep> {
               fontSize: 11.sp,
               height: 1.4,
               fontWeight: FontWeight.w600,
-              color: Colors.grey.shade500,
+              color: isDark ? AppTheme.darkTextSecondary : Colors.grey.shade500,
             ),
           ),
         ),
@@ -239,15 +240,19 @@ class _RegisterExtraStepState extends State<RegisterExtraStep> {
 }
 
 /// Soft tinted square behind a section icon — no gradients, calm palette.
-Widget _softIconChip(IconData icon) {
+Widget _softIconChip(IconData icon, {required bool isDark}) {
   return Container(
     width: 40.w,
     height: 40.w,
     decoration: BoxDecoration(
-      color: AppTheme.primarySoft,
+      color: isDark ? AppTheme.darkSurfaceElevated : AppTheme.primarySoft,
       borderRadius: BorderRadius.circular(13.r),
     ),
-    child: Icon(icon, size: 20, color: AppTheme.primaryColor),
+    child: Icon(
+      icon,
+      size: 20,
+      color: isDark ? AppTheme.primaryLight : AppTheme.primaryColor,
+    ),
   );
 }
 
@@ -268,16 +273,21 @@ class _StepCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppTheme.darkSurface : Colors.white,
         borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(color: const Color(0xFFEDF1F7)),
+        border: Border.all(
+          color: isDark ? AppTheme.darkBorder : const Color(0xFFEDF1F7),
+        ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF1B2B4A).withValues(alpha: 0.04),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.25)
+                : const Color(0xFF1B2B4A).withValues(alpha: 0.04),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
@@ -289,7 +299,7 @@ class _StepCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _softIconChip(icon),
+              _softIconChip(icon, isDark: isDark),
               SizedBox(width: 10.w),
               Expanded(
                 child: Column(
@@ -301,7 +311,7 @@ class _StepCard extends StatelessWidget {
                         fontSize: 13.5.sp,
                         height: 1.2,
                         fontWeight: FontWeight.w800,
-                        color: AppTheme.textPrimary,
+                        color: isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
                       ),
                     ),
                     SizedBox(height: 2.h),
@@ -313,7 +323,7 @@ class _StepCard extends StatelessWidget {
                         fontSize: 11.sp,
                         height: 1.3,
                         fontWeight: FontWeight.w500,
-                        color: Colors.grey.shade500,
+                        color: isDark ? AppTheme.darkTextSecondary : Colors.grey.shade500,
                       ),
                     ),
                   ],
