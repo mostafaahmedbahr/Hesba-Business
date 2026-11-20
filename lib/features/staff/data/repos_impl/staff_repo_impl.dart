@@ -22,17 +22,17 @@ class StaffRepoImpl implements StaffRepo {
   String? get _uid => _auth.currentUser?.uid;
 
   @override
-  Stream<List<StaffModel>> watchStaff() {
+  Future<List<StaffModel>> getStaff() async {
     final uid = _uid;
-    if (uid == null) return const Stream.empty();
-    return _firestore
+    if (uid == null) return const [];
+    final snap = await _firestore
         .collection(AppConstants.usersCollection)
         .where('ownerId', isEqualTo: uid)
         .where('role', isEqualTo: AppConstants.roleStaff)
-        .snapshots()
-        .map((snap) => snap.docs
-            .map((d) => StaffModel.fromJson(d.data(), docId: d.id))
-            .toList());
+        .get();
+    return snap.docs
+        .map((d) => StaffModel.fromJson(d.data(), docId: d.id))
+        .toList();
   }
 
   @override

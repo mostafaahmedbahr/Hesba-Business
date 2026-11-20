@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/extensions/log_util.dart';
 import '../../../../core/services/cloudinary_image_service.dart';
+import '../../../../core/utils/search_tokens.dart';
 import '../../../../core/services/app_settings_service.dart';
 import '../models/subscription_model.dart';
 import '../models/subscription_plan.dart';
@@ -163,7 +164,14 @@ class SubscriptionRepoImpl implements SubscriptionRepo {
       if (storedStatus == SubscriptionStatus.pending.id) {
         throw Exception('لديك طلب معلق بالفعل قيد المراجعة');
       }
-      tx.set(requestRef, request.toJson());
+      tx.set(requestRef, {
+        ...request.toJson(),
+        'searchTokens': SearchTokens.subscriptionRequest(
+          shopName: profile.shopName,
+          ownerName: profile.ownerName,
+          phone: profile.phone,
+        ),
+      });
       tx.set(_subscriptionRef(uid), {
         'status': SubscriptionStatus.pending.id,
         'lastRequestId': requestRef.id,

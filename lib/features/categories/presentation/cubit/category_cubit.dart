@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/utils/error_message.dart';
@@ -10,8 +8,8 @@ import 'package:hesba/core/services/app_logger.dart';
 /// لوجيك الأقسام (الـ View غبية — بتنادي بس).
 class CategoryCubit extends Cubit<CategoryState> {
   final CategoryRepo _repo; // بوابة الداتا.
-  StreamSubscription<List<String>>? _sub; // ستريم المخصصة.
 
+  // ignore: prefer_initializing_formals
   CategoryCubit({required CategoryRepo repo})
       : _repo = repo,
         super(const CategoryState());
@@ -28,30 +26,34 @@ class CategoryCubit extends Cubit<CategoryState> {
     // يحدد الافتراضي حسب النشاط.
     final defaults = _repo.defaultCategoriesFor(ctx.businessType);
     emit(state.copyWith(shopId: ctx.shopId, businessType: ctx.businessType, defaultCategories: defaults, status: CategoryStatus.loading));
-    // يسمع التحديثات live.
-    await _sub?.cancel();
-    _sub = _repo.watchCustomCategories(ctx.shopId).listen(
-      (list) {
-        if (isClosed) return;
+    await _loadCustom(ctx.shopId);
+  }
+
+  /// قراءة واحدة عند الطلب / بعد إضافة أو حذف قسم.
+  Future<void> _loadCustom(String shopId) async {
+    try {
+      final list = await _repo.getCustomCategories(shopId);
+      if (!isClosed) {
         emit(state.copyWith(status: CategoryStatus.success, customCategories: list, clearError: true));
-      },
-      onError: (Object e) {
-        if (isClosed) return;
+      }
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/categories/presentation/cubit/category_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
+      if (!isClosed) {
         emit(state.copyWith(status: CategoryStatus.failure, errorMessage: friendlyError(e)));
-      },
-    );
+      }
+    }
+  }
+
+  /// تحديث عند الطلب (سحب للتحديث).
+  Future<void> refresh() async {
+    if (state.hasShop) await _loadCustom(state.shopId);
   }
 
   /// بديل قديم (يفضل bootstrap).
-  void init({required String shopId, String? businessType}) {
+  Future<void> init({required String shopId, String? businessType}) async {
     final defaults = _repo.defaultCategoriesFor(businessType);
     emit(state.copyWith(shopId: shopId, businessType: businessType, defaultCategories: defaults, status: CategoryStatus.loading, clearError: true, clearSuccess: true));
-    _sub?.cancel();
-    _sub = _repo.watchCustomCategories(shopId).listen((list) {
-      if (!isClosed) emit(state.copyWith(status: CategoryStatus.success, customCategories: list, clearError: true));
-    }, onError: (Object e) {
-      if (!isClosed) emit(state.copyWith(status: CategoryStatus.failure, errorMessage: friendlyError(e)));
-    });
+    await _loadCustom(shopId);
   }
 
   /// يحدث البحث.
@@ -92,6 +94,7 @@ class CategoryCubit extends Cubit<CategoryState> {
     try {
       emit(state.copyWith(status: CategoryStatus.loading, clearError: true, clearSuccess: true));
       await _repo.addCategory(state.shopId, trimmed);
+      await _loadCustom(state.shopId);
       emit(state.copyWith(status: CategoryStatus.success, successMessage: 'تمت إضافة القسم', clearError: true));
       return true;
     } catch (e, logSt) {
@@ -106,6 +109,7 @@ class CategoryCubit extends Cubit<CategoryState> {
     if (!state.hasShop) return false;
     try {
       await _repo.removeCategory(state.shopId, category);
+      await _loadCustom(state.shopId);
       emit(state.copyWith(successMessage: 'تم حذف القسم', clearError: true));
       return true;
     } catch (e, logSt) {
@@ -118,9 +122,4 @@ class CategoryCubit extends Cubit<CategoryState> {
   /// يصفر رسائل الـ toast.
   void clearMessages() => emit(state.copyWith(clearError: true, clearSuccess: true));
 
-  @override
-  Future<void> close() {
-    _sub?.cancel();
-    return super.close();
-  }
 }

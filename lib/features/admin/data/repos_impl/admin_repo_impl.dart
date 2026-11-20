@@ -76,9 +76,13 @@ class AdminRepoImpl implements AdminRepo {
 
   @override
   Stream<QuerySnapshot<Map<String, dynamic>>> watchPendingRequestsOnce() {
+    // الشارة محتاجة عدد تقريبي فقط؛_LIMIT بيمنع قراءة كل الطلبات المعلقة
+    // على مستوى المنصة مع كل كتابة. القائمة الحقيقية مقسّمة أصلاً بـ
+    // getRequestsPage(limit: 20).
     return firestore
         .collection(_requests)
         .where('status', isEqualTo: 'pending')
+        .limit(100)
         .snapshots();
   }
 

@@ -6,6 +6,7 @@ import '../models/product_fields_catalog.dart';
 import '../models/product_form_config.dart';
 import '../repos/product_config_repo.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:hesba/core/services/shop_id_resolver.dart';
 
 /// يقرأ businessType من shops/{shopId} ويبني إعدادات حقول المنتج منه.
 class ProductConfigRepoImpl implements ProductConfigRepo {
@@ -32,11 +33,11 @@ class ProductConfigRepoImpl implements ProductConfigRepo {
   }
 
   Future<String?> _readBusinessType() async {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) return null;
-    final userDoc = await _firestore.collection('users').doc(uid).get();
-    if (!userDoc.exists) return null;
-    final shopId = userDoc.data()?['shopId'] as String?;
+    // shopId من الكاش الموحّد — قراءة users/{uid} القديمة اتشالت.
+    final shopId = await resolveCachedShopId(
+      firestore: _firestore,
+      auth: _auth,
+    );
     if (shopId == null || shopId.isEmpty) return null;
     final shopDoc = await _firestore.collection('shops').doc(shopId).get();
     if (!shopDoc.exists) return null;

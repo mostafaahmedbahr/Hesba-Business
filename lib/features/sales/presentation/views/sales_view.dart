@@ -65,8 +65,11 @@ class _SalesBody extends StatelessWidget {
         if (state.sales.isEmpty) {
           return Scaffold(
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            body: CustomScrollView(
-              slivers: [
+            body: RefreshIndicator(
+              onRefresh: () async => cubit.bootstrap(),
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
                 const SalesListHeader(
                   count: 0,
                   totalValue: 0,
@@ -79,7 +82,8 @@ class _SalesBody extends StatelessWidget {
                 ),
               ],
             ),
-          );
+          ),
+        );
         }
         // فيه داتا.
         final filtered = state.filtered;

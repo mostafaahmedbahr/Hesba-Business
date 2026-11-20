@@ -8,10 +8,7 @@ abstract class CategoryRepo {
   /// يجيب الافتراضي حسب نوع النشاط.
   List<String> defaultCategoriesFor(String? businessType);
 
-  /// ستريم الأقسام المخصصة (live).
-  Stream<List<String>> watchCustomCategories(String shopId);
-
-  /// قراءة مرة واحدة للأقسام المخصصة.
+  /// قراءة مرة واحدة للأقسام المخصصة (عند فتح الشاشة / بعد التعديل).
   Future<List<String>> getCustomCategories(String shopId);
 
   /// يضيف قسم جديد.

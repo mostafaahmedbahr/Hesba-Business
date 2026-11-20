@@ -47,10 +47,6 @@ abstract class SalesRepo {
     DateTime? from,
   });
 
-  /// حدث خفيف (أثر على أحدث فاتورة) يُعيد تحميل التقارير — بدل الاشتراك
-  /// في كل الفواتير. يقرأ مستنداً واحداً فقط.
-  Stream<void> watchLatestSale({required String shopId});
-
   /// id محل اليوزر الحالي (null لو مفيش).
   Future<String?> getShopId();
 }

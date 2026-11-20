@@ -46,7 +46,7 @@ class _ReportsBody extends StatelessWidget {
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           body: RefreshIndicator(
             color: AppTheme.primaryColor,
-            onRefresh: () async => cubit.bootstrap(),
+            onRefresh: () async => cubit.refresh(),
             child: CustomScrollView(
               slivers: [
                 ReportsHeader(state: state),

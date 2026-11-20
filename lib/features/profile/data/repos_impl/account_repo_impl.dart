@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
+import '../../../../core/utils/search_tokens.dart';
 import '../models/user_profile.dart';
 import '../repos/account_repo.dart';
 import 'package:hesba/core/services/app_logger.dart';
@@ -16,20 +17,6 @@ class AccountRepoImpl implements AccountRepo {
 
   @override
   String? currentUserId() => _auth.currentUser?.uid;
-
-  @override
-  Stream<UserProfile?> watchProfile() {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) return Stream.value(null);
-    return _firestore
-        .collection('users')
-        .doc(uid)
-        .snapshots()
-        .map((snap) {
-      if (!snap.exists) return null;
-      return UserProfile.fromJson(snap.data() ?? {});
-    });
-  }
 
   @override
   Future<UserProfile?> getProfile() async {
@@ -91,6 +78,13 @@ class AccountRepoImpl implements AccountRepo {
 
       if (shopId != null && shopId.isNotEmpty) {
         txn.update(_firestore.collection('shops').doc(shopId), {
+          'searchTokens': SearchTokens.shop(
+            shopName: shopName,
+            ownerName: ownerName,
+            // لازم يطابق مسار التسجيل (shopPhone) والـ backfill، وإلا البحث
+            // برقم المحل يتوقف بعد أي تعديل بروفايل.
+            phone: shopPhone,
+          ),
           'shopName': shopName.trim(),
           'businessType': businessType.trim(),
           'shopPhone': shopPhone.trim(),

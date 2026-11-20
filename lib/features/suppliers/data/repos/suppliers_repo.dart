@@ -9,10 +9,7 @@ abstract class SuppliersRepo {
   /// معرّف المحل الحالي (`null` لو المستخدم غير مسجّل أو المحل لسه مش متظبط).
   Future<String?> getShopId();
 
-  /// قائمة حيّة لموردي المحل الحالي (الأحدث أولاً).
-  Stream<List<SupplierModel>> watchSuppliers();
-
-  /// لقطة واحدة لموردي المحل الحالي.
+  /// لقطة واحدة لموردي المحل الحالي (الأحدث أولاً).
   Future<List<SupplierModel>> getSuppliers();
 
   /// مورد واحد بمعرّفه — يرجع `null` لو غير موجود أو تابع لمحل آخر.
@@ -59,7 +56,7 @@ abstract class SuppliersRepo {
   /// عدد المنتجات المرتبطة بكل مورد داخل المحل الحالي (معرّف المورد → العدد).
   ///
   /// مصدر واحد لشارة "المنتجات المرتبكة" في بطاقات القائمة.
-  Stream<Map<String, int>> watchLinkedProductCounts();
+  Future<Map<String, int>> getLinkedProductCounts();
 
   /// المنتجات المرتبطة بمورد معين داخل المحل الحالي فقط.
   Future<List<Product>> getLinkedProducts(String supplierId);

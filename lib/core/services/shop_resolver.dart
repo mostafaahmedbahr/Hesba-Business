@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'shop_id_resolver.dart';
 
 /// Single place that answers "who is the current owner, and what is
 /// their shop?".
@@ -19,12 +20,8 @@ class ShopResolver {
   String? get currentUid => _auth.currentUser?.uid;
 
   Future<String?> getShopId() async {
-    final uid = currentUid;
-    if (uid == null) return null;
     try {
-      final doc = await _firestore.collection('users').doc(uid).get();
-      final shopId = doc.data()?['shopId'] as String?;
-      return (shopId == null || shopId.isEmpty) ? null : shopId;
+      return await resolveCachedShopId(firestore: _firestore, auth: _auth);
     } catch (logErr, logSt) {
       AppLogger.nonFatal('core/services/shop_resolver.dart', logErr, logSt, severity: LoggingSeverity.warning);
       return null;
@@ -33,17 +30,15 @@ class ShopResolver {
 
   /// اسم المحل الحالي (من ملف المستخدم، مع fallback لمستند shops).
   Future<String?> getShopName() async {
-    final uid = currentUid;
-    if (uid == null) return null;
     try {
-      final userDoc = await _firestore.collection('users').doc(uid).get();
-      final data = userDoc.data();
-      final name = data?['shopName'] as String?;
+      final identity = await resolveCachedShopIdentity(
+        firestore: _firestore,
+        auth: _auth,
+      );
+      final name = identity.shopName;
       if (name != null && name.trim().isNotEmpty) return name.trim();
-      // Reuse the shopId already present on the document we just read instead
-      // of calling getShopId(), which would read users/{uid} a second time.
-      final rawShopId = data?['shopId'] as String?;
-      final shopId = (rawShopId == null || rawShopId.isEmpty) ? null : rawShopId;
+      // الاسم مش موجود في الكاش — جرّب مستند shops زي ما كان يحصل.
+      final shopId = identity.shopId;
       if (shopId != null) {
         final shopDoc = await _firestore.collection('shops').doc(shopId).get();
         final sName = shopDoc.data()?['shopName'] as String?;

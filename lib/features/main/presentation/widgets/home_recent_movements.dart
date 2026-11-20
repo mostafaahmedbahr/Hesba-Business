@@ -18,12 +18,19 @@ import 'package:hesba/core/services/app_logger.dart';
 
 /// "آخر الحركات" section of the home page (last sale / return / expense).
 ///
-/// Extracted from `home_view.dart`: owns its shopId lookup, its three
-/// Firestore streams (via [DashboardRepo]) and its own loading/empty states,
+/// Extracted from `home_view.dart`: owns its shopId lookup, its one-shot
+/// Firestore reads (via [DashboardRepo]) and its own loading/empty states,
 /// so the dashboard page stays a thin composition layer.
+///
+/// الكروت بتقرأ مرة واحدة عند الفتح، وبتعيد القراءة لما [revision] يتغير.
+/// القيمة دي جاية من `DashboardState.refreshRevision` اللي بيتزود مع كل
+/// تحميل ناجح — يعني AppEvents والسحب للتحديث و`refresh()` كلهم بيحدّثوا
+/// الكروت من نفس المصدر. مفيش StreamBuilder ولا listener مفتوح على كوليكشن.
 class RecentMovementsSection extends StatefulWidget {
+  /// بيتزود مع كل تحميل للداشبورد؛ تغييره بيخلي الكروت تعيد قراءة Firestore.
+  final int revision;
   final void Function(int index)? onNavigateTab;
-  const RecentMovementsSection({this.onNavigateTab});
+  const RecentMovementsSection({required this.revision, this.onNavigateTab});
   @override
   State<RecentMovementsSection> createState() => RecentMovementsSectionState();
 }
@@ -74,11 +81,11 @@ class RecentMovementsSectionState extends State<RecentMovementsSection> {
           _emptyShop(isDark)
         else
           Column(children: [
-            _LastSaleCard(shopId: _shopId!, onNavigateTab: widget.onNavigateTab),
+            _LastSaleCard(shopId: _shopId!, revision: widget.revision, onNavigateTab: widget.onNavigateTab),
             SizedBox(height: 10.h),
-            _LastReturnCard(shopId: _shopId!, onNavigateTab: widget.onNavigateTab),
+            _LastReturnCard(shopId: _shopId!, revision: widget.revision, onNavigateTab: widget.onNavigateTab),
             SizedBox(height: 10.h),
-            _LastExpenseCard(shopId: _shopId!, onNavigateTab: widget.onNavigateTab),
+            _LastExpenseCard(shopId: _shopId!, revision: widget.revision, onNavigateTab: widget.onNavigateTab),
           ]),
       ],
     );
@@ -99,28 +106,36 @@ class RecentMovementsSectionState extends State<RecentMovementsSection> {
 
 class _LastSaleCard extends StatefulWidget {
   final String shopId;
+  final int revision;
   final void Function(int index)? onNavigateTab;
-  const _LastSaleCard({required this.shopId, this.onNavigateTab});
+  const _LastSaleCard({required this.shopId, required this.revision, this.onNavigateTab});
 
   @override
   State<_LastSaleCard> createState() => _LastSaleCardState();
 }
 
 class _LastSaleCardState extends State<_LastSaleCard> {
-  // Created once: dashboard ticks rebuild the page but must NOT resubscribe.
-  late final Stream<SaleModel?> _stream;
+  late Future<SaleModel?> _future;
 
   @override
   void initState() {
     super.initState();
-    _stream = sl<DashboardRepo>().watchLastSale(widget.shopId);
+    _future = sl<DashboardRepo>().getLastSale(widget.shopId);
+  }
+
+  @override
+  void didUpdateWidget(covariant _LastSaleCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.shopId != widget.shopId || oldWidget.revision != widget.revision) {
+      _future = sl<DashboardRepo>().getLastSale(widget.shopId);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return StreamBuilder<SaleModel?>(
-      stream: _stream,
+    return FutureBuilder<SaleModel?>(
+      future: _future,
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) {
           return const LoadingWidget(size: 18, compact: true);
@@ -163,28 +178,36 @@ class _LastSaleCardState extends State<_LastSaleCard> {
 
 class _LastReturnCard extends StatefulWidget {
   final String shopId;
+  final int revision;
   final void Function(int index)? onNavigateTab;
-  const _LastReturnCard({required this.shopId, this.onNavigateTab});
+  const _LastReturnCard({required this.shopId, required this.revision, this.onNavigateTab});
 
   @override
   State<_LastReturnCard> createState() => _LastReturnCardState();
 }
 
 class _LastReturnCardState extends State<_LastReturnCard> {
-  // Created once: dashboard ticks rebuild the page but must NOT resubscribe.
-  late final Stream<ReturnModel?> _stream;
+  late Future<ReturnModel?> _future;
 
   @override
   void initState() {
     super.initState();
-    _stream = sl<DashboardRepo>().watchLastReturn(widget.shopId);
+    _future = sl<DashboardRepo>().getLastReturn(widget.shopId);
+  }
+
+  @override
+  void didUpdateWidget(covariant _LastReturnCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.shopId != widget.shopId || oldWidget.revision != widget.revision) {
+      _future = sl<DashboardRepo>().getLastReturn(widget.shopId);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return StreamBuilder<ReturnModel?>(
-      stream: _stream,
+    return FutureBuilder<ReturnModel?>(
+      future: _future,
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) {
           return const LoadingWidget(size: 18, compact: true);
@@ -225,28 +248,36 @@ class _LastReturnCardState extends State<_LastReturnCard> {
 
 class _LastExpenseCard extends StatefulWidget {
   final String shopId;
+  final int revision;
   final void Function(int index)? onNavigateTab;
-  const _LastExpenseCard({required this.shopId, this.onNavigateTab});
+  const _LastExpenseCard({required this.shopId, required this.revision, this.onNavigateTab});
 
   @override
   State<_LastExpenseCard> createState() => _LastExpenseCardState();
 }
 
 class _LastExpenseCardState extends State<_LastExpenseCard> {
-  // Created once: dashboard ticks rebuild the page but must NOT resubscribe.
-  late final Stream<ExpenseModel?> _stream;
+  late Future<ExpenseModel?> _future;
 
   @override
   void initState() {
     super.initState();
-    _stream = sl<DashboardRepo>().watchLastExpense(widget.shopId);
+    _future = sl<DashboardRepo>().getLastExpense(widget.shopId);
+  }
+
+  @override
+  void didUpdateWidget(covariant _LastExpenseCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.shopId != widget.shopId || oldWidget.revision != widget.revision) {
+      _future = sl<DashboardRepo>().getLastExpense(widget.shopId);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return StreamBuilder<ExpenseModel?>(
-      stream: _stream,
+    return FutureBuilder<ExpenseModel?>(
+      future: _future,
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) {
           return const LoadingWidget(size: 18, compact: true);

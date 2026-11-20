@@ -3,7 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/models/product.dart';
+import '../../../../core/utils/search_tokens.dart';
 import '../repos/products_repo.dart';
+import 'package:hesba/core/services/shop_id_resolver.dart';
 
 class ProductsRepoImpl implements ProductsRepo {
   final FirebaseAuth _auth;
@@ -13,12 +15,8 @@ class ProductsRepoImpl implements ProductsRepo {
 
   String? get _uid => _auth.currentUser?.uid;
 
-  Future<String?> _getShopId() async {
-    if (_uid == null) return null;
-    final doc = await _firestore.collection('users').doc(_uid).get();
-    if (!doc.exists) return null;
-    return doc.data()?['shopId'] as String?;
-  }
+  Future<String?> _getShopId() =>
+      resolveCachedShopId(firestore: _firestore, auth: _auth);
 
   @override
   Stream<List<Product>> watchProducts() {
@@ -76,6 +74,7 @@ class ProductsRepoImpl implements ProductsRepo {
     final now = FieldValue.serverTimestamp();
     await ref.set({
       ...product.toJson(),
+      'searchTokens': SearchTokens.product(product.name),
       'id': ref.id,
       'shopId': shopId,
       'ownerId': _uid,
@@ -110,6 +109,7 @@ class ProductsRepoImpl implements ProductsRepo {
         .doc(product.id)
         .update({
           ...product.toJson(),
+          'searchTokens': SearchTokens.product(product.name),
           'updatedAt': FieldValue.serverTimestamp(),
         });
   }

@@ -6,6 +6,7 @@ import '../../../../core/utils/paged_fetch.dart';
 import '../models/expense_model.dart';
 import '../expense_reminder_scheduler.dart';
 import '../repos/expenses_repo.dart';
+import 'package:hesba/core/services/shop_id_resolver.dart';
 import 'package:hesba/core/services/app_logger.dart';
 
 class ExpensesRepoImpl implements ExpensesRepo {
@@ -20,13 +21,11 @@ class ExpensesRepoImpl implements ExpensesRepo {
 
   String? get _uid => auth.currentUser?.uid;
 
-  Future<String?> _resolveShopId(String? providedShopId) async {
-    if (providedShopId != null && providedShopId.isNotEmpty) return providedShopId;
-    if (_uid == null) return null;
-    final doc = await firestore.collection('users').doc(_uid).get();
-    if (!doc.exists) return null;
-    return doc.data()?['shopId'] as String?;
-  }
+  Future<String?> _resolveShopId(String? providedShopId) => resolveCachedShopId(
+        firestore: firestore,
+        auth: auth,
+        provided: providedShopId,
+      );
 
   @override
   Future<String?> getShopId() => _resolveShopId(null);
@@ -314,17 +313,6 @@ class ExpensesRepoImpl implements ExpensesRepo {
         );
       },
     );
-  }
-
-  @override
-  Stream<void> watchLatestExpense({required String shopId}) {
-    return firestore
-        .collection(AppConstants.expensesCollection)
-        .where('shopId', isEqualTo: shopId)
-        .orderBy('createdAt', descending: true)
-        .limit(1)
-        .snapshots()
-        .map<void>((_) {});
   }
 
   @override

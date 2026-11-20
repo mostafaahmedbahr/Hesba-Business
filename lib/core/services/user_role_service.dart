@@ -28,6 +28,7 @@ class UserRoleService {
   String? _role;
   String? _ownerId;
   String? _shopId;
+  String? _shopName;
   String? _uidForCache;
   bool _loadFailed = false;
 
@@ -68,6 +69,8 @@ class UserRoleService {
           : uid;
       final shop = data?['shopId'] as String?;
       _shopId = (shop != null && shop.isNotEmpty) ? shop : null;
+      // نفس قراءة المستخدم — مفيش طلب إضافي عشان اسم المحل.
+      _shopName = data?['shopName'] as String?;
       _uidForCache = uid;
       _loadFailed = false;
     } catch (logErr, logSt) {
@@ -82,6 +85,7 @@ class UserRoleService {
       _role = null;
       _ownerId = null;
       _shopId = null;
+      _shopName = null;
       _uidForCache = null;
       _loadFailed = true;
     }
@@ -93,9 +97,17 @@ class UserRoleService {
     _role = null;
     _ownerId = null;
     _shopId = null;
+    _shopName = null;
     _uidForCache = null;
     _loadFailed = false;
   }
 
+  /// معرّف المحل من قراءة المستخدم الوحيدة عند الدخول.
   String? get cachedShopId => _shopId;
+
+  /// uid اللي اتحمل له الكاش — بيمنع استخدام كاش حساب سابق بعد تبديل الحساب.
+  String? get cachedUid => _uidForCache;
+
+  /// اسم المحل من نفس القراءة (للحالات اللي محتاجة الاسم كمان).
+  String? get cachedShopName => _shopName;
 }

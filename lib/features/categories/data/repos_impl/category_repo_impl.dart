@@ -5,6 +5,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../models/category_shop_context.dart';
 import '../repos/category_repo.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:hesba/core/services/shop_id_resolver.dart';
 
 /// تنفيذ Firestore لعقد الأقسام.
 class CategoryRepoImpl implements CategoryRepo {
@@ -19,13 +20,11 @@ class CategoryRepoImpl implements CategoryRepo {
   String? get _uid => _auth.currentUser?.uid;
 
   /// يحل shopId (الممرر أولاً ثم من اليوزر).
-  Future<String?> _resolveShopId(String? provided) async {
-    if (provided != null && provided.isNotEmpty) return provided;
-    if (_uid == null) return null;
-    final doc = await _firestore.collection(AppConstants.usersCollection).doc(_uid).get();
-    if (!doc.exists) return null;
-    return doc.data()?['shopId'] as String?;
-  }
+  Future<String?> _resolveShopId(String? provided) => resolveCachedShopId(
+        firestore: _firestore,
+        auth: _auth,
+        provided: provided,
+      );
 
   /// مرجع `shops/{shopId}`.
   DocumentReference<Map<String, dynamic>> _shopDoc(String shopId) =>
@@ -65,21 +64,6 @@ class CategoryRepoImpl implements CategoryRepo {
       return AppConstants.productCategoriesByBusinessType[businessType]!;
     }
     return AppConstants.defaultProductCategories;
-  }
-
-  @override
-  Stream<List<String>> watchCustomCategories(String shopId) async* {
-    final resolved = await _resolveShopId(shopId);
-    if (resolved == null || resolved.isEmpty) {
-      yield [];
-      return;
-    }
-    yield* _shopDoc(resolved).snapshots().map((snap) {
-      if (!snap.exists) return <String>[];
-      final raw = snap.data()?['customCategories'] as List<dynamic>?;
-      if (raw == null) return <String>[];
-      return raw.map((e) => e.toString()).where((e) => e.trim().isNotEmpty).toList();
-    });
   }
 
   @override

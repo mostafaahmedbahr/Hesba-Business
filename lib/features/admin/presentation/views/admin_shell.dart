@@ -199,7 +199,7 @@ class _PendingBellState extends State<_PendingBell> {
           onPressed: () => context.read<AdminNavCubit>().select(3),
           icon: Badge(
             isLabelVisible: count > 0,
-            label: Text('$count'),
+            label: Text(count >= 100 ? '99+' : '$count'),
             child: const Icon(Icons.notifications_outlined),
           ),
         );

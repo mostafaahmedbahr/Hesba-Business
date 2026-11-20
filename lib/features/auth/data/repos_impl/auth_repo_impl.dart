@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../../core/extensions/log_util.dart';
+import '../../../../core/utils/search_tokens.dart';
 import '../../../subscription/data/repos/subscription_repo.dart';
 import '../models/register_model.dart';
 import '../repos/auth_repo.dart';
@@ -114,6 +115,11 @@ class AuthRepoImpl implements AuthRepo {
     // 5. Save shop data (same rollback guarantee as the owner doc).
     try {
       await shopRef.set({
+        'searchTokens': SearchTokens.shop(
+          shopName: registerModel.shopName,
+          ownerName: registerModel.ownerName,
+          phone: registerModel.shopPhone,
+        ),
         'shopId': shopRef.id,
         'ownerId': user.uid,
         'shopName': registerModel.shopName,

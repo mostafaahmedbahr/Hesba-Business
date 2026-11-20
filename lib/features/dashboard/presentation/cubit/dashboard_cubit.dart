@@ -10,23 +10,21 @@ import 'package:hesba/core/services/app_logger.dart';
 
 class DashboardCubit extends Cubit<DashboardState> {
   final DashboardRepo _repo;
-  StreamSubscription<void>? _dashboardSub;
   StreamSubscription<({String? name, String? imageUrl})>? _shopSub;
   StreamSubscription<AppEvent>? _appEventSub;
-  Timer? _debounce;
   DateTime? _lastLoadTime;
-  bool _isFirstWatchEvent = true;
   bool _isLoading = false;
 
   DashboardCubit({required DashboardRepo repo})
       : _repo = repo,
         super(const DashboardState());
 
+  /// الأرقام بتتحدّث من [AppEvents] بعد كل عملية كتابة، ومن السحب للتحديث،
+  /// ومن الأزرار اللي بتنادى [refresh]. مفيش listener على كوليكشن كامل.
   void init() {
     _listenShopIdentity();
-    loadDashboardData();
-    _startAutoRefresh();
     _listenAppEvents();
+    loadDashboardData();
   }
 
   void _listenShopIdentity() {
@@ -43,28 +41,6 @@ class DashboardCubit extends Cubit<DashboardState> {
     });
   }
 
-  void _startAutoRefresh() {
-    _dashboardSub?.cancel();
-    _isFirstWatchEvent = true;
-    _dashboardSub = _repo.watchDashboardChanges().listen((_) {
-      // Skip first snapshot emission (already loaded in init)
-      if (_isFirstWatchEvent) {
-        _isFirstWatchEvent = false;
-        return;
-      }
-      // If we just did an AppEvent-driven refresh (<1.5s ago), ignore Firestore duplicate
-      if (_lastLoadTime != null &&
-          DateTime.now().difference(_lastLoadTime!) < const Duration(milliseconds: 1500)) {
-        return;
-      }
-      // Debounce to avoid spamming Firestore with rapid consecutive loads
-      _debounce?.cancel();
-      _debounce = Timer(const Duration(milliseconds: 800), () {
-        if (!isClosed) loadDashboardData();
-      });
-    });
-  }
-
   void _listenAppEvents() {
     _appEventSub?.cancel();
     _appEventSub = AppEvents.instance.stream.listen((event) {
@@ -72,8 +48,6 @@ class DashboardCubit extends Cubit<DashboardState> {
           event.type == AppEventType.returnCreated ||
           event.type == AppEventType.expenseCreated ||
           event.type == AppEventType.productChanged) {
-        // Cancel pending debounced Firestore refresh to avoid duplicate
-        _debounce?.cancel();
         if (!isClosed) loadDashboardData();
       }
     });
@@ -134,6 +108,7 @@ class DashboardCubit extends Cubit<DashboardState> {
         lowStockCount: lowStockCount,
         clearError: true,
         hasLoaded: true,
+        refreshRevision: state.refreshRevision + 1,
       ));
     } catch (e, logSt) {
       AppLogger.nonFatal('features/dashboard/presentation/cubit/dashboard_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
@@ -149,8 +124,6 @@ class DashboardCubit extends Cubit<DashboardState> {
 
   @override
   Future<void> close() {
-    _debounce?.cancel();
-    _dashboardSub?.cancel();
     _shopSub?.cancel();
     _appEventSub?.cancel();
     return super.close();

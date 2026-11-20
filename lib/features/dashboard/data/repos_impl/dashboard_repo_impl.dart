@@ -9,6 +9,7 @@ import '../../../returns/data/models/return_model.dart';
 import '../../../sales/data/models/sale_model.dart';
 import '../repos/dashboard_repo.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:hesba/core/services/shop_id_resolver.dart';
 
 class DashboardRepoImpl implements DashboardRepo {
   final FirebaseAuth _auth;
@@ -37,12 +38,8 @@ class DashboardRepoImpl implements DashboardRepo {
   }
 
   /// Fetch the current user's shopId from their profile document.
-  Future<String?> _getShopIdInternal() async {
-    if (_uid == null) return null;
-    final doc = await _firestore.collection('users').doc(_uid).get();
-    if (!doc.exists) return null;
-    return doc.data()?['shopId'] as String?;
-  }
+  Future<String?> _getShopIdInternal() =>
+      resolveCachedShopId(firestore: _firestore, auth: _auth);
 
   @override
   Future<String?> getShopId() => _getShopIdInternal();
@@ -196,138 +193,66 @@ class DashboardRepoImpl implements DashboardRepo {
   }
 
   @override
-  Stream<void> watchDashboardChanges() {
-    final controller = StreamController<void>.broadcast();
-    String? shopId;
-    final subs = <StreamSubscription>[];
-
-    void onListenError(Object e, StackTrace st) {
-      AppLogger.nonFatal(
-        'features/dashboard/data/repos_impl/dashboard_repo_impl.dart',
-        e,
-        st,
-        severity: LoggingSeverity.warning,
-      );
-    }
-
-    void listenCollections(String sid) {
-      for (final s in subs) {
-        s.cancel();
-      }
-      subs.clear();
-      // These listeners are change triggers for the dashboard; an error used
-      // to be silently discarded, hiding permission/network failures.
-      for (final collection in [
-        AppConstants.salesCollection,
-        AppConstants.productsCollection,
-        AppConstants.returnsCollection,
-        AppConstants.expensesCollection,
-      ]) {
-        subs.add(_firestore
-            .collection(collection)
-            .where('shopId', isEqualTo: sid)
-            .snapshots()
-            .listen((_) => controller.add(null), onError: onListenError));
-      }
-    }
-
-    () async {
-      shopId = await _getShopIdInternal();
-      if (shopId != null) {
-        listenCollections(shopId!);
-      } else {
-        // Retry after a short delay in case shopId not yet available
-        await Future.delayed(const Duration(seconds: 2));
-        shopId = await _getShopIdInternal();
-        if (shopId != null) listenCollections(shopId!);
-      }
-    }();
-
-    controller.onCancel = () async {
-      for (final s in subs) {
-        await s.cancel();
-      }
-      await controller.close();
-    };
-
-    return controller.stream;
-  }
-
-  @override
-  Stream<SaleModel?> watchLastSale(String shopId) {
-    return _firestore
+  Future<SaleModel?> getLastSale(String shopId) async {
+    final snap = await _firestore
         .collection(AppConstants.salesCollection)
         .where('shopId', isEqualTo: shopId)
         .orderBy('createdAt', descending: true)
         .limit(1)
-        .snapshots()
-        .map((snap) {
-      if (snap.docs.isEmpty) return null;
-      try {
-        return SaleModel.fromJson(snap.docs.first.data());
-      } catch (logErr, logSt) {
-        AppLogger.nonFatal('features/dashboard/data/repos_impl/dashboard_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning);
-        return null;
-      }
-    });
+        .get();
+    if (snap.docs.isEmpty) return null;
+    try {
+      return SaleModel.fromJson(snap.docs.first.data());
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/dashboard/data/repos_impl/dashboard_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning);
+      return null;
+    }
   }
 
   @override
-  Stream<ReturnModel?> watchLastReturn(String shopId) {
-    return _firestore
+  Future<ReturnModel?> getLastReturn(String shopId) async {
+    final snap = await _firestore
         .collection(AppConstants.returnsCollection)
         .where('shopId', isEqualTo: shopId)
         .orderBy('createdAt', descending: true)
         .limit(1)
-        .snapshots()
-        .map((snap) {
-      if (snap.docs.isEmpty) return null;
-      try {
-        return ReturnModel.fromJson(snap.docs.first.data());
-      } catch (logErr, logSt) {
-        AppLogger.nonFatal('features/dashboard/data/repos_impl/dashboard_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning);
-        return null;
-      }
-    });
+        .get();
+    if (snap.docs.isEmpty) return null;
+    try {
+      return ReturnModel.fromJson(snap.docs.first.data());
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/dashboard/data/repos_impl/dashboard_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning);
+      return null;
+    }
   }
 
   @override
-  Stream<ExpenseModel?> watchLastExpense(String shopId) {
-    return _watchLastExpenseDocs(shopId).map((docs) {
-      for (final doc in docs) {
-        try {
-          final expense = ExpenseModel.fromJson(doc.data());
-          // القوالب المتكررة ليست حركات فعلية — نتخطاها.
-          if (expense.isTemplate) continue;
-          if (expense.shopId == shopId) return expense;
-        } catch (logErr, logSt) {
-          AppLogger.nonFatal('features/dashboard/data/repos_impl/dashboard_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning);
-          // Corrupt doc: skipped instead of breaking the stream.
-        }
-      }
-      return null;
-    });
-  }
-
-  /// Latest expense docs — falls back to a local filter when the composite
-  /// index for `where shopId + orderBy date` is missing.
-  Stream<List<QueryDocumentSnapshot<Map<String, dynamic>>>>
-      _watchLastExpenseDocs(String shopId) async* {
+  Future<ExpenseModel?> getLastExpense(String shopId) async {
     final col = _firestore.collection(AppConstants.expensesCollection);
+    late final QuerySnapshot<Map<String, dynamic>> snap;
     try {
-      await for (final snap in col
+      // المحاولة الأساسية (تحتاج composite index).
+      snap = await col
           .where('shopId', isEqualTo: shopId)
           .orderBy('date', descending: true)
           .limit(5)
-          .snapshots()) {
-        yield snap.docs;
-      }
+          .get();
     } catch (logErr, logSt) {
       AppLogger.nonFatal('features/dashboard/data/repos_impl/dashboard_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning);
-      await for (final snap
-          in col.orderBy('date', descending: true).limit(20).snapshots()) {
-        yield snap.docs;
+      // الـ index ناقص: fallback لقراءة بدون where + فلترة محلية.
+      snap = await col.orderBy('date', descending: true).limit(20).get();
+    }
+    for (final doc in snap.docs) {
+      try {
+        final expense = ExpenseModel.fromJson(doc.data());
+        // القوالب المتكررة ليست حركات فعلية — نتخطاها.
+        if (expense.isTemplate) continue;
+        if (expense.shopId == shopId) return expense;
+      } catch (logErr, logSt) {
+        AppLogger.nonFatal('features/dashboard/data/repos_impl/dashboard_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning);
+        // Corrupt doc: skipped instead of breaking the read.
       }
     }
+    return null;
   }
 }

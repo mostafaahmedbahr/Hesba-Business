@@ -13,39 +13,35 @@ import 'package:hesba/core/services/app_logger.dart';
 /// المنتجات المرتبطة، والحذف.
 class SuppliersCubit extends Cubit<SuppliersState> {
   final SuppliersRepo _repo;
-  StreamSubscription<List<SupplierModel>>? _suppliersSub;
-  StreamSubscription<Map<String, int>>? _countsSub;
   Timer? _debounce;
   int _searchGeneration = 0;
 
   SuppliersCubit({required this._repo}) : super(const SuppliersState());
 
-  /// يشترك في موردي المحل وعدد المنتجات المرتبطة بهم.
-  void init() {
-    _suppliersSub ??= _repo.watchSuppliers().listen(
-      (list) => emit(
-        state.copyWith(
-          status: SuppliersStatus.success,
-          suppliers: list,
-          clearError: true,
-        ),
-      ),
-      onError: (Object e) => emit(
-        state.copyWith(status: SuppliersStatus.failure, errorMessage: friendlyError(e)),
-      ),
-      onDone: () {
-        if (state.status == SuppliersStatus.loading) {
-          emit(state.copyWith(status: SuppliersStatus.success, suppliers: const []));
-        }
-      },
-    );
-
-    _countsSub ??= _repo.watchLinkedProductCounts().listen(
-      (counts) => emit(state.copyWith(linkedCounts: counts)),
-      onError: (Object e) => logWarning('[SuppliersCubit] counts: $e'),
-    );
-
-    // نبقي status = loading حتى يصل أول انبعاث من الستريم (لعرض مؤشر التحميل).
+  /// قراءة واحدة للموردين وعدد المنتجات المرتبطة عند فتح الشاشة / السحب.
+  Future<void> init() async {
+    emit(state.copyWith(status: SuppliersStatus.loading, clearError: true));
+    try {
+      final results = await Future.wait<Object>([
+        _repo.getSuppliers(),
+        _repo.getLinkedProductCounts(),
+      ]);
+      if (isClosed) return;
+      emit(state.copyWith(
+        status: SuppliersStatus.success,
+        suppliers: results[0] as List<SupplierModel>,
+        linkedCounts: results[1] as Map<String, int>,
+        clearError: true,
+      ));
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/suppliers/presentation/cubit/suppliers_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
+      if (!isClosed) {
+        emit(state.copyWith(
+          status: SuppliersStatus.failure,
+          errorMessage: friendlyError(e),
+        ));
+      }
+    }
   }
 
   /// تحديث البحث المحلي في القائمة.
@@ -83,17 +79,13 @@ class SuppliersCubit extends Cubit<SuppliersState> {
   }
 
   /// إعادة تحميل القائمة (سحب للتحديث).
-  Future<void> refresh() async {
-    _suppliersSub?.cancel();
-    _suppliersSub = null;
-    emit(state.copyWith(status: SuppliersStatus.loading, clearError: true));
-    init();
-  }
+  Future<void> refresh() => init();
 
   /// حذف مورد — يفشل برسالة واضحة لو فيه منتجات مرتبطة.
   Future<bool> deleteSupplier(String supplierId) async {
     try {
       await _repo.deleteSupplier(supplierId);
+      await init();
       emit(state.copyWith(clearError: true));
       return true;
     } catch (e, logSt) {
@@ -108,8 +100,6 @@ class SuppliersCubit extends Cubit<SuppliersState> {
   @override
   Future<void> close() {
     _debounce?.cancel();
-    _suppliersSub?.cancel();
-    _countsSub?.cancel();
     return super.close();
   }
 }

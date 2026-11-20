@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/models/staff_model.dart';
@@ -23,15 +21,29 @@ class StaffState {
 
 class StaffCubit extends Cubit<StaffState> {
   final StaffRepo _repo;
-  StreamSubscription<List<StaffModel>>? _sub;
 
+  // ignore: prefer_initializing_formals
   StaffCubit({required StaffRepo repo}) : _repo = repo, super(const StaffState()) {
-    _sub = _repo.watchStaff().listen(
-          (list) => emit(StaffState(staff: list, loading: false)),
-          onError: (_) => emit(StaffState(staff: const [], loading: false,
-              error: 'تعذر تحميل الحسابات الفرعية')),
-        );
+    load();
   }
+
+  /// قراءة واحدة عند فتح الشاشة / بعد كل عملية كتابة (بدل listener دائم).
+  Future<void> load() async {
+    emit(state.copyWith(loading: true, error: null));
+    try {
+      final list = await _repo.getStaff();
+      if (!isClosed) emit(StaffState(staff: list, loading: false));
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/staff/presentation/cubit/staff_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
+      if (!isClosed) {
+        emit(const StaffState(staff: [], loading: false,
+            error: 'تعذر تحميل الحسابات الفرعية'));
+      }
+    }
+  }
+
+  /// تحديث عند الطلب (سحب للتحديث).
+  Future<void> refresh() => load();
 
   Future<void> add({
     required String name,
@@ -47,6 +59,7 @@ class StaffCubit extends Cubit<StaffState> {
         phone: phone,
         password: password,
       );
+      await load();
     } catch (e, logSt) {
       AppLogger.nonFatal('features/staff/presentation/cubit/staff_cubit.dart', e, logSt, severity: LoggingSeverity.error);
       emit(state.copyWith(error: _mapError(e.toString())));
@@ -67,6 +80,7 @@ class StaffCubit extends Cubit<StaffState> {
         phone: phone,
         isActive: isActive,
       );
+      await load();
     } catch (e, logSt) {
       AppLogger.nonFatal('features/staff/presentation/cubit/staff_cubit.dart', e, logSt, severity: LoggingSeverity.error);
       emit(state.copyWith(error: _mapError(e.toString())));
@@ -93,9 +107,4 @@ class StaffCubit extends Cubit<StaffState> {
     return msg.replaceAll(RegExp(r'^Exception:\s*|^[A-Za-z]+\/?[A-Za-z]*:\s*'), '');
   }
 
-  @override
-  Future<void> close() {
-    _sub?.cancel();
-    return super.close();
-  }
 }

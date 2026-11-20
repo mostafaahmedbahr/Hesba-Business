@@ -8,6 +8,7 @@ import '../../../accounts/data/models/person_model.dart';
 import '../../../accounts/data/repos/accounts_repo.dart';
 import '../models/sale_model.dart';
 import '../repos/sales_repo.dart';
+import 'package:hesba/core/services/shop_id_resolver.dart';
 import 'package:hesba/core/services/app_logger.dart';
 
 class SalesRepoImpl implements SalesRepo {
@@ -25,15 +26,11 @@ class SalesRepoImpl implements SalesRepo {
 
   String? get _uid => auth.currentUser?.uid;
 
-  Future<String?> _resolveShopId(String? providedShopId) async {
-    if (providedShopId != null && providedShopId.isNotEmpty) {
-      return providedShopId;
-    }
-    if (_uid == null) return null;
-    final doc = await firestore.collection('users').doc(_uid).get();
-    if (!doc.exists) return null;
-    return doc.data()?['shopId'] as String?;
-  }
+  Future<String?> _resolveShopId(String? providedShopId) => resolveCachedShopId(
+        firestore: firestore,
+        auth: auth,
+        provided: providedShopId,
+      );
 
   Future<String?> _resolveOwnerId(String? providedOwnerId) async {
     if (providedOwnerId != null && providedOwnerId.isNotEmpty) {
@@ -474,14 +471,4 @@ class SalesRepoImpl implements SalesRepo {
     );
   }
 
-  @override
-  Stream<void> watchLatestSale({required String shopId}) {
-    return firestore
-        .collection(AppConstants.salesCollection)
-        .where('shopId', isEqualTo: shopId)
-        .orderBy('createdAt', descending: true)
-        .limit(1)
-        .snapshots()
-        .map<void>((_) {});
-  }
 }

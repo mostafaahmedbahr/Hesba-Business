@@ -7,6 +7,7 @@ import '../../../../core/models/product.dart';
 import '../models/supplier_model.dart';
 import '../repos/suppliers_repo.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:hesba/core/services/shop_id_resolver.dart';
 
 /// تنفيذ ميزة الموردين على Firestore.
 ///
@@ -35,13 +36,8 @@ class SuppliersRepoImpl implements SuppliersRepo {
   CollectionReference<Map<String, dynamic>> get _products =>
       _firestore.collection(AppConstants.productsCollection);
 
-  Future<String?> _getShopId() async {
-    final uid = _uid;
-    if (uid == null) return null;
-    final doc = await _firestore.collection('users').doc(uid).get();
-    if (!doc.exists) return null;
-    return doc.data()?['shopId'] as String?;
-  }
+  Future<String?> _getShopId() =>
+      resolveCachedShopId(firestore: _firestore, auth: _auth);
 
   /// يتأكد إن المعرّفين متاحين، وإلا يرمي رسالة مفهومة.
   Future<String> _requireShop() async {
@@ -90,27 +86,6 @@ class SuppliersRepoImpl implements SuppliersRepo {
 
   @override
   Future<String?> getShopId() => _getShopId();
-
-  @override
-  Stream<List<SupplierModel>> watchSuppliers() {
-    final uid = _uid;
-    if (uid == null) return const Stream.empty();
-    return () async* {
-      final shopId = await _getShopId();
-      if (shopId == null || shopId.isEmpty) {
-        yield const <SupplierModel>[];
-        return;
-      }
-      await for (final snap
-          in _suppliers
-              .where('shopId', isEqualTo: shopId)
-              .orderBy('createdAt', descending: true)
-              .limit(_pageLimit)
-              .snapshots()) {
-        yield _safeList(snap, shopId);
-      }
-    }();
-  }
 
   @override
   Future<List<SupplierModel>> getSuppliers() async {
@@ -290,31 +265,22 @@ class SuppliersRepoImpl implements SuppliersRepo {
   // ─────────────────────── المنتجات المرتبطة ───────────────────────
 
   @override
-  Stream<Map<String, int>> watchLinkedProductCounts() {
-    final uid = _uid;
-    if (uid == null) return const Stream.empty();
-    return () async* {
-      final shopId = await _getShopId();
-      if (shopId == null || shopId.isEmpty) {
-        yield const <String, int>{};
-        return;
-      }
-      await for (final snap
-          in _products
-              .where('shopId', isEqualTo: shopId)
-              .limit(_pageLimit)
-              .snapshots()) {
-        final counts = <String, int>{};
-        for (final doc in snap.docs) {
-          final data = doc.data();
-          if (data['shopId'] != shopId) continue;
-          final supplierId = data['supplierId'] as String?;
-          if (supplierId == null || supplierId.isEmpty) continue;
-          counts[supplierId] = (counts[supplierId] ?? 0) + 1;
-        }
-        yield counts;
-      }
-    }();
+  Future<Map<String, int>> getLinkedProductCounts() async {
+    final shopId = await _getShopId();
+    if (shopId == null || shopId.isEmpty) return const <String, int>{};
+    final snap = await _products
+        .where('shopId', isEqualTo: shopId)
+        .limit(_pageLimit)
+        .get();
+    final counts = <String, int>{};
+    for (final doc in snap.docs) {
+      final data = doc.data();
+      if (data['shopId'] != shopId) continue;
+      final supplierId = data['supplierId'] as String?;
+      if (supplierId == null || supplierId.isEmpty) continue;
+      counts[supplierId] = (counts[supplierId] ?? 0) + 1;
+    }
+    return counts;
   }
 
   @override

@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../models/stock_purchase_item.dart';
 import '../repos/stock_purchase_repo.dart';
+import 'package:hesba/core/services/shop_id_resolver.dart';
 
 class StockPurchaseRepoImpl implements StockPurchaseRepo {
   final FirebaseFirestore _firestore;
@@ -16,14 +17,11 @@ class StockPurchaseRepoImpl implements StockPurchaseRepo {
   String? get _uid => _auth.currentUser?.uid;
 
   Future<Map<String, String?>> _resolveShop() async {
-    final uid = _uid;
-    if (uid == null) return {'shopId': null, 'shopName': null};
-    final doc = await _firestore.collection('users').doc(uid).get();
-    final data = doc.data();
-    return {
-      'shopId': data?['shopId'] as String?,
-      'shopName': data?['shopName'] as String?,
-    };
+    final identity = await resolveCachedShopIdentity(
+      firestore: _firestore,
+      auth: _auth,
+    );
+    return {'shopId': identity.shopId, 'shopName': identity.shopName};
   }
 
   @override

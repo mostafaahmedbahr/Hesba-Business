@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/services/app_events.dart';
 import '../../../../core/utils/error_message.dart';
 import '../../../expenses/data/repos/expenses_repo.dart';
 import '../../../returns/data/repos/returns_repo.dart';
@@ -14,17 +15,16 @@ import 'package:hesba/core/services/app_logger.dart';
 /// ويفلتر محلياً حسب الفترة (تبديل الفترة فوري)، ثم يحسب المؤشرات مرة
 /// واحدة عبر `ReportsCalculator`.
 ///
-/// التحديث الحي: اشتراك خفيف على أحدث مستند في كل مجموعة (limit 1) كـ
-/// trigger لإعادة الجلب — بدل الاشتراك في كل الفواتير (الذي كان مقصوصاً
-/// لـ 500/300). تعديل سجل قديم قد لا يطلق الـ trigger؛ سحب الشاشة للأسفل
-/// يعيد التحميل (RefreshIndicator).
+/// التحديث: مفيش أي listener على Firestore. التقارير بتتحمل عند فتح الشاشة
+/// ([bootstrap])، وبتتجدد بعد عمليات الكتابة عبر `AppEvents` (بـ debounce
+/// عشان ما يتعملش جلب كامل لكل حدث)، وبالسحب للتحديث ([refresh]).
+/// كده تعديل سجل قديم كمان بيظهر — الـ trigger القديم (limit 1) كان بيفتقده.
 class ReportsCubit extends Cubit<ReportsState> {
   final SalesRepo _salesRepo;
   final ReturnsRepo _returnsRepo;
   final ExpensesRepo _expensesRepo;
-  StreamSubscription<void>? _salesSub;
-  StreamSubscription<void>? _returnsSub;
-  StreamSubscription<void>? _expensesSub;
+  StreamSubscription<AppEvent>? _appEventSub;
+  Timer? _refreshDebounce;
 
   /// منع تراكب عمليات الجلب: لو جلب شغّال وحدث جديد وصل، يُعاد بعد
   /// انتهائه ( bitmask: 1=مبيعات، 2=مرتجعات، 4=مصروفات ).
@@ -40,7 +40,7 @@ class ReportsCubit extends Cubit<ReportsState> {
         _expensesRepo = expensesRepo,
         super(const ReportsState());
 
-  /// تجهيز: يجيب المحل + يجلب القوائم كاملة + يشترك في التحديث الحي.
+  /// تجهيز: يجيب المحل + يجلب القوائم كاملة مرة واحدة.
   Future<void> bootstrap() async {
     emit(state.copyWith(status: ReportsStatus.loading, clearError: true));
     final shopId = await _salesRepo.getShopId();
@@ -53,22 +53,33 @@ class ReportsCubit extends Cubit<ReportsState> {
       return;
     }
     emit(state.copyWith(shopId: shopId));
-    await _cancelAll();
+    _listenAppEvents();
     await _reload(mask: 7, showLoading: true);
+  }
 
-    // triggers خفيفة (مستند واحد لكل مجموعة) — إعادة الجلب عند أي إضافة.
-    _salesSub = _salesRepo.watchLatestSale(shopId: shopId).listen(
-          (_) => _reload(mask: 1),
-          onError: (Object _) {}, // فشل الـ trigger لا يُفشل الشاشة
-        );
-    _returnsSub = _returnsRepo.watchLatestReturn(shopId: shopId).listen(
-          (_) => _reload(mask: 2),
-          onError: (Object _) {},
-        );
-    _expensesSub = _expensesRepo.watchLatestExpense(shopId: shopId).listen(
-          (_) => _reload(mask: 4),
-          onError: (Object _) {},
-        );
+  /// إعادة جلب كاملة عند الطلب (السحب للتحديث) أو بعد عمليات الكتابة.
+  Future<void> refresh() async {
+    if (!state.hasShop) return bootstrap();
+    await _reload(mask: 7, showLoading: true);
+  }
+
+  void _listenAppEvents() {
+    if (_appEventSub != null) return;
+    _appEventSub = AppEvents.instance.stream.listen((event) {
+      if (event.type != AppEventType.saleCreated &&
+          event.type != AppEventType.returnCreated &&
+          event.type != AppEventType.expenseCreated &&
+          event.type != AppEventType.expenseUpdated &&
+          event.type != AppEventType.expenseDeleted) {
+        return;
+      }
+      // كل عملية بتبعت أكتر من حدث (مثلاً saleCreated + productChanged)؛
+      // debounce بيحوّلهم لجلب كامل واحد بدل جلب لكل حدث.
+      _refreshDebounce?.cancel();
+      _refreshDebounce = Timer(const Duration(milliseconds: 500), () {
+        if (!isClosed) refresh();
+      });
+    });
   }
 
   /// يغير الفترة (فوري — الداتا في الذاكرة، الحساب فقط يعاد).
@@ -178,18 +189,10 @@ class ReportsCubit extends Cubit<ReportsState> {
     ));
   }
 
-  Future<void> _cancelAll() async {
-    await _salesSub?.cancel();
-    await _returnsSub?.cancel();
-    await _expensesSub?.cancel();
-    _salesSub = null;
-    _returnsSub = null;
-    _expensesSub = null;
-  }
-
   @override
   Future<void> close() {
-    _cancelAll();
+    _refreshDebounce?.cancel();
+    _appEventSub?.cancel();
     return super.close();
   }
 }

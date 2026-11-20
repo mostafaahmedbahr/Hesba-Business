@@ -79,9 +79,12 @@ class GlobalSearchView extends StatelessWidget {
                         return SizedBox(
                           height: 320,
                           child: ListView.separated(
-                            itemCount: state.hits.length,
+                            itemCount: state.hits.length + (state.hasMore ? 1 : 0),
                             separatorBuilder: (_, _) => const SizedBox(height: AdminSpace.sm),
                             itemBuilder: (context, i) {
+                              if (i == state.hits.length) {
+                                return _loadMoreTile(context, state.isLoadingMore);
+                              }
                               final hit = state.hits[i];
                               return AdminCard(
                                 padding: const EdgeInsets.symmetric(
@@ -135,6 +138,25 @@ class GlobalSearchView extends StatelessWidget {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _loadMoreTile(BuildContext context, bool loading) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AdminSpace.sm),
+      child: Center(
+        child: loading
+            ? const SizedBox(
+                height: 18,
+                width: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : TextButton.icon(
+                onPressed: () => context.read<GlobalSearchCubit>().loadMore(),
+                icon: const Icon(Icons.expand_more, size: 18),
+                label: const Text('تحميل المزيد'),
+              ),
       ),
     );
   }

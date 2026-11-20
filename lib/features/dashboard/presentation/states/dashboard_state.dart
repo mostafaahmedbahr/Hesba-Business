@@ -21,6 +21,11 @@ class DashboardState {
   /// بيتميز أول تحميل للهوم عن التحديثات اللي بعدين، عشان اللودر يظهر مرة واحدة.
   final bool hasLoaded;
 
+  /// بيتزود مع كل تحميل ناجح. كروت «آخر الحركات» بتعيد القراءة لما قيمته
+  /// تتغير — سواء التحديث جاي من `AppEvents` أو من السحب للتحديث أو من
+  /// `refresh()`. مصدر واحد بيمنع كروت قديمة بعد السحب.
+  final int refreshRevision;
+
   const DashboardState({
     this.status = DashboardStatus.initial,
     this.shopName = '',
@@ -35,6 +40,7 @@ class DashboardState {
     this.lowStockCount = 0,
     this.errorMessage,
     this.hasLoaded = false,
+    this.refreshRevision = 0,
   });
 
   DashboardState copyWith({
@@ -51,6 +57,7 @@ class DashboardState {
     int? lowStockCount,
     String? errorMessage,
     bool? hasLoaded,
+    int? refreshRevision,
     bool clearError = false,
   }) {
     return DashboardState(
@@ -67,6 +74,7 @@ class DashboardState {
       lowStockCount: lowStockCount ?? this.lowStockCount,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       hasLoaded: hasLoaded ?? this.hasLoaded,
+      refreshRevision: refreshRevision ?? this.refreshRevision,
     );
   }
 }

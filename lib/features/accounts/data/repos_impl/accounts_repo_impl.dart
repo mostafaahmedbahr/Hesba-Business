@@ -6,6 +6,7 @@ import '../models/debt_model.dart';
 import '../models/payment_model.dart';
 import '../models/person_model.dart';
 import '../repos/accounts_repo.dart';
+import 'package:hesba/core/services/shop_id_resolver.dart';
 
 /// تنفيذ ميزة الحسابات على Firestore.
 ///
@@ -30,13 +31,8 @@ class AccountsRepoImpl implements AccountsRepo {
   CollectionReference<Map<String, dynamic>> get _debts =>
       _firestore.collection(AppConstants.debtsCollection);
 
-  Future<String?> _getShopId() async {
-    final uid = _uid;
-    if (uid == null) return null;
-    final doc = await _firestore.collection('users').doc(uid).get();
-    if (!doc.exists) return null;
-    return doc.data()?['shopId'] as String?;
-  }
+  Future<String?> _getShopId() =>
+      resolveCachedShopId(firestore: _firestore, auth: _auth);
 
   Future<String> _requireShop() async {
     if (_uid == null) {

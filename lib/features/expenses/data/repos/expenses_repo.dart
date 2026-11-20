@@ -55,9 +55,6 @@ abstract class ExpensesRepo {
     DateTime? from,
   });
 
-  /// حدث خفيف (أثر على أحدث مصروف) يعيد تحميل التقارير live.
-  Stream<void> watchLatestExpense({required String shopId});
-
   Future<void> deleteExpense({required String expenseId, required String shopId});
 
   /// Current user's shopId (`null` when signed out or not yet assigned).

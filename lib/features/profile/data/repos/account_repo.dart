@@ -5,10 +5,7 @@ abstract class AccountRepo {
   /// Returns the current signed-in user id, or null.
   String? currentUserId();
 
-  /// Streams the current user's profile document from Firestore.
-  Stream<UserProfile?> watchProfile();
-
-  /// Fetches the profile document once.
+  /// Fetches the profile document once (on screen open / after an update).
   Future<UserProfile?> getProfile();
 
   /// Updates all editable registration fields.

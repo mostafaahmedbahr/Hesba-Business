@@ -72,8 +72,6 @@ class _ProductFormViewState extends State<ProductFormView> {
   late List<String> _categories = _categoriesFor(widget.cubit.state.shopType);
   List<String> _customCategories = [];
   String? _shopId;
-  StreamSubscription<List<String>>? _catSub;
-
   bool _saving = false;
   bool _deleting = false;
   bool get _isEdit => widget.product != null;
@@ -173,20 +171,17 @@ class _ProductFormViewState extends State<ProductFormView> {
     try {
       _shopId = await sl<ShopResolver>().getShopId();
       if (_shopId == null || _shopId!.isEmpty) return;
-      final repo = sl<CategoryRepo>();
-      _catSub?.cancel();
-      _catSub = repo.watchCustomCategories(_shopId!).listen((list) {
-        if (!mounted) return;
-        setState(() => _customCategories = list);
-        final saved = widget.product?.category ?? '';
-        if (saved.isNotEmpty &&
-            list.map((e) => e.toLowerCase()).contains(saved.toLowerCase())) {
-          setState(() {
-            _category = saved;
-            _customCategory = false;
-          });
-        }
-      });
+      final list = await sl<CategoryRepo>().getCustomCategories(_shopId!);
+      if (!mounted) return;
+      setState(() => _customCategories = list);
+      final saved = widget.product?.category ?? '';
+      if (saved.isNotEmpty &&
+          list.map((e) => e.toLowerCase()).contains(saved.toLowerCase())) {
+        setState(() {
+          _category = saved;
+          _customCategory = false;
+        });
+      }
     } catch (logErr, logSt) { AppLogger.nonFatal('features/products/presentation/views/product_form_view.dart', logErr, logSt, severity: LoggingSeverity.warning); }
   }
 
@@ -195,7 +190,6 @@ class _ProductFormViewState extends State<ProductFormView> {
 
   @override
   void dispose() {
-    _catSub?.cancel();
     _formCubit.close();
     _customCategoryController.dispose();
     for (final c in _controllers.values) {

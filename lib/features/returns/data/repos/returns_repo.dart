@@ -26,9 +26,6 @@ abstract class ReturnsRepo {
     DateTime? from,
   });
 
-  /// حدث خفيف (أثر على أحدث مرتجع) يعيد تحميل التقارير live.
-  Stream<void> watchLatestReturn({required String shopId});
-
   /// id محل اليوزر الحالي (null لو مفيش).
   Future<String?> getShopId();
 

@@ -1,42 +1,37 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'dart:async';
 
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/services/user_role_service.dart';
 import '../../../../core/utils/error_message.dart';
 import '../../data/repos/account_repo.dart';
-import '../../data/models/user_profile.dart';
 import '../states/profile_state.dart';
 import 'package:hesba/core/services/app_logger.dart';
 
 class ProfileCubit extends Cubit<ProfileState> {
   final AccountRepo _repo;
-  StreamSubscription<UserProfile?>? _sub;
 
+  // ignore: prefer_initializing_formals
   ProfileCubit({required AccountRepo repo})
       : _repo = repo,
         super(const ProfileState());
 
-  void loadProfile() {
+  /// قراءة واحدة عند فتح الشاشة / بعد تعديل البروفايل.
+  Future<void> loadProfile() async {
     emit(state.copyWith(status: ProfileStatus.loading));
-    _sub ??= _repo.watchProfile().listen((profile) {
+    try {
+      final profile = await _repo.getProfile();
       if (!isClosed) {
         emit(ProfileState(status: ProfileStatus.success, profile: profile));
       }
-    }, onError: (e) {
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/profile/presentation/cubit/profile_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       if (!isClosed) {
         emit(state.copyWith(
           status: ProfileStatus.failure,
           errorMessage: friendlyError(e),
         ));
       }
-    });
-  }
-
-  @override
-  Future<void> close() async {
-    await _sub?.cancel();
-    return super.close();
+    }
   }
 
   Future<String?> updateProfile({
@@ -70,6 +65,10 @@ class ProfileCubit extends Cubit<ProfileState> {
         longitude: longitude,
         locationAddress: locationAddress,
       );
+      // الاسم/رقم المحل اتغيّروا → حدّث كاش الدور عشان ShopResolver وشراء
+      // المخزون ما يستخدموش الاسم القديم.
+      await sl<UserRoleService>().reload();
+      await loadProfile();
       return null;
     } catch (e, logSt) {
       AppLogger.nonFatal('features/profile/presentation/cubit/profile_cubit.dart', e, logSt, severity: LoggingSeverity.warning);

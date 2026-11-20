@@ -36,9 +36,10 @@ void main() {
     tearDown(() async => cubit.close());
 
     test('slow first query result is ignored after a newer query started', () async {
-      final old = Completer<List<AdminSearchHit>>();
-      final fresh = Completer<List<AdminSearchHit>>();
-      when(() => repo.search(any())).thenAnswer((inv) {
+      final old = Completer<AdminSearchPage>();
+      final fresh = Completer<AdminSearchPage>();
+      when(() => repo.searchPage(any(), cursor: any(named: 'cursor')))
+          .thenAnswer((inv) {
         final q = inv.positionalArguments.first as String;
         return Future.value(q == 'old' ? old.future : fresh.future);
       });
@@ -51,11 +52,13 @@ void main() {
       expect(cubit.state, isA<SearchLoading>());
       cubit.search('fresh');
       await Future<void>.delayed(const Duration(milliseconds: 450));
-      fresh.complete([const AdminSearchHit('shop', 'جديد', '2')]);
+      fresh.complete(AdminSearchPage(
+          [const AdminSearchHit('shop', 'جديد', '2')], null));
       await pump();
       expect((cubit.state as SearchResults).hits.single.title, 'جديد');
 
-      old.complete([const AdminSearchHit('shop', 'قديم', '1')]);
+      old.complete(AdminSearchPage(
+          [const AdminSearchHit('shop', 'قديم', '1')], null));
       await pump();
       // newer result must still be shown
       expect((cubit.state as SearchResults).hits.single.title, 'جديد');

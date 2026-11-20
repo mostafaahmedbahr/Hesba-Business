@@ -44,7 +44,8 @@ class HomeView extends StatelessWidget {
             p.productsCount != c.productsCount ||
             p.lowStockCount != c.lowStockCount ||
             p.errorMessage != c.errorMessage ||
-            p.hasLoaded != c.hasLoaded,
+            p.hasLoaded != c.hasLoaded ||
+            p.refreshRevision != c.refreshRevision,
         builder: (context, state) {
           // أول تحميل للهوم بس: نعرض اللودر الموحد من core على الشاشة كاملة.
           // التحديثات اللي بعدين بتفضل عرض البيانات الحالية.
@@ -98,7 +99,9 @@ class HomeView extends StatelessWidget {
                           .fadeIn(delay: 180.ms, duration: 420.ms),
                       SizedBox(height: 22.h),
                       // 4 - آخر الحركات (مبيع / مرتجع / مصروف) — تنقل عبر الـ BottomNav
-                      RecentMovementsSection(onNavigateTab: onNavigateTab)
+                      RecentMovementsSection(
+                          revision: state.refreshRevision,
+                          onNavigateTab: onNavigateTab)
                           .animate()
                           .fadeIn(delay: 220.ms, duration: 420.ms)
                           .slideY(begin: 0.06, end: 0),

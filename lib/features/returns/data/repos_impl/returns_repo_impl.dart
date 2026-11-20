@@ -6,6 +6,7 @@ import '../../../../core/utils/paged_fetch.dart';
 import '../../../sales/data/models/sale_model.dart';
 import '../models/return_model.dart';
 import '../repos/returns_repo.dart';
+import 'package:hesba/core/services/shop_id_resolver.dart';
 
 class ReturnsRepoImpl implements ReturnsRepo {
   final FirebaseFirestore firestore;
@@ -19,13 +20,11 @@ class ReturnsRepoImpl implements ReturnsRepo {
 
   String? get _uid => auth.currentUser?.uid;
 
-  Future<String?> _resolveShopId(String? providedShopId) async {
-    if (providedShopId != null && providedShopId.isNotEmpty) return providedShopId;
-    if (_uid == null) return null;
-    final doc = await firestore.collection('users').doc(_uid).get();
-    if (!doc.exists) return null;
-    return doc.data()?['shopId'] as String?;
-  }
+  Future<String?> _resolveShopId(String? providedShopId) => resolveCachedShopId(
+        firestore: firestore,
+        auth: auth,
+        provided: providedShopId,
+      );
 
   Future<String?> _resolveOwnerId(String? providedOwnerId) async {
     if (providedOwnerId != null && providedOwnerId.isNotEmpty) return providedOwnerId;
@@ -352,17 +351,6 @@ class ReturnsRepoImpl implements ReturnsRepo {
         );
       },
     );
-  }
-
-  @override
-  Stream<void> watchLatestReturn({required String shopId}) {
-    return firestore
-        .collection(AppConstants.returnsCollection)
-        .where('shopId', isEqualTo: shopId)
-        .orderBy('createdAt', descending: true)
-        .limit(1)
-        .snapshots()
-        .map<void>((_) {});
   }
 
   @override

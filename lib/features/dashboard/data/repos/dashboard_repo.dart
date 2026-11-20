@@ -35,17 +35,17 @@ Stream<({String? name, String? imageUrl})> watchShopIdentity();
   /// Returns the current user's shopId.
   Future<String?> getShopId();
 
-  /// Watches any change in sales/products/returns/expenses for the current shop.
-  /// Emits whenever any of those collections changes - used for auto-refresh.
-  Stream<void> watchDashboardChanges();
+  /// Reads the latest sale of [shopId] once (`null` when there is none) for
+  /// the home recent-activity card.
+  ///
+  /// These cards are deliberately one-shot reads: the home screen re-fetches
+  /// them through `AppEvents` after a write. No Firestore snapshot listener
+  /// is kept open just to watch whole collections.
+  Future<SaleModel?> getLastSale(String shopId);
 
-  /// Streams the latest sale of [shopId] (`null` when there is none) for the
-  /// home recent-activity card.
-  Stream<SaleModel?> watchLastSale(String shopId);
+  /// Reads the latest return of [shopId] once (`null` when there is none).
+  Future<ReturnModel?> getLastReturn(String shopId);
 
-  /// Streams the latest return of [shopId] (`null` when there is none).
-  Stream<ReturnModel?> watchLastReturn(String shopId);
-
-  /// Streams the latest expense of [shopId] (`null` when there is none).
-  Stream<ExpenseModel?> watchLastExpense(String shopId);
+  /// Reads the latest expense of [shopId] once (`null` when there is none).
+  Future<ExpenseModel?> getLastExpense(String shopId);
 }

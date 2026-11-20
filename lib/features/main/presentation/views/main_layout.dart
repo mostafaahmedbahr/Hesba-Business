@@ -158,22 +158,12 @@ class _MainShellState extends State<_MainShell> {
             const SalesView(),
             const ReportsView(),
           ];
-          return AnimatedSwitcher(
-            duration: const Duration(milliseconds: 280),
-            switchInCurve: Curves.easeOutCubic,
-            switchOutCurve: Curves.easeInCubic,
-            transitionBuilder: (child, anim) => FadeTransition(
-              opacity: anim,
-              child: ScaleTransition(
-                scale: Tween<double>(begin: 0.98, end: 1).animate(anim),
-                child: child,
-              ),
-            ),
-            child: KeyedSubtree(
-              key: ValueKey(widget.currentIndex),
-              child: IndexedStack(index: widget.currentIndex, children: pages),
-            ),
-          );
+          // pages لازم يفضلوا محفوظين بين التابات: الـ KeyedSubtree بمفتاح
+          // متغيّر كان بيخلي AnimatedSwitcher يتعامل معاهم كأطفال جدد كل مرة،
+          // فيُعاد إنشاء Products/Sales/Reports cubits ويُعاد الاشتراك في
+          // Firestore وجلب التقارير كاملة. الـ IndexedStack الثابت بيحفظ
+          // الـ state والـ listeners ويزيل الهدر ده بالكامل.
+          return IndexedStack(index: widget.currentIndex, children: pages);
         },
       ),
       bottomNavigationBar: ModernBottomNav(
