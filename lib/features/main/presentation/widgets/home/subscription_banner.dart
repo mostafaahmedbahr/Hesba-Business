@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../core/router/app_routes.dart';
 import '../../../../../core/services/app_settings_service.dart';
+import '../../../../../core/services/feature_flags_service.dart';
 import '../../../../../core/theme/app_theme.dart';
 
 /// Opens the subscription screen. Always visible so the trial countdown and
@@ -25,13 +26,20 @@ class _SubscriptionBannerState extends State<SubscriptionBanner> {
     super.initState();
     // Fetch the latest settings; on success rebuild with live values.
     // refresh() never throws, so no error handling is needed here.
-    AppSettingsService.refresh().then((_) {
+    Future.wait([
+      AppSettingsService.refresh(),
+      FeatureFlagsService.refresh(),
+    ]).then((_) {
       if (mounted) setState(() {});
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    // القسم بيختفي تماماً لما الداشبورد يبعت false من Firestore.
+    if (!FeatureFlagsService.showSubscriptionSection) {
+      return const SizedBox.shrink();
+    }
     final settings = AppSettingsService.current;
     return Material(
       color: Colors.transparent,

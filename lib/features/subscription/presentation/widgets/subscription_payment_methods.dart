@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,6 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/toast.dart';
 import '../../data/models/subscription_plan.dart';
+import 'payment_brand_logo.dart';
 
 /// The three manual channels the customer transfers to, plus how much.
 class SubscriptionPaymentMethods extends StatelessWidget {
@@ -60,10 +63,18 @@ class _MethodTile extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
+  IconData get _numberIcon => switch (method) {
+        SubscriptionPaymentMethod.instapay => Icons.bolt_rounded,
+        SubscriptionPaymentMethod.vodafoneCash => Icons.smartphone_rounded,
+        SubscriptionPaymentMethod.etisalatCash => Icons.wifi_calling_3_rounded,
+      };
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final bodyColor = theme.textTheme.bodyMedium?.color ?? Colors.black87;
+    final brandColor = PaymentBrandLogo.colorOf(method.id);
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(14.r),
@@ -85,24 +96,7 @@ class _MethodTile extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 42.w,
-              height: 42.w,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: method.brandColor,
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              child: Text(
-                method.brandMark,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ),
+            PaymentBrandLogo(id: method.id, size: 42.w),
             SizedBox(width: 10.w),
             Expanded(
               child: Column(
@@ -115,21 +109,30 @@ class _MethodTile extends StatelessWidget {
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  SizedBox(height: 6.h),
+                  SizedBox(height: 2.h),
+                  Text(
+                    method.hintKey.tr(),
+                    style: TextStyle(
+                      fontSize: 10.5.sp,
+                      color: theme.hintColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(height: 7.h),
                   InkWell(
                     onTap: () => _copyNumber(context),
-                    borderRadius: BorderRadius.circular(9.r),
+                    borderRadius: BorderRadius.circular(11.r),
                     child: Container(
                       width: double.infinity,
                       padding: EdgeInsets.symmetric(
-                        horizontal: 10.w,
+                        horizontal: 9.w,
                         vertical: 7.h,
                       ),
                       decoration: BoxDecoration(
                         color: selected
                             ? Colors.white
                             : bodyColor.withValues(alpha: 0.05),
-                        borderRadius: BorderRadius.circular(9.r),
+                        borderRadius: BorderRadius.circular(11.r),
                         border: Border.all(
                           color: selected
                               ? AppTheme.primaryColor.withValues(alpha: 0.35)
@@ -139,9 +142,24 @@ class _MethodTile extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
+                          Container(
+                            width: 25.w,
+                            height: 25.w,
+                            decoration: BoxDecoration(
+                              color: brandColor.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(8.r),
+                            ),
+                            child: Icon(
+                              _numberIcon,
+                              size: 14.sp,
+                              color: brandColor,
+                            ),
+                          ),
+                          SizedBox(width: 8.w),
                           Expanded(
                             child: Text(
                               method.number,
+                              textDirection: ui.TextDirection.ltr,
                               style: TextStyle(
                                 fontSize: 14.sp,
                                 letterSpacing: 1.2,
@@ -151,10 +169,20 @@ class _MethodTile extends StatelessWidget {
                             ),
                           ),
                           SizedBox(width: 6.w),
-                          Icon(
-                            Icons.copy_rounded,
-                            size: 16.sp,
-                            color: theme.hintColor,
+                          Container(
+                            width: 26.w,
+                            height: 26.w,
+                            decoration: BoxDecoration(
+                              color: AppTheme.primaryColor.withValues(
+                                alpha: selected ? 0.14 : 0.08,
+                              ),
+                              borderRadius: BorderRadius.circular(8.r),
+                            ),
+                            child: Icon(
+                              Icons.copy_rounded,
+                              size: 14.sp,
+                              color: AppTheme.primaryColor,
+                            ),
                           ),
                         ],
                       ),

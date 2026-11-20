@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hesba/core/models/admin_settings.dart';
-import 'package:hesba/core/theme/app_theme.dart';
 import 'package:hesba/core/utils/toast.dart';
 import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
+import 'package:hesba/features/subscription/presentation/widgets/payment_brand_logo.dart';
 
 import 'price_decoration.dart';
 
@@ -20,30 +20,14 @@ class PaymentMethodCard extends StatelessWidget {
   final TextEditingController controller;
   final bool enabled;
 
-  ({IconData icon, Color color}) get _brand {
-    return switch (method.id) {
-      'instapay' => (icon: Icons.sync_alt_rounded, color: AppTheme.deepBlue),
-      'vodafone_cash' => (
-          icon: Icons.smartphone_rounded,
-          color: const Color(0xFFE60000),
-        ),
-      'etisalat_cash' => (
-          icon: Icons.wifi_calling_3_rounded,
-          color: const Color(0xFF00A651),
-        ),
-      _ => (
-          icon: Icons.account_balance_wallet_outlined,
-          color: AppTheme.primaryColor,
-        ),
-    };
-  }
+  Color get _brandColor => PaymentBrandLogo.colorOf(method.id);
 
   @override
   Widget build(BuildContext context) {
-    final brand = _brand;
+    final brandColor = _brandColor;
     final header = Row(
       children: [
-        AdminIconTile(icon: brand.icon, color: brand.color, size: 38, iconSize: 19),
+        PaymentBrandLogo(id: method.id, size: 38),
         const SizedBox(width: AdminSpace.sm),
         Expanded(
           child: Column(
@@ -78,7 +62,7 @@ class PaymentMethodCard extends StatelessWidget {
       inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9+\s-]'))],
       autovalidateMode: AutovalidateMode.onUserInteraction,
       style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, letterSpacing: 0.4),
-      decoration: priceDecoration(context, brand.color).copyWith(
+      decoration: priceDecoration(context, brandColor).copyWith(
         hintText: '01xxxxxxxxx',
         suffixIcon: controller.text.trim().isEmpty
             ? null

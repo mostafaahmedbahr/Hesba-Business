@@ -841,6 +841,14 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // ── Feature flags (مفاتيح تحكم عن بُعد) ────────────────────
+    // مثال: feature_flags/home { showSubscriptionSection: true }
+    // أي مستخدم مسجل دخول يقرأ القيمة، والأدمن فقط يقدر يغيّرها.
+    match /feature_flags/{docId} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
     match /admin_settings/{docId} {
       // Customers read the settings (plan prices, trial days, wallet numbers)
       // so dashboard edits apply live; only admins may write — and only valid

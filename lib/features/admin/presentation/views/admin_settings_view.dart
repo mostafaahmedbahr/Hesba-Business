@@ -9,6 +9,7 @@ import 'package:hesba/features/admin/data/repos/admin_repo.dart';
 import 'package:hesba/features/admin/presentation/cubit/admin_settings_cubit.dart';
 import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
 import 'package:hesba/features/admin/presentation/views/diagnostics_view.dart';
+import 'package:hesba/features/admin/presentation/widgets/admin_settings/feature_flags_section.dart';
 import 'package:hesba/features/admin/presentation/widgets/admin_settings/hero.dart';
 import 'package:hesba/features/admin/presentation/widgets/admin_settings/payment_method_card.dart';
 import 'package:hesba/features/admin/presentation/widgets/admin_settings/plan_card.dart';
@@ -333,6 +334,8 @@ class _SettingsFormState extends State<_SettingsForm> {
       ),
     );
 
+    final flags = const FeatureFlagsSection();
+
     final summary = PricingSummary(
       plans: plans,
       savingOf: savingOf,
@@ -372,6 +375,8 @@ class _SettingsFormState extends State<_SettingsForm> {
                           const SizedBox(height: AdminSpace.md),
                           payments,
                           const SizedBox(height: AdminSpace.md),
+                          flags,
+                          const SizedBox(height: AdminSpace.md),
                           summary,
                         ],
                       );
@@ -395,6 +400,8 @@ class _SettingsFormState extends State<_SettingsForm> {
                           child: Column(
                             children: [
                               trial,
+                              const SizedBox(height: AdminSpace.md),
+                              flags,
                               const SizedBox(height: AdminSpace.md),
                               summary,
                             ],

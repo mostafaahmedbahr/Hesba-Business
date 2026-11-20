@@ -106,6 +106,13 @@ enum SubscriptionPaymentMethod {
         SubscriptionPaymentMethod.etisalatCash => 'payEtisalatCash',
       };
 
+  /// وصف صغير تحت اسم طريقة الدفع عشان الشكل يبان أوضح وأقرب للواقع.
+  String get hintKey => switch (this) {
+        SubscriptionPaymentMethod.instapay => 'payInstapayHint',
+        SubscriptionPaymentMethod.vodafoneCash => 'payVodafoneCashHint',
+        SubscriptionPaymentMethod.etisalatCash => 'payEtisalatCashHint',
+      };
+
   /// Short mark drawn inside the channel badge instead of a stock icon.
   String get brandMark => switch (this) {
         SubscriptionPaymentMethod.instapay => 'IP',
