@@ -21,6 +21,10 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
   String _query = '';
   final _searchCtrl = TextEditingController();
 
+  /// userId => shopName, fetched from the owner docs for the loaded page.
+  final Map<String, String> _shopNames = {};
+  final Set<String> _fetchingShopNames = {};
+
   @override
   void dispose() {
     _searchCtrl.dispose();
@@ -37,12 +41,13 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
           status: _status == 'all' ? null : _status,
         ),
       )..firstPage(),
-      child: BlocBuilder<AdminListCubit, AdminListState>(
+      child: BlocConsumer<AdminListCubit, AdminListState>(
+        listener: (context, state) => _loadShopNames(state.docs),
         builder: (context, state) {
           if (state.loading && state.docs.isEmpty) {
             return Column(
               children: [
-                AdminSearchField(controller: _searchCtrl, hint: 'ابحث برقم المستخدم أو الباقة...', enabled: false),
+                AdminSearchField(controller: _searchCtrl, hint: 'ابحث باسم المحل أو رقم المستخدم أو الباقة...', enabled: false),
                 Expanded(child: LoadingWidget()),
               ],
             );
@@ -63,7 +68,7 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                       unit: 'اشتراك',
                       loading: false,
                       onRefresh: () => context.read<AdminListCubit>().firstPage()),
-                  AdminSearchField(controller: _searchCtrl, hint: 'ابحث برقم المستخدم أو الباقة...', enabled: false),
+                  AdminSearchField(controller: _searchCtrl, hint: 'ابحث باسم المحل أو رقم المستخدم أو الباقة...', enabled: false),
                   _statusChips(),
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.35,
@@ -86,7 +91,7 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                 _summary(context, state),
                 AdminSearchField(
                   controller: _searchCtrl,
-                  hint: 'ابحث برقم المستخدم أو الباقة...',
+                  hint: 'ابحث باسم المحل أو رقم المستخدم أو الباقة...',
                   onChanged: (v) => setState(() => _query = v),
                 ),
                 _statusChips(countFor: (s) => _countFor(state.docs, s)),
@@ -118,6 +123,7 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                                 itemCount: filtered.length,
                                 itemBuilder: (context, i) => _SubCard(
                                   doc: filtered[i],
+                                  shopName: _shopNames[_userIdOf(filtered[i])],
                                   onTap: () => _openDetails(context, filtered[i]),
                                 ),
                               );
@@ -130,6 +136,7 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                                 padding: const EdgeInsets.symmetric(horizontal: AdminSpace.md),
                                 child: _SubCard(
                                   doc: filtered[i],
+                                  shopName: _shopNames[_userIdOf(filtered[i])],
                                   onTap: () => _openDetails(context, filtered[i]),
                                 ),
                               ),
@@ -204,22 +211,62 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
     if (q.isEmpty) return docs;
     return docs.where((d) {
       final data = d.data();
-      final haystack = [data['userId'], data['plan'], data['status'], d.id].whereType<String>().join(' ');
-      return haystack.contains(q);
+      final haystack = [
+        data['userId'],
+        _shopNames[_userIdOf(d)],
+        data['plan'],
+        data['status'],
+        d.id,
+      ].whereType<String>().join(' ');
+      return haystack.toLowerCase().contains(q.toLowerCase());
     }).toList();
   }
 
+  /// The mirror doc is keyed by the owner's uid and stores it in `userId`.
+  String _userIdOf(QueryDocumentSnapshot<Map<String, dynamic>> doc) =>
+      (doc.data()['userId'] as String?) ?? doc.id;
+
+  /// Resolve shop names for the loaded subscriptions in one batched query.
+  /// Already-resolved ids are cached in the State, so paging/refreshing never
+  /// re-reads the same owner docs.
+  Future<void> _loadShopNames(List<QueryDocumentSnapshot<Map<String, dynamic>>> docs) async {
+    final missing = docs
+        .map(_userIdOf)
+        .where((id) => id.isNotEmpty && !_shopNames.containsKey(id) && !_fetchingShopNames.contains(id))
+        .toSet()
+        .toList();
+    if (missing.isEmpty) return;
+
+    _fetchingShopNames.addAll(missing);
+    try {
+      final names = await sl<AdminRepo>().getShopNamesByOwnerIds(missing);
+      if (!mounted || names.isEmpty) return;
+      setState(() => _shopNames.addAll(names));
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/admin/presentation/views/subscriptions_view.dart', logErr, logSt,
+          severity: LoggingSeverity.warning);
+    } finally {
+      _fetchingShopNames.removeAll(missing);
+    }
+  }
+
   void _openDetails(BuildContext context, QueryDocumentSnapshot<Map<String, dynamic>> doc) {
-    showAdminSheet(context, _SubDetailsSheet(data: doc.data(), docId: doc.id));
+    final userId = _userIdOf(doc);
+    showAdminSheet(context, _SubDetailsSheet(
+      data: doc.data(),
+      docId: doc.id,
+      shopName: _shopNames[userId],
+    ));
   }
 }
 
 // ── Card ────────────────────────────────────────────────
 
 class _SubCard extends StatelessWidget {
-  const _SubCard({required this.doc, required this.onTap});
+  const _SubCard({required this.doc, required this.onTap, this.shopName});
   final QueryDocumentSnapshot<Map<String, dynamic>> doc;
   final VoidCallback onTap;
+  final String? shopName;
 
   @override
   Widget build(BuildContext context) {
@@ -257,9 +304,31 @@ class _SubCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Directionality(
                       textDirection: TextDirection.rtl,
-                      child: Text(
-                          'user: ${AdminFmt.shortId(userId, 10)}${userId.length > 10 ? '…' : ''}',
-                          style: TextStyle(fontSize: 11, color: sub, fontWeight: FontWeight.w600)),
+                      child: Row(
+                        children: [
+                          if (shopName != null && shopName!.isNotEmpty) ...[
+                            Flexible(
+                              child: Text(
+                                shopName!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                  color: theme.textTheme.titleSmall?.color,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+                          ],
+                          Text(
+                            shopName != null && shopName!.isNotEmpty
+                                ? '#${AdminFmt.shortId(userId, 10)}${userId.length > 10 ? '…' : ''}'
+                                : 'user: ${AdminFmt.shortId(userId, 10)}${userId.length > 10 ? '…' : ''}',
+                            style: TextStyle(fontSize: 11, color: sub, fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -342,9 +411,10 @@ class _SubCard extends StatelessWidget {
 // ── Details sheet ───────────────────────────────────────
 
 class _SubDetailsSheet extends StatelessWidget {
-  const _SubDetailsSheet({required this.data, required this.docId});
+  const _SubDetailsSheet({required this.data, required this.docId, this.shopName});
   final Map<String, dynamic> data;
   final String docId;
+  final String? shopName;
 
   @override
   Widget build(BuildContext context) {
@@ -415,6 +485,8 @@ class _SubDetailsSheet extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 14),
+          AdminInfoRow(icon: Icons.storefront_outlined, label: 'المحل المشترك', value: shopName ?? '-'),
+          const Divider(height: 14),
           CopyableId(id: userId, full: true, label: 'معرف المستخدم'),
           const Divider(height: 20),
           CopyableId(id: docId, full: true, label: 'معرف المستند'),

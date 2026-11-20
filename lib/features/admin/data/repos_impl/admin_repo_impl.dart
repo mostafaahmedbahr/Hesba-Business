@@ -485,6 +485,27 @@ class AdminRepoImpl implements AdminRepo {
       firestore.collection(_users).doc(userId).collection('subscription').doc('current').get();
 
   @override
+  Future<Map<String, String>> getShopNamesByOwnerIds(List<String> ownerIds) async {
+    final result = <String, String>{};
+    final ids = ownerIds.where((id) => id.isNotEmpty).toSet().toList();
+    // Firestore limits `whereIn` disjunctions, so read the owner docs in chunks.
+    const chunkSize = 10;
+    for (var i = 0; i < ids.length; i += chunkSize) {
+      final chunk = ids.sublist(i, (i + chunkSize).clamp(0, ids.length));
+      if (chunk.isEmpty) continue;
+      final snap = await firestore
+          .collection(_users)
+          .where(FieldPath.documentId, whereIn: chunk)
+          .get();
+      for (final doc in snap.docs) {
+        final name = (doc.data()['shopName'] as String?)?.trim();
+        if (name != null && name.isNotEmpty) result[doc.id] = name;
+      }
+    }
+    return result;
+  }
+
+  @override
   Future<SubscriptionRequestModel?> getRequest(String requestId) async {
     final snap = await firestore.collection(_requests).doc(requestId).get();
     final data = snap.data();

@@ -48,6 +48,11 @@ abstract class AdminRepo {
   // Details
   Future<DocumentSnapshot<Map<String, dynamic>>> getShop(String shopId);
   Future<DocumentSnapshot<Map<String, dynamic>>> getUserSubscription(String userId);
+
+  /// أسماء المحلات لأصحاب الاشتراكات: خريطة `userId => shopName`.
+  /// استعلام مجمّع واحد (على دفعات) بدل قراءة مستند لكل اشتراك على حدة.
+  Future<Map<String, String>> getShopNamesByOwnerIds(List<String> ownerIds);
+
   Future<SubscriptionRequestModel?> getRequest(String requestId);
 
   /// Capped document count of a shop collection (products/sales/expenses).
