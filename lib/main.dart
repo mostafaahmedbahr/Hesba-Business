@@ -17,10 +17,12 @@ import 'package:hesba/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:hesba/features/settings/presentation/states/settings_state.dart';
 
  Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  // التقاط كل خطأ غير ملتقط (FlutterError + async) في سجل واحد.
-  AppLogger.installGlobalHandlers();
   await runZonedGuarded(() async {
+    // لازم تهيئة الـ binding داخل نفس الـ zone اللي بتستدعي فيها runApp،
+    // وإلا هيحصل Zone mismatch (الـ binding اتهيأ في zone مختلف).
+    WidgetsFlutterBinding.ensureInitialized();
+    // التقاط كل خطأ غير ملتقط (FlutterError + async) في سجل واحد.
+    AppLogger.installGlobalHandlers();
     await    Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
     await NotificationService().initialize(onTap: _handleNotificationTap);
     await initDependencies();
