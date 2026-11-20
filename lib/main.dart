@@ -21,6 +21,10 @@ import 'package:hesba/features/settings/presentation/states/settings_state.dart'
     // لازم تهيئة الـ binding داخل نفس الـ zone اللي بتستدعي فيها runApp،
     // وإلا هيحصل Zone mismatch (الـ binding اتهيأ في zone مختلف).
     WidgetsFlutterBinding.ensureInitialized();
+    // لازم يتنادى قبل runApp عشان اللغة المحفوظة تتحمّل من SharedPreferences
+    // قبل ما EasyLocalization يبني الـ controller. بدونه بيفضل startLocale
+    // (العربية) هو اللي بيشتغل كل مرة حتى لو المستخدم اختار الإنجليزية.
+    await EasyLocalization.ensureInitialized();
     // التقاط كل خطأ غير ملتقط (FlutterError + async) في سجل واحد.
     AppLogger.installGlobalHandlers();
     await    Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);

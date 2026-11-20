@@ -105,7 +105,7 @@ class _SubscriptionBannerState extends State<SubscriptionBanner> {
                 ),
               ),
               Icon(
-                Icons.chevron_left_rounded,
+                Icons.chevron_right_rounded,
                 color: Colors.white,
                 size: 26.sp,
               ),
