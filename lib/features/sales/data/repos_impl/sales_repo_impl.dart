@@ -42,6 +42,112 @@ class SalesRepoImpl implements SalesRepo {
     return _uid;
   }
 
+  /// عند رفض Firestore لكتابة المبيعة، نقرأ نفس البيانات اللي القواعد
+  /// بتتحقق منها ونرجّع سببًا عربيًا واضحًا يظهر للمستخدم بدل رسالة
+  /// permission-denied غامضة. قراءات فقط وما بيغيّرش أي حاجة.
+  Future<String> _describeDenial(SaleModel sale) async {
+    try {
+      final uid = _uid;
+      final ownerId = sale.ownerId;
+      final shopId = sale.shopId;
+      final userDoc = await firestore.collection('users').doc(uid).get();
+      final u = userDoc.data() ?? const <String, dynamic>{};
+      final subDoc = await firestore
+          .collection('users')
+          .doc(uid)
+          .collection('subscription')
+          .doc('current')
+          .get();
+      final s = subDoc.data() ?? const <String, dynamic>{};
+
+      final rawEnd = s['endDate'];
+      DateTime? end;
+      if (rawEnd is Timestamp) {
+        end = rawEnd.toDate();
+      } else if (rawEnd is DateTime) {
+        end = rawEnd;
+      }
+      final endLive = end != null && end.isAfter(DateTime.now());
+      final status = s['status']?.toString() ?? 'غير موجود';
+      final suspended = s['suspended'] == true;
+      final userShop = u['shopId']?.toString() ?? '';
+
+      // باقي شروط قاعدة المبيعات: معرّف الحساب، قيم الفاتورة، والعميل المختار.
+      DocumentSnapshot<Map<String, dynamic>>? personSnap;
+      if (sale.personId.isNotEmpty) {
+        personSnap = await firestore.collection('persons').doc(sale.personId).get();
+      }
+      final personShop = personSnap?.data()?['shopId']?.toString() ?? '';
+      final badAmounts = sale.subtotal < 0 || sale.discount < 0 || sale.total < 0;
+
+      // تحديث المخزون داخل نفس الـ transaction لازم يعدي قاعدة المنتجات،
+      // اللي بتشترط إن ownerId بتاع المنتج = معرّف المستخدم الحالي.
+      final productOwners = <String>[];
+      for (final item in sale.items) {
+        if (item.productId.isEmpty) continue;
+        try {
+          final p = await firestore.collection('products').doc(item.productId).get();
+          final d = p.data() ?? const <String, dynamic>{};
+          var supplierInfo = '';
+          final sid = d['supplierId'];
+          if (sid != null && sid.toString().isNotEmpty) {
+            final sup = await firestore.collection('suppliers').doc(sid.toString()).get();
+            supplierInfo =
+                ' supExists=${sup.exists} supShop=${sup.data()?['shopId']}';
+          }
+          productOwners.add(
+            '${item.productName} owner=${d['ownerId']} price=${d['price']} '
+            'stock=${d['stock']} low=${d['lowStockThreshold']} '
+            'supId=$sid supName=${d['supplierName']}$supplierInfo',
+          );
+        } catch (logErr, logSt) {
+          AppLogger.nonFatal('SALES_DIAG_PRODUCT', logErr, logSt);
+          productOwners.add('${item.productName}:? $logErr');
+        }
+      }
+
+      late final String reason;
+      if (uid != ownerId) {
+        reason = 'معرّف الحساب مختلف عن معرّف الفاتورة';
+      } else if (badAmounts) {
+        reason = 'قيم الفاتورة (الإجمالي/الخصم) غير صالحة';
+      } else if (sale.personId.isNotEmpty && !personSnap!.exists) {
+        reason = 'العميل المختار غير موجود';
+      } else if (sale.personId.isNotEmpty && personShop != shopId) {
+        reason = 'العميل المختار غير مرتبط بهذا المحل';
+      } else if (!subDoc.exists) {
+        reason = 'لا يوجد اشتراك مسجّل لهذا الحساب';
+      } else if (suspended) {
+        reason = 'الحساب موقوف من الإدارة';
+      } else if (!endLive) {
+        reason = 'انتهت مدة الاشتراك';
+      } else if (status != 'trial' && status != 'active') {
+        reason = 'حالة الاشتراك ($status) لا تسمح بالبيع — لازم الأدمن يوافق على التجديد';
+      } else if (u['isActive'] == false) {
+        reason = 'الحساب غير مفعّل';
+      } else if (userShop.isEmpty || userShop != shopId) {
+        reason = 'المحل المرتبط بالحساب مختلف عن محل المبيعة';
+      } else {
+        reason = 'الصلاحية مرفوضة من إعدادات الأمان';
+      }
+
+      AppLogger.warning(
+        'uid=$uid role=${u['role']} active=${u['isActive']} userShopId=$userShop '
+        'saleOwnerId=$ownerId saleShopId=$shopId '
+        'subtotal=${sale.subtotal} discount=${sale.discount} total=${sale.total} '
+        'personId=${sale.personId} personShop=$personShop '
+        'productOwners=$productOwners | '
+        'subExists=${subDoc.exists} subStatus=$status '
+        'subEnd=$end subSuspended=$suspended | سبب الرفض: $reason',
+        context: 'SALES_DIAG',
+      );
+      return reason;
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('SALES_DIAG', logErr, logSt);
+      return 'تعذر التأكد من حالة الاشتراك، حاول مرة أخرى';
+    }
+  }
+
   /// اسم المحل ليُحفظ مع كل فاتورة.
   ///
   /// يُجلب من shops/{shopName} مع fallback لاسم المستخدم، ويُخزَّن للجلسة
@@ -194,7 +300,8 @@ class SalesRepoImpl implements SalesRepo {
 
     // Use transaction to ensure stock availability and decrement atomically
     SaleModel? alreadyWritten;
-    await firestore.runTransaction((transaction) async {
+    try {
+      await firestore.runTransaction((transaction) async {
       if (requestId != null) {
         final existing = await transaction.get(saleRef);
         if (existing.exists && existing.data() != null) {
@@ -272,7 +379,14 @@ class SalesRepoImpl implements SalesRepo {
           'updatedAt': FieldValue.serverTimestamp(),
         });
       }
-    });
+      });
+    } on FirebaseException catch (e) {
+      final reason = await _describeDenial(sale);
+      if (e.code == 'permission-denied') {
+        throw Exception('تعذر حفظ المبيعة: $reason');
+      }
+      rethrow;
+    }
 
     return alreadyWritten ?? sale;
   }

@@ -298,7 +298,11 @@ service cloud.firestore {
     // Live subscription required for WRITES on business data.
     // A suspended shop is read-only no matter what the status/dates say.
     function subscriptionLive() {
-      let sub = get(/databases/$(database)/documents/users/$(billingOwnerId())/subscription/current).data;
+      let subRef = /databases/$(database)/documents/users/$(billingOwnerId())/subscription/current;
+      // get() على مستند غير موجود يرمي "Null value error" في محرك القواعد،
+      // والعميل يستلمه كـ cloud_firestore/unknown برسالة فاضية (null) —
+      // عشان كده بنفحص exists أولًا زي ما بنعمل في configuredTrialDays().
+      let sub = exists(subRef) ? get(subRef).data : {};
       return sub != null
         && sub.get('status', '') in ['trial', 'active']
         && sub.get('suspended', false) == false
@@ -593,6 +597,16 @@ service cloud.firestore {
           && validStockValue(request.resource.data.stock)
           && resource.data.stock is number
           && request.resource.data.stock - resource.data.stock <= 10000
+          && mayWriteShopData(resource.data.shopId))
+        || (signedIn() && isOwnerUser()
+          // صاحب المحل يخصم المخزون من منتجات محله حتى لو كانت مضافة
+          // بحساب الأدمن (ownerId مختلف) — التغيير محصور في المخزون وحده.
+          && resource.data.shopId == request.resource.data.shopId
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['stock', 'updatedAt'])
+          && validStockValue(request.resource.data.stock)
+          && resource.data.stock is number
+          && request.resource.data.stock - resource.data.stock <= 10000
           && mayWriteShopData(resource.data.shopId));
       allow delete: if isAdmin() || (signedIn() && isOwnerUser()
         && resource.data.ownerId == myUid()
@@ -601,8 +615,12 @@ service cloud.firestore {
 
     match /sales/{docId} {
       // الفواتير تُقرأ للموظف فقط داخل فورم المرتجع (اختيار فاتورة).
-      allow read: if signedIn() && mayReadEntryData(
-        resource.data.shopId, resource.data.ownerId);
+      // قراءة مستند غير موجود (خطوة الـ idempotency قبل الكتابة) لازم تعدي:
+      // resource/data بيبقوا null فلا يجوز الوصول لـ .shopId مباشرة.
+      allow read: if signedIn() && (
+        resource == null ||
+        resource.data == null ||
+        mayReadEntryData(resource.data.shopId, resource.data.ownerId));
       // الفاتورة تشير اختياريًا لجهة اتصال (persons) في نفس المحل —
       // personId الفارغ (بيع عابر / فاتورة قديمة) لا يُطلب عنه شيء.
       allow create: if signedIn()

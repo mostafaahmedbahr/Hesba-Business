@@ -30,6 +30,7 @@ import {
   setDoc,
   updateDoc,
   getDoc,
+  runTransaction,
 } from 'firebase/firestore';
 
 const rulesPath = path.join(
@@ -479,5 +480,117 @@ test('19. settings doc without paymentMethods list is rejected', async () => {
   const { paymentMethods, ...rest } = DEFAULT_SETTINGS;
   await assertFails(
     setDoc(doc(admin.firestore(), 'admin_settings/settings'), rest),
+  );
+});
+
+// ── 20-21: subscriptionLive() should fail CLEANLY when the subscription
+// document is missing. get() on a missing doc raises a rules "Null value
+// error", which reaches the client as cloud_firestore/unknown with a null
+// message (exactly the error seen when an owner adds a sale). The rule must
+// guard it with exists() so the client gets a plain permission-denied.
+function salePayload(ownerId, shopId) {
+  return {
+    id: 's1',
+    ownerId,
+    shopId,
+    subtotal: 10,
+    discount: 0,
+    total: 10,
+    createdAt: new Date(),
+  };
+}
+
+test('20. owner with a live trial can create a sale', async () => {
+  await seed(async (db) => {
+    await setDoc(doc(db, 'users/u1/subscription/current'), {
+      status: 'trial',
+      suspended: false,
+      endDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    });
+  });
+  const alice = env.authenticatedContext('u1');
+  await assertSucceeds(
+    setDoc(doc(alice.firestore(), 'sales/s1'), salePayload('u1', 'shop1')),
+  );
+});
+
+test('21. owner with NO subscription doc gets permission-denied, not unknown', async () => {
+  const alice = env.authenticatedContext('u1');
+  await assert.rejects(
+    setDoc(doc(alice.firestore(), 'sales/s1'), salePayload('u1', 'shop1')),
+    (err) => {
+      assert.equal(err.code, 'permission-denied');
+      // قبل الإصلاح كان محرك القواعد يرمي "Null value error" من get() على
+      // مستند مفقود، والعميل يستلمه كـ cloud_firestore/unknown null.
+      assert.ok(
+        !/Null value error/.test(err.message ?? ''),
+        `rules evaluation error leaked to client: ${err.message}`,
+      );
+      return true;
+    },
+  );
+});
+
+// نفس عملية التطبيق بالظبط: خصم مخزون + كتابة فاتورة في transaction واحدة.
+// نفس العملية + خطوة idempotency: قراءة مستند الفاتورة قبل كتابته.
+test('23. idempotency read of a missing sale does not block the transaction', async () => {
+  await seed(async (db) => {
+    await setDoc(doc(db, 'users/u1/subscription/current'), {
+      status: 'trial',
+      suspended: false,
+      isTrial: true,
+      endDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+    });
+    await setDoc(doc(db, 'products/p1'), {
+      id: 'p1',
+      ownerId: 'u1',
+      shopId: 'shop1',
+      name: 'Product 1',
+      price: 170,
+      stock: 10,
+      lowStockThreshold: 5,
+      isActive: true,
+    });
+  });
+  const alice = env.authenticatedContext('u1');
+  const db = alice.firestore();
+  await assertSucceeds(
+    runTransaction(db, async (tx) => {
+      await tx.get(doc(db, 'sales/s3'));
+      tx.update(doc(db, 'products/p1'), { stock: 9, updatedAt: new Date() });
+      tx.set(doc(db, 'sales/s3'), salePayload('u1', 'shop1'));
+    }),
+  );
+});
+
+test('22. owner with active subscription can decrement stock and write the sale', async () => {
+  await seed(async (db) => {
+    await setDoc(doc(db, 'users/u1/subscription/current'), {
+      status: 'active',
+      suspended: false,
+      isTrial: false,
+      endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+    });
+    await setDoc(doc(db, 'products/p1'), {
+      id: 'p1',
+      ownerId: 'u1',
+      shopId: 'shop1',
+      name: 'Product 1',
+      price: 100,
+      stock: 10,
+      lowStockThreshold: 0,
+      isActive: true,
+    });
+  });
+  const alice = env.authenticatedContext('u1');
+  const db = alice.firestore();
+  await assertSucceeds(
+    runTransaction(db, async (tx) => {
+      tx.update(doc(db, 'products/p1'), {
+        stock: 8,
+        updatedAt: new Date(),
+      });
+      tx.set(doc(db, 'sales/s2'), salePayload('u1', 'shop1'));
+    }),
   );
 });

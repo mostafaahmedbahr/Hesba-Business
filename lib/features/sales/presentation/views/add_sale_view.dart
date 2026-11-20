@@ -332,6 +332,9 @@ class _AddSaleViewState extends State<AddSaleView> {
         builder: (innerContext) {
           return BlocListener<SalesCubit, SalesState>(
             listener: (ctx, state) async {
+              // الـ repo عنده timeout 20 ثانية — لو الشاشة اتقفلت في الوقت ده
+              // لازم ما نستدعيش Overlay على context متهدم.
+              if (!ctx.mounted) return;
               if (state.status == SalesStatus.error) {
                 AppToast.error(ctx, translateError(state.errorMessage, state.errorArgs));
               }
