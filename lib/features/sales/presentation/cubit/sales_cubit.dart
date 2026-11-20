@@ -33,6 +33,7 @@ class SalesCubit extends Cubit<SalesState> {
     required String note,
     String? customerName,
     String? customerPhone,
+    String personType = 'customer',
   }) async {
     // Re-entrancy guard: rapid double-taps must not create duplicate sales.
     if (state.status == SalesStatus.loading) return;
@@ -99,6 +100,7 @@ class SalesCubit extends Cubit<SalesState> {
         note: note,
         customerName: customerName,
         customerPhone: customerPhone,
+        personType: personType,
         requestId: _requestId,
       ).timeout(const Duration(seconds: 20));
 

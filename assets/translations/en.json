@@ -805,6 +805,8 @@
   "saleCustomerTypeCustomer": "Customer",
   "saleCustomerTypeSupplier": "Supplier",
   "saleCustomerTypeBoth": "Customer & Supplier",
+  "salePickSupplier": "Supplier",
+  "saleSupplierHint": "Supplier selected — it will be saved and linked to this invoice",
   "contactPhoneInvalid": "Invalid phone number",
   "contactCopied": "Number copied",
   "contactFailed": "Could not open the link",

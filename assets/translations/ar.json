@@ -805,6 +805,8 @@
   "saleCustomerTypeCustomer": "عميل",
   "saleCustomerTypeSupplier": "مورد",
   "saleCustomerTypeBoth": "عميل ومورد",
+  "salePickSupplier": "مورد",
+  "saleSupplierHint": "مورد مختار — هيتحفظ وترتبط به الفاتورة",
   "contactPhoneInvalid": "رقم الهاتف غير صحيح",
   "contactCopied": "تم نسخ الرقم",
   "contactFailed": "تعذر فتح الرابط",

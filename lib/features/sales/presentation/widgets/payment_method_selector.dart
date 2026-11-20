@@ -8,7 +8,7 @@ class PaymentMethodSelector extends StatelessWidget {
   final String value;
   final ValueChanged<String> onChanged;
 
-  /// الحساب الفرعي لا يستطيع البيع الآجل (يمنع إنشاء ذمم العملاء).
+  /// افتراضيًا كل الطرق الأربع ظاهرة — للموظف وصاحب المحل.
   final bool allowCredit;
 
   const PaymentMethodSelector({

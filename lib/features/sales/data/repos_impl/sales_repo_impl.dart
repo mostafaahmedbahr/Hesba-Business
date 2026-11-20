@@ -190,6 +190,7 @@ class SalesRepoImpl implements SalesRepo {
     required String note,
     String? customerName,
     String? customerPhone,
+    String personType = PersonModel.typeCustomer,
     String? requestId,
   }) async {
     if (items.isEmpty) {
@@ -241,7 +242,7 @@ class SalesRepoImpl implements SalesRepo {
         person = await _accounts.findOrCreatePerson(
           name: cleanCustomerName,
           phone: cleanCustomerPhone,
-          partyType: PersonModel.typeCustomer,
+          partyType: personType,
         );
       } on FirebaseException catch (logErr, logSt) {
         AppLogger.nonFatal(

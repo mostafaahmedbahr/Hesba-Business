@@ -15,7 +15,6 @@ import '../../../profile/presentation/views/change_password_view.dart';
 import '../../../expenses/presentation/views/add_expense_view.dart';
 import '../../../returns/presentation/views/add_return_view.dart';
 import '../../../sales/presentation/views/add_sale_view.dart';
-import '../../../products/presentation/views/add_stock_purchase_view.dart';
 import 'package:hesba/core/services/app_logger.dart';
 
 /// الواجهة الوحidade التي يراها الحساب الفرعي. لا تحتوي على أي من
@@ -154,15 +153,16 @@ class _StaffHomeBodyState extends State<_StaffHomeBody> {
               color: AppTheme.primaryColor,
               title: 'بيع جديد',
               subtitle: 'تسجيل فاتورة بيع',
-              onTap: () => _open(context, const AddSaleView(restricted: true)),
+              // نفس شاشة البيع الكاملة زي صاحب المحل: 4 طرق دفع + عميل/مورد.
+              onTap: () => _open(context, const AddSaleView()),
             ),
-            _ActionCard(
-              icon: Icons.inventory_2_outlined,
-              color: AppTheme.successDark,
-              title: 'شراء مخزون',
-              subtitle: 'تسجيل فاتورة شراء وتحديث المخزون',
-              onTap: () => _open(context, const AddStockPurchaseView(restricted: true)),
-            ),
+            // _ActionCard(
+            //   icon: Icons.inventory_2_outlined,
+            //   color: AppTheme.successDark,
+            //   title: 'شراء مخزون',
+            //   subtitle: 'تسجيل فاتورة شراء وتحديث المخزون',
+            //   onTap: () => _open(context, const AddStockPurchaseView(restricted: true)),
+            // ),
             _ActionCard(
               icon: Icons.assignment_return_outlined,
               color: AppTheme.warningAmber,

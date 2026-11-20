@@ -1,4 +1,5 @@
 import '../../../../core/utils/paged_fetch.dart';
+import '../../../accounts/data/models/person_model.dart';
 import '../models/sale_model.dart';
 
 /// عقد مبيعات المحل (كتابة + قراءة).
@@ -11,10 +12,13 @@ abstract class SalesRepo {
     required String paymentMethod,
     required String note,
 
-    /// اختياري: اسم ورقم العميل. الاتنين لازم يُكتبوا معًا أو يفضلوا
+    /// اختياري: اسم ورقم جهة الاتصال. الاتنين لازم يُكتبوا معًا أو يفضلوا
     /// فاضيين. نفس الرقم الموحّد داخل المحل = نفس جهة الاتصال.
     String? customerName,
     String? customerPhone,
+
+    /// نوع جهة الاتصال: عميل (الافتراضي) أو مورد لما يتضاف من شاشة البيع.
+    String personType = PersonModel.typeCustomer,
 
     /// Optional idempotency key: used as the sale document id so a retry after
     /// a lost response returns the existing sale instead of writing a duplicate.

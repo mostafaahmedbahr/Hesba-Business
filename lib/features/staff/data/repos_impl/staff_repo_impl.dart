@@ -53,16 +53,20 @@ class StaffRepoImpl implements StaffRepo {
       throw Exception('لم يتم العثور على المتجر');
     }
 
+    // البحث عن التطبيق المؤقت بشكل آمن: firstWhere يرمي StateError
+    // ("Bad state: No element") لما التطبيق لا يكون موجودًا بعد، وهي الحالة
+    // الطبيعية عند إضافة حساب فرعي للمرة الأولى — فنتجنب الاستثناء هنا.
     FirebaseApp? tempApp;
-    try {
-      tempApp = Firebase.apps.firstWhere((a) => a.name == _tempAppName);
-    } catch (logErr, logSt) {
-      AppLogger.nonFatal('features/staff/data/repos_impl/staff_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning);
-      tempApp = await Firebase.initializeApp(
-        name: _tempAppName,
-        options: Firebase.app().options,
-      );
+    for (final app in Firebase.apps) {
+      if (app.name == _tempAppName) {
+        tempApp = app;
+        break;
+      }
     }
+    tempApp ??= await Firebase.initializeApp(
+      name: _tempAppName,
+      options: Firebase.app().options,
+    );
 
     try {
       final tempAuth = FirebaseAuth.instanceFor(app: tempApp);

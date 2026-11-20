@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/toast.dart';
+import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/loading_widget.dart';
 import '../../data/models/staff_model.dart';
 import '../../data/repos/staff_repo.dart';
@@ -410,8 +411,8 @@ class _AddStaffSheetState extends State<_AddStaffSheet> {
                 label: 'البريد الإلكتروني',
                 icon: Icons.email_outlined,
                 keyboardType: TextInputType.emailAddress,
-                validator: (v) =>
-                    (v == null || !v.contains('@')) ? 'بريد غير صالح' : null,
+                // نفس سياسة التحقق المستخدمة في شاشة إنشاء الحساب.
+                validator: Validators.email,
               ),
               SizedBox(height: 12.h),
               _field(
@@ -419,8 +420,8 @@ class _AddStaffSheetState extends State<_AddStaffSheet> {
                 label: 'الهاتف',
                 icon: Icons.phone_outlined,
                 keyboardType: TextInputType.phone,
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'مطلوب' : null,
+                // نفس سياسة موبايل مصر المستخدمة في شاشة إنشاء الحساب.
+                validator: Validators.egyptianPhone,
               ),
               SizedBox(height: 12.h),
               _field(

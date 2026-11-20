@@ -27,6 +27,8 @@ import {
   getDocs,
   query,
   where,
+  serverTimestamp,
+  deleteDoc,
 } from 'firebase/firestore';
 
 const rulesPath = path.join(
@@ -114,9 +116,40 @@ beforeEach(async () => {
       id: 'e1', ownerId: 'u1', shopId: 'shop1', amount: 50,
       title: 'Rent', createdAt: new Date(),
     });
+    await setDoc(doc(db, 'expenses/e2'), {
+      id: 'e2', ownerId: 'u2', shopId: 'shop2', amount: 70,
+      title: 'Other rent', createdAt: new Date(),
+    });
     await setDoc(doc(db, 'persons/per1'), {
       id: 'per1', ownerId: 'u1', shopId: 'shop1',
       name: 'Customer', phone: '01000000000', type: 'customer',
+      createdAt: new Date(), updatedAt: new Date(),
+    });
+    await setDoc(doc(db, 'persons/per2'), {
+      id: 'per2', ownerId: 'u2', shopId: 'shop2',
+      name: 'Other Customer', phone: '01111111111', type: 'customer',
+      createdAt: new Date(), updatedAt: new Date(),
+    });
+    await setDoc(doc(db, 'suppliers/sup1'), {
+      id: 'sup1', ownerId: 'u1', shopId: 'shop1',
+      name: 'Supplier One', phone: '01222222222',
+      createdAt: new Date(), updatedAt: new Date(),
+    });
+    await setDoc(doc(db, 'suppliers/sup2'), {
+      id: 'sup2', ownerId: 'u2', shopId: 'shop2',
+      name: 'Supplier Two', phone: '01333333333',
+      createdAt: new Date(), updatedAt: new Date(),
+    });
+    await setDoc(doc(db, 'debts/d1'), {
+      id: 'd1', ownerId: 'u1', shopId: 'shop1', saleId: 'sale1',
+      personId: 'per1', personName: 'Customer', partyType: 'customer',
+      direction: 'receivable', amount: 100, paidAmount: 0,
+      createdAt: new Date(), updatedAt: new Date(),
+    });
+    await setDoc(doc(db, 'debts/d2'), {
+      id: 'd2', ownerId: 'u2', shopId: 'shop2', saleId: 's2',
+      personId: 'per2', personName: 'Other Customer', partyType: 'customer',
+      direction: 'receivable', amount: 100, paidAmount: 0,
       createdAt: new Date(), updatedAt: new Date(),
     });
   });
@@ -179,15 +212,63 @@ test('8. staff can read its own user doc but NOT the owner doc', async () => {
   await assertFails(getDoc(doc(staff.firestore(), 'users/u1')));
 });
 
-test('9. staff cannot read expenses / persons / suppliers / debts', async () => {
+test('7b. staff can read persons/suppliers of its own shop for the sale form', async () => {
   const staff = env.authenticatedContext('s1');
-  await assertFails(getDoc(doc(staff.firestore(), 'expenses/e1')));
-  await assertFails(getDoc(doc(staff.firestore(), 'persons/per1')));
-  await assertFails(
+  await assertSucceeds(getDoc(doc(staff.firestore(), 'persons/per1')));
+  await assertSucceeds(
+    getDocs(query(collection(staff.firestore(), 'persons'), where('shopId', '==', 'shop1'))),
+  );
+  await assertSucceeds(getDoc(doc(staff.firestore(), 'suppliers/sup1')));
+  await assertSucceeds(
     getDocs(query(collection(staff.firestore(), 'suppliers'), where('shopId', '==', 'shop1'))),
   );
-  await assertFails(
+  await assertFails(getDoc(doc(staff.firestore(), 'persons/per2')));
+  await assertFails(getDoc(doc(staff.firestore(), 'suppliers/sup2')));
+});
+
+test('7c. staff can do the idempotency read of a not-yet-created return', async () => {
+  await seed(async (db) => {
+    await setDoc(doc(db, 'returns/ret1'), {
+      id: 'ret1', ownerId: 'u1', shopId: 'shop1',
+      total: 5, originalSaleId: 'sale1', items: [], createdAt: new Date(),
+    });
+  });
+  const staff = env.authenticatedContext('s1');
+  await assertSucceeds(getDoc(doc(staff.firestore(), 'returns/not-created-yet')));
+  await assertSucceeds(getDoc(doc(staff.firestore(), 'returns/ret1')));
+});
+
+test('9a. staff can read own-shop expenses and the idempotency read of a missing one', async () => {
+  const staff = env.authenticatedContext('s1');
+  await assertSucceeds(getDoc(doc(staff.firestore(), 'expenses/e1')));
+  await assertSucceeds(
+    getDocs(query(collection(staff.firestore(), 'expenses'), where('shopId', '==', 'shop1'))),
+  );
+  await assertSucceeds(getDoc(doc(staff.firestore(), 'expenses/not-created-yet')));
+  await assertFails(getDoc(doc(staff.firestore(), 'expenses/e2')));
+});
+
+test('9b. staff can read its shop debts (needed to settle a return)', async () => {
+  const staff = env.authenticatedContext('s1');
+  await assertSucceeds(getDoc(doc(staff.firestore(), 'debts/d1')));
+  await assertSucceeds(
     getDocs(query(collection(staff.firestore(), 'debts'), where('shopId', '==', 'shop1'))),
+  );
+  await assertFails(getDoc(doc(staff.firestore(), 'debts/d2')));
+});
+
+test('9c. staff can settle a debt when returning a credit sale', async () => {
+  const staff = env.authenticatedContext('s1');
+  await assertSucceeds(
+    updateDoc(doc(staff.firestore(), 'debts/d1'), {
+      paidAmount: 20, updatedAt: new Date(),
+    }),
+  );
+  await assertSucceeds(
+    setDoc(doc(staff.firestore(), 'debts/d1/payments/ret1'), {
+      ownerId: 's1', shopId: 'shop1', amount: 20,
+      note: 'تسوية مرتجع — فاتورة #sale1', createdAt: serverTimestamp(),
+    }),
   );
 });
 
@@ -286,30 +367,75 @@ test('15b. staff cannot write negative or exaggerated stock', async () => {
   await assertSucceeds(updateDoc(doc(staff.firestore(), 'products/p1'), { stock: 0 }));
 });
 
-test('16. staff cannot create person / supplier / debt', async () => {
+test('16. staff can add a customer, a supplier and a credit-sale debt in its own shop', async () => {
   const staff = env.authenticatedContext('s1');
-  await assertFails(
+  await assertSucceeds(
     setDoc(doc(staff.firestore(), 'persons/new'), {
       id: 'new', ownerId: 's1', shopId: 'shop1',
       name: 'Someone', phone: '01000000000', type: 'customer',
-      createdAt: new Date(), updatedAt: new Date(),
+      createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
     }),
   );
-  await assertFails(
+  await assertSucceeds(
     setDoc(doc(staff.firestore(), 'suppliers/new'), {
       id: 'new', ownerId: 's1', shopId: 'shop1',
-      name: 'Someone', phone: '01000000000',
-      createdAt: new Date(), updatedAt: new Date(),
+      name: 'Supplier New', phone: '01444444444',
+      createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
     }),
   );
-  await assertFails(
+  await assertSucceeds(
     setDoc(doc(staff.firestore(), 'debts/new'), {
       id: 'new', ownerId: 's1', shopId: 'shop1',
       personId: 'per1', personName: 'Customer', partyType: 'customer',
       direction: 'receivable', amount: 10, paidAmount: 0,
-      createdAt: new Date(), updatedAt: new Date(),
+      createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
     }),
   );
+  await assertFails(
+    setDoc(doc(staff.firestore(), 'persons/bad'), {
+      id: 'bad', ownerId: 's1', shopId: 'shop2',
+      name: 'Someone', phone: '01000000000', type: 'customer',
+      createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+    }),
+  );
+  await assertFails(
+    setDoc(doc(staff.firestore(), 'suppliers/bad'), {
+      id: 'bad', ownerId: 's1', shopId: 'shop2',
+      name: 'Bad Supplier', phone: '01444444444',
+      createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+    }),
+  );
+});
+
+test('16b. owner can collect a debt and manage a supplier created by a staff account', async () => {
+  await seed(async (db) => {
+    await setDoc(doc(db, 'debts/staffDebt'), {
+      id: 'staffDebt', ownerId: 's1', shopId: 'shop1',
+      personId: 'per1', personName: 'Customer', partyType: 'customer',
+      direction: 'receivable', amount: 10, paidAmount: 0,
+      createdAt: new Date(), updatedAt: new Date(),
+    });
+    await setDoc(doc(db, 'suppliers/staffSup'), {
+      id: 'staffSup', ownerId: 's1', shopId: 'shop1',
+      name: 'Staff Supplier', phone: '01444444444',
+      createdAt: new Date(), updatedAt: new Date(),
+    });
+  });
+  const owner = env.authenticatedContext('u1');
+  await assertSucceeds(
+    updateDoc(doc(owner.firestore(), 'debts/staffDebt'), {
+      paidAmount: 4, updatedAt: new Date(),
+    }),
+  );
+  await assertSucceeds(
+    setDoc(doc(owner.firestore(), 'debts/staffDebt/payments/p1'), {
+      ownerId: 'u1', shopId: 'shop1', amount: 4, createdAt: serverTimestamp(),
+    }),
+  );
+  await assertSucceeds(
+    updateDoc(doc(owner.firestore(), 'suppliers/staffSup'), { name: 'Edited by owner' }),
+  );
+  await assertSucceeds(deleteDoc(doc(owner.firestore(), 'suppliers/staffSup')));
 });
 
 test('17. another shop staff cannot write into this shop', async () => {

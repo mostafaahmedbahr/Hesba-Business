@@ -17,12 +17,24 @@ class SaleCustomerSection extends StatefulWidget {
   /// `true` عند اختيار "آجل" — يُظهر ملاحظة إن العميل مطلوب.
   final bool creditRequired;
 
+  /// زر اختيار/إضافة مورد من داخل فاتورة البيع — نفس الشاشة للموظف والصاحب.
+  final VoidCallback? onPickSupplier;
+
+  /// يُستدعى عند «مسح» عشان نرجّع نوع جهة الاتصال لعميل عادي.
+  final VoidCallback? onClear;
+
+  /// يوضّح إن جهة الاتصال الحالية مورد (مختار من دليل الموردين).
+  final bool supplierSelected;
+
   const SaleCustomerSection({
     super.key,
     required this.nameController,
     required this.phoneController,
     required this.persons,
     this.creditRequired = false,
+    this.onPickSupplier,
+    this.onClear,
+    this.supplierSelected = false,
   });
 
   @override
@@ -99,6 +111,7 @@ class _SaleCustomerSectionState extends State<SaleCustomerSection> {
   void _clear() {
     widget.nameController.clear();
     widget.phoneController.clear();
+    widget.onClear?.call();
     setState(() {});
     HapticFeedback.lightImpact();
   }
@@ -176,6 +189,20 @@ class _SaleCustomerSectionState extends State<SaleCustomerSection> {
               ),
             ),
             const Spacer(),
+            if (widget.onPickSupplier != null)
+              TextButton.icon(
+                onPressed: widget.onPickSupplier,
+                icon: Icon(Icons.local_shipping_outlined, size: 15.sp),
+                label: Text(
+                  'salePickSupplier'.tr(),
+                  style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800),
+                ),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppTheme.violetDeep,
+                  padding: EdgeInsets.symmetric(horizontal: 6.w),
+                  minimumSize: Size(0, 32.h),
+                ),
+              ),
             if (_anyFilled)
               TextButton.icon(
                 onPressed: _clear,
@@ -244,7 +271,14 @@ class _SaleCustomerSectionState extends State<SaleCustomerSection> {
                   icon: Icons.call_rounded,
                 ),
               ),
-              if (_showSuggestions) ...[
+              if (widget.supplierSelected) ...[
+                SizedBox(height: 8.h),
+                _InlineNote(
+                  icon: Icons.local_shipping_rounded,
+                  color: AppTheme.violetDeep,
+                  text: 'saleSupplierHint'.tr(),
+                ),
+              ] else if (_showSuggestions) ...[
                 SizedBox(height: 8.h),
                 _SuggestionsPanel(
                   persons: _suggestions,

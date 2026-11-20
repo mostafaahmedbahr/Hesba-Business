@@ -9,11 +9,10 @@ rules_version = '2';
 //  1. No catch-all: every collection is scoped explicitly. Default deny.
 //  2. Shop isolation: a signed-in user touches only docs of their own shop
 //     (ownerId match) or a shop they belong to (users/{uid}.shopId match).
-//     Staff accounts (role == 'staff') are deliberately narrower: the only
-//     business data they may READ is the minimum their entry forms need
-//     (products/sales/returns for picking, shops for names). They may only
-//     CREATE sales/returns/expenses/stock purchases — never read lists,
-//     reports, debts, suppliers, or modify products.
+//     Staff accounts (role == 'staff') read only the data their entry forms
+//     need (products, sales, returns, expenses, persons, suppliers, debts of
+//     their shop) and may create the matching records. Reports, other shops
+//     and product edits beyond stock stay owner-only.
 //  3. Subscription enforcement is server-side, not just UI: creating,
 //     updating or deleting business data (products/sales/expenses/returns)
 //     requires a live trial/active subscription whose endDate is in the
@@ -49,6 +48,14 @@ service cloud.firestore {
 
     function isStaffUser() {
       return signedIn() && myRole() == 'staff';
+    }
+
+    /// سجل كتبه حساب فرعي تابع لمحل صاحب المحل الحالي.
+    function createdByMyStaff(userId) {
+      let ref = /databases/$(database)/documents/users/$(userId);
+      return userId != null && userId != '' && exists(ref)
+        && get(ref).data.get('role', '') == 'staff'
+        && get(ref).data.get('ownerId', '') == myUid();
     }
 
     function isOwnerUser() {
@@ -165,10 +172,10 @@ service cloud.firestore {
     //  - name + phone are required non-empty strings; phone is 7..30 of
     //    dialable characters (Latin + Arabic-Indic digits, + ( ) - space).
     //  - every other field is optional but must be a bounded string.
-    function validSupplier(docId) {
+    function validSupplierFor(docId, expectedOwnerId) {
       let d = request.resource.data;
       return d.get('id', null) == docId
-        && d.get('ownerId', null) == myUid()
+        && d.get('ownerId', null) == expectedOwnerId
         && d.get('shopId', null) == myShopId()
         && d.get('name', null) is string
         && d.get('name', '').size() > 0
@@ -184,6 +191,10 @@ service cloud.firestore {
         && optionalString(d, 'address', 300)
         && optionalString(d, 'city', 120)
         && optionalString(d, 'notes', 2000);
+    }
+
+    function validSupplier(docId) {
+      return validSupplierFor(docId, myUid());
     }
 
     // Suppliers: only editable content fields (+ updatedAt) may change.
@@ -242,6 +253,12 @@ service cloud.firestore {
     function onlyPersonEditableFields() {
       return request.resource.data.diff(resource.data).affectedKeys()
         .hasOnly(['name', 'phone', 'type', 'normalizedPhone', 'updatedAt']);
+    }
+
+    /// الموظف يدمج نوع الشخص فقط لما يختار عميل/مورد موجود في فورم البيع.
+    function onlyPersonTypeMerge() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['type', 'updatedAt']);
     }
 
     // True only when the person doc exists and belongs to `shopId`.
@@ -640,9 +657,14 @@ service cloud.firestore {
     }
 
     match /expenses/{docId} {
-      // قائمة المصروفات وأرقامها سرية لصاحب المحل فقط.
-      allow read: if signedIn() && mayReadFullShopData(
-        resource.data.shopId, resource.data.ownerId);
+      // الموظف محتاج يقرأ مصروفات محله داخل فورم الإضافة: خطوة الـ
+      // idempotency (get لمستند لسه مش موجود) + مزامنة المصروفات المتكررة
+      // + الستريم. قديمًا كانت القراءة مقتصرة على صاحب المحل، فكان أي
+      // إضافة من الموظف بترمي permission-denied قبل ما توصل للكتابة.
+      allow read: if signedIn() && (
+        resource == null ||
+        resource.data == null ||
+        mayReadEntryData(resource.data.shopId, resource.data.ownerId));
       allow create: if signedIn()
         && request.resource.data.ownerId == myUid()
         && nonNegative('amount')
@@ -674,8 +696,12 @@ service cloud.firestore {
 
     match /returns/{docId} {
       // يُقرأ من الموظف داخل فورم المرتجع للتحقق من الكميات المرتجعة سابقًا.
-      allow read: if signedIn() && mayReadEntryData(
-        resource.data.shopId, resource.data.ownerId);
+      // خطوة الـ idempotency تعمل get لمستند لسه مش موجود — لازم تعدي،
+      // زي ما حصل في المبيعات بالظبط، وإلا القراءة ترمي permission-denied.
+      allow read: if signedIn() && (
+        resource == null ||
+        resource.data == null ||
+        mayReadEntryData(resource.data.shopId, resource.data.ownerId));
       allow create: if signedIn()
         && request.resource.data.ownerId == myUid()
         && nonNegative('total')
@@ -728,32 +754,35 @@ service cloud.firestore {
     // the caller's own shop. Reads are open to the shop team, writes
     // require a live subscription (same rule as products).
     match /suppliers/{docId} {
-      allow read: if signedIn() && mayReadFullShopData(
+      // القراءة متاحة للموظف داخل محله عشان يقدر يختار/يضيف مورد من البيع.
+      allow read: if signedIn() && mayReadEntryData(
         resource.data.shopId, resource.data.ownerId);
-      allow create: if signedIn() && (isOwnerUser() || isShopOwnerAdmin())
+      allow create: if signedIn() && (isOwnerUser() || isShopOwnerAdmin()
+        || (isStaffUser() && sameShop(request.resource.data.shopId)))
         && validSupplier(docId)
-        // Timestamps come from the server: nobody can back-date a supplier.
         && request.resource.data.get('createdAt', null) == request.time
         && request.resource.data.get('updatedAt', null) == request.time
         && mayWriteShopData(request.resource.data.shopId);
-      // Content edits only: ownerId/shopId/id/createdAt never move.
       allow update: if isAdmin() || (signedIn() && isOwnerUser()
-        && resource.data.ownerId == myUid()
+        && (resource.data.ownerId == myUid()
+          || createdByMyStaff(resource.data.ownerId))
         && resource.data.shopId == request.resource.data.shopId
         && onlySupplierEditableFields()
-        && validSupplier(docId)
+        && validSupplierFor(docId, resource.data.ownerId)
         && mayWriteShopData(resource.data.shopId));
       allow delete: if isAdmin() || (signedIn() && isOwnerUser()
-        && resource.data.ownerId == myUid()
+        && (resource.data.ownerId == myUid()
+          || createdByMyStaff(resource.data.ownerId))
         && mayWriteShopData(resource.data.shopId));
     }
 
     // ── persons (قاعدة الأشخاص الموحّدة) ─────────────────────
     // دليل موحّد للعملاء والموردين — نفس العزل والاشتراك كالموردين.
     match /persons/{docId} {
-      allow read: if signedIn() && mayReadFullShopData(
+      allow read: if signedIn() && mayReadEntryData(
         resource.data.shopId, resource.data.ownerId);
-      allow create: if signedIn() && (isOwnerUser() || isShopOwnerAdmin())
+      allow create: if signedIn() && (isOwnerUser() || isShopOwnerAdmin()
+        || (isStaffUser() && sameShop(request.resource.data.shopId)))
         && validPerson(docId)
         && request.resource.data.get('createdAt', null) == request.time
         && request.resource.data.get('updatedAt', null) == request.time
@@ -763,7 +792,13 @@ service cloud.firestore {
         && resource.data.shopId == request.resource.data.shopId
         && onlyPersonEditableFields()
         && validPerson(docId)
-        && mayWriteShopData(resource.data.shopId));
+        && mayWriteShopData(resource.data.shopId))
+        || (signedIn() && isStaffUser()
+          && sameShop(resource.data.shopId)
+          && resource.data.shopId == request.resource.data.shopId
+          && onlyPersonTypeMerge()
+          && validPerson(docId)
+          && mayWriteShopData(resource.data.shopId));
       // الحذف للأدمن فقط — الشخص مرتبط بسجلات ذمم تاريخية.
       allow delete: if isAdmin();
     }
@@ -771,18 +806,25 @@ service cloud.firestore {
     // ── debts (ذمم العملاء والموردين) ───────────────────────
     // السجل الأصلي لا يُحذف من العميل — يبقى كسجل تدقيق حتى بعد السداد.
     match /debts/{debtId} {
-      allow read: if signedIn() && mayReadFullShopData(
-        resource.data.shopId, resource.data.ownerId);
-      allow create: if signedIn() && (isOwnerUser() || isShopOwnerAdmin())
+      // الموظف محتاج يقرأ ذمة الفاتورة جوّه فورم المرتجع عشان يسوّيها،
+      // والقراءة مقيدة بمحله (نفس نمط المنتجات/المصروفات).
+      allow read: if signedIn() && (
+        resource == null ||
+        resource.data == null ||
+        mayReadEntryData(resource.data.shopId, resource.data.ownerId));
+      // الموظف ينشئ ذمة عند البيع الآجل — ضمن محله وباشتراك صاحب المحل.
+      allow create: if signedIn() && (isOwnerUser() || isShopOwnerAdmin()
+        || (isStaffUser() && sameShop(request.resource.data.shopId)))
         && validDebt(debtId)
         && request.resource.data.get('createdAt', null) == request.time
         && request.resource.data.get('updatedAt', null) == request.time
-        // المديونية الجديدة تبدأ بلا مدفوعات.
         && request.resource.data.paidAmount == 0
         && mayWriteShopData(request.resource.data.shopId);
-      // التعديل الوحيد: السداد (paidAmount/updatedAt) عبر transaction.
-      allow update: if isAdmin() || (signedIn() && isOwnerUser()
-        && resource.data.ownerId == myUid()
+      // التحصيل/التسوية متاح لصاحب المحل وللموظف داخل محله — المرتجع بيقلل
+      // الذمة المرتبطة بالفاتورة الآجلة من خلال نفس مسار الدفع.
+      allow update: if isAdmin() || (signedIn()
+        && (isOwnerUser() || isStaffUser())
+        && sameShop(resource.data.shopId)
         && resource.data.shopId == request.resource.data.shopId
         && onlyDebtPaymentFields()
         && mayWriteShopData(resource.data.shopId));
@@ -794,11 +836,12 @@ service cloud.firestore {
         allow read: if signedIn() && (isAdmin()
           || get(/databases/$(database)/documents/debts/$(debtId)).data.ownerId == myUid()
           || sameShop(get(/databases/$(database)/documents/debts/$(debtId)).data.shopId));
-        allow create: if signedIn() && (isOwnerUser() || isShopOwnerAdmin())
+        allow create: if signedIn() && (isOwnerUser() || isShopOwnerAdmin()
+          || isStaffUser())
           && request.resource.data.get('ownerId', null) == myUid()
           && request.resource.data.get('shopId', null) ==
              get(/databases/$(database)/documents/debts/$(debtId)).data.shopId
-          && get(/databases/$(database)/documents/debts/$(debtId)).data.ownerId == myUid()
+          && sameShop(get(/databases/$(database)/documents/debts/$(debtId)).data.shopId)
           && request.resource.data.amount is number
           && request.resource.data.amount > 0
           // الدفعة لا تتجاوز المتبقي الحالي للمديونية.

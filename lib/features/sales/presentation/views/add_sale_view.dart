@@ -16,6 +16,7 @@ import '../../../../core/utils/number_parser.dart';
 import '../../../../core/utils/toast.dart';
 import '../../../../core/widgets/loading_widget.dart';
 import '../../../products/data/repos/products_repo.dart';
+import '../../../suppliers/presentation/widgets/supplier_picker_sheet.dart';
 import '../../../accounts/data/models/person_model.dart';
 import '../../../accounts/data/repos/accounts_repo.dart';
 import '../../../../core/utils/validators.dart';
@@ -40,15 +41,13 @@ class AddSaleView extends StatefulWidget {
   final String? ownerId;
   final String? shopId;
 
-  /// عند true (حساب الموظف): لا يُعرض قسم العميل ولا خيار البيع الآجل،
-  /// حتى لا يستطيع الموظف الوصول لبيانات العملاء أو إنشاء ذمم.
-  final bool restricted;
-
+  /// شاشة البيع واحدة لصاحب المحل والموظف: طرق الدفع الأربع (بما فيها آجل)،
+  /// وقسم جهة الاتصال الكامل (عميل عادي أو مورد من دليل الموردين) متاحان
+  /// للطرفين. القيود على البيانات موجودة في قواعد Firestore، مش في الواجهة.
   const AddSaleView({
     super.key,
     this.ownerId,
     this.shopId,
-    this.restricted = false,
   });
 
   @override
@@ -62,9 +61,12 @@ class _AddSaleViewState extends State<AddSaleView> {
   final _discountController = TextEditingController();
   final _noteController = TextEditingController();
 
-  // العميل (اختياري) — اسم ورقم يُكتبان معًا أو يُتركان فاضيين.
+  // جهة الاتصال (اختيارية) — اسم ورقم يُكتبان معًا أو يُتركان فاضيين.
   final _customerNameController = TextEditingController();
   final _customerPhoneController = TextEditingController();
+
+  /// نوع جهة الاتصال: عميل عادي أو مورد (من زر «مورد» في نفس الشاشة).
+  String _personType = PersonModel.typeCustomer;
 
   String _paymentMethod = AppConstants.paymentCash;
 
@@ -86,7 +88,7 @@ class _AddSaleViewState extends State<AddSaleView> {
     _resolvedShopId = widget.shopId;
     _resolveIds();
     _loadProducts();
-    if (!widget.restricted) _loadPersons();
+    _loadPersons();
     _addItem();
     _discountController.addListener(_onRecalc);
   }
@@ -157,6 +159,20 @@ class _AddSaleViewState extends State<AddSaleView> {
         onError: (_) {},
       );
     } catch (logErr, logSt) { AppLogger.nonFatal('features/sales/presentation/views/add_sale_view.dart', logErr, logSt, severity: LoggingSeverity.warning); }
+  }
+
+  /// فتح دليل الموردين من داخل الفاتورة: اختيار مورد موجود أو إضافة مورد
+  /// جديد بنفس نموذج شاشة الموردين، وربطه بالفاتورة كجهة اتصال من نوع «مورد».
+  Future<void> _pickSupplier() async {
+    final result = await SupplierPickerSheet.show(context);
+    final supplier = result?.supplier;
+    if (supplier == null || !mounted) return;
+    setState(() {
+      _customerNameController.text = supplier.displayName;
+      _customerPhoneController.text = supplier.phone.trim();
+      _personType = PersonModel.typeSupplier;
+    });
+    HapticFeedback.selectionClick();
   }
 
   void _onRecalc() => setState(() {});
@@ -241,28 +257,24 @@ class _AddSaleViewState extends State<AddSaleView> {
       return;
     }
 
-    // العميل اختياري — لكن اسمه ورقمه يُكتبان معًا.
-    // الحساب الفرعي لا يرى العملاء ولا يمكنه البيع الآجل (منع الذمم).
-    String? customerName;
-    String? customerPhone;
-    if (!widget.restricted) {
-      customerName = _customerNameController.text.trim();
-      customerPhone = _customerPhoneController.text.trim();
-      if (customerName.isEmpty != customerPhone.isEmpty) {
-        AppToast.warning(innerContext, 'saleCustomerBothRequired'.tr());
+    // جهة الاتصال اختيارية — لكن اسمها ورقمها يُكتبان معًا.
+    // متاحة لصاحب المحل والموظف على حد سواء (بيع آجل + عميل/مورد).
+    final customerName = _customerNameController.text.trim();
+    final customerPhone = _customerPhoneController.text.trim();
+    if (customerName.isEmpty != customerPhone.isEmpty) {
+      AppToast.warning(innerContext, 'saleCustomerBothRequired'.tr());
+      return;
+    }
+    if (_paymentMethod == AppConstants.paymentCredit &&
+        (customerName.isEmpty || customerPhone.isEmpty)) {
+      AppToast.warning(innerContext, 'saleCreditRequiresCustomer'.tr());
+      return;
+    }
+    if (customerPhone.isNotEmpty) {
+      final phoneError = Validators.egyptianPhone(customerPhone);
+      if (phoneError != null) {
+        AppToast.warning(innerContext, 'contactPhoneInvalid'.tr());
         return;
-      }
-      if (_paymentMethod == AppConstants.paymentCredit &&
-          (customerName.isEmpty || customerPhone.isEmpty)) {
-        AppToast.warning(innerContext, 'saleCreditRequiresCustomer'.tr());
-        return;
-      }
-      if (customerPhone.isNotEmpty) {
-        final phoneError = Validators.egyptianPhone(customerPhone);
-        if (phoneError != null) {
-          AppToast.warning(innerContext, 'contactPhoneInvalid'.tr());
-          return;
-        }
       }
     }
 
@@ -302,8 +314,9 @@ class _AddSaleViewState extends State<AddSaleView> {
           discount: _discount,
           paymentMethod: _paymentMethod,
           note: _noteController.text,
-          customerName: (customerName == null || customerName.isEmpty) ? null : customerName,
-          customerPhone: (customerPhone == null || customerPhone.isEmpty) ? null : customerPhone,
+          customerName: customerName.isEmpty ? null : customerName,
+          customerPhone: customerPhone.isEmpty ? null : customerPhone,
+          personType: _personType,
         );
   }
 
@@ -375,26 +388,26 @@ class _AddSaleViewState extends State<AddSaleView> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // عنوان الأصناف + المتاح.
-                              Row(
-                                children: [
-                                  Text('saleItemsTitle'.tr(), style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
-                                  SizedBox(width: 8.w),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 4.h),
-                                    decoration: BoxDecoration(color: AppTheme.primaryColor.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(20.r)),
-                                    child: Text('${_items.length}', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w900, color: AppTheme.primaryColor)),
-                                  ),
-                                  const Spacer(),
-                                  if (_loadingProducts)
-                                    const LoadingWidget(size: 16, compact: true)
-                                  else
-                                    Text('saleAvailableStock'.tr(namedArgs: {'n': '${_availableProducts.where((p) => p.isActive).length}'}), style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600)),
-                                ],
-                              ),
-                              SizedBox(height: 4.h),
-                              Text('saleSearchHint'.tr(), style: TextStyle(fontSize: 11.5.sp, color: AppTheme.mutedGray)),
-                              SizedBox(height: 12.h),
+                              // // عنوان الأصناف + المتاح.
+                              // Row(
+                              //   children: [
+                              //     Text('saleItemsTitle'.tr(), style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
+                              //     SizedBox(width: 8.w),
+                              //     Container(
+                              //       padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 4.h),
+                              //       decoration: BoxDecoration(color: AppTheme.primaryColor.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(20.r)),
+                              //       child: Text('${_items.length}', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w900, color: AppTheme.primaryColor)),
+                              //     ),
+                              //     const Spacer(),
+                              //     if (_loadingProducts)
+                              //       const LoadingWidget(size: 16, compact: true)
+                              //     else
+                              //       Text('saleAvailableStock'.tr(namedArgs: {'n': '${_availableProducts.where((p) => p.isActive).length}'}), style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray, fontWeight: FontWeight.w600)),
+                              //   ],
+                              // ),
+                              // SizedBox(height: 4.h),
+                              // Text('saleSearchHint'.tr(), style: TextStyle(fontSize: 11.5.sp, color: AppTheme.mutedGray)),
+                              // SizedBox(height: 12.h),
 
                               SaleItemsSection(
                                 isDark: isDark,
@@ -421,25 +434,28 @@ class _AddSaleViewState extends State<AddSaleView> {
                               // الدفع.
                               Text('salePaymentMethod'.tr(), style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
                               SizedBox(height: 10.h),
+                              // الأربع طرق متاحة دايمًا — للموظف وصاحب المحل.
                               PaymentMethodSelector(
                                 value: _paymentMethod,
-                                allowCredit: !widget.restricted,
                                 onChanged: (v) => setState(() => _paymentMethod = v),
                               ),
                               SizedBox(height: 20.h),
 
-                              // العميل (اختياري) لربط الفاتورة بجهة اتصال.
-                              // مخفي تمامًا في حساب الموظف.
-                              if (!widget.restricted) ...[
-                                SaleCustomerSection(
-                                  nameController: _customerNameController,
-                                  phoneController: _customerPhoneController,
-                                  persons: _persons,
-                                  creditRequired:
-                                      _paymentMethod == AppConstants.paymentCredit,
-                                ),
-                                SizedBox(height: 20.h),
-                              ],
+                              // جهة الاتصال (اختيارية): عميل عادي أو مورد من
+                              // دليل الموردين — نفس القسم للطرفين.
+                              SaleCustomerSection(
+                                nameController: _customerNameController,
+                                phoneController: _customerPhoneController,
+                                persons: _persons,
+                                creditRequired:
+                                    _paymentMethod == AppConstants.paymentCredit,
+                                onPickSupplier: _pickSupplier,
+                                onClear: () =>
+                                    setState(() => _personType = PersonModel.typeCustomer),
+                                supplierSelected:
+                                    _personType == PersonModel.typeSupplier,
+                              ),
+                              SizedBox(height: 20.h),
 
                               SaleExtrasSection(
                                 isDark: isDark,
