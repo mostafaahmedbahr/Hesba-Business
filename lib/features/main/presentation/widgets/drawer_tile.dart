@@ -8,6 +8,7 @@ class CustomDrawerTile extends StatelessWidget {
     required this.color,
     this.onTap,
     this.isDark,
+    this.isDestructive = false,
   });
 
   final IconData icon;
@@ -15,6 +16,7 @@ class CustomDrawerTile extends StatelessWidget {
   final Color color;
   final VoidCallback? onTap;
   final bool? isDark;
+  final bool isDestructive;
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +26,9 @@ class CustomDrawerTile extends StatelessWidget {
     return ListTile(
       onTap: onTap,
       dense: true,
+      tileColor: isDestructive
+          ? color.withValues(alpha: darkMode ? 0.16 : 0.08)
+          : null,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.r),
       ),
@@ -31,7 +36,7 @@ class CustomDrawerTile extends StatelessWidget {
         width: 36.w,
         height: 36.w,
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.12),
+          color: color.withValues(alpha: darkMode ? 0.20 : 0.12),
           borderRadius: BorderRadius.circular(10.r),
         ),
         child: Icon(
@@ -53,7 +58,7 @@ class CustomDrawerTile extends StatelessWidget {
       trailing: Icon(
         Icons.chevron_right_rounded,
         size: 18.sp,
-        color: const Color(0xFFCBD5E1),
+        color: const Color(0xFF94A3B8),
       ),
       contentPadding: EdgeInsets.symmetric(
         horizontal: 8.w,

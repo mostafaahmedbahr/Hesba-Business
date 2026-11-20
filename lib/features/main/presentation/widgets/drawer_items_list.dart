@@ -10,7 +10,8 @@ import '../../../profile/presentation/views/change_password_view.dart';
 import '../../../profile/presentation/views/delete_account_view.dart';
 import '../../../profile/presentation/views/profile_view.dart';
 import '../../../profile/presentation/views/update_profile_view.dart';
-import 'package:hesba/admin_main.dart' show AdminHome;
+import 'drawer_admin_card.dart';
+import 'drawer_icon_colors.dart';
 import 'drawer_language_tile.dart';
 import 'drawer_theme_tile.dart';
 import 'drawer_tile.dart';
@@ -18,6 +19,16 @@ import 'section_label.dart';
 import 'package:hesba/core/services/app_logger.dart';
 
 /// عناصر الـ Drawer (تركيب بس — من غير المبيعات).
+///
+/// التقسيم:
+///   ١. العمليات         (مرتجعات / مصروفات / إشعارات)
+///   ٢. إدارة المتجر     (حسابات / موظفين / موردين / أقسام)
+///   ٣. الحساب           (بروفايل / تعديل / كلمة مرور)
+///   ٤. الإعدادات والدعم (ثيم / لغة / تواصل / خصوصية)
+///   ٥. لوحة الإدارة     (بطاقة مميزة)
+///   ٦. منطقة الخطر      (حذف الحساب)
+///
+/// كل صفحة ليها لونها الخاص من [DrawerIconColor]، مع نسخة أفتح للوضع الداكن.
 class DrawerItemsList extends StatelessWidget {
   final bool isDark;
   final ValueChanged<int>? onNavigateTab;
@@ -67,13 +78,14 @@ class DrawerItemsList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: ListView(
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
         children: [
-          SectionLabel('العمليات', isDark),
+          // ١. العمليات
+          SectionLabel('drawerOperations'.tr(), isDark),
           CustomDrawerTile(
             icon: Icons.assignment_return_rounded,
             label: 'navReturns'.tr(),
-            color: AppTheme.warningAmber,
+            color: DrawerIconColor.returns.of(isDark),
             onTap: () {
               Navigator.pop(context);
               onOpenReturns?.call();
@@ -82,120 +94,102 @@ class DrawerItemsList extends StatelessWidget {
           CustomDrawerTile(
             icon: Icons.savings_rounded,
             label: 'navExpenses'.tr(),
-            color: AppTheme.danger,
+            color: DrawerIconColor.expenses.of(isDark),
             onTap: () {
               Navigator.pop(context);
               onOpenExpenses?.call();
             },
           ),
-          SizedBox(height: 10.h),
-          Divider(
-            color: isDark ? AppTheme.darkBorder : AppTheme.hairline,
-            height: 1,
+          CustomDrawerTile(
+            icon: Icons.notifications_active_rounded,
+            label: 'moreNotifications'.tr(),
+            color: DrawerIconColor.notifications.of(isDark),
+            onTap: () => _open(context, const NotificationsView()),
           ),
-          SizedBox(height: 10.h),
-          SectionLabel('إدارة المتجر', isDark),
+
+          // ٢. إدارة المتجر
+          SectionLabel('drawerStoreManagement'.tr(), isDark),
+          CustomDrawerTile(
+            icon: Icons.account_balance_wallet_rounded,
+            label: 'drawerAccounts'.tr(),
+            color: DrawerIconColor.accounts.of(isDark),
+            onTap: () => _open(context, const AccountsView()),
+          ),
           CustomDrawerTile(
             icon: Icons.badge_outlined,
-            label: 'الحسابات الفرعية',
-            color: const Color(0xFF7C4DFF),
-            onTap: () => Navigator.pushNamed(context, AppRoutes.staffManagement),
+            label: 'drawerStaffAccounts'.tr(),
+            color: DrawerIconColor.staff.of(isDark),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, AppRoutes.staffManagement);
+            },
           ),
           CustomDrawerTile(
             icon: Icons.local_shipping_rounded,
             label: 'suppliersSection'.tr(),
-            color: AppTheme.violetDeep,
+            color: DrawerIconColor.suppliers.of(isDark),
             onTap: () => _open(context, const SuppliersView()),
           ),
           CustomDrawerTile(
-            icon: Icons.account_balance_wallet_rounded,
-            label: 'الحسابات',
-            color: AppTheme.primaryColor,
-            onTap: () => _open(context, const AccountsView()),
-          ),
-          CustomDrawerTile(
             icon: Icons.category_rounded,
-            label: 'إدارة الأقسام',
-            color: AppTheme.successDark,
+            label: 'drawerCategoryManagement'.tr(),
+            color: DrawerIconColor.categories.of(isDark),
             onTap: () => _open(context, const CategoryManagementView()),
           ),
-          CustomDrawerTile(
-            icon: Icons.notifications_active_rounded,
-            label: 'moreNotificationsTitle'.tr(),
-            color: const Color(0xFF00ACC1),
-            onTap: () => _open(context, const NotificationsView()),
-          ),
-          SizedBox(height: 10.h),
-          Divider(
-            color: isDark ? AppTheme.darkBorder : AppTheme.hairline,
-            height: 1,
-          ),
-          SizedBox(height: 10.h),
+
+          // ٣. الحساب
           SectionLabel('moreAccount'.tr(), isDark),
           CustomDrawerTile(
             icon: Icons.person_rounded,
             label: 'moreProfile'.tr(),
-            color: AppTheme.primaryColor,
+            color: DrawerIconColor.profile.of(isDark),
             onTap: () => _open(context, const ProfileView()),
           ),
           CustomDrawerTile(
             icon: Icons.edit_rounded,
             label: 'moreEditProfile'.tr(),
-            color: const Color(0xFFF5A623),
+            color: DrawerIconColor.editProfile.of(isDark),
             onTap: () => _open(context, const UpdateProfileView()),
           ),
           CustomDrawerTile(
             icon: Icons.lock_reset_rounded,
             label: 'moreChangePassword'.tr(),
-            color: const Color(0xFF7C4DFF),
+            color: DrawerIconColor.password.of(isDark),
             onTap: () => _open(context, const ChangePasswordView()),
           ),
-          CustomDrawerTile(
-            icon: Icons.delete_forever_rounded,
-            label: 'moreDeleteAccount'.tr(),
-            color: const Color(0xFFE53935),
-            onTap: () => _open(context, const DeleteAccountView()),
-          ),
-          SizedBox(height: 10.h),
-          Divider(
-            color: isDark ? AppTheme.darkBorder : AppTheme.hairline,
-            height: 1,
-          ),
-          SizedBox(height: 10.h),
-          SectionLabel('morePreferences'.tr(), isDark),
+
+          // ٤. الإعدادات والدعم
+          SectionLabel('drawerSettingsSupport'.tr(), isDark),
           DrawerThemeTile(isDark: isDark),
           DrawerLanguageTile(isDark: isDark),
-          SizedBox(height: 10.h),
-          Divider(
-            color: isDark ? AppTheme.darkBorder : AppTheme.hairline,
-            height: 1,
-          ),
-          SizedBox(height: 10.h),
           CustomDrawerTile(
             icon: Icons.headset_mic_rounded,
             label: 'moreContactUs'.tr(),
-            color: const Color(0xFF00ACC1),
+            color: DrawerIconColor.contact.of(isDark),
             onTap: () => _open(context, const ContactUsView()),
           ),
           CustomDrawerTile(
             icon: Icons.privacy_tip_outlined,
             label: 'morePrivacyPolicy'.tr(),
-            color: const Color(0xFF6B7A90),
+            color: DrawerIconColor.privacy.of(isDark),
             onTap: () => _openPrivacyPolicy(context),
           ),
-          SizedBox(height: 10.h),
-          Divider(
-            color: isDark ? AppTheme.darkBorder : AppTheme.hairline,
-            height: 1,
-          ),
-          SizedBox(height: 10.h),
-          SectionLabel('لوحة التحكم', isDark),
+
+          // ٥. لوحة الإدارة (بطاقة مميزة — مش عنصر تنقل عادي)
+          SectionLabel('drawerAdminPanel'.tr(), isDark),
+          const DrawerAdminCard(),
+
+          // ٦. منطقة الخطر
+          SectionLabel('drawerDangerZone'.tr(), isDark),
           CustomDrawerTile(
-            icon: Icons.admin_panel_settings_rounded,
-            label: 'لوحة التحكم',
-            color: AppTheme.primaryColor,
-            onTap: () => _open(context, const AdminHome()),
+            icon: Icons.delete_forever_rounded,
+            label: 'moreDeleteAccount'.tr(),
+            color: DrawerIconColor.danger.of(isDark),
+            isDestructive: true,
+            onTap: () => _open(context, const DeleteAccountView()),
           ),
+
+          SizedBox(height: 8.h),
         ],
       ),
     );
