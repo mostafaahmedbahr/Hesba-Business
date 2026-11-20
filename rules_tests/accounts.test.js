@@ -128,6 +128,10 @@ beforeEach(async () => {
     // u3/shop3: بدون اشتراك.
     await setDoc(doc(db, 'users/u3'), { role: 'owner', shopId: 'shop3' });
     await setDoc(doc(db, 'users/admin1'), { role: 'admin' });
+    // أدمن يملك محلًا فعليًا — لازم يتعامل زي الصاحب داخل محله.
+    await setDoc(doc(db, 'users/adminShop'), { role: 'admin', shopId: 'shop1' });
+    // أدمن بدون محل — يفضل مقتصر على مهام الإدارة.
+    await setDoc(doc(db, 'users/adminNoShop'), { role: 'admin' });
 
     // ── persons ─────────────────────────────────
     await setDoc(doc(db, 'persons/p1'),
@@ -172,6 +176,22 @@ test('A1. owner creates a valid person (customer)', async () => {
   await assertSucceeds(
     setDoc(doc(u1.firestore(), 'persons/new1'),
       personPayload('new1', 'u1', 'shop1', { type: 'customer' })),
+  );
+});
+
+test('A1b. admin who owns a shop can create a person in that shop', async () => {
+  const admin = env.authenticatedContext('adminShop');
+  await assertSucceeds(
+    setDoc(doc(admin.firestore(), 'persons/admin-new1'),
+      personPayload('admin-new1', 'adminShop', 'shop1', { type: 'customer' })),
+  );
+});
+
+test('A1c. admin without a shop still cannot create a person', async () => {
+  const admin = env.authenticatedContext('adminNoShop');
+  await assertFails(
+    setDoc(doc(admin.firestore(), 'persons/admin-no-shop'),
+      personPayload('admin-no-shop', 'adminNoShop', 'shop1')),
   );
 });
 
@@ -268,6 +288,13 @@ test('B1. owner creates a valid customer debt (receivable)', async () => {
   const u1 = env.authenticatedContext('u1');
   await assertSucceeds(
     setDoc(doc(u1.firestore(), 'debts/new1'), debtPayload('new1', 'u1', 'shop1', 'p1')));
+});
+
+test('B1b. admin who owns a shop can create a debt for that shop', async () => {
+  const admin = env.authenticatedContext('adminShop');
+  await assertSucceeds(
+    setDoc(doc(admin.firestore(), 'debts/admin-new1'),
+      debtPayload('admin-new1', 'adminShop', 'shop1', 'p1')));
 });
 
 test('B2. guest cannot create a debt', async () => {

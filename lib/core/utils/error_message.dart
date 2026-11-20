@@ -87,7 +87,7 @@ String? _friendlyByCode(String code) {
   if (code.contains('permission-denied') ||
       code.contains('permission denied') ||
       code.contains('insufficient permission')) {
-    return 'الصلاحية مرفوضة: تأكد أن حساب الموظف مُفعّل ومرتبط بالمحل، وأن اشتراك صاحب المحل ساري.';
+    return 'الصلاحية مرفوضة: تعذّر تنفيذ العملية. تأكد من تفعيل حسابك وارتباطه بالمحل وسريان الاشتراك، ثم حاول مرة أخرى.';
   }
   if (code.contains('unavailable') ||
       code.contains('network-request-failed') ||

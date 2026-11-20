@@ -55,6 +55,13 @@ service cloud.firestore {
       return signedIn() && myRole() == 'owner';
     }
 
+    /// أدمن يملك محلًا فعليًا: يُعامل كصاحب محل لبيانات *محله فقط*.
+    /// الأدمن اللي مستندة users بتاعته مفيهاش shopId يفضل مقتصر على
+    /// مهام الإدارة (القواعد اللي تحت بتتحقق من ownerId/shopId == uid/محله).
+    function isShopOwnerAdmin() {
+      return isAdmin() && myShopId() != '';
+    }
+
     /// حساب موقوف يُمنع من كل القراءات والكتابات فورًا.
     function isActiveAccount() {
       return myUserDoc().get('isActive', true) == true;
@@ -566,7 +573,7 @@ service cloud.firestore {
       // لكن إنشاء/تعديل/حذف المنتجات ممنوع نهائيًا عليه.
       allow read: if signedIn() && mayReadEntryData(
         resource.data.shopId, resource.data.ownerId);
-      allow create: if signedIn() && isOwnerUser()
+      allow create: if signedIn() && (isOwnerUser() || isShopOwnerAdmin())
         && request.resource.data.ownerId == myUid()
         && validProduct()
         && validSupplierRef()
@@ -705,7 +712,7 @@ service cloud.firestore {
     match /suppliers/{docId} {
       allow read: if signedIn() && mayReadFullShopData(
         resource.data.shopId, resource.data.ownerId);
-      allow create: if signedIn() && isOwnerUser()
+      allow create: if signedIn() && (isOwnerUser() || isShopOwnerAdmin())
         && validSupplier(docId)
         // Timestamps come from the server: nobody can back-date a supplier.
         && request.resource.data.get('createdAt', null) == request.time
@@ -728,7 +735,7 @@ service cloud.firestore {
     match /persons/{docId} {
       allow read: if signedIn() && mayReadFullShopData(
         resource.data.shopId, resource.data.ownerId);
-      allow create: if signedIn() && isOwnerUser()
+      allow create: if signedIn() && (isOwnerUser() || isShopOwnerAdmin())
         && validPerson(docId)
         && request.resource.data.get('createdAt', null) == request.time
         && request.resource.data.get('updatedAt', null) == request.time
@@ -748,7 +755,7 @@ service cloud.firestore {
     match /debts/{debtId} {
       allow read: if signedIn() && mayReadFullShopData(
         resource.data.shopId, resource.data.ownerId);
-      allow create: if signedIn() && isOwnerUser()
+      allow create: if signedIn() && (isOwnerUser() || isShopOwnerAdmin())
         && validDebt(debtId)
         && request.resource.data.get('createdAt', null) == request.time
         && request.resource.data.get('updatedAt', null) == request.time
@@ -769,7 +776,7 @@ service cloud.firestore {
         allow read: if signedIn() && (isAdmin()
           || get(/databases/$(database)/documents/debts/$(debtId)).data.ownerId == myUid()
           || sameShop(get(/databases/$(database)/documents/debts/$(debtId)).data.shopId));
-        allow create: if signedIn() && isOwnerUser()
+        allow create: if signedIn() && (isOwnerUser() || isShopOwnerAdmin())
           && request.resource.data.get('ownerId', null) == myUid()
           && request.resource.data.get('shopId', null) ==
              get(/databases/$(database)/documents/debts/$(debtId)).data.shopId

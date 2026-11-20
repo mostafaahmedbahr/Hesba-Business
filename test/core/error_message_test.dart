@@ -32,6 +32,9 @@ void main() {
       FirebaseException(plugin: 'cloud_firestore', code: 'permission-denied'),
     );
     expect(msg, contains('الصلاحية مرفوضة'));
+    //Must not assume the caller is a staff account — owners see this too.
+    expect(msg, isNot(contains('الموظف')));
+    expect(msg, isNot(contains('صاحب المحل')));
   });
 
   test('maps auth session expiry without leaking the code', () {

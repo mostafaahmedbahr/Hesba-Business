@@ -127,11 +127,27 @@ class SalesRepoImpl implements SalesRepo {
       if (cleanCustomerName.isEmpty || cleanCustomerPhone.isEmpty) {
         throw Exception('اكتب اسم العميل ورقم هاتفه معًا');
       }
-      final person = await _accounts.findOrCreatePerson(
-        name: cleanCustomerName,
-        phone: cleanCustomerPhone,
-        partyType: PersonModel.typeCustomer,
-      );
+      // خطوة منفصلة عن كتابة الفاتورة: عميل جديد = إنشاء مستند persons أولًا.
+      // لو القواعد رفضتها، رسالة البيع العامة كانت بتضلل المستخدم (بتقول إنها
+      // مشكلة موظف/اشتراك). هنا نسمّي الخطوة نفسها عشان يفهم إيه اللي فشل.
+      late final PersonModel person;
+      try {
+        person = await _accounts.findOrCreatePerson(
+          name: cleanCustomerName,
+          phone: cleanCustomerPhone,
+          partyType: PersonModel.typeCustomer,
+        );
+      } on FirebaseException catch (logErr, logSt) {
+        AppLogger.nonFatal(
+          'features/sales/data/repos_impl/sales_repo_impl.dart (create person)',
+          logErr,
+          logSt,
+          severity: LoggingSeverity.warning,
+        );
+        throw Exception(
+          'تعذّر حفظ بيانات العميل الجديد (الاسم والرقم). تأكد من سريان الاشتراك ونشر قواعد Firestore، أو اختر عميلًا موجودًا.',
+        );
+      }
       personId = person.id;
       personName = cleanCustomerName;
       personPhone = cleanCustomerPhone;
