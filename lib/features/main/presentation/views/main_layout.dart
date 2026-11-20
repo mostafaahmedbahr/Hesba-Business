@@ -136,7 +136,7 @@ class _MainShellState extends State<_MainShell> {
       context.read<NotificationCubit>().loadReminders();
       // setupFcm performs network/plugin calls — use the guarded repo wrapper
       // so failures are logged instead of becoming unhandled async errors.
-      unawaited(context.read<NotificationRepo>().setupFcm());
+      unawaited(sl<NotificationRepo>().setupFcm());
     });
   }
 
