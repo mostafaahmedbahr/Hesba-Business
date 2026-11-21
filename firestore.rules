@@ -919,6 +919,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Precomputed platform rollup (one doc read instead of scanning the book).
+    // Admin-only on both sides — it is an aggregated financial figure.
+    match /admin_rollups/{docId} {
+      allow read, write: if isAdmin();
+    }
+
     match /admin_settings/{docId} {
       // Customers read the settings (plan prices, trial days, wallet numbers)
       // so dashboard edits apply live; only admins may write — and only valid

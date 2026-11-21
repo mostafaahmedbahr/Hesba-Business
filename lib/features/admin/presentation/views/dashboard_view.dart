@@ -73,9 +73,22 @@ class DashboardView extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.all(AdminSpace.lg),
             children: [
-              const AdminPageHeader(
-                title: 'لوحة التحكم',
-                description: 'نظرة عامة على أداء النظام — اضغط على أي بطاقة للانتقال للقسم',
+              Row(
+                children: [
+                  const Expanded(
+                    child: AdminPageHeader(
+                      title: 'لوحة التحكم',
+                      description: 'نظرة عامة على أداء النظام — اضغط على أي بطاقة للانتقال للقسم',
+                    ),
+                  ),
+                  Tooltip(
+                    message: 'إعادة حساب إجماليات الأرباح من كل السجلات',
+                    child: IconButton(
+                      icon: const Icon(Icons.calculate_outlined),
+                      onPressed: () => context.read<AdminDashboardCubit>().rebuildProfit(),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: AdminSpace.md),
               LayoutBuilder(

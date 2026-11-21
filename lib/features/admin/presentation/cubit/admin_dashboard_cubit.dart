@@ -68,6 +68,23 @@ class AdminDashboardCubit extends Cubit<AdminDashboardState> {
   /// snapshot overwrites the newer one.
   bool _loading = false;
 
+  /// recomputes the cached platform rollup, then reloads the dashboard.
+  Future<void> rebuildProfit() async {
+    if (_loading) return;
+    _loading = true;
+    emit(AdminDashboardLoading());
+    try {
+      await repo.rebuildPlatformRollup();
+      _loading = false;
+      await load();
+    } catch (e, logSt) {
+      AppLogger.nonFatal('features/admin/presentation/cubit/admin_dashboard_cubit.dart', e, logSt,
+          severity: LoggingSeverity.warning);
+      if (!isClosed) emit(AdminDashboardError(e.toString()));
+      _loading = false;
+    }
+  }
+
   Future<void> load() async {
     if (_loading) return;
     _loading = true;

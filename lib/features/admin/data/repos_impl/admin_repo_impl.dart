@@ -172,8 +172,77 @@ class AdminRepoImpl implements AdminRepo {
   ///    original sale.
   /// Numbers therefore reconcile with the per-shop reports for the same
   /// underlying documents, up to the scan caps ([capped]).
+  /// Reads the precomputed rollup (one document read) when it exists.
+  /// Falls back to the legacy bounded scan when it hasn't been generated yet,
+  /// so upgrading never shows an empty dashboard.
   @override
   Future<ProfitSummary> profitSummary() async {
+    try {
+      final snap = await firestore
+          .collection('admin_rollups')
+          .doc('platform')
+          .get();
+      final data = snap.data();
+      if (data != null && data.isNotEmpty) {
+        return _profitSummaryFromJson(data);
+      }
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('features/admin/data/repos_impl/admin_repo_impl.dart', logErr, logSt,
+          severity: LoggingSeverity.warning);
+    }
+    return _scanProfitSummary();
+  }
+
+  /// Scans the whole book once (bounded) and writes ONE rollup document.
+  /// Designed to be called by an admin action / scheduled job — not on every
+  /// dashboard open. Keeps 100+ shops fast and the numbers uncapped.
+  @override
+  Future<ProfitSummary> rebuildPlatformRollup() async {
+    final summary = await _scanProfitSummary();
+    await firestore.collection('admin_rollups').doc('platform').set({
+      ..._profitSummaryToJson(summary),
+      'generatedAt': FieldValue.serverTimestamp(),
+    });
+    return summary;
+  }
+
+  Map<String, dynamic> _profitSummaryToJson(ProfitSummary s) => {
+        'revenue': s.revenue,
+        'returnsTotal': s.returnsTotal,
+        'cost': s.cost,
+        'profit': s.profit,
+        'salesCounted': s.salesCounted,
+        'returnsCounted': s.returnsCounted,
+        'capped': s.capped,
+        'unknownCostLines': s.unknownCostLines,
+        'profitByMonth': s.profitByMonth,
+        'revenueByMonth': s.revenueByMonth,
+      };
+
+  ProfitSummary _profitSummaryFromJson(Map<String, dynamic> d) {
+    Map<String, int> intMap(String key) => (d[key] as Map<String, dynamic>? ?? const {})
+        .map((k, v) => MapEntry(k, (v is num) ? v.round() : (v is String ? int.tryParse(v) ?? 0 : 0)));
+    num asNum(String key) {
+      final v = d[key];
+      return v is num ? v : (v is String ? num.tryParse(v) ?? 0 : 0);
+    }
+    int asInt(String key) => asNum(key).round();
+    return ProfitSummary(
+      revenue: asNum('revenue').toDouble(),
+      returnsTotal: asNum('returnsTotal').toDouble(),
+      cost: asNum('cost').toDouble(),
+      profit: asNum('profit').toDouble(),
+      salesCounted: asInt('salesCounted'),
+      returnsCounted: asInt('returnsCounted'),
+      capped: d['capped'] == true,
+      unknownCostLines: asInt('unknownCostLines'),
+      profitByMonth: intMap('profitByMonth'),
+      revenueByMonth: intMap('revenueByMonth'),
+    );
+  }
+
+  /// Legacy bounded scan — exact same math, used as fallback and by rebuild.
+  Future<ProfitSummary> _scanProfitSummary() async {
     var capped = false;
 
     Future<List<SaleModel>> loadSales() async {

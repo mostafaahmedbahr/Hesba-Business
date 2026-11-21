@@ -29,7 +29,12 @@ abstract class AdminRepo {
   Future<Map<String, int>> revenueByMonth({required int months});
 
   /// Platform-wide profit derived from sales across all shops.
+  /// Reads the cached rollup when available; falls back to a bounded scan.
   Future<ProfitSummary> profitSummary();
+
+  /// Recomputes the cached platform rollup by scanning the book once and
+  /// writing a single document (`admin_rollups/platform`). Admin-only.
+  Future<ProfitSummary> rebuildPlatformRollup();
 
   // Lists (paginated)
   Future<QuerySnapshot<Map<String, dynamic>>> getShopsPage({DocumentSnapshot? startAfter, String search = ''});
