@@ -15,9 +15,10 @@
 //      receivable, payment-update-only writes (paidAmount monotonic and
 //      bounded by amount), no client delete, cross-shop isolation.
 //   C. payments — debts/{id}/payments: immutable ledger (no update/
-//      delete), amount bounded by the debt's remaining balance, creator-
-//      only recording, full transaction flow (set payment + increment
-//      paidAmount) as the app does it.
+//      delete), amount bounded by the debt's remaining balance, recording
+//      by any owner/staff of the SAME shop (needed for credit-return
+//      settlement) with ownerId pinned to the caller, full transaction
+//      flow (set payment + increment paidAmount) as the app does it.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -439,11 +440,19 @@ test('C2. payment above remaining balance is rejected', async () => {
     }));
 });
 
-test('C3. coworker of the shop cannot record a payment on someone else’s debt', async () => {
+test('C3. same-shop actor may settle a shop debt but cannot forge the ledger ownerId', async () => {
   const u1b = env.authenticatedContext('u1b');
-  await assertFails(
+  // u1b مالك ثانٍ داخل shop1: القواعد تسمح لملاك/موظفي المحل بتسوية ديونه،
+  // لأن مرتجع البيع الآجل بيقلّل الذمة من نفس مسار الدفع (انظر staff.test.js 9c).
+  await assertSucceeds(
     setDoc(doc(u1b.firestore(), 'debts/d1/payments/pay1'), {
       id: 'pay1', ownerId: 'u1b', shopId: 'shop1',
+      amount: 100, note: '', createdAt: serverTimestamp(),
+    }));
+  // لكن السجل لازم يعكس مَن نفّذ الدفعة فعليًا — تزوير ownerId لمالك آخر مرفوض.
+  await assertFails(
+    setDoc(doc(u1b.firestore(), 'debts/d1/payments/pay2'), {
+      id: 'pay2', ownerId: 'u1', shopId: 'shop1',
       amount: 100, note: '', createdAt: serverTimestamp(),
     }));
 });

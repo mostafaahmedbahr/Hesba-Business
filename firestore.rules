@@ -135,6 +135,15 @@ service cloud.firestore {
           'locationAddress', 'fcmTokens', 'fcmTokensUpdatedAt']);
     }
 
+    // FCM tokens: bounded list of short strings. Stops a client from filling
+    // the user doc with thousands of fake tokens (abuse / document-size bloat).
+    // 50 comfortably covers every real device; production had up to 19.
+    function validFcmTokens() {
+      return !('fcmTokens' in request.resource.data)
+        || (request.resource.data.fcmTokens is list
+          && request.resource.data.fcmTokens.size() <= 50);
+    }
+
     // Optional numeric field that, when present, must be a number >= 0.
     // Tolerant of partial updates; blocks negative-money injection.
     function nonNegative(field) {
@@ -426,7 +435,7 @@ service cloud.firestore {
       // never role/ownerId/shopId, so a staff account cannot be escalated.
       allow update: if isAdmin()
         || (signedIn() && isActiveAccount() && myUid() == userId && unchangedRole()
-          && onlyOwnerFields())
+          && onlyOwnerFields() && validFcmTokens())
         || (signedIn() && isActiveAccount() && isOwnerUser()
           && resource.data.get('role', '') == 'staff'
           && resource.data.get('ownerId', '') == myUid()

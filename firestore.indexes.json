@@ -144,30 +144,6 @@
         { "fieldPath": "shopId", "order": "ASCENDING" },
         { "fieldPath": "supplierId", "order": "ASCENDING" }
       ]
-    },
-    {
-      "collectionGroup": "shops",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "searchTokens", "arrayConfig": "CONTAINS" },
-        { "fieldPath": "__name__", "order": "ASCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "products",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "searchTokens", "arrayConfig": "CONTAINS" },
-        { "fieldPath": "__name__", "order": "ASCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "subscription_requests",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "searchTokens", "arrayConfig": "CONTAINS" },
-        { "fieldPath": "__name__", "order": "ASCENDING" }
-      ]
     }
   ],
   "fieldOverrides": []

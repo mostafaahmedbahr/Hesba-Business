@@ -157,6 +157,26 @@ test('V2. suspended owner cannot edit their own profile', async () => {
   );
 });
 
+// ── FCM token hygiene ──────────────────────────────────────────────────
+test('F1. owner can store a bounded FCM token list', async () => {
+  const alice = env.authenticatedContext('u1');
+  await assertSucceeds(
+    updateDoc(doc(alice.firestore(), 'users/u1'), {
+      fcmTokens: ['token-a', 'token-b'],
+      fcmTokensUpdatedAt: new Date(),
+    }),
+  );
+});
+
+test('F2. FCM token list larger than 50 is rejected', async () => {
+  const alice = env.authenticatedContext('u1');
+  await assertFails(
+    updateDoc(doc(alice.firestore(), 'users/u1'), {
+      fcmTokens: Array.from({ length: 51 }, (_, i) => 'token-' + i),
+    }),
+  );
+});
+
 test('V3a. suspended owner cannot edit the shop document', async () => {
   await seed(async (db) => {
     await setDoc(doc(db, 'users/u1'), {

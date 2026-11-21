@@ -95,11 +95,12 @@
 
 ## 5. المطلوب منك بره الكود (قبل النشر)
 
-1. **نشر الفهارس:**
+1. **نشر الفهارس:** ✅ **تم في 21 Nov 2026** على `hesba-business` (`Deploy complete!`، 18 منشورة = 18 محلية).
+   > أثناء النشر رفض Firestore الفهارس الثلاثة الخاصة بـ `searchTokens` (shops/products/subscription_requests) لأنها «غير ضرورية — تُضبط بـ single-field index controls»؛ حُذفت من `firestore.indexes.json` (21 → 18) لأن استعلام `arrayContains + orderBy(__name__)` يكفيه الفهرس التلقائي.
    ```
-   firebase deploy --only firestore:indexes
+   firebase deploy --only firestore:rules,firestore:indexes --project hesba-business
    ```
-2. **تشغيل الـ backfill مرة واحدة** للمستندات القديمة اللي مفيهاش `searchTokens` (`AdminSearchRepo.backfillSearchTokens()`).
+2. **تشغيل الـ backfill مرة واحدة** ✅ **تم في 21 Nov 2026**: 28 مستندًا قديمًا (10 محلات + 13 منتج + 5 طلبات اشتراك) أخذت `searchTokens`؛ إعادة الفحص 0 متبقٍ، واستعلام البحث المفهرس اختُبر على الإنتاج بنجاح. (`AdminSearchRepo.backfillSearchTokens()`).
 3. **إعادة بناء الـ AAB** من الـ HEAD الحالي بعد كل التعديلات.
 4. ملاحظات قديمة من التدقيق لسه مفتوحة على حدة: تدوير الـ keystore، نشر/تحقق قواعد Firestore، ونماذج Play Console.
 
