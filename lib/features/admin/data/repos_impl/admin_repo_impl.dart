@@ -442,6 +442,15 @@ class AdminRepoImpl implements AdminRepo {
   }
 
   @override
+  Future<QuerySnapshot<Map<String, dynamic>>> getActivityLogs() {
+    return firestore
+        .collection(_activity)
+        .orderBy('createdAt', descending: true)
+        .limit(100)
+        .get();
+  }
+
+  @override
   Future<void> signInAdmin(String email, String password) {
     // Throws FirebaseAuthException on bad credentials — the cubit maps it.
     return auth.signInWithEmailAndPassword(email: email, password: password);

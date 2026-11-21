@@ -153,7 +153,7 @@
 | ~~🟡 P2~~ ✅ | ~~تنظيف 66 ملاحظة analyzer + TODOs~~ | **تم**: `dart fix --apply` (57 إصلاحًا في 34 ملفًا) + 9 إصلاحات يدوية ⇒ `No issues found!`، و0 TODO حقيقي (§15) |
 | ~~🟡 P2~~ ✅ محليًا | ~~App Check + Crashlytics + تقليم FCM + فصل preset الإيصالات~~ | **تم محليًا** + تقليم بيانات الإنتاج + نشر القواعد (§16). خارجي: تفعيل Console لـ App Check/Crashlytics وإنشاء preset Cloudinary |
 | ~~🟡 P2~~ ✅ | ~~اختبارات Widget/Integration لتدفق كامل + تقليلالاعتماد على المسح الكامل للتقارير~~ | **تم**: تدفق مالي كامل (بيع آجل → مرتجع → تسوية → تجديد → رفض) + widget chips + كاش فترات يمنع إعادة المسح الكامل (§17) |
-| ⚪ P3 | تحسينات اختيارية في `FIRESTORE_READS_MAP.md` §6، إغلاق S-19، iOS APNs | بعد النشر |
+| ~~⚪ P3~~ ✅ | ~~تحسينات اختيارية في `FIRESTORE_READS_MAP.md` §6، إغلاق S-19، iOS APNs~~ | **تم**: gating درج الأدمن، دمج `getToday*` في استعلام واحد/كوليكشن، `getActivityLogs()` بدل live listener، تحميل الإعدادات مرة واحدة في الـ splash، iOS APNs=production، وتنظيف آخر debugPrint (§18) |
 
 ---
 
@@ -326,6 +326,21 @@
 - `test/reports/period_cache_test.dart` (4 اختبارات) يثبت: bootstrap بنافذة محدودة، مسح كامل واحد، تبديل بلا مسح متكرر، وتحديث بنفس النافذة.
 
 **التحقق:** `flutter analyze` → No issues found · `flutter test` → **236/236** (كانت 228).
+
+---
+
+## 18. جولة P3 الأخيرة ✅
+
+| # | التحسين | الملفات |
+|---|---|---|
+| S-19 | بطاقة «لوحة التحكم» صارت للأدمن فقط عبر `sl<UserRoleService>().isAdmin` — تقليل سطح الهجوم ومنع تضليل المستخدمين | `drawer_items_list.dart` |
+| debugPrint | آخر `debugPrint` مباشر في `add_return_view.dart` أُزيل (الـ `AppLogger.nonFatal` موجود أصلًا) | `add_return_view.dart` |
+| iOS APNs | `aps-environment` من `development` إلى `production` | `ios/Runner/Runner.entitlements` |
+| دمج `getToday*` | `getTodaySummary()` جديد يقرأ sales/returns/expenses **مرة واحدة لكل كوليكشن** بدل استعلامين (الإجمالي + التقسيم/العدد) — الـ cubit يستخدمه | `dashboard_repo.dart`, `dashboard_repo_impl.dart`, `dashboard_cubit.dart` |
+| Activity logs | `getActivityLogs()` (one-shot) + زر/سحب تحديث بدل `watchActivityLogs()` المستمر | `admin_repo.dart`, `admin_repo_impl.dart`, `activity_view.dart` |
+| الإعدادات | `AppSettingsService.refresh()` + `FeatureFlagsService.refresh()` في الـ splash مرة واحدة؛ الـ banner يقرأ من الكاش | `splash_view.dart`, `subscription_banner.dart` |
+
+**التحقق:** `flutter analyze` → No issues found · `flutter test` → **236/236** (تحديث اختبار `no_live_collection_listeners` ليعكس قراءة واحدة/كوليكشن).
 
 ---
 

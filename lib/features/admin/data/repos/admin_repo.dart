@@ -65,6 +65,9 @@ abstract class AdminRepo {
   /// Latest activity log entries for the activity view.
   Stream<QuerySnapshot<Map<String, dynamic>>> watchActivityLogs();
 
+  /// One-shot read of the latest activity logs (no live listener).
+  Future<QuerySnapshot<Map<String, dynamic>>> getActivityLogs();
+
   // Approve / reject
   Future<void> approveRequest(SubscriptionRequestModel request);
   Future<void> rejectRequest(SubscriptionRequestModel request, String reason);

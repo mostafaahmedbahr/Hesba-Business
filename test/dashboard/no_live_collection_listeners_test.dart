@@ -94,11 +94,12 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 50));
 
     expect(cubit.state.status, DashboardStatus.success);
-    // Exactly the six metric queries + one users doc read each for the shop
-    // identity listener and getShopId(). The removed watchDashboardChanges()
-    // used to add one extra collection call to each of the four collections.
+    // Today's money metrics are now read in ONE pass per collection (sales,
+    // returns, expenses) instead of two separate queries for total/count and
+    // by-method. Products still need two counts (active + low stock), and the
+    // users doc is read once for shop identity + once for getShopId().
     expect(counting.callsFor('sales'), 1);
-    expect(counting.callsFor('returns'), 2);
+    expect(counting.callsFor('returns'), 1);
     expect(counting.callsFor('expenses'), 1);
     expect(counting.callsFor('products'), 2);
     expect(counting.callsFor('users'), 2);

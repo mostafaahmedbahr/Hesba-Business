@@ -2,6 +2,21 @@ import '../../../expenses/data/models/expense_model.dart';
 import '../../../returns/data/models/return_model.dart';
 import '../../../sales/data/models/sale_model.dart';
 
+/// Combined today summary returned by [DashboardRepo.getTodaySummary].
+class TodaySummary {
+  const TodaySummary({
+    required this.salesByMethod,
+    required this.returnsTotal,
+    required this.returnsCount,
+    required this.expensesTotal,
+  });
+
+  final Map<String, double> salesByMethod;
+  final double returnsTotal;
+  final int returnsCount;
+  final double expensesTotal;
+}
+
 abstract class DashboardRepo {
   /// Returns total sales amount for today.
   ///
@@ -31,6 +46,11 @@ abstract class DashboardRepo {
 
 /// Streams the shop name and photo from the current user's profile.
 Stream<({String? name, String? imageUrl})> watchShopIdentity();
+
+  /// Reads today's sales/returns/expenses in ONE pass per collection instead
+  /// of running separate queries for total + by-method + count. Returns
+  /// `(salesByMethod, returnsTotal, returnsCount, expensesTotal)`.
+  Future<TodaySummary> getTodaySummary({required String shopId});
 
   /// Returns the current user's shopId.
   Future<String?> getShopId();

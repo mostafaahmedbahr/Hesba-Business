@@ -19,13 +19,21 @@ class ActivityView extends StatefulWidget {
 class _ActivityViewState extends State<ActivityView> {
   String _group = 'all';
 
-  // ننشئ الستريم مرة واحدة — إنشاؤه داخل build يعني listener جديد مع كل setState.
-  late final Stream<QuerySnapshot<Map<String, dynamic>>> _activityStream;
+  // One-shot read instead of a live listener: the activity log changes only
+  // on admin actions, so re-reading on refresh (pull / button) is enough.
+  late final Future<QuerySnapshot<Map<String, dynamic>>> _activityFuture;
 
   @override
   void initState() {
     super.initState();
-    _activityStream = sl<AdminRepo>().watchActivityLogs();
+    _activityFuture = sl<AdminRepo>().getActivityLogs();
+  }
+
+  Future<void> _reload() async {
+    setState(() {
+      _activityFuture = sl<AdminRepo>().getActivityLogs();
+    });
+    await _activityFuture;
   }
 
   bool _matches(String action) {
@@ -42,8 +50,8 @@ class _ActivityViewState extends State<ActivityView> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: _activityStream,
+    return FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      future: _activityFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Column(
@@ -57,7 +65,7 @@ class _ActivityViewState extends State<ActivityView> {
           );
         }
         if (snapshot.hasError) {
-          return adminError('تعذر تحميل سجل النشاطات', () => setState(() {}));
+          return adminError('تعذر تحميل سجل النشاطات', _reload);
         }
 
         final all = snapshot.data?.docs ?? [];
@@ -68,7 +76,7 @@ class _ActivityViewState extends State<ActivityView> {
         final groups = _groupByDate(docs);
 
         return RefreshIndicator(
-          onRefresh: () async => setState(() {}),
+          onRefresh: _reload,
           child: Column(
             children: [
               const AdminPageHeader(
@@ -86,7 +94,7 @@ class _ActivityViewState extends State<ActivityView> {
                   else
                     'آخر ١٠٠ عملية مرتبة بالأحدث أولاً'
                 ],
-                onRefresh: () => setState(() {}),
+                onRefresh: _reload,
               ),
               AdminFilterChips(
                 selected: _group,

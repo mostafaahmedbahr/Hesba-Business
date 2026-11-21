@@ -76,23 +76,22 @@ class DashboardCubit extends Cubit<DashboardState> {
       // Pass a non-null sentinel when signed out so the repo methods never
       // re-read users/{uid}; an empty shopId simply matches no documents.
       final shopId = await _repo.getShopId() ?? '';
+      // Today's money metrics now come from a single pass per collection
+      // (sales/returns/expenses read once each instead of twice).
       final results = await Future.wait([
-        _repo.getTodaySalesByMethod(shopId: shopId),
-        _repo.getTodayReturnsTotal(shopId: shopId),
-        _repo.getTodayReturnsCount(shopId: shopId),
-        _repo.getTodayExpensesTotal(shopId: shopId),
+        _repo.getTodaySummary(shopId: shopId),
         _repo.getProductsCount(shopId: shopId),
         _repo.getLowStockProductsCount(shopId: shopId),
       ]);
 
-      // الإجمالي = مجموع كل وسائل الدفع (فواتير بلا وسيلة مدخلة تحت '').
-      final byMethod = results[0] as Map<String, double>;
+      final today = results[0] as TodaySummary;
+      final byMethod = today.salesByMethod;
       final salesTotal = byMethod.values.fold<double>(0, (s, v) => s + v);
-      final returnsTotal = results[1] as double;
-      final returnsCount = results[2] as int;
-      final expensesTotal = results[3] as double;
-      final productsCount = results[4] as int;
-      final lowStockCount = results[5] as int;
+      final returnsTotal = today.returnsTotal;
+      final returnsCount = today.returnsCount;
+      final expensesTotal = today.expensesTotal;
+      final productsCount = results[1] as int;
+      final lowStockCount = results[2] as int;
 
       if (isClosed) return;
       emit(state.copyWith(

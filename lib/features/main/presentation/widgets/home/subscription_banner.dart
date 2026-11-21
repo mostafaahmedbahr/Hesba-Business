@@ -24,14 +24,8 @@ class _SubscriptionBannerState extends State<SubscriptionBanner> {
   @override
   void initState() {
     super.initState();
-    // Fetch the latest settings; on success rebuild with live values.
-    // refresh() never throws, so no error handling is needed here.
-    Future.wait([
-      AppSettingsService.refresh(),
-      FeatureFlagsService.refresh(),
-    ]).then((_) {
-      if (mounted) setState(() {});
-    });
+    // Settings + flags are loaded once from the splash screen. Reading the
+    // cached values here avoids a Firestore round-trip on every banner build.
   }
 
   @override

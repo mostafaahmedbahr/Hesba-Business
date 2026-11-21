@@ -145,6 +145,59 @@ class DashboardRepoImpl implements DashboardRepo {
   }
 
   @override
+  Future<TodaySummary> getTodaySummary({required String shopId}) async {
+    // One query per collection: sales docs feed both the total and the
+    // by-method breakdown; return docs feed total + count; expenses feed total.
+    final results = await Future.wait([
+      _firestore
+          .collection('sales')
+          .where('shopId', isEqualTo: shopId)
+          .where('createdAt', isGreaterThanOrEqualTo: _todayStart)
+          .where('createdAt', isLessThanOrEqualTo: _todayEnd)
+          .get(),
+      _firestore
+          .collection('returns')
+          .where('shopId', isEqualTo: shopId)
+          .where('createdAt', isGreaterThanOrEqualTo: _todayStart)
+          .where('createdAt', isLessThanOrEqualTo: _todayEnd)
+          .get(),
+      _firestore
+          .collection('expenses')
+          .where('shopId', isEqualTo: shopId)
+          .where('date', isGreaterThanOrEqualTo: _todayStart)
+          .where('date', isLessThanOrEqualTo: _todayEnd)
+          .get(),
+    ]);
+
+    final byMethod = <String, double>{};
+    for (final doc in results[0].docs) {
+      final data = doc.data();
+      final method = (data['paymentMethod'] as String?)?.trim() ?? '';
+      byMethod[method] =
+          (byMethod[method] ?? 0) + ((data['total'] as num?)?.toDouble() ?? 0);
+    }
+
+    double returnsTotal = 0;
+    for (final doc in results[1].docs) {
+      returnsTotal += (doc.data()['total'] as num?)?.toDouble() ?? 0;
+    }
+
+    double expensesTotal = 0;
+    for (final doc in results[2].docs) {
+      // Recurring templates are not real expenses — exclude them.
+      if (((doc.data()['recurrence'] as String?) ?? 'none') != 'none') continue;
+      expensesTotal += (doc.data()['amount'] as num?)?.toDouble() ?? 0;
+    }
+
+    return TodaySummary(
+      salesByMethod: byMethod,
+      returnsTotal: returnsTotal,
+      returnsCount: results[1].docs.length,
+      expensesTotal: expensesTotal,
+    );
+  }
+
+  @override
   Future<int> getProductsCount({String? shopId}) async {
     final resolved = await _resolveShop(shopId);
     if (resolved == null) return 0;
