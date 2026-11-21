@@ -10,7 +10,9 @@ import 'package:hesba/core/theme/app_theme.dart';
 import 'package:hesba/features/admin/data/repos/admin_repo.dart';
 import 'package:hesba/features/admin/presentation/cubit/admin_auth_cubit.dart';
 import 'package:hesba/features/admin/presentation/cubit/admin_dashboard_cubit.dart';
+import 'package:hesba/features/admin/presentation/cubit/admin_list_cubit.dart';
 import 'package:hesba/features/admin/presentation/cubit/admin_nav_cubit.dart';
+import 'package:hesba/features/admin/presentation/cubit/admin_settings_cubit.dart';
 import 'package:hesba/features/admin/presentation/views/activity_view.dart';
 import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
 import 'package:hesba/features/admin/presentation/views/admin_settings_view.dart';
@@ -24,10 +26,10 @@ import 'package:hesba/features/admin/presentation/views/shops_view.dart';
 import 'package:hesba/features/admin/presentation/views/subscription_requests_view.dart';
 import 'package:hesba/features/admin/presentation/views/subscriptions_view.dart';
 
-class AdminShell extends StatelessWidget {
+class AdminShell extends StatefulWidget {
   const AdminShell({super.key});
 
-  static const _items = [
+  static const items = [
     _NavItem('الرئيسية', 'نظرة عامة على النظام', Icons.dashboard_outlined, Icons.dashboard),
     _NavItem('المحلات', 'إدارة المحلات المسجلة', Icons.storefront_outlined, Icons.storefront),
     _NavItem('الاشتراكات', 'حالات اشتراكات المحلات', Icons.workspace_premium_outlined, Icons.workspace_premium),
@@ -40,31 +42,97 @@ class AdminShell extends StatelessWidget {
     _NavItem('الإعدادات', 'أسعار الباقات وطرق الدفع', Icons.settings_outlined, Icons.settings),
   ];
 
+  @override
+  State<AdminShell> createState() => _AdminShellState();
+}
+
+class _AdminShellState extends State<AdminShell> {
+  /// Page widgets are created ONCE on first visit and kept alive in an
+  /// IndexedStack. Switching tabs no longer rebuilds the Cubit / re-reads
+  /// Firestore — pull-to-refresh (and the 60s return refresh below) are the
+  /// only triggers for new reads.
+  final List<Widget?> _pages = List<Widget?>.filled(10, null);
+  final List<GlobalKey> _keys =
+      List<GlobalKey>.generate(10, (i) => GlobalKey(debugLabel: 'admin-page-$i'));
+  final Map<int, DateTime> _lastVisit = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _page(0); // build the first page once; others are created on first visit
+    _lastVisit[0] = DateTime.now();
+  }
+
+  /// Refresh a returning tab only when its data is stale (>60s). Fresh data
+  /// from a recent visit is reused as-is — zero reads on quick tab switches.
+  void _maybeRefreshOnReturn(int index) {
+    final last = _lastVisit[index];
+    if (last == null || DateTime.now().difference(last) < const Duration(seconds: 60)) {
+      return;
+    }
+    final ctx = _keys[index].currentContext;
+    if (ctx == null) return;
+    try {
+      ctx.read<AdminDashboardCubit>().load();
+      return;
+    } catch (_) {}
+    try {
+      ctx.read<AdminSettingsCubit>().load();
+      return;
+    } catch (_) {}
+    try {
+      ctx.read<AdminListCubit>().firstPage();
+    } catch (_) {}
+  }
+
+  void _selectTab(int index) {
+    if (index == context.read<AdminNavCubit>().state.index) return;
+    _maybeRefreshOnReturn(index);
+    _page(index); // create on first visit only
+    _lastVisit[index] = DateTime.now();
+    context.read<AdminNavCubit>().select(index);
+  }
+
   Widget _page(int index) {
+    final existing = _pages[index];
+    if (existing != null) return existing;
+    final page = _buildPage(index);
+    _pages[index] = page;
+    return page;
+  }
+
+  Widget _stack(int currentIndex) => IndexedStack(
+        index: currentIndex,
+        children: List.generate(10, (i) => _pages[i] ?? const SizedBox.shrink()),
+      );
+
+  Widget _buildPage(int index) {
+    final key = _keys[index];
     switch (index) {
       case 0:
         return BlocProvider(
+          key: key,
           create: (_) => AdminDashboardCubit(repo: sl<AdminRepo>())..load(),
           child: const DashboardView(),
         );
       case 1:
-        return const ShopsView();
+        return ShopsView(key: key);
       case 2:
-        return const SubscriptionsView();
+        return SubscriptionsView(key: key);
       case 3:
-        return const SubscriptionRequestsView();
+        return SubscriptionRequestsView(key: key);
       case 4:
-        return const ProductsView();
+        return ProductsView(key: key);
       case 5:
-        return const SalesView();
+        return SalesView(key: key);
       case 6:
-        return const ExpensesView();
+        return ExpensesView(key: key);
       case 7:
-        return const ActivityView();
+        return ActivityView(key: key);
       case 8:
-        return const FeedbackView();
+        return FeedbackView(key: key);
       case 9:
-        return const AdminSettingsView();
+        return AdminSettingsView(key: key);
       default:
         return const SizedBox();
     }
@@ -79,7 +147,7 @@ class AdminShell extends StatelessWidget {
           final wide = MediaQuery.of(context).size.width >= 760;
           return Scaffold(
             resizeToAvoidBottomInset: false,
-            appBar: _TopBar(title: _items[nav.index].label),
+            appBar: _TopBar(title: AdminShell.items[nav.index].label),
             drawer: wide
                 ? null
                 : Drawer(
@@ -88,7 +156,7 @@ class AdminShell extends StatelessWidget {
                         expanded: true,
                         selectedIndex: nav.index,
                         onSelect: (i) {
-                          context.read<AdminNavCubit>().select(i);
+                          _selectTab(i);
                           Navigator.of(context).pop();
                         },
                       ),
@@ -107,16 +175,16 @@ class AdminShell extends StatelessWidget {
                         child: _Sidebar(
                           expanded: !nav.collapsed,
                           selectedIndex: nav.index,
-                          onSelect: (i) => context.read<AdminNavCubit>().select(i),
+                          onSelect: _selectTab,
                           onToggleCollapsed: context.read<AdminNavCubit>().toggleCollapsed,
                           collapsed: nav.collapsed,
                         ),
                       ),
                       Container(width: 1, color: AdminColors.border(context)),
-                      Expanded(child: _page(nav.index)),
+                      Expanded(child: _stack(nav.index)),
                     ],
                   )
-                : _page(nav.index),
+                : _stack(nav.index),
           );
         },
       ),
@@ -246,9 +314,9 @@ class _Sidebar extends StatelessWidget {
         Expanded(
           child: ListView.builder(
             padding: const EdgeInsets.symmetric(vertical: AdminSpace.xs),
-            itemCount: AdminShell._items.length,
+            itemCount: AdminShell.items.length,
             itemBuilder: (context, i) {
-              final item = AdminShell._items[i];
+              final item = AdminShell.items[i];
               return _NavTile(
                 icon: i == selectedIndex ? item.activeIcon : item.icon,
                 label: item.label,
