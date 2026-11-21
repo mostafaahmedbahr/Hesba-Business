@@ -85,12 +85,15 @@ class _AdminShellState extends State<AdminShell> {
     } catch (_) {}
   }
 
-  void _selectTab(int index) {
-    if (index == context.read<AdminNavCubit>().state.index) return;
+  void _selectTab(BuildContext context, int index) {
+    // `context` here must come from inside BlocBuilder (below BlocProvider),
+    // otherwise context.read<AdminNavCubit>() throws ProviderNotFoundError.
+    final nav = context.read<AdminNavCubit>();
+    if (index == nav.state.index) return;
     _maybeRefreshOnReturn(index);
     _page(index); // create on first visit only
     _lastVisit[index] = DateTime.now();
-    context.read<AdminNavCubit>().select(index);
+    nav.select(index);
   }
 
   Widget _page(int index) {
@@ -156,7 +159,7 @@ class _AdminShellState extends State<AdminShell> {
                         expanded: true,
                         selectedIndex: nav.index,
                         onSelect: (i) {
-                          _selectTab(i);
+                          _selectTab(context, i);
                           Navigator.of(context).pop();
                         },
                       ),
@@ -175,7 +178,7 @@ class _AdminShellState extends State<AdminShell> {
                         child: _Sidebar(
                           expanded: !nav.collapsed,
                           selectedIndex: nav.index,
-                          onSelect: _selectTab,
+                          onSelect: (i) => _selectTab(context, i),
                           onToggleCollapsed: context.read<AdminNavCubit>().toggleCollapsed,
                           collapsed: nav.collapsed,
                         ),
