@@ -24,8 +24,13 @@ class _SubscriptionBannerState extends State<SubscriptionBanner> {
   @override
   void initState() {
     super.initState();
-    // Settings + flags are loaded once from the splash screen. Reading the
-    // cached values here avoids a Firestore round-trip on every banner build.
+    // Refresh AFTER sign-in (splash runs before auth → Firestore rules deny).
+    Future.wait([
+      AppSettingsService.refresh(),
+      FeatureFlagsService.refresh(),
+    ]).then((_) {
+      if (mounted) setState(() {});
+    });
   }
 
   @override

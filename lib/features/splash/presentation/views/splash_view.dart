@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'package:hesba/features/profile/data/repos/account_repo.dart';
 import 'package:hesba/core/services/user_role_service.dart';
-import 'package:hesba/core/services/app_settings_service.dart';
-import 'package:hesba/core/services/feature_flags_service.dart';
 import '../../../../common_imports.dart';
 import '../widgets/splash_background.dart';
 import '../widgets/splash_body_content.dart';
@@ -29,13 +27,6 @@ class _SplashViewState extends State<SplashView> {
   }
 
   void _startSplash() {
-    // Load settings + feature flags ONCE at startup. Individual screens
-    // (subscription banner, forms, paywall) read the cached values instead of
-    // re-fetching on every init — fewer Firestore reads per navigation.
-    unawaited(Future.wait([
-      AppSettingsService.refresh(),
-      FeatureFlagsService.refresh(),
-    ]));
     _timer = Timer(const Duration(seconds: 3), _navigateNext);
   }
 
