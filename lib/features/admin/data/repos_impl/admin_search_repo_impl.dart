@@ -10,11 +10,10 @@ import 'package:hesba/core/services/app_logger.dart';
 /// الكتيرة، والمؤشر بيكمل من نفس النقطة.
 class AdminSearchRepoImpl implements AdminSearchRepo {
   AdminSearchRepoImpl({
-    required FirebaseFirestore firestore,
+    required this._firestore,
     int? batchSize,
     int? pageSize,
-  })  : _firestore = firestore,
-        _batchSize = batchSize ?? 200,
+  })  : _batchSize = batchSize ?? 200,
         _maxHitsPerPage = pageSize ?? 50;
 
   final FirebaseFirestore _firestore;

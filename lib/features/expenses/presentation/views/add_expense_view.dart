@@ -69,11 +69,11 @@ class _AddExpenseViewState extends State<AddExpenseView> {
     const prefix = 'هتتسجّل تلقائيًا ';
     switch (_recurrence) {
       case ExpenseModel.recurrenceDaily:
-        return '${prefix}يوميًا — وإشعار قبل الميعاد بساعتين';
+        return '$prefixيوميًا — وإشعار قبل الميعاد بساعتين';
       case ExpenseModel.recurrenceWeekly:
-        return '${prefix}أسبوعيًا — وإشعار قبل الميعاد بيوم';
+        return '$prefixأسبوعيًا — وإشعار قبل الميعاد بيوم';
       case ExpenseModel.recurrenceMonthly:
-        return '${prefix}شهريًا — وإشعار قبل الميعاد بيومين';
+        return '$prefixشهريًا — وإشعار قبل الميعاد بيومين';
       default:
         return '';
     }
@@ -268,8 +268,9 @@ class _AddExpenseViewState extends State<AddExpenseView> {
             );
             Navigator.pop(ctx, true);
           }
-          if (state.status == ExpensesStatus.error)
+          if (state.status == ExpensesStatus.error) {
             AppToast.error(ctx, state.errorMessage ?? 'حدث خطأ');
+          }
         },
         child: Builder(
           builder: (innerContext) {

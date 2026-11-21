@@ -57,6 +57,7 @@ class QuickActionsGrid extends StatelessWidget {
                 data: actions[0],
                 onTap: () async {
                   if (!await SubscriptionGate.ensureCanModify(context)) return;
+                  if (!context.mounted) return;
                   final r = await Navigator.pushNamed(context, AppRoutes.addSaleView);
                   if (r == true && context.mounted) {
                     try { context.read<DashboardCubit>().refresh(); } catch (logErr, logSt) { AppLogger.nonFatal('features/main/presentation/widgets/home/quick_actions_grid.dart', logErr, logSt, severity: LoggingSeverity.warning); }
@@ -69,6 +70,7 @@ class QuickActionsGrid extends StatelessWidget {
                 onTap: () async {
                   // يفتح فورم إضافة منتج مباشرة.
                   if (!await SubscriptionGate.ensureCanModify(context)) return;
+                  if (!context.mounted) return;
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -95,6 +97,7 @@ class QuickActionsGrid extends StatelessWidget {
                 onTap: () async {
                   // يفتح إضافة مرتجع مباشرة.
                   if (!await SubscriptionGate.ensureCanModify(context)) return;
+                  if (!context.mounted) return;
                   final r = await Navigator.pushNamed(context, AppRoutes.addReturnView);
                   if (r == true && context.mounted) {
                     try { context.read<DashboardCubit>().refresh(); } catch (logErr, logSt) { AppLogger.nonFatal('features/main/presentation/widgets/home/quick_actions_grid.dart', logErr, logSt, severity: LoggingSeverity.warning); }
@@ -107,6 +110,7 @@ class QuickActionsGrid extends StatelessWidget {
                 onTap: () async {
                   // يفتح إضافة مصروف مباشرة.
                   if (!await SubscriptionGate.ensureCanModify(context)) return;
+                  if (!context.mounted) return;
                   final r = await Navigator.pushNamed(context, AppRoutes.addExpenseView);
                   if (r == true && context.mounted) {
                     try { context.read<DashboardCubit>().refresh(); } catch (logErr, logSt) { AppLogger.nonFatal('features/main/presentation/widgets/home/quick_actions_grid.dart', logErr, logSt, severity: LoggingSeverity.warning); }

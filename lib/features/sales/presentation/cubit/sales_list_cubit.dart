@@ -12,9 +12,8 @@ class SalesListCubit extends Cubit<SalesListState> {
   final SalesRepo _repo; // بوابة الداتا.
   StreamSubscription? _sub; // ستريم المبيعات.
 
-  SalesListCubit({required SalesRepo repo})
-      : _repo = repo,
-        super(const SalesListState());
+  SalesListCubit({required this._repo})
+      : super(const SalesListState());
 
   /// تجهيز القائمة: يجيب المحل + يشترك في المبيعات live.
   Future<void> bootstrap() async {

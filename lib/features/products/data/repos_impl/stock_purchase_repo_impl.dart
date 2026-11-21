@@ -10,9 +10,7 @@ class StockPurchaseRepoImpl implements StockPurchaseRepo {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
 
-  StockPurchaseRepoImpl({required FirebaseFirestore firestore, required FirebaseAuth auth})
-      : _firestore = firestore,
-        _auth = auth;
+  StockPurchaseRepoImpl({required this._firestore, required this._auth});
 
   String? get _uid => _auth.currentUser?.uid;
 

@@ -33,6 +33,7 @@ class _ReturnsBody extends StatelessWidget {
   /// يفتح إضافة مرتجع وينعش الداشبورد.
   Future<void> _goToAddReturn(BuildContext context) async {
     if (!await SubscriptionGate.ensureCanModify(context)) return;
+    if (!context.mounted) return;
     HapticFeedback.lightImpact();
     final result = await Navigator.pushNamed(context, AppRoutes.addReturnView);
     if (!context.mounted) return;

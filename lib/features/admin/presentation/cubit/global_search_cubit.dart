@@ -51,9 +51,8 @@ class SearchHit {
 
 class GlobalSearchCubit extends Cubit<GlobalSearchState> {
   // ignore: prefer_initializing_formals
-  GlobalSearchCubit({required AdminSearchRepo searchRepo})
-      : _searchRepo = searchRepo,
-        super(SearchIdle());
+  GlobalSearchCubit({required this._searchRepo})
+      : super(SearchIdle());
 
   final AdminSearchRepo _searchRepo;
   Timer? _debounce;

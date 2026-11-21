@@ -15,9 +15,8 @@ class DashboardCubit extends Cubit<DashboardState> {
   DateTime? _lastLoadTime;
   bool _isLoading = false;
 
-  DashboardCubit({required DashboardRepo repo})
-      : _repo = repo,
-        super(const DashboardState());
+  DashboardCubit({required this._repo})
+      : super(const DashboardState());
 
   /// الأرقام بتتحدّث من [AppEvents] بعد كل عملية كتابة، ومن السحب للتحديث،
   /// ومن الأزرار اللي بتنادى [refresh]. مفيش listener على كوليكشن كامل.

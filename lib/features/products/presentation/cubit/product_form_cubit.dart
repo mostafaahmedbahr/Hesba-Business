@@ -18,9 +18,8 @@ import 'package:hesba/core/services/app_logger.dart';
 class ProductFormCubit extends Cubit<ProductFormState> {
   final ProductConfigRepo _configRepo;
 
-  ProductFormCubit({required ProductConfigRepo configRepo})
-    : _configRepo = configRepo,
-      super(const ProductFormState());
+  ProductFormCubit({required this._configRepo})
+    : super(const ProductFormState());
 
   /// يحمّل إعدادات الحقول من نوع النشاط. آمن أكثر من مرة.
   ///

@@ -387,7 +387,6 @@ class _ActivityCard extends StatelessWidget {
 
   String _time(dynamic v) {
     final dt = _toDate(v);
-    final h = dt.hour.toString().padLeft(2, '0');
     final m = dt.minute.toString().padLeft(2, '0');
     final p = dt.hour >= 12 ? 'م' : 'ص';
     final hour12 = dt.hour % 12 == 0 ? 12 : dt.hour % 12;

@@ -11,9 +11,8 @@ class ProfileCubit extends Cubit<ProfileState> {
   final AccountRepo _repo;
 
   // ignore: prefer_initializing_formals
-  ProfileCubit({required AccountRepo repo})
-      : _repo = repo,
-        super(const ProfileState());
+  ProfileCubit({required this._repo})
+      : super(const ProfileState());
 
   /// قراءة واحدة عند فتح الشاشة / بعد تعديل البروفايل.
   Future<void> loadProfile() async {

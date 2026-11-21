@@ -8,9 +8,8 @@ import 'package:hesba/core/services/app_logger.dart';
 class RegisterCubit extends Cubit<RegisterState> {
   final AuthRepo _authRepo;
 
-  RegisterCubit({required AuthRepo authRepo})
-      : _authRepo = authRepo,
-        super(const RegisterState());
+  RegisterCubit({required this._authRepo})
+      : super(const RegisterState());
 
   void nextStep() {
     if (state.step >= 2) {

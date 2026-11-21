@@ -42,7 +42,7 @@ class RegisterHeader extends StatelessWidget {
                 ),
                 child: Image.asset(
                   'assets/images/playstore.png',
-                  errorBuilder: (_, __, ___) =>
+                  errorBuilder: (_, _, _) =>
                       Icon(Icons.calculate_rounded, size: 30.sp, color: Colors.white),
                 ),
               ),

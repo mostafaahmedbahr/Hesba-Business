@@ -18,9 +18,7 @@ import 'package:hesba/core/services/app_logger.dart';
 /// الدور الغائب من المستند نفسه (legacy بدون حقل role) يبقى يعني مالك
 /// كما كانت الحال — ذلك سلوك مقصود للتوافق مع الحسابات القديمة.
 class UserRoleService {
-  UserRoleService({required FirebaseAuth auth, required FirebaseFirestore firestore})
-      : _auth = auth,
-        _firestore = firestore;
+  UserRoleService({required this._auth, required this._firestore});
 
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;

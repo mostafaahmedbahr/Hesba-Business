@@ -12,9 +12,8 @@ class ReturnsListCubit extends Cubit<ReturnsListState> {
   final ReturnsRepo _repo; // بوابة الداتا.
   StreamSubscription? _sub; // ستريم المرتجعات.
 
-  ReturnsListCubit({required ReturnsRepo repo})
-      : _repo = repo,
-        super(const ReturnsListState());
+  ReturnsListCubit({required this._repo})
+      : super(const ReturnsListState());
 
   /// تجهيز القائمة: يجيب المحل + يشترك في المرتجعات live.
   Future<void> bootstrap() async {

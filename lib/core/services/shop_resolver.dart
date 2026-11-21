@@ -10,9 +10,7 @@ import 'shop_id_resolver.dart';
 /// `users/{uid}.shopId` lookups that used to live in every form view and
 /// cubit — one implementation, one error policy (null on any failure).
 class ShopResolver {
-  ShopResolver({required FirebaseAuth auth, required FirebaseFirestore firestore})
-      : _auth = auth,
-        _firestore = firestore;
+  ShopResolver({required this._auth, required this._firestore});
 
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;

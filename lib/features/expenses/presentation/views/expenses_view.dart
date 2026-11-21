@@ -169,7 +169,7 @@ class _ExpensesBody extends StatelessWidget {
                     padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 110.h),
                     sliver: SliverList.separated(
                       itemCount: filtered.length,
-                      separatorBuilder: (_, __) => SizedBox(height: 10.h),
+                      separatorBuilder: (_, _) => SizedBox(height: 10.h),
                       itemBuilder: (itemCtx, i) {
                         final expense = filtered[i];
                         return Dismissible(

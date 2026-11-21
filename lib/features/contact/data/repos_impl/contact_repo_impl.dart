@@ -8,10 +8,9 @@ class ContactRepoImpl implements ContactRepo {
   final FirebaseFirestore _firestore;
 
   ContactRepoImpl({
-    required FirebaseAuth auth,
-    required FirebaseFirestore firestore,
-  })  : _auth = auth,
-        _firestore = firestore;
+    required this._auth,
+    required this._firestore,
+  });
 
   @override
   Future<String> submitFeedback({

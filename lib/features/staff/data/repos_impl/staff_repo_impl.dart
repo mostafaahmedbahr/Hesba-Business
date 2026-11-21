@@ -15,9 +15,7 @@ class StaffRepoImpl implements StaffRepo {
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
 
-  StaffRepoImpl({required FirebaseAuth auth, required FirebaseFirestore firestore})
-      : _auth = auth,
-        _firestore = firestore;
+  StaffRepoImpl({required this._auth, required this._firestore});
 
   String? get _uid => _auth.currentUser?.uid;
 

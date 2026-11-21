@@ -16,10 +16,9 @@ class DashboardRepoImpl implements DashboardRepo {
   final FirebaseFirestore _firestore;
 
   DashboardRepoImpl({
-    required FirebaseAuth auth,
-    required FirebaseFirestore firestore,
-  })  : _auth = auth,
-        _firestore = firestore;
+    required this._auth,
+    required this._firestore,
+  });
 
   String? get _uid => _auth.currentUser?.uid;
 

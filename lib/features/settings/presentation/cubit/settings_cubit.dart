@@ -7,9 +7,8 @@ import '../states/settings_state.dart';
 class SettingsCubit extends Cubit<SettingsState> {
   final PreferencesRepo _repo;
 
-  SettingsCubit({required PreferencesRepo repo})
-      : _repo = repo,
-        super(const SettingsState());
+  SettingsCubit({required this._repo})
+      : super(const SettingsState());
 
   /// Load persisted preferences once at startup.
   Future<void> load() async {

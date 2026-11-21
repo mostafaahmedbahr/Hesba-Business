@@ -14,10 +14,9 @@ class ProductConfigRepoImpl implements ProductConfigRepo {
   final FirebaseFirestore _firestore;
 
   ProductConfigRepoImpl({
-    required FirebaseAuth auth,
-    required FirebaseFirestore firestore,
-  }) : _auth = auth,
-       _firestore = firestore;
+    required this._auth,
+    required this._firestore,
+  });
 
   @override
   Future<ProductFormConfig> getProductFormConfig() async {

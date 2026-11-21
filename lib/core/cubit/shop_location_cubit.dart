@@ -11,9 +11,8 @@ import 'package:hesba/core/services/app_logger.dart';
 /// the same flow: GPS → map pin → typed address, with the resulting
 /// coordinates / address / Google Maps link kept in one place.
 class ShopLocationCubit extends Cubit<ShopLocationState> {
-  ShopLocationCubit({required ShopLocationService locationService})
-      : _locationService = locationService,
-        super(const ShopLocationState());
+  ShopLocationCubit({required this._locationService})
+      : super(const ShopLocationState());
 
   final ShopLocationService _locationService;
 

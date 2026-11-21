@@ -1,4 +1,3 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../common_imports.dart';
 import '../../data/models/default_reminders.dart';
@@ -16,10 +15,8 @@ class NotificationCubit extends Cubit<NotificationState> {
   final NotificationRepo _repo;
   final ActivityRepo _activityRepo;
 
-  NotificationCubit({required NotificationRepo repo, required ActivityRepo activityRepo})
-      : _repo = repo,
-        _activityRepo = activityRepo,
-        super(const NotificationState());
+  NotificationCubit({required this._repo, required this._activityRepo})
+      : super(const NotificationState());
 
   /// يجهز الإذن والتوكن.
   Future<void> init() async {

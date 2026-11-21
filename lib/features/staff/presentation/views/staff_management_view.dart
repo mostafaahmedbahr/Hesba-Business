@@ -267,6 +267,7 @@ class _StaffCard extends StatelessWidget {
       ),
     );
     if (ok != true) return;
+    if (!context.mounted) return;
     try {
       await context.read<StaffCubit>().update(
             uid: staff.uid,
@@ -292,6 +293,7 @@ class _StaffCard extends StatelessWidget {
       ),
     );
     if (ok != true) return;
+    if (!context.mounted) return;
     try {
       await context.read<StaffCubit>().update(
             uid: staff.uid,

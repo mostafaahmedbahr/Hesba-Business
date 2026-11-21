@@ -16,7 +16,7 @@ class ActivityCubit extends Cubit<ActivityState> {
   StreamSubscription<List<ActivityModel>>? _sub;
   StreamSubscription<AppEvent>? _eventSub;
 
-  ActivityCubit({required ActivityRepo repo}) : _repo = repo, super(const ActivityState()) {
+  ActivityCubit({required this._repo}) : super(const ActivityState()) {
     _init();
   }
 

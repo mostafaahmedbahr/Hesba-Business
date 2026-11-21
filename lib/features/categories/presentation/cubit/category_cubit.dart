@@ -10,9 +10,8 @@ class CategoryCubit extends Cubit<CategoryState> {
   final CategoryRepo _repo; // بوابة الداتا.
 
   // ignore: prefer_initializing_formals
-  CategoryCubit({required CategoryRepo repo})
-      : _repo = repo,
-        super(const CategoryState());
+  CategoryCubit({required this._repo})
+      : super(const CategoryState());
 
   /// تجهيز الشاشة: يجيب المحل + الافتراضي + يشترك في المخصصة.
   Future<void> bootstrap() async {

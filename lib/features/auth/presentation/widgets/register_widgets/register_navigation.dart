@@ -151,8 +151,7 @@ class RegisterNavigation extends StatelessWidget {
                               color: Colors.white.withValues(alpha: 0.9),
                             ),
                           )
-                        else if (suffixIcon != null)
-                          suffixIcon,
+                        else ?suffixIcon,
                         if (!isLoading) SizedBox(width: 8.w),
                         Text(
                           label,

@@ -33,6 +33,7 @@ class _SalesBody extends StatelessWidget {
   /// يفتح إضافة بيع وينعش الداشبورد.
   Future<void> _goToAddSale(BuildContext context) async {
     if (!await SubscriptionGate.ensureCanModify(context)) return;
+    if (!context.mounted) return;
     HapticFeedback.lightImpact();
     final result = await Navigator.pushNamed(context, AppRoutes.addSaleView);
     if (!context.mounted) return;

@@ -19,12 +19,10 @@ import 'package:hesba/core/services/app_logger.dart';
 ///   subscription_requests/{id}         one row per submitted receipt
 class SubscriptionRepoImpl implements SubscriptionRepo {
   SubscriptionRepoImpl({
-    required FirebaseAuth auth,
-    required FirebaseFirestore firestore,
-    required CloudinaryImageService cloudinary,
-  })  : _auth = auth,
-        _firestore = firestore,
-        _cloudinary = cloudinary;
+    required this._auth,
+    required this._firestore,
+    required this._cloudinary,
+  });
 
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;

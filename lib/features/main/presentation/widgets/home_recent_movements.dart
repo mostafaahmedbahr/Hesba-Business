@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/router/app_routes.dart';
@@ -30,7 +29,7 @@ class RecentMovementsSection extends StatefulWidget {
   /// بيتزود مع كل تحميل للداشبورد؛ تغييره بيخلي الكروت تعيد قراءة Firestore.
   final int revision;
   final void Function(int index)? onNavigateTab;
-  const RecentMovementsSection({required this.revision, this.onNavigateTab});
+  const RecentMovementsSection({super.key, required this.revision, this.onNavigateTab});
   @override
   State<RecentMovementsSection> createState() => RecentMovementsSectionState();
 }
@@ -388,7 +387,7 @@ class RecentEmpty extends StatelessWidget {
   final String subtitle;
   final String actionLabel;
   final VoidCallback onTap;
-  const RecentEmpty({required this.isDark, required this.icon, required this.gradient, required this.title, required this.subtitle, required this.actionLabel, required this.onTap});
+  const RecentEmpty({super.key, required this.isDark, required this.icon, required this.gradient, required this.title, required this.subtitle, required this.actionLabel, required this.onTap});
   @override
   Widget build(BuildContext context) {
     return Container(
