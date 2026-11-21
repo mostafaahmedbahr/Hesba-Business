@@ -1,9 +1,12 @@
 import 'dart:async';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/service_locator.dart';
+import '../../../../core/utils/toast.dart';
 import '../../../dashboard/presentation/cubit/dashboard_cubit.dart';
 import '../../../notifications/data/repos/activity_repo.dart';
 import '../../../notifications/data/repos/notification_repo.dart';
@@ -127,7 +130,43 @@ class _MainShell extends StatefulWidget {
   State<_MainShell> createState() => _MainShellState();
 }
 
+/// قرار زر الرجوع — دالة نقية للاختبار.
+enum BackAction { goHome, warn, exit }
+
+BackAction decideBackAction({
+  required int currentIndex,
+  required DateTime? lastBackPress,
+  required DateTime now,
+  Duration threshold = const Duration(seconds: 2),
+}) {
+  if (currentIndex != 0) return BackAction.goHome;
+  if (lastBackPress != null && now.difference(lastBackPress) <= threshold) {
+    return BackAction.exit;
+  }
+  return BackAction.warn;
+}
+
 class _MainShellState extends State<_MainShell> {
+  DateTime? _lastBackPress;
+
+  /// ضغطة رجوع: ترجّع للتب الرئيسي أولًا، وبعدين ضغشتين للخروج.
+  void _handleBack() {
+    final now = DateTime.now();
+    switch (decideBackAction(
+      currentIndex: widget.currentIndex,
+      lastBackPress: _lastBackPress,
+      now: now,
+    )) {
+      case BackAction.goHome:
+        widget.onTabSelected(0);
+      case BackAction.warn:
+        _lastBackPress = now;
+        AppToast.info(context, 'pressBackAgainToExit'.tr());
+      case BackAction.exit:
+        SystemNavigator.pop();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -142,7 +181,13 @@ class _MainShellState extends State<_MainShell> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return PopScope<Object?>(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        _handleBack();
+      },
+      child: Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       extendBody: true,
       drawer: AppDrawer(
@@ -169,6 +214,7 @@ class _MainShellState extends State<_MainShell> {
       bottomNavigationBar: ModernBottomNav(
         currentIndex: widget.currentIndex,
         onTap: widget.onTabSelected,
+      ),
       ),
     );
   }
