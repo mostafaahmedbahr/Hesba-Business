@@ -17,6 +17,7 @@ import 'drawer_theme_tile.dart';
 import 'drawer_tile.dart';
 import 'section_label.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:hesba/core/services/user_role_service.dart';
 
 /// عناصر الـ Drawer (تركيب بس — من غير المبيعات).
 ///
@@ -175,9 +176,12 @@ class DrawerItemsList extends StatelessWidget {
             onTap: () => _openPrivacyPolicy(context),
           ),
 
-          // ٥. لوحة الإدارة (بطاقة مميزة — مش عنصر تنقل عادي)
-          SectionLabel('drawerAdminPanel'.tr(), isDark),
-          const DrawerAdminCard(),
+          // ٥. لوحة الإدارة — للأدمن فقط. القواعد تمنع غير الأدمن فعليًا،
+          // لكن إخفاء البطاقة يقلّل سطح الهجوم ويمنع تضليل المستخدمين.
+          if (sl<UserRoleService>().isAdmin) ...[
+            SectionLabel('drawerAdminPanel'.tr(), isDark),
+            const DrawerAdminCard(),
+          ],
 
           // ٦. منطقة الخطر
           SectionLabel('drawerDangerZone'.tr(), isDark),

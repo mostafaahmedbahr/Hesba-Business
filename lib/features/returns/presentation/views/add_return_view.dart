@@ -194,7 +194,6 @@ class _AddReturnViewState extends State<AddReturnView> {
     } catch (e, logSt) {
       AppLogger.nonFatal('features/returns/presentation/views/add_return_view.dart', e, logSt, severity: LoggingSeverity.warning);
       // Fail closed: without history the editable max is unreliable.
-      debugPrint('getAlreadyReturnedQuantities failed: $e');
       _historyFailed = true;
     }
   }
