@@ -4,6 +4,7 @@ import 'package:hesba/core/services/user_role_service.dart';
 import '../../../../common_imports.dart';
 import '../widgets/splash_background.dart';
 import '../widgets/splash_body_content.dart';
+import 'package:hesba/core/widgets/exit_guard.dart';
 import 'package:hesba/core/services/app_logger.dart';
 
 class SplashView extends StatefulWidget {
@@ -84,7 +85,8 @@ class _SplashViewState extends State<SplashView> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Scaffold(
+    return ExitGuard(
+      child: Scaffold(
       backgroundColor:
           isDark ? const Color(0xFF0A1A45) : const Color(0xFFF6F7FB),
       body: Stack(
@@ -100,6 +102,7 @@ class _SplashViewState extends State<SplashView> {
           else
             const SplashBodyContent(),
         ],
+      ),
       ),
     );
   }

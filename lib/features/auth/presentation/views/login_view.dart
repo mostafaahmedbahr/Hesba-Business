@@ -8,6 +8,7 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/services/user_role_service.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/toast.dart';
+import '../../../../core/widgets/exit_guard.dart';
 import '../../data/repos/auth_repo.dart';
 import '../cubit/login_cubit.dart';
 import '../states/login_state.dart';
@@ -47,7 +48,8 @@ class _LoginBodyState extends State<_LoginBody> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return BlocListener<LoginCubit, LoginState>(
+    return ExitGuard(
+      child: BlocListener<LoginCubit, LoginState>(
       listener: _handleState,
       child: Scaffold(
         backgroundColor: isDark ? AppTheme.darkBackground : const Color(0xFFF5F7FB),
@@ -66,6 +68,7 @@ class _LoginBodyState extends State<_LoginBody> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

@@ -10,6 +10,7 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/services/shop_location_service.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/toast.dart';
+import '../../../../core/widgets/exit_guard.dart';
 import '../../data/repos/auth_repo.dart';
 import '../cubit/register_cubit.dart';
 import '../states/register_state.dart';
@@ -85,7 +86,8 @@ class _RegisterBodyState extends State<_RegisterBody> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return BlocListener<RegisterCubit, RegisterState>(
+    return ExitGuard(
+      child: BlocListener<RegisterCubit, RegisterState>(
       listener: _handleState,
       child: Scaffold(
         backgroundColor: isDark ? AppTheme.darkBackground : AppTheme.primaryLight,
@@ -121,6 +123,7 @@ class _RegisterBodyState extends State<_RegisterBody> {
             ),
           ),
         ),
+      ),
       ),
     );
   }
