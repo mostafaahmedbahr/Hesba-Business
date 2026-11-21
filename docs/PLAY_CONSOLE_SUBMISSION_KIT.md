@@ -31,15 +31,14 @@ https://www.freeprivacypolicy.com/live/b331026f-9deb-428d-8ad5-614ede1fdec5
 | Photos / Camera | ✅ Yes | App functionality | No* | صور المنتجات + إيصالات الدفع → Cloudinary |
 | Device or other IDs | ✅ Yes | App functionality | No* | رموز FCM في `users/{uid}.fcmTokens` |
 | App activity / Usage data | ✅ Yes | App functionality | No* | `activity_logs` + سجل تشخيص داخلي (`AppLogger`) |
-| Crash logs / Diagnostics | ✅ Yes | App functionality + Security | No* | `firebase_crashlytics` — أخطاء non-fatal في release فقط |
 | App integrity / device info | ✅ Yes | Security | No* | `firebase_app_check` (Play Integrity / App Attest) |
 | IP address / device info | ✅ Yes | App functionality + Security | No* | Firestore/Firebase تلقائيًا |
 
-> *****_shared_: هذه البيانات تُرسل إلى مزوّدي الخدمة (Google Firebase و Cloudinary) لمعالجتها نيابةً عنّا. إذا كان نموذج Play يصنّف ذلك كـ "Shared with third parties"، فعّل **Shared** واذكر: `Google Firebase (Auth, Firestore, Cloud Messaging, Crashlytics, App Check)` و `Cloudinary`. وإلا اتركها **Collected only** — كلا الخيارين شائعان، الأهم هو الاتساق مع سياسة الخصوصية.
+> *****_shared_: هذه البيانات تُرسل إلى مزوّدي الخدمة (Google Firebase و Cloudinary) لمعالجتها نيابةً عنّا. إذا كان نموذج Play يصنّف ذلك كـ "Shared with third parties"، فعّل **Shared** واذكر: `Google Firebase (Auth, Firestore, Cloud Messaging, App Check)` و `Cloudinary`. وإلا اتركها **Collected only** — كلا الخيارين شائعان، الأهم هو الاتساق مع سياسة الخصوصية.
 
 - **Encrypted in transit:** ✅ Yes (HTTPS لكل Firestore/Cloudinary).
 - **Data deletion:** ✅ **Yes** — التطبيق فيه «حذف الحساب» (إعادة مصادقة بكلمة المرور + طلب مُتتبَع في `account_deletion_requests`)، وتُنفَّذ يدويًا خلال المدة في السياسة. يجب أن يتطابق هذا مع إجابة Play.
-- **No ads, no sale of data, no third-party ad/tracking SDK** (لا يوجد AdMob ولا Analytics للإعلانات). التقارير داخلية + Crashlytics مخصصة للتشخيص الأمني فقط.
+- **No ads, no sale of data, no third-party ad/tracking SDK** (لا يوجد AdMob ولا Analytics للإعلانات). كل التشخيص داخلي عبر `AppLogger`.
 
 **أسئلة إضافية متوقعة:**
 - "Does your app collect any personal data?" → **Yes**.

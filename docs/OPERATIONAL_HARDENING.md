@@ -1,4 +1,4 @@
-# التحصين التشغيلي — App Check + Crashlytics + FCM + presets
+# التحصين التشغيلي — App Check + FCM + presets
 
 > **التاريخ:** 21 نوفمبر 2026 · الجزء المحلي منفَّذ ومُختبَر؛ خطوات الـ Console خارجية وموضّحة أدناه.
 
@@ -8,7 +8,7 @@
 
 **محليًا ✅**
 - أُضيف `firebase_app_check: ^0.3.2+10` (متوافق مع `firebase_core ^3.12.1`).
-- في `main.dart` → `_initOperationalHardening()`:
+- في `main.dart` → `_initAppCheck()`:
   - release: `AndroidProvider.playIntegrity` / `AppleProvider.appAttest`.
   - debug: `AndroidProvider.debug` / `AppleProvider.debug`.
   - best-effort داخل try/catch — فشل التفعيل لا يمنع فتح التطبيق.
@@ -24,22 +24,7 @@
 
 ---
 
-## 2. Firebase Crashlytics (عميل جاهز — التفعيل خارجي)
-
-**محليًا ✅**
-- أُضيف `firebase_crashlytics: ^4.3.10`.
-- `AppLogger.remoteReporter` جديد: كل حدث `warning`/`error` يُرسل كـ non-fatal إلى Crashlytics من نقطة واحدة (لا تغيير في الـ 161 catch).
-- التجميع مفعّل في release فقط (`setCrashlyticsCollectionEnabled(kReleaseMode)`) — لا ضجيج أثناء التطوير.
-- الإرسال fire-and-forget ومحمي بـ try/catch: تعطل التقارير لا يوقف التطبيق.
-- اختبار وحدة جديد يثبت أن `info` لا يُرسل و`warning/error` يُرسلان.
-
-**خارجي:** Firebase Console → **Crashlytics** → تفعيل الخدمة، ثم إرسل حدثًا تجريبيًا من نسخة release وتأكد ظهوره.
-
-> تحديث Data Safety: يجب إضافة «Crash logs / Diagnostics» و«App/device info» إلى إجابات المتجر — تم تحديث `docs/PLAY_CONSOLE_SUBMISSION_KIT.md`.
-
----
-
-## 3. تقليم FCM (محلي + بيانات الإنتاج) ✅
+## 2. تقليم FCM (محلي + بيانات الإنتاج) ✅
 
 | البند | الحالة |
 |---|---|
@@ -54,7 +39,7 @@
 
 ---
 
-## 4. فصل preset الإيصالات (مُهيّأ — التفعيل بـ dart-define)
+## 3. فصل preset الإيصالات (مُهيّأ — التفعيل بـ dart-define)
 
 **محليًا ✅**
 - `cloudinaryReceiptUploadPreset` مستقل أصلًا عن `cloudinaryUploadPreset`، مع folder منفصل `hesba/payment-proofs`.
@@ -73,7 +58,7 @@
 
 ---
 
-## 5. ملخص التحقق المحلي
+## 4. ملخص التحقق المحلي
 
 | الفحص | النتيجة |
 |---|---|

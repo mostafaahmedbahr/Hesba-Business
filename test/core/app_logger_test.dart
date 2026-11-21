@@ -5,8 +5,6 @@ import 'package:hesba/core/services/app_logger.dart';
 void main() {
   setUp(AppLogger.clear);
 
-  tearDown(() => AppLogger.remoteReporter = null);
-
   group('AppLogger', () {
     test('يسجل مستوى وشدة وسياق صحيحين', () {
       AppLogger.warning('تحذير تجريبي', context: 'test/ctx');
@@ -47,22 +45,6 @@ void main() {
       AppLogger.error('x');
       AppLogger.clear();
       expect(AppLogger.entries, isEmpty);
-    });
-
-    test('remoteReporter يستقبل warning/error فقط', () async {
-      final received = <LogEntry>[];
-      AppLogger.remoteReporter = (entry) async {
-        received.add(entry);
-      };
-      AppLogger.info('معلومة');
-      AppLogger.warning('تحذير');
-      AppLogger.error('خطأ');
-      // الجسر fire-and-forget — نمنح الـ microtask فرصة للكتابة.
-      await Future<void>.delayed(Duration.zero);
-      expect(received.map((e) => e.severity), [
-        LoggingSeverity.warning,
-        LoggingSeverity.error,
-      ]);
     });
 
     test('قائمة entries غير قابلة للتعديل', () {
