@@ -5,6 +5,10 @@
 #    resolved relative to android/app/).
 # 3. Copy this file to android/key.properties (gitignored) and fill it in.
 # 4. CI must provide android/key.properties as a secret file.
+# 5. If a keystore is ever committed/leaked, treat it as compromised: generate a
+#    NEW key, register its certificate via Play Console -> App Signing ->
+#    "Request upload key reset", then rebuild/reupload the AAB. See
+#    docs/PLAY_UPLOAD_KEY_ROTATION.md.
 storeFile=hesba-upload-key.keystore
 storePassword=REPLACE_ME
 keyAlias=hesba-upload

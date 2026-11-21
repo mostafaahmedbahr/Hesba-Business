@@ -46,3 +46,11 @@ app.*.map.json
 
 # Node (Firestore rules tests live in rules_tests/)
 node_modules/
+
+# Release signing keys — NEVER commit. The upload key is configured through
+# android/key.properties (gitignored in android/.gitignore). If a key is ever
+# committed, treat it as compromised: rotate it via Play App Signing and purge
+# it from Git history. These root-level patterns stop copies placed at the repo
+# root from being tracked (android/.gitignore only covers android/).
+*.keystore
+*.jks
