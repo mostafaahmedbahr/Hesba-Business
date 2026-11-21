@@ -41,6 +41,11 @@ class LogEntry {
 abstract class AppLogger {
   static const int maxEntries = 300;
 
+  /// جسر اختياري لخدمة تقارير خارجية (Firebase Crashlytics).
+  /// يُربط في main() بعد تهيئة Firebase؛ التفاصيل تبقى داخل السجل المحلي.
+  /// المُستقبِل لازم يتحمل مسؤولية أي خطأ داخلي (لا يرمي).
+  static Future<void> Function(LogEntry entry)? remoteReporter;
+
   static final List<LogEntry> _entries = [];
 
   /// آخر الأحداث (الأحدث آخرًا) — غير قابلة للتعديل.
@@ -149,6 +154,14 @@ abstract class AppLogger {
       _entries.removeAt(0);
     }
     _entries.add(entry);
+
+    // إرسال الأحداث المهمة لخدمة التقارير الخارجية (إن وُجدت).
+    // fire-and-forget عمدًا — تسجيل خطأ ما يوقف مسار التطبيق.
+    if (remoteReporter != null &&
+        (severity == LoggingSeverity.error ||
+            severity == LoggingSeverity.warning)) {
+      remoteReporter!(entry);
+    }
 
     // الطباعة: كل المستويات في debug؛ warning/error فقط في release.
     final shouldPrint = kDebugMode ||

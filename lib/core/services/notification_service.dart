@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -35,6 +36,10 @@ class NotificationService {
   /// notification from the Firebase Console by targeting the topic
   /// [appTopic] instead of pasting a device token.
   static const String appTopic = 'hesba_all';
+
+  /// آخر رمز عرفناه على هذا الجهاز — يُستخدم لإزالته عند تجديد الرمز أو الخروج،
+  /// وإلا يتراكم `fcmTokens` في مستند المستخدم إلى أجل غير مسمى.
+  static const String _savedTokenKey = 'fcm_saved_token';
 
   FlutterLocalNotificationsPlugin get local => _local;
 
@@ -285,11 +290,17 @@ final channel = AndroidNotificationChannel(
     }
   }
 
-  /// Saves (or removes) the token on the user document (Firestore).
+  /// Saves the token, first removing the previous token of this device.
+  /// Without the removal, every app start / token refresh adds another entry
+  /// to `users/{uid}.fcmTokens` forever (measured: up to 19 in production).
   Future<void> saveToken(String token) async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return;
     try {
+      final previous = await _readSavedToken();
+      if (previous != null && previous != token) {
+        await _removeTokenFromUser(uid, previous);
+      }
       await _firestore
           .collection('users')
           .doc(uid)
@@ -297,10 +308,69 @@ final channel = AndroidNotificationChannel(
             'fcmTokens': FieldValue.arrayUnion([token]),
             'fcmTokensUpdatedAt': FieldValue.serverTimestamp(),
           }, SetOptions(merge: true));
+      await _writeSavedToken(token);
     } catch (e, logSt) {
       // Token persistence is best effort — a network/permission failure must
       // not crash the app or surface as an unhandled Future error.
       AppLogger.nonFatal('core/services/notification_service.dart', e, logSt, severity: LoggingSeverity.warning);
+    }
+  }
+
+  /// Called before sign-out: invalidates the device token and removes it from
+  /// Firestore so the next account on this device never receives old pushes.
+  Future<void> clearToken() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    final stored = await _readSavedToken();
+    String? token;
+    if (stored != null) {
+      token = stored;
+    } else {
+      try {
+        token = await _messaging.getToken();
+      } catch (logErr, logSt) {
+        AppLogger.nonFatal('core/services/notification_service.dart', logErr, logSt, severity: LoggingSeverity.warning);
+      }
+    }
+    try {
+      await _messaging.deleteToken();
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal('core/services/notification_service.dart', logErr, logSt, severity: LoggingSeverity.warning);
+    }
+    if (uid != null && token != null) {
+      try {
+        await _removeTokenFromUser(uid, token);
+      } catch (logErr, logSt) {
+        AppLogger.nonFatal('core/services/notification_service.dart', logErr, logSt, severity: LoggingSeverity.warning);
+      }
+    }
+    await _writeSavedToken(null);
+  }
+
+  Future<void> _removeTokenFromUser(String uid, String token) async {
+    await _firestore.collection('users').doc(uid).update({
+      'fcmTokens': FieldValue.arrayRemove([token]),
+      'fcmTokensUpdatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<String?> _readSavedToken() async {
+    try {
+      return (await SharedPreferences.getInstance()).getString(_savedTokenKey);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _writeSavedToken(String? token) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (token == null) {
+        await prefs.remove(_savedTokenKey);
+      } else {
+        await prefs.setString(_savedTokenKey, token);
+      }
+    } catch (_) {
+      // Best effort — a missing pref store never blocks notifications.
     }
   }
 

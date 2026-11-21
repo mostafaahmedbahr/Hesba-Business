@@ -43,11 +43,20 @@ class AppConstants {
 
   // Payment receipts live apart from shop photos so the shop's 250px/sepia
   // preset never shrinks a screenshot the admin has to read.
+  // A DEDICATED unsigned preset must be created in the Cloudinary dashboard
+  // (folder hesba/payment-proofs, png/jpg only, <=10MB, unique filename), then
+  // pass --dart-define=CLOUDINARY_RECEIPT_PRESET=hesba_receipts to release
+  // builds. The default stays the shared preset so existing installs keep
+  // working until that preset exists.
   static const String cloudinaryPaymentProofFolder = 'hesba/payment-proofs';
   static const String cloudinaryReceiptUploadPreset = String.fromEnvironment(
     'CLOUDINARY_RECEIPT_PRESET',
     defaultValue: 'hesba_images',
   );
+
+  /// True only when a dedicated receipt preset was supplied at build time.
+  static bool get hasDedicatedReceiptPreset =>
+      cloudinaryReceiptUploadPreset != cloudinaryUploadPreset;
 
   static bool get isCloudinaryConfigured {
     return !cloudinaryCloudName.startsWith('REPLACE_') &&

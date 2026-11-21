@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 
 import '../../../../core/utils/search_tokens.dart';
+import '../../../../core/services/notification_service.dart';
 import '../models/user_profile.dart';
 import '../repos/account_repo.dart';
 import 'package:hesba/core/services/app_logger.dart';
@@ -11,9 +11,7 @@ class AccountRepoImpl implements AccountRepo {
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
 
-  AccountRepoImpl({required FirebaseAuth auth, required FirebaseFirestore firestore})
-      : _auth = auth,
-        _firestore = firestore;
+  AccountRepoImpl({required this._auth, required this._firestore});
 
   @override
   String? currentUserId() => _auth.currentUser?.uid;
@@ -154,10 +152,11 @@ class AccountRepoImpl implements AccountRepo {
 
   @override
   Future<void> logout() async {
-    // Drop the device token first so the next account on this device does
-    // not receive the previous owner's pushes. Best effort only.
+    // Remove the token from Firestore AND invalidate it on the device, so the
+    // next account here never receives the previous owner's pushes and the
+    // `fcmTokens` array does not keep growing. Best effort only.
     try {
-      await FirebaseMessaging.instance.deleteToken();
+      await NotificationService().clearToken();
     } catch (logErr, logSt) { AppLogger.nonFatal('features/profile/data/repos_impl/account_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning); }
     await _auth.signOut();
   }

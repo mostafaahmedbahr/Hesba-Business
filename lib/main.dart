@@ -1,13 +1,15 @@
+import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/services.dart';
 import 'dart:ui' as ui;
 import 'dart:async';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'firebase_options.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:hesba/common_imports.dart';
 import 'package:hesba/core/router/notification_router.dart';
-import 'package:hesba/core/di/service_locator.dart';
 import 'package:hesba/core/services/app_logger.dart';
 import 'package:hesba/core/services/user_role_service.dart';
 import 'package:hesba/features/expenses/data/repos/expenses_repo.dart';
@@ -28,6 +30,8 @@ import 'package:hesba/features/settings/presentation/states/settings_state.dart'
     // التقاط كل خطأ غير ملتقط (FlutterError + async) في سجل واحد.
     AppLogger.installGlobalHandlers();
     await    Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    // تحصين تشغيلي — كلاهما best-effort: فشل أيهما ما يمنع opening التطبيق.
+    await _initOperationalHardening();
     await NotificationService().initialize(onTap: _handleNotificationTap);
     await initDependencies();
     SystemChrome.setPreferredOrientations([
@@ -51,6 +55,45 @@ import 'package:hesba/features/settings/presentation/states/settings_state.dart'
       stackTrace: stackTrace,
     );
   });
+}
+
+/// تهيئة App Check و Crashlytics بأمان.
+///
+/// App Check: play integrity في الإنتاج، debug provider في التطوير. التفعيل
+/// في Console خارجي — هنا نُجهّز العميل فقط بدون فرض القواعد (لا نكسر التطبيق).
+/// Crashlytics: كل أحداث AppLogger من مستوى warning فأعلى تُرسل كـ non-fatal.
+Future<void> _initOperationalHardening() async {
+  try {
+    await FirebaseAppCheck.instance.activate(
+      androidProvider:
+          kReleaseMode ? AndroidProvider.playIntegrity : AndroidProvider.debug,
+      appleProvider: kReleaseMode ? AppleProvider.appAttest : AppleProvider.debug,
+    );
+  } catch (logErr, logSt) {
+    AppLogger.nonFatal('main.dart', logErr, logSt,
+        severity: LoggingSeverity.warning);
+  }
+
+  try {
+    await FirebaseCrashlytics.instance
+        .setCrashlyticsCollectionEnabled(kReleaseMode);
+    AppLogger.remoteReporter = (entry) async {
+      try {
+        await FirebaseCrashlytics.instance.recordError(
+          entry.error ?? entry.message,
+          entry.stackTrace,
+          reason: '[${entry.severity.name}] ${entry.message}',
+          information: entry.context == null ? <Object>[] : <Object>[entry.context!],
+          fatal: false,
+        );
+      } catch (_) {
+        // الإبلاغ نفسه لازم ما يرميش أبدًا.
+      }
+    };
+  } catch (logErr, logSt) {
+    AppLogger.nonFatal('main.dart', logErr, logSt,
+        severity: LoggingSeverity.warning);
+  }
 }
 
 /// مزامنة المصروفات المتكررة بدون رمي أي خطأ (best effort عند الإقلاع).
