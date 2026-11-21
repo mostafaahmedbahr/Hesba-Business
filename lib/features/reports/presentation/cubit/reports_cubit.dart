@@ -31,14 +31,16 @@ class ReportsCubit extends Cubit<ReportsState> {
   bool _busy = false;
   int _pendingMask = 0;
 
+  /// بداية نافذة البيانات المحمّلة في الذاكرة. null = كل التاريخ محمّل.
+  /// نستخدمها لتجنّب إعادة المسح الكامل عند التبديل بين «الكل» والفترات.
+  DateTime? _loadedFrom;
+  bool _hasLoaded = false;
+
   ReportsCubit({
-    required SalesRepo salesRepo,
-    required ReturnsRepo returnsRepo,
-    required ExpensesRepo expensesRepo,
-  })  : _salesRepo = salesRepo,
-        _returnsRepo = returnsRepo,
-        _expensesRepo = expensesRepo,
-        super(const ReportsState());
+    required this._salesRepo,
+    required this._returnsRepo,
+    required this._expensesRepo,
+  })  : super(const ReportsState());
 
   /// تجهيز: يجيب المحل + يجلب القوائم كاملة مرة واحدة.
   Future<void> bootstrap() async {
@@ -57,10 +59,12 @@ class ReportsCubit extends Cubit<ReportsState> {
     await _reload(mask: 7, showLoading: true);
   }
 
-  /// إعادة جلب كاملة عند الطلب (السحب للتحديث) أو بعد عمليات الكتابة.
+  /// إعادة جلب عند الطلب (السحب للتحديث) أو بعد عمليات الكتابة.
+  /// نحافظ على نفس نافذة البيانات المحمّلة — لا نوسّعها بالقوة إلى «الكل»
+  /// لمجرد أن المستخدم فتح شاشة التقارير على فترة قصيرة.
   Future<void> refresh() async {
     if (!state.hasShop) return bootstrap();
-    await _reload(mask: 7, showLoading: true);
+    await _reload(mask: 7, showLoading: true, from: _loadedFrom);
   }
 
   void _listenAppEvents() {
@@ -82,10 +86,12 @@ class ReportsCubit extends Cubit<ReportsState> {
     });
   }
 
-  /// يغير الفترة (فوري — الداتا في الذاكرة، الحساب فقط يعاد).
+  /// يغير الفترة. الحساب من الذاكرة دائمًا (فوري)؛ لا تُقرأ Firestore إلا
+  /// عندما نحتاج نافذة أوسع من المحمّلة فعلًا (أول مرة يُختار «الكل»).
+  /// الرجوع من «الكل» لفترة قصيرة لا يُسقط بيانات «الكل»، فالتبديل العكسي
+  /// صار بلا مسح كامل متكرر.
   void setPeriod(ReportPeriod period) {
     if (period == state.period) return;
-    final wasAll = state.period == ReportPeriod.all;
     emit(state.copyWith(
       period: period,
       metrics: ReportsCalculator.calculate(
@@ -96,11 +102,11 @@ class ReportsCubit extends Cubit<ReportsState> {
         end: period.endExclusive,
       ),
     ));
-    // Recent periods share one 30-day window fetched at bootstrap, so their
-    // switching stays instant. Only "all" needs a different (full) dataset.
-    if ((period == ReportPeriod.all) != wasAll) {
+    final needsFullHistory = period == ReportPeriod.all;
+    final hasFullHistory = _hasLoaded && _loadedFrom == null;
+    if (needsFullHistory && !hasFullHistory) {
       // ignore: unawaited_futures
-      _reload(mask: 7, showLoading: true);
+      _reload(mask: 7, showLoading: true, from: null);
     }
   }
 
@@ -110,7 +116,11 @@ class ReportsCubit extends Cubit<ReportsState> {
       : DateTime.now().subtract(const Duration(days: 30));
 
   /// جلب المجموعات المطلوبة بـ cursor ثم حساب مؤشرات الفترة مرة واحدة.
-  Future<void> _reload({required int mask, bool showLoading = false}) async {
+  Future<void> _reload({
+    required int mask,
+    bool showLoading = false,
+    DateTime? from,
+  }) async {
     if (_busy) {
       _pendingMask |= mask;
       return;
@@ -126,15 +136,15 @@ class ReportsCubit extends Cubit<ReportsState> {
       final wantExpenses = (mask & 4) != 0;
 
       // الجلب بالتوازي (كل مجموعة مستقلة).
-      final from = _fetchFrom(state.period);
+      final effectiveFrom = from ?? _fetchFrom(state.period);
       final salesFut = wantSales
-          ? _salesRepo.fetchAllSales(shopId: shopId, from: from)
+          ? _salesRepo.fetchAllSales(shopId: shopId, from: effectiveFrom)
           : null;
       final returnsFut = wantReturns
-          ? _returnsRepo.fetchAllReturns(shopId: shopId, from: from)
+          ? _returnsRepo.fetchAllReturns(shopId: shopId, from: effectiveFrom)
           : null;
       final expensesFut = wantExpenses
-          ? _expensesRepo.fetchAllExpenses(shopId: shopId, from: from)
+          ? _expensesRepo.fetchAllExpenses(shopId: shopId, from: effectiveFrom)
           : null;
 
       final salesRes = await salesFut;
@@ -152,6 +162,12 @@ class ReportsCubit extends Cubit<ReportsState> {
               (salesRes?.isComplete ?? true) &&
               (returnsRes?.isComplete ?? true) &&
               (expensesRes?.isComplete ?? true);
+
+      // تتبّع النافذة المحمّلة — أساس قرار «هل نحتاج مسحًا كاملًا؟».
+      if (mask == 7) {
+        _loadedFrom = effectiveFrom;
+        _hasLoaded = true;
+      }
 
       emit(state.copyWith(
         status: ReportsStatus.success,
@@ -176,7 +192,7 @@ class ReportsCubit extends Cubit<ReportsState> {
       if (_pendingMask != 0 && !isClosed) {
         final pending = _pendingMask;
         _pendingMask = 0;
-        await _reload(mask: pending);
+        await _reload(mask: pending, from: _loadedFrom);
       }
     }
   }
