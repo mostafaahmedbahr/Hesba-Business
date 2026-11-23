@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'firebase_options.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:hesba/common_imports.dart';
@@ -28,7 +29,21 @@ import 'package:hesba/features/settings/presentation/states/settings_state.dart'
     await EasyLocalization.ensureInitialized();
     // التقاط كل خطأ غير ملتقط (FlutterError + async) في سجل واحد.
     AppLogger.installGlobalHandlers();
-    await    Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    // Crashlytics — يبلّغ عن أي كراش/خطأ غير متوقع مباشرة للـ Firebase Console.
+    // بيعتمد على الـ Gradle plugin المضاف في android/app/build.gradle.kts.
+    FlutterError.onError = (details) {
+      AppLogger.error('كراش Flutter', context: 'crashlytics',
+          error: details.exception, stackTrace: details.stack);
+      FirebaseCrashlytics.instance.recordFlutterFatalError(details);
+    };
+    // أخطاء async بره الـ Flutter framework.
+    ui.PlatformDispatcher.instance.onError = (error, stack) {
+      AppLogger.error('كراش async', context: 'crashlytics',
+          error: error, stackTrace: stack);
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
     // App Check — best-effort: فشله ما يمنعش فتح التطبيق.
     await _initAppCheck();
     await NotificationService().initialize(onTap: _handleNotificationTap);
@@ -53,6 +68,8 @@ import 'package:hesba/features/settings/presentation/states/settings_state.dart'
       error: error,
       stackTrace: stackTrace,
     );
+    // يكمّل الـ Crashlytics حتى للأخطاء اللي طايرة بره الـ framework.
+    FirebaseCrashlytics.instance.recordError(error, stackTrace, fatal: true);
   });
 }
 
