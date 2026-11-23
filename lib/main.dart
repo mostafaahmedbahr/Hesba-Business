@@ -183,3 +183,4 @@ class _AppRoot extends StatelessWidget {
     );
   }
 }
+/// shorebird patch --platforms=android --release-version=1.0.0+1
