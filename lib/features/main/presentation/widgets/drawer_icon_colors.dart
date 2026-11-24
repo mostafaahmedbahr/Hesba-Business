@@ -23,6 +23,7 @@ class DrawerIconColor {
   static const staff = DrawerIconColor(AppTheme.violetDeep, Color(0xFFA78BFA));
   static const suppliers = DrawerIconColor(Color(0xFF0D9488), Color(0xFF2DD4BF));
   static const categories = DrawerIconColor(AppTheme.successDark, Color(0xFF34D399));
+  static const backup = DrawerIconColor(Color(0xFF16A34A), Color(0xFF4ADE80));
 
   /// الحساب
   static const profile = DrawerIconColor(AppTheme.primaryColor, AppTheme.brightBlue);

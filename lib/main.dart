@@ -30,6 +30,8 @@ import 'package:hesba/features/settings/presentation/states/settings_state.dart'
     // التقاط كل خطأ غير ملتقط (FlutterError + async) في سجل واحد.
     AppLogger.installGlobalHandlers();
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    // كاش Firestore على الجهاز — مجاني، وبيتفعّل قبل أي استخدام للـ Firestore.
+    configureFirestore();
     // Crashlytics — يبلّغ عن أي كراش/خطأ غير متوقع مباشرة للـ Firebase Console.
     // بيعتمد على الـ Gradle plugin المضاف في android/app/build.gradle.kts.
     FlutterError.onError = (details) {

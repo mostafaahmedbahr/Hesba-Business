@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
@@ -7,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloudinary_flutter/cloudinary_object.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/services/backup_service.dart';
 import '../../core/services/cloudinary_image_service.dart';
 import '../../core/services/notification_service.dart';
 import '../../core/services/shop_location_service.dart';
@@ -55,6 +57,17 @@ import '../../features/products/data/repos_impl/stock_purchase_repo_impl.dart';
 
 final sl = GetIt.instance;
 
+/// لازم يتنادى بعد `Firebase.initializeApp()` وقبل أي قراءة/كتابة Firestore،
+/// بما فيها NotificationService. الكاش مجاني (مش Blaze) ومش بديل عن ملف النسخ،
+/// بس بيخلي البيانات المقروءة متاحة offline.
+void configureFirestore() {
+  if (kIsWeb) return;
+  FirebaseFirestore.instance.settings = const Settings(
+    persistenceEnabled: true,
+    cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+  );
+}
+
 Future<void> initDependencies() async {
   final prefs = await SharedPreferences.getInstance();
   sl.registerLazySingleton<SharedPreferences>(() => prefs);
@@ -79,6 +92,17 @@ Future<void> initDependencies() async {
   _initAccounts();
   _initStaff();
   _initStockPurchases();
+  _initBackup();
+}
+
+void _initBackup() {
+  sl.registerLazySingleton<BackupService>(
+    () => BackupService(
+      firestore: sl<FirebaseFirestore>(),
+      auth: sl<FirebaseAuth>(),
+      shopResolver: sl<ShopResolver>(),
+    ),
+  );
 }
 
 void _initSubscription() {

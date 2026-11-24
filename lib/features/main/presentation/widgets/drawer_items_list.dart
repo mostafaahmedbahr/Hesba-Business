@@ -18,6 +18,7 @@ import 'drawer_tile.dart';
 import 'section_label.dart';
 import 'package:hesba/core/services/app_logger.dart';
 import 'package:hesba/core/services/user_role_service.dart';
+import '../../../backup/presentation/views/backup_view.dart';
 
 /// عناصر الـ Drawer (تركيب بس — من غير المبيعات).
 ///
@@ -137,6 +138,12 @@ class DrawerItemsList extends StatelessWidget {
             color: DrawerIconColor.categories.of(isDark),
             onTap: () => _open(context, const CategoryManagementView()),
           ),
+          // CustomDrawerTile(
+          //   icon: Icons.backup_rounded,
+          //   label: 'drawerBackup'.tr(),
+          //   color: DrawerIconColor.backup.of(isDark),
+          //   onTap: () => _open(context, const BackupView()),
+          // ),
 
           // ٣. الحساب
           SectionLabel('moreAccount'.tr(), isDark),

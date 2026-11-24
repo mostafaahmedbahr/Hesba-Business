@@ -45,8 +45,12 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Node (Firestore rules tests live in rules_tests/)
+# Node (Firestore rules tests live in rules_tests/ and restore script in tool/)
 node_modules/
+
+# Backup restore credentials — service account keys must never be committed
+tool/restore_backup/serviceAccount.json
+*.json.gz
 
 # Release signing keys — NEVER commit. The upload key is configured through
 # android/key.properties (gitignored in android/.gitignore). If a key is ever

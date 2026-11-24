@@ -1,0 +1,11 @@
+{
+  "name": "hesba-restore-backup",
+  "private": true,
+  "description": "Restore a Hesba JSON backup into Firestore with Admin SDK privileges — no Cloud Functions, no Blaze plan",
+  "scripts": {
+    "check": "node --check restore.js && node --check transformer.js && node --test transformer.test.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0"
+  }
+}
