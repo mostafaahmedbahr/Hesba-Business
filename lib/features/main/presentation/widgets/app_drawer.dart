@@ -22,6 +22,7 @@ class AppDrawer extends StatelessWidget {
           bottomEnd: Radius.circular(24.r),
         ),
       ),
+
       child: SafeArea(
         child: Column(
           children: [
