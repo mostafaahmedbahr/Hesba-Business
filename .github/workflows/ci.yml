@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+# Keep only the newest run for a given branch/PR.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  FLUTTER_VERSION: '3.44.8' # matches the SDK used locally (Dart 3.12.2)
+  FIREBASE_TOOLS_VERSION: '15.37.0'
+  FIREBASE_PROJECT: hesba-business-demo # emulator-only; never touches production
+
+jobs:
+  flutter:
+    name: Flutter — analyze + tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - run: flutter --version
+      - run: flutter pub get
+      # Existing style infos are allowed; warnings and errors fail the build.
+      - name: Static analysis
+        run: flutter analyze --no-fatal-infos
+      - name: Unit / widget / integration tests
+        run: flutter test --reporter compact
+
+  firestore-rules:
+    name: Firestore rules — emulator tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: rules_tests/package-lock.json
+      - run: npm ci --prefix rules_tests
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Cache emulator jar
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/firebase/emulators
+          key: firebase-emulators-${{ runner.os }}-${{ env.FIREBASE_TOOLS_VERSION }}
+      - name: Run rules tests against the local emulator only
+        run: |
+          npx --yes "firebase-tools@$FIREBASE_TOOLS_VERSION" \
+            emulators:exec --only firestore --project "$FIREBASE_PROJECT" \
+            "npm --prefix rules_tests test"
+
+  hygiene:
+    name: i18n + secret guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Every .tr key exists in ar.json and en.json
+        run: node tool/check_i18n.js
+      - name: No signing keys or service accounts committed
+        shell: bash
+        run: |
+          set -euo pipefail
+          forbidden="$(git ls-files | grep -Ei '(^|/)(key\.properties|serviceAccount\.json|.*\.(jks|keystore))$' || true)"
+          if [[ -n "$forbidden" ]]; then
+            echo "::error::Never commit secrets or signing keys:"
+            echo "$forbidden"
+            exit 1
+          fi
+          echo "No tracked secrets found."
