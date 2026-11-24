@@ -17,6 +17,7 @@ import 'drawer_theme_tile.dart';
 import 'drawer_tile.dart';
 import 'section_label.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:hesba/core/services/feature_flags_service.dart';
 import 'package:hesba/core/services/user_role_service.dart';
 import '../../../backup/presentation/views/backup_view.dart';
 
@@ -138,12 +139,11 @@ class DrawerItemsList extends StatelessWidget {
             color: DrawerIconColor.categories.of(isDark),
             onTap: () => _open(context, const CategoryManagementView()),
           ),
-          // CustomDrawerTile(
-          //   icon: Icons.backup_rounded,
-          //   label: 'drawerBackup'.tr(),
-          //   color: DrawerIconColor.backup.of(isDark),
-          //   onTap: () => _open(context, const BackupView()),
-          // ),
+          // زرار النسخ الاحتياطي — بيظهر بس لما الأدمن يفعّل المفتاح.
+          _BackupDrawerTile(
+            isDark: isDark,
+            onTap: () => _open(context, const BackupView()),
+          ),
 
           // ٣. الحساب
           SectionLabel('moreAccount'.tr(), isDark),
@@ -203,6 +203,42 @@ class DrawerItemsList extends StatelessWidget {
           SizedBox(height: 8.h),
         ],
       ),
+    );
+  }
+}
+
+/// بيتحقق من مفتاح الأدمن `showBackup` كل ما القائمة تتفتح.
+/// الافتراضي `true`، والفشل في القراءة بيخلي الزرار ظاهر (مفيش إخفاء بالغلط).
+class _BackupDrawerTile extends StatefulWidget {
+  const _BackupDrawerTile({required this.isDark, required this.onTap});
+
+  final bool isDark;
+  final VoidCallback onTap;
+
+  @override
+  State<_BackupDrawerTile> createState() => _BackupDrawerTileState();
+}
+
+class _BackupDrawerTileState extends State<_BackupDrawerTile> {
+  bool _show = FeatureFlagsService.showBackup;
+
+  @override
+  void initState() {
+    super.initState();
+    FeatureFlagsService.refresh().then((_) {
+      if (!mounted) return;
+      setState(() => _show = FeatureFlagsService.showBackup);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_show) return const SizedBox.shrink();
+    return CustomDrawerTile(
+      icon: Icons.backup,
+      label: 'drawerBackup'.tr(),
+      color: DrawerIconColor.backup.of(widget.isDark),
+      onTap: widget.onTap,
     );
   }
 }
