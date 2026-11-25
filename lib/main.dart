@@ -70,8 +70,12 @@ import 'package:hesba/features/settings/presentation/states/settings_state.dart'
       error: error,
       stackTrace: stackTrace,
     );
-    // يكمّل الـ Crashlytics حتى للأخطاء اللي طايرة بره الـ framework.
-    FirebaseCrashlytics.instance.recordError(error, stackTrace, fatal: true);
+    // يكمّل الـ Crashlytics حتى للأخطاء اللي طايرة بره الـ framework،
+    // بس لو الـ initializeApp نفسه فشل فمفيش app أصلاً واستدعاؤه هنا هي رمي
+    // "No Firebase App '[DEFAULT]'" ويخفي السبب الحقيقي للكراش.
+    if (Firebase.apps.isNotEmpty) {
+      FirebaseCrashlytics.instance.recordError(error, stackTrace, fatal: true);
+    }
   });
 }
 
