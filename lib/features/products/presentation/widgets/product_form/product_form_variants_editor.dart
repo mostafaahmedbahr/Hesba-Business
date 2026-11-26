@@ -20,7 +20,12 @@ class ProductVariantRow {
   /// هل اختار المستخدم "أخرى" للمقاس وبيكتب نص يدوي؟
   bool useCustomSize;
 
-  ProductVariantRow({this.color = '', this.size = '', this.qty = '', this.useCustomSize = false});
+  ProductVariantRow({
+    this.color = '',
+    this.size = '',
+    this.qty = '',
+    this.useCustomSize = false,
+  });
 
   Map<String, dynamic> toMap() => {'color': color, 'size': size, 'qty': qty};
 }
@@ -39,6 +44,9 @@ class ProductFormVariantsEditor extends StatelessWidget {
   final void Function(int index, ProductVariantRow row) onChange;
   final String? Function(List<ProductVariantRow>)? validator;
 
+  /// مقاسات نوع المحل (أحذية أرقام / ملابس حروف ...).
+  final List<String> sizeOptions;
+
   const ProductFormVariantsEditor({
     super.key,
     required this.rows,
@@ -47,6 +55,7 @@ class ProductFormVariantsEditor extends StatelessWidget {
     required this.onRemove,
     required this.onChange,
     this.validator,
+    this.sizeOptions = AppConstants.productSizes,
   });
 
   static double totalQty(List<ProductVariantRow> rows) {
@@ -62,12 +71,14 @@ class ProductFormVariantsEditor extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final error = validator?.call(rows);
     final total = totalQty(rows);
-    final totalLabel = total == total.roundToDouble() ? total.toStringAsFixed(0) : total.toStringAsFixed(1);
+    final totalLabel = total == total.roundToDouble()
+        ? total.toStringAsFixed(0)
+        : total.toStringAsFixed(1);
     final availableLabel = availableStock == null
         ? ''
         : (availableStock! == availableStock!.roundToDouble()
-            ? availableStock!.toStringAsFixed(0)
-            : availableStock!.toStringAsFixed(1));
+              ? availableStock!.toStringAsFixed(0)
+              : availableStock!.toStringAsFixed(1));
     final exceeds = availableStock != null && total > availableStock!;
 
     return Column(
@@ -141,7 +152,11 @@ class ProductFormVariantsEditor extends StatelessWidget {
             SizedBox(height: 4.h),
             Text(
               'productFormVariantsStockAuto'.tr(),
-              style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray, height: 1.4),
+              style: TextStyle(
+                fontSize: 11.sp,
+                color: AppTheme.mutedGray,
+                height: 1.4,
+              ),
             ),
           ],
         ],
@@ -149,14 +164,23 @@ class ProductFormVariantsEditor extends StatelessWidget {
           SizedBox(height: 6.h),
           Text(
             error,
-            style: TextStyle(fontSize: 11.5.sp, color: AppTheme.danger, fontWeight: FontWeight.w700),
+            style: TextStyle(
+              fontSize: 11.5.sp,
+              color: AppTheme.danger,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ],
       ],
     );
   }
 
-  Widget _row(BuildContext context, ProductVariantRow row, int index, String? error) {
+  Widget _row(
+    BuildContext context,
+    ProductVariantRow row,
+    int index,
+    String? error,
+  ) {
     return Container(
       key: ValueKey(row.id),
       margin: EdgeInsets.only(bottom: 8.h),
@@ -181,7 +205,10 @@ class ProductFormVariantsEditor extends StatelessWidget {
               Expanded(
                 child: TextFormField(
                   initialValue: row.color,
-                  style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
                   decoration: productFormDecoration(
                     context,
                     label: 'productFormColor'.tr(),
@@ -205,17 +232,19 @@ class ProductFormVariantsEditor extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                flex: 3,
-                child: _sizeDropdown(context, row, index),
-              ),
+              Expanded(flex: 3, child: _sizeDropdown(context, row, index)),
               SizedBox(width: 8.w),
               Expanded(
                 flex: 2,
                 child: TextFormField(
                   initialValue: row.qty,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
                   decoration: productFormDecoration(
                     context,
                     label: 'productFormVariantsStockQty'.tr(),
@@ -245,7 +274,7 @@ class ProductFormVariantsEditor extends StatelessWidget {
   }
 
   Widget _sizeDropdown(BuildContext context, ProductVariantRow row, int index) {
-    final sizes = AppConstants.productSizes;
+    final sizes = sizeOptions;
     final selected = row.useCustomSize
         ? 'أخرى'
         : (row.size.isEmpty ? null : row.size);

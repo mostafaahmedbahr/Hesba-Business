@@ -59,7 +59,7 @@ class ProductFieldsCatalog {
     return ProductFormConfig(
       profileId: profile,
       businessType: businessType,
-      fields: _fieldsFor(profile),
+      fields: _fieldsFor(profile, businessType),
     );
   }
 
@@ -154,20 +154,19 @@ class ProductFieldsCatalog {
     ProductFieldConfig notes = _notes,
     List<ProductFieldConfig> extra = const [],
     List<ProductFieldConfig> beforeNotes = const [],
-  }) =>
-      [
-        _name,
-        _category,
-        _code,
-        _costPrice,
-        _price,
-        _stock,
-        _lowStock,
-        ...extra,
-        ...beforeNotes,
-        _image,
-        notes,
-      ];
+  }) => [
+    _name,
+    _category,
+    _code,
+    _costPrice,
+    _price,
+    _stock,
+    _lowStock,
+    ...extra,
+    ...beforeNotes,
+    _image,
+    notes,
+  ];
 
   // ────────────────────────── الملفات التعريفية ──────────────────────────
 
@@ -226,14 +225,15 @@ class ProductFieldsCatalog {
     section: ProductFormSection.specs,
   );
 
-  static const ProductFieldConfig _size = ProductFieldConfig(
+  /// المقاسات تُبنى من نوع النشاط: أحذية → أرقام، ملابس → حروف، إلخ.
+  static ProductFieldConfig _sizeFor(String? type) => ProductFieldConfig(
     key: ProductFieldKeys.size,
     type: ProductFieldType.dropdown,
     labelKey: 'productFormSize',
     hintKey: 'productFormSizeHint',
     icon: Icons.straighten_rounded,
     section: ProductFormSection.specs,
-    options: AppConstants.productSizes,
+    options: AppConstants.productSizesFor(type),
     allowCustom: true,
   );
 
@@ -252,7 +252,7 @@ class ProductFieldsCatalog {
   static ProductFormConfig _variantsProfile(String? type) => ProductFormConfig(
     profileId: profileVariants,
     businessType: type,
-    fields: _baseFields(extra: const [_color, _size, _model]),
+    fields: _baseFields(extra: [_color, _sizeFor(type), _model]),
   );
 
   // ── بقالة / سوبر ماركت / لحوم / خضروات ...: باركود + وحدة + صلاحية ──
@@ -432,18 +432,19 @@ class ProductFieldsCatalog {
     fields: _baseFields(),
   );
 
-  static List<ProductFieldConfig> _fieldsFor(String profile) => switch (profile) {
-    profileRestaurant => _fieldsOf(_restaurant(null)),
-    profileVariants => _fieldsOf(_variantsProfile(null)),
-    profileRetail => _fieldsOf(_retail(null)),
-    profilePharmacy => _fieldsOf(_pharmacy(null)),
-    profileElectronics => _fieldsOf(_electronics(null)),
-    profileBeauty => _fieldsOf(_beauty(null)),
-    profileHomeGoods => _fieldsOf(_homeGoods(null)),
-    profileFlorist => _fieldsOf(_florist(null)),
-    profileBarber => _fieldsOf(_barber(null)),
-    _ => _fieldsOf(_generic(null)),
-  };
+  static List<ProductFieldConfig> _fieldsFor(String profile, String? type) =>
+      switch (profile) {
+        profileRestaurant => _fieldsOf(_restaurant(type)),
+        profileVariants => _fieldsOf(_variantsProfile(type)),
+        profileRetail => _fieldsOf(_retail(type)),
+        profilePharmacy => _fieldsOf(_pharmacy(type)),
+        profileElectronics => _fieldsOf(_electronics(type)),
+        profileBeauty => _fieldsOf(_beauty(type)),
+        profileHomeGoods => _fieldsOf(_homeGoods(type)),
+        profileFlorist => _fieldsOf(_florist(type)),
+        profileBarber => _fieldsOf(_barber(type)),
+        _ => _fieldsOf(_generic(type)),
+      };
 
   static List<ProductFieldConfig> _fieldsOf(ProductFormConfig c) => c.fields;
 }

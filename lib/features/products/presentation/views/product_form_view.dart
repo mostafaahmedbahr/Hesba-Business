@@ -154,7 +154,9 @@ class _ProductFormViewState extends State<ProductFormView> {
         final savedSize = '${row['size'] ?? ''}';
         final isCustomSize =
             savedSize.isNotEmpty &&
-            !AppConstants.productSizes.contains(savedSize);
+            !AppConstants.productSizesFor(
+              widget.cubit.state.shopType,
+            ).contains(savedSize);
         _variants.add(
           ProductVariantRow(
             color: '${row['color'] ?? ''}',
@@ -164,6 +166,15 @@ class _ProductFormViewState extends State<ProductFormView> {
           ),
         );
       }
+    }
+  }
+
+  /// تحديث علم "مقاس مخصص" بعد تحميل مقاسات النشاط الفعلية.
+  /// مقاس قديم (مثلاً 42 في محل أحذية) ما يعتبرش مخصص بعد ما عرفنا
+  /// أن المقاس ده ضمن قائمة المقاسات الخاصة بالنشاط.
+  void _syncVariantCustomFlags(List<String> sizes) {
+    for (final row in _variants) {
+      row.useCustomSize = row.size.isNotEmpty && !sizes.contains(row.size);
     }
   }
 
@@ -182,7 +193,14 @@ class _ProductFormViewState extends State<ProductFormView> {
           _customCategory = false;
         });
       }
-    } catch (logErr, logSt) { AppLogger.nonFatal('features/products/presentation/views/product_form_view.dart', logErr, logSt, severity: LoggingSeverity.warning); }
+    } catch (logErr, logSt) {
+      AppLogger.nonFatal(
+        'features/products/presentation/views/product_form_view.dart',
+        logErr,
+        logSt,
+        severity: LoggingSeverity.warning,
+      );
+    }
   }
 
   String get _otherOption =>
@@ -344,7 +362,12 @@ class _ProductFormViewState extends State<ProductFormView> {
         _formCubit.setSupplier(id, liveName);
       }
     } catch (logErr, logSt) {
-      AppLogger.nonFatal('features/products/presentation/views/product_form_view.dart', logErr, logSt, severity: LoggingSeverity.warning);
+      AppLogger.nonFatal(
+        'features/products/presentation/views/product_form_view.dart',
+        logErr,
+        logSt,
+        severity: LoggingSeverity.warning,
+      );
       // أفضل جهد فقط.
     }
   }
@@ -405,6 +428,10 @@ class _ProductFormViewState extends State<ProductFormView> {
           if (!state.isReady) {
             return const LoadingWidget();
           }
+          _syncVariantCustomFlags(
+            state.config.field(ProductFieldKeys.size)?.options ??
+                AppConstants.productSizesFor(state.businessType),
+          );
           _ensureDropdownInitials(state.config);
           return Form(
             key: _formKey,
@@ -599,6 +626,9 @@ class _ProductFormViewState extends State<ProductFormView> {
           key: ValueKey(f.key),
           rows: _variants,
           availableStock: _variantsAvailableStock(),
+          sizeOptions:
+              _formCubit.state.config.field(ProductFieldKeys.size)?.options ??
+              AppConstants.productSizesFor(_formCubit.state.businessType),
           validator: (rows) {
             for (final r in rows) {
               final qty = r.qty.trim();

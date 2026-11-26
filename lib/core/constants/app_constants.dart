@@ -161,8 +161,13 @@ class AppConstants {
     'غير ذلك': ['عام', 'أخرى'],
   };
 
-  // Product sizes (dropdown). 'أخرى' reveals a free-text field.
-  static const List<String> productSizes = [
+  // ─────────────────────────────────────────────────────────────────
+  // Product sizes (dropdown) — تختلف حسب نوع النشاط التجاري.
+  // 'أخرى' دائماً موجودة وتفتح حقل نص حر (مقاس طفل / رقم غير مدرج...).
+  // ─────────────────────────────────────────────────────────────────
+
+  /// مقاسات الملابس — تُستخدم كأفضل قيمة افتراضية عند عدم معرفة النشاط.
+  static const List<String> clothingProductSizes = [
     'S',
     'M',
     'L',
@@ -172,6 +177,55 @@ class AppConstants {
     'موحد',
     'أخرى',
   ];
+
+  /// مقاسات الأحذية بالأرقام (المقاس الأوروبي الشائع).
+  static const List<String> shoeProductSizes = [
+    '35',
+    '36',
+    '37',
+    '38',
+    '39',
+    '40',
+    '41',
+    '42',
+    '43',
+    '44',
+    '45',
+    '46',
+    'أخرى',
+  ];
+
+  /// الأنشطة اللي لا تستخدم مقاسات ملابس/أحذية.
+  static const List<String> genericProductSizes = ['موحد', 'أخرى'];
+
+  /// القائمة القديمة (مقاسات الملابس) — تُبقى للتوافق مع أي كود قديم.
+  static const List<String> productSizes = clothingProductSizes;
+
+  /// المقاسات المناسبة لكل نشاط تجاري (مطابقة لـ RegisterConstants.businessTypes).
+  static const Map<String, List<String>> productSizesByBusinessType = {
+    'سوبر ماركت': genericProductSizes,
+    'بقالة': genericProductSizes,
+    'محل خضروات': genericProductSizes,
+    'محل فواكه': genericProductSizes,
+    'محل لحوم': genericProductSizes,
+    'محل أسماك': genericProductSizes,
+    'صيدلية': genericProductSizes,
+    'محل ملابس': clothingProductSizes,
+    'محل إلكترونيات': genericProductSizes,
+    'محل عطور': genericProductSizes,
+    'محل أحذية': shoeProductSizes,
+    'محل أدوات منزلية': genericProductSizes,
+    'محل ورد': genericProductSizes,
+    'كافيه': genericProductSizes,
+    'مطعم': genericProductSizes,
+    'محل حلويات': genericProductSizes,
+    'محل حلاقة': genericProductSizes,
+    'غير ذلك': genericProductSizes,
+  };
+
+  /// مقاسات النشاط التجاري (نوع غير معروف → مقاسات الملابس كما في السابق).
+  static List<String> productSizesFor(String? businessType) =>
+      productSizesByBusinessType[businessType?.trim()] ?? clothingProductSizes;
 
   // Payment Methods
   static const String paymentCash = 'cash';
