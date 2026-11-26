@@ -66,13 +66,13 @@ class DrawerItemsList extends StatelessWidget {
       );
       if (!opened) {
         messenger.showSnackBar(
-          const SnackBar(content: Text('تعذر فتح سياسة الخصوصية — راجع الرابط من المتصفح')),
+          SnackBar(content: Text('تعذر فتح سياسة الخصوصية — راجع الرابط من المتصفح'.tr())),
         );
       }
     } catch (logErr, logSt) {
       AppLogger.nonFatal('features/main/presentation/widgets/drawer_items_list.dart', logErr, logSt, severity: LoggingSeverity.warning);
       messenger.showSnackBar(
-        const SnackBar(content: Text('تعذر فتح سياسة الخصوصية — راجع الرابط من المتصفح')),
+        SnackBar(content: Text('تعذر فتح سياسة الخصوصية — راجع الرابط من المتصفح'.tr())),
       );
     }
   }

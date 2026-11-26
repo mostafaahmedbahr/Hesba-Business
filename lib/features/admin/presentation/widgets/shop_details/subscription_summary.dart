@@ -7,6 +7,8 @@ import 'package:hesba/features/admin/data/repos/admin_repo.dart';
 import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
 import 'package:hesba/features/subscription/data/models/subscription_model.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// ملخص الاشتراك في تبويب «نظرة عامة» + زر إيقاف/تفعيل المحل.
 class ShopSubscriptionSummary extends StatefulWidget {
@@ -39,23 +41,23 @@ class _ShopSubscriptionSummaryState extends State<ShopSubscriptionSummary> {
   Widget build(BuildContext context) {
     if (ownerId.isEmpty) {
       return AdminSection(
-        title: 'الاشتراك',
+        title: 'الاشتراك'.tr(),
         icon: Icons.workspace_premium_outlined,
-        child: adminEmpty(Icons.workspace_premium_outlined, 'لا يوجد مالك مرتبط'),
+        child: adminEmpty(Icons.workspace_premium_outlined, 'لا يوجد مالك مرتبط'.tr()),
       );
     }
     return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       future: _future,
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) {
-          return const AdminSection(title: 'الاشتراك', icon: Icons.workspace_premium_outlined, child: LinearProgressIndicator(minHeight: 4));
+          return AdminSection(title: 'الاشتراك'.tr(), icon: Icons.workspace_premium_outlined, child: LinearProgressIndicator(minHeight: 4));
         }
         final sub = snap.data?.data();
         if (sub == null || sub.isEmpty) {
           return AdminSection(
-            title: 'الاشتراك',
+            title: 'الاشتراك'.tr(),
             icon: Icons.workspace_premium_outlined,
-            child: adminEmpty(Icons.workspace_premium_outlined, 'لا يوجد اشتراك'),
+            child: adminEmpty(Icons.workspace_premium_outlined, 'لا يوجد اشتراك'.tr()),
           );
         }
         final status = (sub['status'] as String?) ?? '';
@@ -63,22 +65,22 @@ class _ShopSubscriptionSummaryState extends State<ShopSubscriptionSummary> {
         final model = SubscriptionModel.fromJson(sub);
         final working = model.canModifyData;
         final lockReason = suspended
-            ? 'موقوف من الإدارة'
+            ? 'موقوف من الإدارة'.tr()
             : switch (model.effectiveStatus) {
-                SubscriptionStatus.pending => 'قيد المراجعة',
-                SubscriptionStatus.rejected => 'مرفوض',
-                _ => 'انتهت المدة',
+                SubscriptionStatus.pending => 'قيد المراجعة'.tr(),
+                SubscriptionStatus.rejected => 'مرفوض'.tr(),
+                _ => 'انتهت المدة'.tr(),
               };
         return AdminSection(
-          title: 'الاشتراك',
+          title: 'الاشتراك'.tr(),
           icon: Icons.workspace_premium_outlined,
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               if (suspended)
-                const Padding(
+                Padding(
                   padding: EdgeInsets.only(left: 6),
-                  child: AdminStatusBadge(label: 'موقوف', color: AppTheme.danger),
+                  child: AdminStatusBadge(label: 'موقوف'.tr(), color: AppTheme.danger),
                 ),
               AdminStatusBadge.status(status),
             ],
@@ -86,11 +88,11 @@ class _ShopSubscriptionSummaryState extends State<ShopSubscriptionSummary> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              AdminInfoRow(icon: Icons.play_arrow_outlined, label: 'المدة', value: '${AdminFmt.dateNum(sub['startDate'])} → ${AdminFmt.dateNum(sub['endDate'])}'),
+              AdminInfoRow(icon: Icons.play_arrow_outlined, label: 'المدة'.tr(), value: '${AdminFmt.dateNum(sub['startDate'])} → ${AdminFmt.dateNum(sub['endDate'])}'),
               AdminInfoRow(
                 icon: working ? Icons.check_circle_rounded : Icons.lock_rounded,
-                label: 'الحالة',
-                value: working ? 'شغال' : 'مقفول — $lockReason',
+                label: 'الحالة'.tr(),
+                value: working ? 'شغال'.tr() : uiTr('مقفول — $lockReason'),
               ),
               const SizedBox(height: 10),
               SizedBox(
@@ -107,13 +109,13 @@ class _ShopSubscriptionSummaryState extends State<ShopSubscriptionSummary> {
                         ? OutlinedButton.icon(
                             onPressed: () => _setSuspended(false),
                             icon: const Icon(Icons.play_arrow_rounded, size: 16),
-                            label: const Text('إعادة تفعيل المحل', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800)),
+                            label: Text('إعادة تفعيل المحل'.tr(), style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800)),
                           )
                         : OutlinedButton.icon(
                             onPressed: () => _setSuspended(true),
                             style: OutlinedButton.styleFrom(foregroundColor: AppTheme.danger, side: BorderSide(color: AppTheme.danger)),
                             icon: const Icon(Icons.block_rounded, size: 16),
-                            label: const Text('إيقاف المحل', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800)),
+                            label: Text('إيقاف المحل'.tr(), style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800)),
                           ),
               ),
             ],
@@ -128,11 +130,11 @@ class _ShopSubscriptionSummaryState extends State<ShopSubscriptionSummary> {
   Future<void> _setSuspended(bool suspended) async {
     final ok = await showAdminConfirm(
       context,
-      title: suspended ? 'إيقاف المحل' : 'إعادة تفعيل المحل',
+      title: suspended ? 'إيقاف المحل'.tr() : 'إعادة تفعيل المحل'.tr(),
       message: suspended
-          ? 'هيتوقف المحل فورًا (قراءة فقط) حتى لو اشتراكه شغال. متأكد؟'
-          : 'هيرجع المحل يشتغل طبيعي حسب اشتراكه. متأكد؟',
-      confirmLabel: suspended ? 'إيقاف' : 'تفعيل',
+          ? 'هيتوقف المحل فورًا (قراءة فقط) حتى لو اشتراكه شغال. متأكد؟'.tr()
+          : 'هيرجع المحل يشتغل طبيعي حسب اشتراكه. متأكد؟'.tr(),
+      confirmLabel: suspended ? 'إيقاف'.tr() : 'تفعيل'.tr(),
       danger: suspended,
     );
     if (!ok || !mounted) return;
@@ -142,12 +144,12 @@ class _ShopSubscriptionSummaryState extends State<ShopSubscriptionSummary> {
           .setShopSuspended(userId: ownerId, suspended: suspended);
       if (!mounted) return;
       AppDialogs.showSnackBar(
-          context, suspended ? 'تم إيقاف المحل' : 'تم إعادة تفعيل المحل');
+          context, suspended ? 'تم إيقاف المحل'.tr() : 'تم إعادة تفعيل المحل'.tr());
       _reload();
     } catch (logErr, logSt) {
       AppLogger.nonFatal('features/admin/presentation/widgets/shop_details/subscription_summary.dart', logErr, logSt, severity: LoggingSeverity.warning);
       if (!mounted) return;
-      AppDialogs.showSnackBar(context, 'تعذر تنفيذ العملية', isError: true);
+      AppDialogs.showSnackBar(context, 'تعذر تنفيذ العملية'.tr(), isError: true);
     } finally {
       if (mounted) setState(() => _toggling = false);
     }

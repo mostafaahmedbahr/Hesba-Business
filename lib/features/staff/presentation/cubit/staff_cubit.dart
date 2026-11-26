@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/models/staff_model.dart';
 import '../../data/repos/staff_repo.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class StaffState {
   final List<StaffModel> staff;
@@ -36,8 +37,8 @@ class StaffCubit extends Cubit<StaffState> {
     } catch (e, logSt) {
       AppLogger.nonFatal('features/staff/presentation/cubit/staff_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
       if (!isClosed) {
-        emit(const StaffState(staff: [], loading: false,
-            error: 'تعذر تحميل الحسابات الفرعية'));
+        emit(StaffState(staff: [], loading: false,
+            error: 'تعذر تحميل الحسابات الفرعية'.tr()));
       }
     }
   }
@@ -99,11 +100,11 @@ class StaffCubit extends Cubit<StaffState> {
   }
 
   String _mapError(String msg) {
-    if (msg.contains('email-already-in-use')) return 'هذا البريد مستخدم بالفعل';
-    if (msg.contains('invalid-email')) return 'البريد الإلكتروني غير صالح';
-    if (msg.contains('weak-password')) return 'كلمة المرور غير كافية';
-    if (msg.contains('network-request-failed')) return 'تحقق من اتصال الإنترنت';
-    if (msg.contains('permission-denied')) return 'ليست لديك صلاحية لتنفيذ هذا الإجراء';
+    if (msg.contains('email-already-in-use')) return 'هذا البريد مستخدم بالفعل'.tr();
+    if (msg.contains('invalid-email')) return 'البريد الإلكتروني غير صالح'.tr();
+    if (msg.contains('weak-password')) return 'كلمة المرور غير كافية'.tr();
+    if (msg.contains('network-request-failed')) return 'تحقق من اتصال الإنترنت'.tr();
+    if (msg.contains('permission-denied')) return 'ليست لديك صلاحية لتنفيذ هذا الإجراء'.tr();
     return msg.replaceAll(RegExp(r'^Exception:\s*|^[A-Za-z]+\/?[A-Za-z]*:\s*'), '');
   }
 

@@ -10,6 +10,7 @@ import '../../../sales/data/repos/sales_repo.dart';
 import '../../data/reports_calculator.dart';
 import 'reports_state.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// لوجيك التقارير: يجلب **كل** سجلات المحل بترقيم cursor (بلا قيود 300)
 /// ويفلتر محلياً حسب الفترة (تبديل الفترة فوري)، ثم يحسب المؤشرات مرة
@@ -50,7 +51,7 @@ class ReportsCubit extends Cubit<ReportsState> {
     if (shopId == null || shopId.isEmpty) {
       emit(state.copyWith(
         status: ReportsStatus.failure,
-        errorMessage: 'لم يتم العثور على المتجر',
+        errorMessage: 'لم يتم العثور على المتجر'.tr(),
       ));
       return;
     }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_theme.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Premium placeholder — gradient ring + soft card
 class UnderConstructionView extends StatelessWidget {
@@ -100,7 +101,7 @@ class UnderConstructionView extends StatelessWidget {
                       children: [
                         Icon(Icons.hourglass_top_rounded, size: 14.sp, color: AppTheme.primaryColor),
                         SizedBox(width: 6.w),
-                        Text('قريباً',
+                        Text('قريباً'.tr(),
                             style: TextStyle(
                                 fontSize: 11.sp,
                                 fontWeight: FontWeight.w700,

@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../core/theme/app_theme.dart';
 import 'big_amount_field.dart';
 import 'field.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// كارت «التفاصيل»: المبلغ الكبير + العنوان + اسم المحل.
 class ExpenseDetailsCard extends StatelessWidget {
@@ -51,21 +52,21 @@ class ExpenseDetailsCard extends StatelessWidget {
           SizedBox(height: 12.h),
           ExpenseField(
             controller: titleController,
-            label: 'عنوان المصروف *',
-            hint: 'مثال: إيجار شهر يناير',
+            label: 'عنوان المصروف *'.tr(),
+            hint: 'مثال: إيجار شهر يناير'.tr(),
             icon: Icons.title_rounded,
             isDark: isDark,
             onChanged: onChanged,
             validator: (v) =>
                 (v == null || v.trim().isEmpty)
-                ? 'العنوان مطلوب'
+                ? 'العنوان مطلوب'.tr()
                 : null,
           ),
           SizedBox(height: 12.h),
           ExpenseField(
             controller: shopNameController,
-            label: 'اسم المحل',
-            hint: 'اسم المحل (اختياري)',
+            label: 'اسم المحل'.tr(),
+            hint: 'اسم المحل (اختياري)'.tr(),
             icon: Icons.storefront_rounded,
             isDark: isDark,
             onChanged: onChanged,

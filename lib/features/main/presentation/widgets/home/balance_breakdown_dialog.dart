@@ -58,13 +58,13 @@ class BalanceBreakdownDialog extends StatelessWidget {
               SizedBox(width: 10.w),
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('تفصيل الرصيد',
+                  Text('تفصيل الرصيد'.tr(),
                       style: TextStyle(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w900,
                           color: isDark ? Colors.white : AppTheme.ink)),
                   SizedBox(height: 2.h),
-                  Text('مبيعات النهاردة حسب طريقة الدفع',
+                  Text('مبيعات النهاردة حسب طريقة الدفع'.tr(),
                       style: TextStyle(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w600,
@@ -95,7 +95,7 @@ class BalanceBreakdownDialog extends StatelessWidget {
               Center(
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 10.h),
-                  child: Text('لا توجد مبيعات اليوم',
+                  child: Text('لا توجد مبيعات اليوم'.tr(),
                       style: TextStyle(
                           fontSize: 12.5.sp,
                           fontWeight: FontWeight.w700,
@@ -127,17 +127,17 @@ class BalanceBreakdownDialog extends StatelessWidget {
               ),
             if (returns > 0) ...[
               SizedBox(height: 10.h),
-              _deductRow('المرتجعات', returns, AppTheme.warningAmber, currency, isDark),
+              _deductRow('المرتجعات'.tr(), returns, AppTheme.warningAmber, currency, isDark),
             ],
             if (expenses > 0) ...[
               SizedBox(height: 6.h),
-              _deductRow('المصروفات', expenses, AppTheme.danger, currency, isDark),
+              _deductRow('المصروفات'.tr(), expenses, AppTheme.danger, currency, isDark),
             ],
             SizedBox(height: 12.h),
             Divider(height: 1, color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft),
             SizedBox(height: 10.h),
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text('= الرصيد الحالي',
+              Text('= الرصيد الحالي'.tr(),
                   style: TextStyle(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w900,
@@ -163,7 +163,7 @@ class BalanceBreakdownDialog extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14.r)),
                 ),
-                child: Text('تمام',
+                child: Text('تمام'.tr(),
                     style: TextStyle(
                         fontSize: 13.5.sp,
                         fontWeight: FontWeight.w800,
@@ -178,9 +178,9 @@ class BalanceBreakdownDialog extends StatelessWidget {
 
   /// اسم طريقة الدفع بالعربي (نفس شاشة العميل) — الفواتير بلا وسيلة → غير محدد.
   String _labelOf(String method) {
-    if (method.isEmpty) return 'غير محدد';
+    if (method.isEmpty) return 'غير محدد'.tr();
     final label = SalesListState.paymentLabel(method);
-    return label.isEmpty ? 'غير محدد' : label;
+    return label.isEmpty ? 'غير محدد'.tr() : label;
   }
 
   Widget _deductRow(String label, double amount, Color color, String currency, bool isDark) {

@@ -5,6 +5,7 @@ import 'package:hesba/features/admin/presentation/widgets/shop_details/header_ca
 import 'package:hesba/features/admin/presentation/widgets/shop_details/overview_tab.dart';
 import 'package:hesba/features/admin/presentation/widgets/shop_details/shop_items_tab.dart';
 import 'package:hesba/features/admin/presentation/widgets/shop_details/subscription_tab.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Scaffold تفاصيل المحل: الهيدر + تبويبات (نظرة عامة / منتجات / مبيعات / مصروفات / اشتراك).
 class ShopDetailsScaffold extends StatelessWidget {
@@ -21,7 +22,7 @@ class ShopDetailsScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = (shop['shopName'] as String? ?? '').trim().isEmpty ? 'تفاصيل المحل' : shop['shopName'] as String;
+    final name = (shop['shopName'] as String? ?? '').trim().isEmpty ? 'تفاصيل المحل'.tr() : shop['shopName'] as String;
     final imageUrl = (shop['shopImageUrl'] as String? ?? '').trim();
     final type = (shop['businessType'] as String? ?? '').trim();
     final city = (shop['city'] as String? ?? '').trim();
@@ -36,20 +37,20 @@ class ShopDetailsScaffold extends StatelessWidget {
           title: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis),
           actions: [
             IconButton(
-              tooltip: 'نسخ معرف المحل',
+              tooltip: 'نسخ معرف المحل'.tr(),
               icon: const Icon(Icons.copy_outlined, size: 20),
               onPressed: () => CopyableId.copy(context, shopId),
             ),
           ],
-          bottom: const TabBar(
+          bottom: TabBar(
             isScrollable: true,
             labelStyle: TextStyle(fontWeight: FontWeight.w800, fontFamily: AppTheme.fontFamily),
             tabs: [
-              Tab(text: 'نظرة عامة'),
-              Tab(text: 'المنتجات'),
-              Tab(text: 'المبيعات'),
-              Tab(text: 'المصروفات'),
-              Tab(text: 'الاشتراك'),
+              Tab(text: 'نظرة عامة'.tr()),
+              Tab(text: 'المنتجات'.tr()),
+              Tab(text: 'المبيعات'.tr()),
+              Tab(text: 'المصروفات'.tr()),
+              Tab(text: 'الاشتراك'.tr()),
             ],
           ),
         ),

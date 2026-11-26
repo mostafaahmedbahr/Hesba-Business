@@ -1,6 +1,8 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:hesba/core/theme/app_theme.dart';
 import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// هيدر تفاصيل المحل: الصورة + الاسم + الموقع + النوع + حالة النشاط.
 class ShopDetailsHeaderCard extends StatelessWidget {
@@ -67,7 +69,7 @@ class ShopDetailsHeaderCard extends StatelessWidget {
                         const Icon(Icons.phone_outlined, color: Colors.white70, size: 14),
                         const SizedBox(width: 4),
                         Directionality(
-                          textDirection: TextDirection.rtl,
+                          textDirection: ui.TextDirection.rtl,
                           child: Text(phone, style: const TextStyle(color: Colors.white70, fontSize: 12)),
                         ),
                       ],
@@ -92,7 +94,7 @@ class ShopDetailsHeaderCard extends StatelessWidget {
                         color: isActive ? AdminColors.success : Colors.grey,
                         borderRadius: BorderRadius.circular(AdminRadius.badge),
                       ),
-                      child: Text(isActive ? 'نشط' : 'غير نشط',
+                      child: Text(isActive ? 'نشط'.tr() : 'غير نشط'.tr(),
                           style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w800)),
                     ),
                   ],

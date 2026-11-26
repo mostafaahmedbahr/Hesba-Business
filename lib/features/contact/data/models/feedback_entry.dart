@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// ملاحظة/شكوى/اقتراح واصل من المستخدم عبر "تواصل معنا".
 ///
@@ -56,12 +57,12 @@ class FeedbackEntry {
   /// النوع بالعربي + أيقونة + لون (للوحة الأدمن).
   static (String label, IconData icon, Color color) typeMeta(String type) {
     return switch (type) {
-      'feedbackComplaint' => ('شكوى', Icons.report_gmailerrorred_outlined, Color(0xFFEF4444)),
-      'feedbackSuggestion' => ('اقتراح', Icons.lightbulb_outline, Color(0xFF3B82F6)),
-      'feedbackNote' => ('ملاحظة', Icons.sticky_note_2_outlined, Color(0xFFF59E0B)),
-      'feedbackInquiry' => ('استفسار', Icons.help_outline, Color(0xFF8B5CF6)),
-      'feedbackOther' => ('أخرى', Icons.more_horiz, Color(0xFF64748B)),
-      _ => ('ملاحظة', Icons.sticky_note_2_outlined, Color(0xFF64748B)),
+      'feedbackComplaint' => ('شكوى'.tr(), Icons.report_gmailerrorred_outlined, Color(0xFFEF4444)),
+      'feedbackSuggestion' => ('اقتراح'.tr(), Icons.lightbulb_outline, Color(0xFF3B82F6)),
+      'feedbackNote' => ('ملاحظة'.tr(), Icons.sticky_note_2_outlined, Color(0xFFF59E0B)),
+      'feedbackInquiry' => ('استفسار'.tr(), Icons.help_outline, Color(0xFF8B5CF6)),
+      'feedbackOther' => ('أخرى'.tr(), Icons.more_horiz, Color(0xFF64748B)),
+      _ => ('ملاحظة'.tr(), Icons.sticky_note_2_outlined, Color(0xFF64748B)),
     };
   }
 }

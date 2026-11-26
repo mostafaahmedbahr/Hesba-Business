@@ -9,6 +9,7 @@ import '../../data/models/expense_model.dart';
 import '../../data/repos/expenses_repo.dart';
 import 'expenses_state.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class ExpensesCubit extends Cubit<ExpensesState> {
   final ExpensesRepo expensesRepo;
@@ -23,7 +24,7 @@ class ExpensesCubit extends Cubit<ExpensesState> {
   String? _expenseRequestId;
   int _loadGeneration = 0;
 
-  ExpensesCubit({required this.expensesRepo}) : super(const ExpensesState()) {
+  ExpensesCubit({required this.expensesRepo}) : super(ExpensesState()) {
     // أي إضافة/تعديل/حذف من أي Cubit تاني يحدّث القائمة فوراً
     _eventSub = AppEvents.instance.stream.listen((event) {
       if (event.type == AppEventType.expenseCreated ||
@@ -37,7 +38,7 @@ class ExpensesCubit extends Cubit<ExpensesState> {
   void reset() {
     _expensesSubscription?.cancel();
     _expensesSubscription = null;
-    emit(const ExpensesState());
+    emit(ExpensesState());
   }
 
   Future<String?> _resolveShopId(String? providedShopId) async {
@@ -108,15 +109,15 @@ class ExpensesCubit extends Cubit<ExpensesState> {
   }) async {
     if (_saving) return;
     if (title.trim().isEmpty) {
-      emit(state.copyWith(status: ExpensesStatus.error, errorMessage: 'عنوان المصروف مطلوب'));
+      emit(state.copyWith(status: ExpensesStatus.error, errorMessage: 'عنوان المصروف مطلوب'.tr()));
       return;
     }
     if (amount <= 0) {
-      emit(state.copyWith(status: ExpensesStatus.error, errorMessage: 'المبلغ يجب أن يكون أكبر من صفر'));
+      emit(state.copyWith(status: ExpensesStatus.error, errorMessage: 'المبلغ يجب أن يكون أكبر من صفر'.tr()));
       return;
     }
     if (category.isEmpty) {
-      emit(state.copyWith(status: ExpensesStatus.error, errorMessage: 'اختر تصنيف المصروف'));
+      emit(state.copyWith(status: ExpensesStatus.error, errorMessage: 'اختر تصنيف المصروف'.tr()));
       return;
     }
 
@@ -171,15 +172,15 @@ class ExpensesCubit extends Cubit<ExpensesState> {
   }) async {
     if (_saving) return;
     if (title.trim().isEmpty) {
-      emit(state.copyWith(status: ExpensesStatus.error, errorMessage: 'عنوان المصروف مطلوب'));
+      emit(state.copyWith(status: ExpensesStatus.error, errorMessage: 'عنوان المصروف مطلوب'.tr()));
       return;
     }
     if (amount <= 0) {
-      emit(state.copyWith(status: ExpensesStatus.error, errorMessage: 'المبلغ يجب أن يكون أكبر من صفر'));
+      emit(state.copyWith(status: ExpensesStatus.error, errorMessage: 'المبلغ يجب أن يكون أكبر من صفر'.tr()));
       return;
     }
     if (category.isEmpty) {
-      emit(state.copyWith(status: ExpensesStatus.error, errorMessage: 'اختر تصنيف المصروف'));
+      emit(state.copyWith(status: ExpensesStatus.error, errorMessage: 'اختر تصنيف المصروف'.tr()));
       return;
     }
 

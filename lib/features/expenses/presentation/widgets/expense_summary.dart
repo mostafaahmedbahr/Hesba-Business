@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 class ExpenseSummary extends StatelessWidget {
   final double totalAmount;
@@ -36,12 +38,12 @@ class ExpenseSummary extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('عدد المصروفات', style: TextStyle(fontSize: 12.sp, color: theme.hintColor)),
+                  Text('عدد المصروفات'.tr(), style: TextStyle(fontSize: 12.sp, color: theme.hintColor)),
                   Text('$itemsCount', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700)),
                 ],
               ),
             ),
-          _SummaryRow(title: 'إجمالي المصروفات', value: '${totalAmount.toStringAsFixed(2)} ج.م', isTotal: true),
+          _SummaryRow(title: 'إجمالي المصروفات'.tr(), value: uiTr('${totalAmount.toStringAsFixed(2)} ج.م'), isTotal: true),
         ],
       ),
     );

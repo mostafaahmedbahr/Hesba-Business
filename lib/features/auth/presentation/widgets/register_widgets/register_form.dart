@@ -16,6 +16,7 @@ import 'register_owner_step.dart';
 import 'register_shop_step.dart';
 import 'register_extra_step.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// كارت إنشاء الحساب: هيدر ملوّن + مؤشر خطوات + مساحة النموذج + أزرار.
 class RegisterForm extends StatelessWidget {
@@ -195,7 +196,7 @@ class _LoginFooter extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          'لديك حساب بالفعل؟',
+          'لديك حساب بالفعل؟'.tr(),
           style: TextStyle(
             fontSize: 12.sp,
             color: isDark ? AppTheme.darkTextSecondary : Colors.grey.shade500,
@@ -212,7 +213,7 @@ class _LoginFooter extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
             child: Text(
-              'تسجيل الدخول',
+              'تسجيل الدخول'.tr(),
               style: TextStyle(
                 fontSize: 12.5.sp,
                 fontWeight: FontWeight.w900,
@@ -240,7 +241,7 @@ class _PrivacyFooter extends StatelessWidget {
         alignment: WrapAlignment.center,
         children: [
           Text(
-            'بإنشائك حسابًا فأنت توافق على ',
+            'بإنشائك حسابًا فأنت توافق على '.tr(),
             style: TextStyle(
               fontSize: 11.5.sp,
               color: isDark ? AppTheme.darkTextSecondary : Colors.grey.shade500,
@@ -262,7 +263,7 @@ class _PrivacyFooter extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 2.h),
               child: Text(
-                'سياسة الخصوصية',
+                'سياسة الخصوصية'.tr(),
                 style: TextStyle(
                   fontSize: 11.5.sp,
                   fontWeight: FontWeight.w800,

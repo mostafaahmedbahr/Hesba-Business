@@ -8,6 +8,8 @@ import 'package:hesba/core/widgets/loading_widget.dart';
 import 'package:hesba/features/admin/data/repos/admin_repo.dart';
 
 import 'admin_ds.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 class ActivityView extends StatefulWidget {
   const ActivityView({super.key});
@@ -56,16 +58,16 @@ class _ActivityViewState extends State<ActivityView> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Column(
             children: [
-              const AdminPageHeader(
-                title: 'سجل النشاطات',
-                description: 'متابعة كل إجراءات الأدمن داخل لوحة التحكم',
+              AdminPageHeader(
+                title: 'سجل النشاطات'.tr(),
+                description: 'متابعة كل إجراءات الأدمن داخل لوحة التحكم'.tr(),
               ),
               Expanded(child: LoadingWidget()),
             ],
           );
         }
         if (snapshot.hasError) {
-          return adminError('تعذر تحميل سجل النشاطات', _reload);
+          return adminError('تعذر تحميل سجل النشاطات'.tr(), _reload);
         }
 
         final all = snapshot.data?.docs ?? [];
@@ -79,43 +81,43 @@ class _ActivityViewState extends State<ActivityView> {
           onRefresh: _reload,
           child: Column(
             children: [
-              const AdminPageHeader(
-                title: 'سجل النشاطات',
-                description: 'سجل زمني يوضح ما تم تنفيذه، ومن قام به، وأين',
+              AdminPageHeader(
+                title: 'سجل النشاطات'.tr(),
+                description: 'سجل زمني يوضح ما تم تنفيذه، ومن قام به، وأين'.tr(),
               ),
               AdminSummaryHeader(
                 icon: Icons.timeline_outlined,
-                title: 'إجمالي النشاطات المسجلة',
+                title: 'إجمالي النشاطات المسجلة'.tr(),
                 total: all.length,
-                unit: 'عملية',
+                unit: 'عملية'.tr(),
                 stats: [
                   if (_group != 'all')
-                    'يتم عرض ${docs.length} عملية من أصل ${all.length}'
+                    uiTr('يتم عرض ${docs.length} عملية من أصل ${all.length}')
                   else
-                    'آخر ١٠٠ عملية مرتبة بالأحدث أولاً'
+                    'آخر ١٠٠ عملية مرتبة بالأحدث أولاً'.tr()
                 ],
                 onRefresh: _reload,
               ),
               AdminFilterChips(
                 selected: _group,
                 onSelect: (k) => setState(() => _group = k),
-                items: const [
-                  AdminChipItem('all', 'الكل'),
-                  AdminChipItem('subs', 'الاشتراكات', dot: AppTheme.primaryColor),
-                  AdminChipItem('shops', 'المحلات', dot: AppTheme.secondaryColor),
-                  AdminChipItem('products', 'المنتجات', dot: AppTheme.primaryColor),
-                  AdminChipItem('sales', 'المبيعات', dot: AppTheme.successColor),
-                  AdminChipItem('expenses', 'المصروفات', dot: AppTheme.errorColor),
+                items: [
+                  AdminChipItem('all', 'الكل'.tr()),
+                  AdminChipItem('subs', 'الاشتراكات'.tr(), dot: AppTheme.primaryColor),
+                  AdminChipItem('shops', 'المحلات'.tr(), dot: AppTheme.secondaryColor),
+                  AdminChipItem('products', 'المنتجات'.tr(), dot: AppTheme.primaryColor),
+                  AdminChipItem('sales', 'المبيعات'.tr(), dot: AppTheme.successColor),
+                  AdminChipItem('expenses', 'المصروفات'.tr(), dot: AppTheme.errorColor),
                 ],
               ),
               Expanded(
                 child: docs.isEmpty
                     ? adminEmpty(
                   Icons.history_outlined,
-                  'لا يوجد نشاط لعرضه',
+                  'لا يوجد نشاط لعرضه'.tr(),
                   _group == 'all'
-                      ? 'عند قيام الأدمن بأي إجراء سيظهر هنا مباشرةً'
-                      : 'لا توجد نشاطات ضمن هذا التصنيف حالياً',
+                      ? 'عند قيام الأدمن بأي إجراء سيظهر هنا مباشرةً'.tr()
+                      : 'لا توجد نشاطات ضمن هذا التصنيف حالياً'.tr(),
                 )
                     : ListView.builder(
                   padding: const EdgeInsets.fromLTRB(
@@ -219,11 +221,11 @@ class _ActivityViewState extends State<ActivityView> {
   String _dateTitle(DateTime dt) {
     final now = DateTime.now();
     if (dt.year == now.year && dt.month == now.month && dt.day == now.day) {
-      return 'اليوم';
+      return 'اليوم'.tr();
     }
     final yesterday = now.subtract(const Duration(days: 1));
     if (dt.year == yesterday.year && dt.month == yesterday.month && dt.day == yesterday.day) {
-      return 'أمس';
+      return 'أمس'.tr();
     }
     return AdminFmt.dateNum(dt);
   }
@@ -366,12 +368,12 @@ class _ActivityCard extends StatelessWidget {
                               if (userId.isNotEmpty)
                                 _MetaItem(
                                   icon: Icons.admin_panel_settings_outlined,
-                                  label: 'تم بواسطة الأدمن',
+                                  label: 'تم بواسطة الأدمن'.tr(),
                                   copyValue: userId,
                                 ),
                               _MetaItem(
                                 icon: Icons.fingerprint_outlined,
-                                label: 'معرّف السجل',
+                                label: 'معرّف السجل'.tr(),
                                 copyValue: doc.id,
                               ),
                               _MetaItem(
@@ -396,7 +398,7 @@ class _ActivityCard extends StatelessWidget {
   String _time(dynamic v) {
     final dt = _toDate(v);
     final m = dt.minute.toString().padLeft(2, '0');
-    final p = dt.hour >= 12 ? 'م' : 'ص';
+    final p = dt.hour >= 12 ? 'م'.tr() : 'ص'.tr();
     final hour12 = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
     return '${hour12.toString().padLeft(2, '0')}:$m $p';
   }
@@ -410,31 +412,31 @@ class _ActivityCard extends StatelessWidget {
   String _titleFor(String action, String desc, String? shopName) {
     if (action == 'subscription_approved') {
       return shopName != null && shopName.isNotEmpty
-          ? 'تمت الموافقة على طلب اشتراك المحل'
-          : 'تمت الموافقة على طلب اشتراك';
+          ? 'تمت الموافقة على طلب اشتراك المحل'.tr()
+          : 'تمت الموافقة على طلب اشتراك'.tr();
     }
     if (action == 'subscription_rejected') {
       return shopName != null && shopName.isNotEmpty
-          ? 'تم رفض طلب اشتراك المحل'
-          : 'تم رفض طلب اشتراك';
+          ? 'تم رفض طلب اشتراك المحل'.tr()
+          : 'تم رفض طلب اشتراك'.tr();
     }
     if (action == 'subscription_suspended') {
       return shopName != null && shopName.isNotEmpty
-          ? 'تم تعليق المحل مؤقتاً'
-          : 'تم تعليق الاشتراك / المحل';
+          ? 'تم تعليق المحل مؤقتاً'.tr()
+          : 'تم تعليق الاشتراك / المحل'.tr();
     }
     if (action == 'subscription_unsuspended') {
       return shopName != null && shopName.isNotEmpty
-          ? 'تم إعادة تفعيل المحل'
-          : 'تم إعادة تفعيل الاشتراك';
+          ? 'تم إعادة تفعيل المحل'.tr()
+          : 'تم إعادة تفعيل الاشتراك'.tr();
     }
-    if (action == 'subscription_request_created') return 'تم إرسال طلب اشتراك جديد';
-    if (action == 'shop_created' || action.contains('shop_create')) return 'تم إنشاء محل جديد';
-    if (action == 'product_added') return 'تم إضافة منتج جديد';
-    if (action == 'sale_created') return 'تم تسجيل عملية بيع';
-    if (action == 'expense_created') return 'تم إضافة مصروف جديد';
+    if (action == 'subscription_request_created') return 'تم إرسال طلب اشتراك جديد'.tr();
+    if (action == 'shop_created' || action.contains('shop_create')) return 'تم إنشاء محل جديد'.tr();
+    if (action == 'product_added') return 'تم إضافة منتج جديد'.tr();
+    if (action == 'sale_created') return 'تم تسجيل عملية بيع'.tr();
+    if (action == 'expense_created') return 'تم إضافة مصروف جديد'.tr();
 
-    if (action.isEmpty) return 'إجراء إداري';
+    if (action.isEmpty) return 'إجراء إداري'.tr();
     return action.replaceAll('_', ' ');
   }
 
@@ -443,25 +445,25 @@ class _ActivityCard extends StatelessWidget {
       if (desc.contains(' for ')) {
         final parts = desc.split(' for ');
         if (parts.length == 2) {
-          return 'تم تفعيل الاشتراك للباقة: ${parts[1].replaceAll(shopName ?? '', '').trim().isEmpty ? parts[1] : parts[1].replaceAll(shopName ?? '', '').trim()}';
+          return uiTr('تم تفعيل الاشتراك للباقة: ${parts[1].replaceAll(shopName ?? '', '').trim().isEmpty ? parts[1] : parts[1].replaceAll(shopName ?? '', '').trim()}');
         }
       }
-      return desc.isNotEmpty ? desc : 'تم تحويل حالة الطلب إلى "مُوافق عليه" وتفعيل الاشتراك للمحل.';
+      return desc.isNotEmpty ? desc : 'تم تحويل حالة الطلب إلى "مُوافق عليه" وتفعيل الاشتراك للمحل.'.tr();
     }
     if (action == 'subscription_rejected') {
       if (desc.contains(':')) {
         final parts = desc.split(':');
         if (parts.length >= 2 && parts.last.trim().isNotEmpty) {
-          return 'سبب الرفض: ${parts.last.trim()}';
+          return uiTr('سبب الرفض: ${parts.last.trim()}');
         }
       }
-      return desc.isNotEmpty ? desc : 'تم رفض طلب الاشتراك مع إبقاء السجل للمراجعة.';
+      return desc.isNotEmpty ? desc : 'تم رفض طلب الاشتراك مع إبقاء السجل للمراجعة.'.tr();
     }
     if (action == 'subscription_suspended') {
-      return 'تم حجب صلاحية المحل مؤقتاً حتى يتم إعادة التفعيل من لوحة الإدارة.';
+      return 'تم حجب صلاحية المحل مؤقتاً حتى يتم إعادة التفعيل من لوحة الإدارة.'.tr();
     }
     if (action == 'subscription_unsuspended') {
-      return 'عاد المحل للعمل بشكل طبيعي بعد إزالة التعليق.';
+      return 'عاد المحل للعمل بشكل طبيعي بعد إزالة التعليق.'.tr();
     }
     return desc;
   }
@@ -527,7 +529,7 @@ class _MetaItem extends StatelessWidget {
       borderRadius: BorderRadius.circular(6),
       onTap: () {
         Clipboard.setData(ClipboardData(text: copyValue!));
-        AppToast.success(context, 'تم نسخ المعرّف');
+        AppToast.success(context, 'تم نسخ المعرّف'.tr());
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),

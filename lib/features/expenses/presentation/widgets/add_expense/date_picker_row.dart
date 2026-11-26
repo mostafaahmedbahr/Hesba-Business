@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../../core/theme/app_theme.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// صف اختيار تاريخ المصروف.
 class ExpenseDatePickerRow extends StatelessWidget {
@@ -65,7 +66,7 @@ class ExpenseDatePickerRow extends StatelessWidget {
                     CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'التاريخ',
+                    'التاريخ'.tr(),
                     style: TextStyle(
                       fontSize: 11.sp,
                       color: AppTheme.mutedGray,

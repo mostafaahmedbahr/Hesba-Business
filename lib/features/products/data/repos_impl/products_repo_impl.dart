@@ -6,6 +6,7 @@ import '../../../../core/models/product.dart';
 import '../../../../core/utils/search_tokens.dart';
 import '../repos/products_repo.dart';
 import 'package:hesba/core/services/shop_id_resolver.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class ProductsRepoImpl implements ProductsRepo {
   final FirebaseAuth _auth;
@@ -85,15 +86,15 @@ class ProductsRepoImpl implements ProductsRepo {
 
   Future<void> _assertOwnership(String productId) async {
     final shopId = await _getShopId();
-    if (shopId == null) throw Exception('لم يتم العثور على المتجر');
+    if (shopId == null) throw Exception('لم يتم العثور على المتجر'.tr());
     final snap = await _firestore
         .collection(AppConstants.productsCollection)
         .doc(productId)
         .get();
     final data = snap.data();
-    if (!snap.exists || data == null) throw Exception('المنتج غير موجود');
+    if (!snap.exists || data == null) throw Exception('المنتج غير موجود'.tr());
     if (data['shopId'] != shopId || (data['ownerId'] as String?) != _uid) {
-      throw Exception('غير مصرح بتعديل هذا المنتج');
+      throw Exception('غير مصرح بتعديل هذا المنتج'.tr());
     }
   }
 
@@ -102,7 +103,7 @@ class ProductsRepoImpl implements ProductsRepo {
     if (product.id.isEmpty) throw StateError('invalid-id');
     await _assertOwnership(product.id);
     final shopId = await _getShopId();
-    if (shopId == null) throw Exception('لم يتم العثور على المتجر');
+    if (shopId == null) throw Exception('لم يتم العثور على المتجر'.tr());
     await _assertSupplierInShop(product.supplierId, shopId);
     await _firestore
         .collection(AppConstants.productsCollection)

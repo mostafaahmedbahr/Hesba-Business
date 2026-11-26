@@ -3,6 +3,7 @@ import 'package:fl_chart/fl_chart.dart';
 
 import '../../../../common_imports.dart';
 import '../cubit/reports_state.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// كارت اتجاه المبيعات (خط 7 أيام).
 class ReportsTrendCard extends StatelessWidget {
@@ -32,16 +33,16 @@ class ReportsTrendCard extends StatelessWidget {
           Container(width: 36.w, height: 36.w, decoration: BoxDecoration(gradient: const LinearGradient(colors: [AppTheme.primaryColor, AppTheme.brightBlue]), borderRadius: BorderRadius.circular(10.r)), child: Icon(Icons.show_chart_rounded, color: Colors.white, size: 18.sp)),
           SizedBox(width: 10.w),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('اتجاه المبيعات', style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
-            Text('آخر 7 أيام', style: TextStyle(fontSize: 11.sp, color: AppTheme.slateGray)),
+            Text('اتجاه المبيعات'.tr(), style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
+            Text('آخر 7 أيام'.tr(), style: TextStyle(fontSize: 11.sp, color: AppTheme.slateGray)),
           ])),
-          Container(padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h), decoration: BoxDecoration(color: const Color(0xFFECFDF5), borderRadius: BorderRadius.circular(20.r)), child: Text('${state.sales.length} عملية', style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.w700, color: AppTheme.successDark))),
+          Container(padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h), decoration: BoxDecoration(color: const Color(0xFFECFDF5), borderRadius: BorderRadius.circular(20.r)), child: Text(uiTr('${state.sales.length} عملية'), style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.w700, color: AppTheme.successDark))),
         ]),
         SizedBox(height: 16.h),
         SizedBox(
           height: 160.h,
           child: spots.every((s) => s.y == 0)
-              ? Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.bar_chart_rounded, size: 32.sp, color: const Color(0xFFCBD5E1)), SizedBox(height: 8.h), Text('لا توجد مبيعات في هذه الفترة', style: TextStyle(fontSize: 12.sp, color: AppTheme.mutedGray))]))
+              ? Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.bar_chart_rounded, size: 32.sp, color: const Color(0xFFCBD5E1)), SizedBox(height: 8.h), Text('لا توجد مبيعات في هذه الفترة'.tr(), style: TextStyle(fontSize: 12.sp, color: AppTheme.mutedGray))]))
               : LineChart(
                   LineChartData(
                     gridData: FlGridData(show: true, drawVerticalLine: true, horizontalInterval: maxY / 4, verticalInterval: 1, getDrawingHorizontalLine: (v) => FlLine(color: isDark ? AppTheme.darkBorder : AppTheme.mist, strokeWidth: 1), getDrawingVerticalLine: (v) => FlLine(color: isDark ? AppTheme.darkBorder.withValues(alpha: 0.5) : AppTheme.canvasLight, strokeWidth: 1)),
@@ -94,13 +95,13 @@ class ReportsExpensesPie extends StatelessWidget {
           Container(width: 36.w, height: 36.w, decoration: BoxDecoration(gradient: const LinearGradient(colors: [AppTheme.danger, AppTheme.roseLight]), borderRadius: BorderRadius.circular(10.r)), child: Icon(Icons.pie_chart_rounded, color: Colors.white, size: 18.sp)),
           SizedBox(width: 10.w),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('المصروفات حسب التصنيف', style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
-            Text(total == 0 ? 'لا توجد مصروفات' : 'إجمالي ${fmtReport(total)} ج.م', style: TextStyle(fontSize: 11.sp, color: AppTheme.slateGray)),
+            Text('المصروفات حسب التصنيف'.tr(), style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
+            Text(total == 0 ? 'لا توجد مصروفات'.tr() : uiTr('إجمالي ${fmtReport(total)} ج.م'), style: TextStyle(fontSize: 11.sp, color: AppTheme.slateGray)),
           ])),
         ]),
         SizedBox(height: 16.h),
         if (byCat.isEmpty)
-          Center(child: Padding(padding: EdgeInsets.symmetric(vertical: 24.h), child: Column(children: [Icon(Icons.donut_large_rounded, size: 36.sp, color: const Color(0xFFCBD5E1)), SizedBox(height: 8.h), Text('لا توجد مصروفات في هذه الفترة', style: TextStyle(fontSize: 12.sp, color: AppTheme.mutedGray))])))
+          Center(child: Padding(padding: EdgeInsets.symmetric(vertical: 24.h), child: Column(children: [Icon(Icons.donut_large_rounded, size: 36.sp, color: const Color(0xFFCBD5E1)), SizedBox(height: 8.h), Text('لا توجد مصروفات في هذه الفترة'.tr(), style: TextStyle(fontSize: 12.sp, color: AppTheme.mutedGray))])))
         else
           Row(children: [
             SizedBox(

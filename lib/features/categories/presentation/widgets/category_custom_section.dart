@@ -3,6 +3,8 @@ import '../cubit/category_state.dart';
 import 'category_custom_row.dart';
 import 'category_empty_box.dart';
 import 'category_section_header.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// سكشن أقسامك (تتعدل).
 class CategoryCustomSection extends StatelessWidget {
@@ -28,16 +30,16 @@ class CategoryCustomSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const CategorySectionHeader(
+          CategorySectionHeader(
             icon: Icons.folder_copy_rounded,
-            title: 'أقسامك',
+            title: 'أقسامك'.tr(),
             count: '',
             gradient: [AppTheme.successDark, Color(0xFF34D399)],
           ),
           Padding(
             padding: EdgeInsets.only(top: 4.h),
             child: Text(
-              '${items.length} قسم مخصص',
+              uiTr('${items.length} قسم مخصص'),
               style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray),
             ),
           ),
@@ -45,10 +47,10 @@ class CategoryCustomSection extends StatelessWidget {
           if (items.isEmpty)
             CategoryEmptyBox(
               icon: isSearching ? Icons.search_off_rounded : Icons.inbox_rounded,
-              title: isSearching ? 'لا توجد نتائج' : 'لا توجد أقسام مخصصة بعد',
+              title: isSearching ? 'لا توجد نتائج'.tr() : 'لا توجد أقسام مخصصة بعد'.tr(),
               subtitle: isSearching
-                  ? 'جرّب كلمة بحث مختلفة'
-                  : 'أضف قسماً من الأعلى ليظهر هنا وفي المنتج',
+                  ? 'جرّب كلمة بحث مختلفة'.tr()
+                  : 'أضف قسماً من الأعلى ليظهر هنا وفي المنتج'.tr(),
             )
           else
             Column(

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -104,7 +104,7 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
         DropdownMenuItem(
           value: v,
           child: Text(
-            v,
+            v.tr(),
             style: TextStyle(fontSize: 13.sp),
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
@@ -118,7 +118,7 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
         DropdownMenuItem(
           value: current,
           child: Text(
-            current,
+            current.tr(),
             style: TextStyle(fontSize: 13.sp),
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
@@ -161,7 +161,7 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
                       _SectionCard(
                         isDark: isDark,
                         icon: Icons.person_outline_rounded,
-                        title: 'بياناتك',
+                        title: 'بياناتك'.tr(),
                         gradient: const [AppTheme.primaryColor, AppTheme.brightBlue],
                         child: Column(children: [
                           _Field(
@@ -186,7 +186,7 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
                             icon: Icons.email_outlined,
                             label: 'profileEmail'.tr(),
                             value: state.profile?.email ?? '',
-                            hint: 'يتغير من إعدادات الحساب فقط',
+                            hint: 'يتغير من إعدادات الحساب فقط'.tr(),
                           ),
                         ]),
                       ),
@@ -194,7 +194,7 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
                       _SectionCard(
                         isDark: isDark,
                         icon: Icons.storefront_rounded,
-                        title: 'بيانات المحل',
+                        title: 'بيانات المحل'.tr(),
                         gradient: const [AppTheme.successDark, Color(0xFF34D399)],
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -249,7 +249,7 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
                                     decoration: _dropdownDecoration(isDark, 'shopGovernorate'.tr(), Icons.map_outlined),
                                     items: [
                                       for (final g in RegisterConstants.governorates)
-                                        DropdownMenuItem(value: g, child: Text(g, style: TextStyle(fontSize: 13.sp), overflow: TextOverflow.ellipsis, maxLines: 1)),
+                                        DropdownMenuItem(value: g, child: Text(g.tr(), style: TextStyle(fontSize: 13.sp), overflow: TextOverflow.ellipsis, maxLines: 1)),
                                     ],
                                     onChanged: (v) => setState(() {
                                       _governorate = v;
@@ -277,7 +277,7 @@ class _UpdateProfileViewState extends State<UpdateProfileView> {
                                           decoration: _dropdownDecoration(isDark, 'shopCity'.tr(), Icons.location_city_rounded),
                                           items: [
                                             for (final c in _centers)
-                                              DropdownMenuItem(value: c, child: Text(c, style: TextStyle(fontSize: 13.sp), overflow: TextOverflow.ellipsis, maxLines: 1)),
+                                              DropdownMenuItem(value: c, child: Text(c.tr(), style: TextStyle(fontSize: 13.sp), overflow: TextOverflow.ellipsis, maxLines: 1)),
                                           ],
                                           onChanged: (v) => setState(() => _cityController.text = v ?? ''),
                                           validator: (v) {

@@ -57,7 +57,7 @@ class AccountsState extends Equatable {
         return false;
       }
       if (to != null && created != null) {
-        // "إلى" شاملة لليوم كله.
+        // "إلى".tr() شاملة لليوم كله.
         final end = DateTime(to.year, to.month, to.day, 23, 59, 59, 999);
         if (created.isAfter(end)) return false;
       }

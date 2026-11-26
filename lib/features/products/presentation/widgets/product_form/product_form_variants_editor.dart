@@ -17,7 +17,7 @@ class ProductVariantRow {
   String size;
   String qty;
 
-  /// هل اختار المستخدم "أخرى" للمقاس وبيكتب نص يدوي؟
+  /// هل اختار المستخدم "أخرى".tr() للمقاس وبيكتب نص يدوي؟
   bool useCustomSize;
 
   ProductVariantRow({
@@ -276,18 +276,18 @@ class ProductFormVariantsEditor extends StatelessWidget {
   Widget _sizeDropdown(BuildContext context, ProductVariantRow row, int index) {
     final sizes = sizeOptions;
     final selected = row.useCustomSize
-        ? 'أخرى'
+        ? 'أخرى'.tr()
         : (row.size.isEmpty ? null : row.size);
     final items = <DropdownMenuItem<String>>[
       for (final s in sizes)
         DropdownMenuItem(
           value: s,
-          child: Text(s, style: TextStyle(fontSize: 13.sp)),
+          child: Text(s.tr(), style: TextStyle(fontSize: 13.sp)),
         ),
       if (selected != null && !sizes.contains(selected))
         DropdownMenuItem(
           value: selected,
-          child: Text(selected, style: TextStyle(fontSize: 13.sp)),
+          child: Text(selected.tr(), style: TextStyle(fontSize: 13.sp)),
         ),
     ];
 
@@ -313,7 +313,7 @@ class ProductFormVariantsEditor extends StatelessWidget {
         color: AppTheme.primaryColor,
       ),
       onChanged: (v) {
-        if (v == 'أخرى') {
+        if (v == 'أخرى'.tr()) {
           row.useCustomSize = true;
           row.size = '';
         } else {

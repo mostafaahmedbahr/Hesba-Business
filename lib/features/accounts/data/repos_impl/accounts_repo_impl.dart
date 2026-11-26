@@ -7,6 +7,8 @@ import '../models/payment_model.dart';
 import '../models/person_model.dart';
 import '../repos/accounts_repo.dart';
 import 'package:hesba/core/services/shop_id_resolver.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// تنفيذ ميزة الحسابات على Firestore.
 ///
@@ -36,11 +38,11 @@ class AccountsRepoImpl implements AccountsRepo {
 
   Future<String> _requireShop() async {
     if (_uid == null) {
-      throw Exception('يجب تسجيل الدخول أولًا');
+      throw Exception('يجب تسجيل الدخول أولًا'.tr());
     }
     final shopId = await _getShopId();
     if (shopId == null || shopId.isEmpty) {
-      throw Exception('لا يوجد محل مرتبط بهذا الحساب');
+      throw Exception('لا يوجد محل مرتبط بهذا الحساب'.tr());
     }
     return shopId;
   }
@@ -166,14 +168,14 @@ class AccountsRepoImpl implements AccountsRepo {
     final uid = _uid!;
     final cleanName = name.trim();
     final cleanPhone = phone.trim();
-    if (cleanName.isEmpty) throw Exception('الاسم مطلوب');
-    if (cleanPhone.isEmpty) throw Exception('رقم الهاتف مطلوب');
+    if (cleanName.isEmpty) throw Exception('الاسم مطلوب'.tr());
+    if (cleanPhone.isEmpty) throw Exception('رقم الهاتف مطلوب'.tr());
     _assertPhoneShape(cleanPhone);
     if (!amount.isFinite || amount <= 0) {
-      throw Exception('المبلغ يجب أن يكون أكبر من صفر');
+      throw Exception('المبلغ يجب أن يكون أكبر من صفر'.tr());
     }
     if (partyType != DebtParty.customer && partyType != DebtParty.supplier) {
-      throw Exception('نوع الطرف غير صحيح');
+      throw Exception('نوع الطرف غير صحيح'.tr());
     }
     // العملاء دائمًا «ليّا» — لا يمكن قلب الاتجاه إلا للموردين.
     final cleanDirection = partyType == DebtParty.customer
@@ -227,13 +229,13 @@ class AccountsRepoImpl implements AccountsRepo {
     final uid = _uid!;
     final cleanName = name.trim();
     final cleanPhone = phone.trim();
-    if (cleanName.isEmpty) throw Exception('الاسم مطلوب');
-    if (cleanPhone.isEmpty) throw Exception('رقم الهاتف مطلوب');
+    if (cleanName.isEmpty) throw Exception('الاسم مطلوب'.tr());
+    if (cleanPhone.isEmpty) throw Exception('رقم الهاتف مطلوب'.tr());
     _assertPhoneShape(cleanPhone);
     if (partyType != PersonModel.typeCustomer &&
         partyType != PersonModel.typeSupplier &&
         partyType != PersonModel.typeBoth) {
-      throw Exception('نوع الشخص غير صحيح');
+      throw Exception('نوع الشخص غير صحيح'.tr());
     }
     // منع التكرار: نفس الرقم الموحّد داخل نفس المحل = نفس الشخص.
     // ملاحظة: يُنشأ الشخص أولًا في كتابة مستقلة، ثم يُستخدم الرقم —
@@ -279,9 +281,9 @@ class AccountsRepoImpl implements AccountsRepo {
     String note = '',
     String? requestId,
   }) async {
-    if (debtId.isEmpty) throw Exception('الحساب غير موجود');
+    if (debtId.isEmpty) throw Exception('الحساب غير موجود'.tr());
     if (!amount.isFinite || amount <= 0) {
-      throw Exception('مبلغ الدفعة يجب أن يكون أكبر من صفر');
+      throw Exception('مبلغ الدفعة يجب أن يكون أكبر من صفر'.tr());
     }
     final shopId = await _requireShop();
     final uid = _uid!;
@@ -298,10 +300,10 @@ class AccountsRepoImpl implements AccountsRepo {
       final snap = await txn.get(debtRef);
       final data = snap.data();
       if (!snap.exists || data == null) {
-        throw Exception('الحساب غير موجود');
+        throw Exception('الحساب غير موجود'.tr());
       }
       if (data['shopId'] != shopId) {
-        throw Exception('لا تملك صلاحية على هذا الحساب');
+        throw Exception('لا تملك صلاحية على هذا الحساب'.tr());
       }
       final total = (data['amount'] is num)
           ? (data['amount'] as num).toDouble()
@@ -312,7 +314,7 @@ class AccountsRepoImpl implements AccountsRepo {
       final remaining = total - paid;
       // سماحية كسرية بسيطة ضد فروقات الفاصلة العائمة.
       if (amount > remaining + 0.0001) {
-        throw Exception('الدفعة أكبر من المتبقي (${remaining.toStringAsFixed(2)})');
+        throw Exception(uiTr('الدفعة أكبر من المتبقي (${remaining.toStringAsFixed(2)})'));
       }
       final paymentRef = requestId == null
           ? debtRef.collection(AppConstants.debtPaymentsSubCollection).doc()
@@ -365,6 +367,6 @@ class AccountsRepoImpl implements AccountsRepo {
         digits.length >= 7 &&
         digits.length <= 15 &&
         RegExp(r'^[0-9]+$').hasMatch(digits);
-    if (!valid) throw Exception('رقم الهاتف غير صحيح');
+    if (!valid) throw Exception('رقم الهاتف غير صحيح'.tr());
   }
 }

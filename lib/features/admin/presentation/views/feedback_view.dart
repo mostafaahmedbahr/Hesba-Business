@@ -10,12 +10,14 @@ import '../../data/repos/admin_repo.dart';
 import '../cubit/admin_list_cubit.dart';
 import 'admin_ds.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// إدارة ملاحظات المستخدمين (شكاوى / اقتراحات / استفسارات).
 ///
 /// الملاحظات بتيجي من "تواصل معنا" داخل التطبيق (collection `feedback`).
-/// الأدمن يقدر يقرأ كل الملاحظات، يعلّمها "تم التعامل معها" أو يرجعها
-/// "جديدة"، أو يحذفها — مفيش رد مباشر داخل اللوحة.
+/// الأدمن يقدر يقرأ كل الملاحظات، يعلّمها "تم التعامل معها".tr() أو يرجعها
+/// "جديدة".tr()، أو يحذفها — مفيش رد مباشر داخل اللوحة.
 class FeedbackView extends StatefulWidget {
   const FeedbackView({super.key});
 
@@ -47,7 +49,7 @@ class _FeedbackViewState extends State<FeedbackView> {
           if (state.loading && state.docs.isEmpty) {
             return Column(
               children: [
-                AdminSearchField(controller: _searchCtrl, hint: 'ابحث بالعنوان أو التفاصيل أو البريد...', enabled: false),
+                AdminSearchField(controller: _searchCtrl, hint: 'ابحث بالعنوان أو التفاصيل أو البريد...'.tr(), enabled: false),
                 const Expanded(child: LoadingWidget()),
               ],
             );
@@ -66,40 +68,40 @@ class _FeedbackViewState extends State<FeedbackView> {
             onRefresh: () => context.read<AdminListCubit>().firstPage(),
             child: Column(
               children: [
-                const AdminPageHeader(
-                  title: 'الملاحظات والشكاوى',
-                  description: 'شكاوى واقتراحات واستفسارات المستخدمين — علّمها كمُعالجة أو احذفها',
+                AdminPageHeader(
+                  title: 'الملاحظات والشكاوى'.tr(),
+                  description: 'شكاوى واقتراحات واستفسارات المستخدمين — علّمها كمُعالجة أو احذفها'.tr(),
                 ),
                 AdminSummaryHeader(
                   icon: Icons.mark_email_unread_outlined,
-                  title: 'ملاحظات جديدة',
+                  title: 'ملاحظات جديدة'.tr(),
                   total: newCount,
-                  unit: 'جديدة',
+                  unit: 'جديدة'.tr(),
                   stats: [
-                    'إجمالي المعروض: ${ordered.length}',
-                    'تم التعامل معها: $handledCount',
+                    uiTr('إجمالي المعروض: ${ordered.length}'),
+                    uiTr('تم التعامل معها: $handledCount'),
                   ],
                   loading: state.loading,
                   onRefresh: () => context.read<AdminListCubit>().firstPage(),
                 ),
                 AdminSearchField(
                   controller: _searchCtrl,
-                  hint: 'ابحث بالعنوان أو التفاصيل أو البريد...',
+                  hint: 'ابحث بالعنوان أو التفاصيل أو البريد...'.tr(),
                   onChanged: (v) => setState(() => _query = v),
                 ),
                 AdminFilterChips(
                   selected: _status,
                   onSelect: (k) => setState(() => _status = k),
                   items: [
-                    const AdminChipItem('all', 'الكل'),
-                    AdminChipItem('new', 'جديدة', dot: AdminColors.warning),
-                    AdminChipItem('handled', 'تم التعامل معها', dot: AdminColors.success),
+                    AdminChipItem('all', 'الكل'.tr()),
+                    AdminChipItem('new', 'جديدة'.tr(), dot: AdminColors.warning),
+                    AdminChipItem('handled', 'تم التعامل معها'.tr(), dot: AdminColors.success),
                   ],
                 ),
                 if (searching)
                   AdminResultCount(
                     count: filtered.length,
-                    clearLabel: 'مسح البحث',
+                    clearLabel: 'مسح البحث'.tr(),
                     onClear: () => setState(() {
                       _query = '';
                       _searchCtrl.clear();
@@ -110,13 +112,13 @@ class _FeedbackViewState extends State<FeedbackView> {
                       ? adminEmpty(
                           Icons.feedback_outlined,
                           searching
-                              ? 'لا توجد نتائج مطابقة لبحثك'
+                              ? 'لا توجد نتائج مطابقة لبحثك'.tr()
                               : _status == 'new'
-                                  ? 'لا توجد ملاحظات جديدة'
+                                  ? 'لا توجد ملاحظات جديدة'.tr()
                                   : _status == 'handled'
-                                      ? 'لا توجد ملاحظات تم التعامل معها'
-                                      : 'لا توجد ملاحظات بعد',
-                          searching ? null : 'أي ملاحظة تصل عبر "تواصل معنا" هتظهر هنا',
+                                      ? 'لا توجد ملاحظات تم التعامل معها'.tr()
+                                      : 'لا توجد ملاحظات بعد'.tr(),
+                          searching ? null : 'أي ملاحظة تصل عبر "تواصل معنا" هتظهر هنا'.tr(),
                         )
                       : ListView.separated(
                           padding: const EdgeInsets.fromLTRB(0, AdminSpace.xs, 0, AdminSpace.lg),
@@ -137,7 +139,7 @@ class _FeedbackViewState extends State<FeedbackView> {
                 if (state.hasMore)
                   AdminLoadMore(
                     loading: state.loading,
-                    label: 'تحميل المزيد (${state.docs.length} معروض)',
+                    label: uiTr('تحميل المزيد (${state.docs.length} معروض)'),
                     onLoad: () => context.read<AdminListCubit>().nextPage(),
                   ),
               ],
@@ -196,34 +198,34 @@ class _FeedbackViewState extends State<FeedbackView> {
     try {
       await sl<AdminRepo>().setFeedbackHandled(entry.id, handled);
       if (!context.mounted) return;
-      AppToast.success(context, handled ? 'تم تعليم الملاحظة كـ "تم التعامل معها"' : 'رجعت الملاحظة "جديدة"');
+      AppToast.success(context, handled ? 'تم تعليم الملاحظة كـ "تم التعامل معها"'.tr() : 'رجعت الملاحظة "جديدة"'.tr());
       context.read<AdminListCubit>().firstPage();
     } catch (logErr, logSt) {
       AppLogger.nonFatal('features/admin/presentation/views/feedback_view.dart', logErr, logSt, severity: LoggingSeverity.error);
       if (!context.mounted) return;
-      AppToast.error(context, 'تعذر تحديث الملاحظة');
+      AppToast.error(context, 'تعذر تحديث الملاحظة'.tr());
     }
   }
 
   Future<bool> _delete(BuildContext context, FeedbackEntry entry) async {
     final ok = await showAdminConfirm(
       context,
-      title: 'حذف الملاحظة',
-      message: 'هيتم حذف الملاحظة نهائيًا. هل أنت متأكد؟',
-      confirmLabel: 'حذف',
+      title: 'حذف الملاحظة'.tr(),
+      message: 'هيتم حذف الملاحظة نهائيًا. هل أنت متأكد؟'.tr(),
+      confirmLabel: 'حذف'.tr(),
       danger: true,
     );
     if (!ok) return false;
     try {
       await sl<AdminRepo>().deleteFeedback(entry.id);
       if (!context.mounted) return true;
-      AppToast.success(context, 'تم حذف الملاحظة');
+      AppToast.success(context, 'تم حذف الملاحظة'.tr());
       context.read<AdminListCubit>().firstPage();
       return true;
     } catch (logErr, logSt) {
       AppLogger.nonFatal('features/admin/presentation/views/feedback_view.dart', logErr, logSt, severity: LoggingSeverity.error);
       if (!context.mounted) return true;
-      AppToast.error(context, 'تعذر حذف الملاحظة');
+      AppToast.error(context, 'تعذر حذف الملاحظة'.tr());
       return true;
     }
   }
@@ -255,7 +257,7 @@ class _FeedbackCard extends StatelessWidget {
                   children: [
                     Flexible(
                       child: Text(
-                        e.title.isEmpty ? '(بدون عنوان)' : e.title,
+                        e.title.isEmpty ? '(بدون عنوان)'.tr() : e.title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
@@ -265,13 +267,13 @@ class _FeedbackCard extends StatelessWidget {
                     AdminStatusBadge(label: typeLabel, color: typeColor),
                     if (!e.handled) ...[
                       const SizedBox(width: 6),
-                      AdminStatusBadge(label: 'جديدة', color: AdminColors.warning, dot: true),
+                      AdminStatusBadge(label: 'جديدة'.tr(), color: AdminColors.warning, dot: true),
                     ],
                   ],
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  e.userEmail.isEmpty ? 'مستخدم بدون بريد' : e.userEmail,
+                  e.userEmail.isEmpty ? 'مستخدم بدون بريد'.tr() : e.userEmail,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(color: AdminColors.textSecondary(context), fontSize: 12),
@@ -326,7 +328,7 @@ class _FeedbackDetailsDialogState extends State<_FeedbackDetailsDialog> {
     final e = widget.entry;
     final (typeLabel, typeIcon, typeColor) = FeedbackEntry.typeMeta(e.type);
     return AdminDialogShell(
-      title: 'تفاصيل الملاحظة',
+      title: 'تفاصيل الملاحظة'.tr(),
       subtitle: typeLabel,
       actions: [
         OutlinedButton.icon(
@@ -336,12 +338,12 @@ class _FeedbackDetailsDialogState extends State<_FeedbackDetailsDialog> {
             side: BorderSide(color: AdminColors.error),
           ),
           icon: const Icon(Icons.delete_outline, size: 18),
-          label: const Text('حذف'),
+          label: Text('حذف'.tr()),
         ),
         FilledButton.icon(
           onPressed: _busy ? null : _toggleHandled,
           icon: Icon(e.handled ? Icons.mark_email_unread_outlined : Icons.check_circle_outline, size: 18),
-          label: Text(e.handled ? 'ارجعها جديدة' : 'تم التعامل معها'),
+          label: Text(e.handled ? 'ارجعها جديدة'.tr() : 'تم التعامل معها'.tr()),
         ),
       ],
       child: Column(
@@ -354,14 +356,14 @@ class _FeedbackDetailsDialogState extends State<_FeedbackDetailsDialog> {
               AdminStatusBadge(label: typeLabel, color: typeColor),
               const SizedBox(width: 6),
               AdminStatusBadge(
-                label: e.handled ? 'تم التعامل معها' : 'جديدة',
+                label: e.handled ? 'تم التعامل معها'.tr() : 'جديدة'.tr(),
                 color: e.handled ? AdminColors.success : AdminColors.warning,
               ),
             ],
           ),
           const SizedBox(height: AdminSpace.md),
           Text(
-            e.title.isEmpty ? '(بدون عنوان)' : e.title,
+            e.title.isEmpty ? '(بدون عنوان)'.tr() : e.title,
             style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15),
           ),
           const SizedBox(height: AdminSpace.md),
@@ -380,28 +382,28 @@ class _FeedbackDetailsDialogState extends State<_FeedbackDetailsDialog> {
           const SizedBox(height: AdminSpace.md),
           AdminInfoRow(
             icon: Icons.alternate_email,
-            label: 'البريد',
+            label: 'البريد'.tr(),
             value: e.userEmail.isEmpty ? '-' : e.userEmail,
             copyable: e.userEmail.isNotEmpty,
           ),
           const SizedBox(height: AdminSpace.sm),
           AdminInfoRow(
             icon: Icons.schedule_outlined,
-            label: 'تاريخ الإرسال',
+            label: 'تاريخ الإرسال'.tr(),
             value: AdminFmt.dateTime(e.createdAt),
           ),
           if (e.handled && e.handledAt != null) ...[
             const SizedBox(height: AdminSpace.sm),
             AdminInfoRow(
               icon: Icons.check_circle_outline,
-              label: 'تاريخ التعامل معها',
+              label: 'تاريخ التعامل معها'.tr(),
               value: AdminFmt.dateTime(e.handledAt),
             ),
           ],
           const SizedBox(height: AdminSpace.md),
-          CopyableId(id: e.id, full: true, label: 'معرّف الملاحظة'),
+          CopyableId(id: e.id, full: true, label: 'معرّف الملاحظة'.tr()),
           const SizedBox(height: 6),
-          CopyableId(id: e.userId, full: true, label: 'معرّف المستخدم'),
+          CopyableId(id: e.userId, full: true, label: 'معرّف المستخدم'.tr()),
         ],
       ),
     );

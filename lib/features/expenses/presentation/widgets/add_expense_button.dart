@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class AddExpenseButton extends StatelessWidget {
   final bool loading;
@@ -23,7 +24,7 @@ class AddExpenseButton extends StatelessWidget {
           width: 22,
           child: CircularProgressIndicator(strokeWidth: 2),
         )
-            : const Text('إضافة المصروف'),
+            : Text('إضافة المصروف'.tr()),
       ),
     );
   }

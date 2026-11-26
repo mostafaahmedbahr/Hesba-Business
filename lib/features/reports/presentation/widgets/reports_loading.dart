@@ -1,6 +1,7 @@
 import 'package:hesba/core/widgets/loading_widget.dart';
 
 import '../../../../common_imports.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// شimmer التحميل (شبكة + كروت).
 class ReportsLoadingGrid extends StatelessWidget {
@@ -18,7 +19,7 @@ class ReportsFullLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const LoadingWidget(message: 'جاري تجهيز التقارير...');
+    return LoadingWidget(message: 'جاري تجهيز التقارير...'.tr());
   }
 }
 
@@ -34,7 +35,7 @@ class ReportsNoShop extends StatelessWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
         child: Text(
-          message ?? 'لم يتم العثور على المتجر',
+          message ?? 'لم يتم العثور على المتجر'.tr(),
           style: TextStyle(
             fontSize: 14.sp,
             fontWeight: FontWeight.w800,

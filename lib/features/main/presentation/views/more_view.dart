@@ -71,10 +71,10 @@ class MoreView extends StatelessWidget {
               ),
             ]),
             SizedBox(height: 20.h),
-            _SectionCard('إدارة المتجر', [
+            _SectionCard('إدارة المتجر'.tr(), [
               MoreItem(
                 icon: Icons.badge_outlined,
-                label: 'الحسابات الفرعية',
+                label: 'الحسابات الفرعية'.tr(),
                 color: const Color(0xFF7C4DFF),
                 onTap: () =>
                     Navigator.pushNamed(context, AppRoutes.staffManagement),
@@ -87,14 +87,14 @@ class MoreView extends StatelessWidget {
               ),
               MoreItem(
                 icon: Icons.category_rounded,
-                label: 'إدارة الأقسام',
+                label: 'إدارة الأقسام'.tr(),
                 color: AppTheme.successDark,
                 onTap: () =>
                     _navigateTo(context, const CategoryManagementView()),
               ),
               MoreItem(
                 icon: Icons.add_shopping_cart_rounded,
-                label: 'زيادة المخزون',
+                label: 'زيادة المخزون'.tr(),
                 color: AppTheme.successDark,
                 onTap: () =>
                     Navigator.pushNamed(context, AppRoutes.stockPurchaseView),
@@ -318,7 +318,7 @@ class _LanguageItem extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            isEnglish ? 'English' : 'العربية',
+            isEnglish ? 'English' : 'العربية'.tr(),
             style: TextStyle(
               fontSize: 13.sp,
               color: Theme.of(context).colorScheme.onSurfaceVariant,

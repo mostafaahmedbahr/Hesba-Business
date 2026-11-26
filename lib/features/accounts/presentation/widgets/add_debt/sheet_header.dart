@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../core/theme/app_theme.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// هيدر «إضافة مديونية»: المقبض + الأيقونة + العنوان + زر الإغلاق.
 class AddDebtSheetHeader extends StatelessWidget {
@@ -47,7 +48,7 @@ class AddDebtSheetHeader extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'مديونية جديدة',
+                      'مديونية جديدة'.tr(),
                       style: TextStyle(
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w900,
@@ -55,7 +56,7 @@ class AddDebtSheetHeader extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'التاريخ يُسجَّل تلقائيًا عند الحفظ',
+                      'التاريخ يُسجَّل تلقائيًا عند الحفظ'.tr(),
                       style: TextStyle(
                         fontSize: 10.sp,
                         fontWeight: FontWeight.w600,

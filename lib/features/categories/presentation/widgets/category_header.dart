@@ -1,4 +1,6 @@
 import '../../../../common_imports.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// هيدر متدرج (نوع المحل + العدد).
 class CategoryHeader extends StatelessWidget {
@@ -28,8 +30,8 @@ class CategoryHeader extends StatelessWidget {
         icon: const Icon(Icons.arrow_back_rounded),
         onPressed: () => Navigator.pop(context),
       ),
-      title: const Text(
-        'إدارة الأقسام',
+      title: Text(
+        'إدارة الأقسام'.tr(),
         style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white),
       ),
       centerTitle: true,
@@ -101,7 +103,7 @@ class CategoryHeader extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  businessType ?? 'المتجر',
+                                  businessType ?? 'المتجر'.tr(),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
@@ -111,7 +113,7 @@ class CategoryHeader extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  'نظّم أقسام منتجاتك بسهولة',
+                                  'نظّم أقسام منتجاتك بسهولة'.tr(),
                                   style: TextStyle(
                                     fontSize: 11.sp,
                                     color: Colors.white.withValues(alpha: 0.85),
@@ -128,7 +130,7 @@ class CategoryHeader extends StatelessWidget {
                               borderRadius: BorderRadius.circular(20.r),
                             ),
                             child: Text(
-                              '$total قسم',
+                              uiTr('$total قسم'),
                               style: TextStyle(
                                 fontSize: 11.5.sp,
                                 fontWeight: FontWeight.w900,
@@ -144,7 +146,7 @@ class CategoryHeader extends StatelessWidget {
                           Expanded(
                             child: CategoryStatPill(
                               icon: Icons.folder_copy_rounded,
-                              label: 'المخصصة',
+                              label: 'المخصصة'.tr(),
                               value: '$customs',
                             ),
                           ),
@@ -152,7 +154,7 @@ class CategoryHeader extends StatelessWidget {
                           Expanded(
                             child: CategoryStatPill(
                               icon: Icons.layers_rounded,
-                              label: 'الافتراضية',
+                              label: 'الافتراضية'.tr(),
                               value: '$defaults',
                             ),
                           ),

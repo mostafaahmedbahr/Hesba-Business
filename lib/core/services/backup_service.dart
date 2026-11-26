@@ -8,6 +8,8 @@ import 'package:path_provider/path_provider.dart';
 
 import '../constants/app_constants.dart';
 import 'shop_resolver.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// تصدير نسخة احتياطية كاملة لمحل واحد بصيغة JSON **محايدة** (غير مرتبطة
 /// بـ Firestore)، لتصلح للاحتفاظ بها أو لرفعها على أي API أو إعادة رفعها على
@@ -49,11 +51,11 @@ class BackupService {
 
   Future<BackupResult> exportCurrentShop() async {
     final uid = _auth.currentUser?.uid;
-    if (uid == null) throw const BackupException('لازم تسجّل الدخول أولاً.');
+    if (uid == null) throw BackupException('لازم تسجّل الدخول أولاً.'.tr());
 
     final shopId = await _shopResolver.getShopId();
     if (shopId == null || shopId.isEmpty) {
-      throw const BackupException('تعذر تحديد المحل الحالي. أعد فتح التطبيق.');
+      throw BackupException('تعذر تحديد المحل الحالي. أعد فتح التطبيق.'.tr());
     }
 
     final docs = <Map<String, dynamic>>[];
@@ -94,7 +96,7 @@ class BackupService {
     var paymentCount = 0;
     for (final debtId in debtIds) {
       final payments = await _guard(
-        'حركات الدفع',
+        'حركات الدفع'.tr(),
         () => _firestore
             .collection(AppConstants.debtsCollection)
             .doc(debtId)
@@ -113,7 +115,7 @@ class BackupService {
     // (myUid == userId) ومستندات موظفيه بس لو الاستعلام مقيد بـ ownerId + role.
     // الاستعلام بـ shopId لوحده بترفضه القواعد → permission-denied.
     final ownerDoc = await _guard(
-      'بيانات الحساب',
+      'بيانات الحساب'.tr(),
       () => _firestore.collection(AppConstants.usersCollection).doc(uid).get(),
     );
     fromCache = fromCache || ownerDoc.metadata.isFromCache;
@@ -124,7 +126,7 @@ class BackupService {
     }
 
     final staff = await _guard(
-      'الحسابات الفرعية',
+      'الحسابات الفرعية'.tr(),
       () => _firestore
           .collection(AppConstants.usersCollection)
           .where('ownerId', isEqualTo: uid)
@@ -146,7 +148,7 @@ class BackupService {
     await addSingle('${AppConstants.shopsCollection}/$shopId');
 
     final requests = await _guard(
-      'طلبات الاشتراك',
+      'طلبات الاشتراك'.tr(),
       () => _firestore
           .collection('subscription_requests')
           .where('userId', isEqualTo: uid)
@@ -233,7 +235,7 @@ class BackupService {
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
         throw BackupException(
-          'الصلاحية مرفوضة عند قراءة $label. تأكد أنك صاحب المحل وأن الاشتراك مفعّل.',
+          uiTr('الصلاحية مرفوضة عند قراءة $label. تأكد أنك صاحب المحل وأن الاشتراك مفعّل.'),
         );
       }
       rethrow;

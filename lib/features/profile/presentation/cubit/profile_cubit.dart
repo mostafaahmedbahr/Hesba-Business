@@ -6,6 +6,7 @@ import '../../../../core/utils/error_message.dart';
 import '../../data/repos/account_repo.dart';
 import '../states/profile_state.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class ProfileCubit extends Cubit<ProfileState> {
   final AccountRepo _repo;
@@ -105,17 +106,17 @@ class ProfileCubit extends Cubit<ProfileState> {
   String _mapError(dynamic error) {
     final msg = error.toString();
     if (msg.contains('wrong-password') || msg.contains('invalid-credential')) {
-      return 'كلمة المرور الحالية غير صحيحة';
+      return 'كلمة المرور الحالية غير صحيحة'.tr();
     }
-    if (msg.contains('weak-password')) return 'كلمة المرور الجديدة ضعيفة جداً';
+    if (msg.contains('weak-password')) return 'كلمة المرور الجديدة ضعيفة جداً'.tr();
     if (msg.contains('requires-recent-login')) {
-      return 'يرجى تسجيل الدخول مجدداً ثم المحاولة';
+      return 'يرجى تسجيل الدخول مجدداً ثم المحاولة'.tr();
     }
-    if (msg.contains('too-many-requests')) return 'محاولات كثيرة، حاول مرة أخرى لاحقاً';
+    if (msg.contains('too-many-requests')) return 'محاولات كثيرة، حاول مرة أخرى لاحقاً'.tr();
     if (msg.contains('user-not-found') || msg.contains('invalid-email')) {
-      return 'تعذر التحقق من الحساب، سجل الدخول مجدداً';
+      return 'تعذر التحقق من الحساب، سجل الدخول مجدداً'.tr();
     }
-    if (msg.contains('network-request-failed')) return 'تحقق من اتصال الإنترنت';
-    return 'تعذر تغيير كلمة المرور، حاول مرة أخرى';
+    if (msg.contains('network-request-failed')) return 'تحقق من اتصال الإنترنت'.tr();
+    return 'تعذر تغيير كلمة المرور، حاول مرة أخرى'.tr();
   }
 }

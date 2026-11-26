@@ -90,7 +90,7 @@ class SubscriptionModel extends Equatable {
   /// أي فترة تجريبية أو مدفوعة سارية (endDate في المستقبل) تتغلب على أي
   /// حالة مخزّنة — طلب تجديد معلّق أو مرفوض لا يجوز أن يقفل محلًا ما زالت
   /// مدته قائمة. بدونه، `pending`/`rejected` تُعاد كما هي حتى تميّز الواجهة
-  /// بين "قيد المراجعة" و"مرفوض"، وأي شيء آخر يُقرأ كـ `expired`.
+  /// بين "قيد المراجعة".tr() و"مرفوض".tr()، وأي شيء آخر يُقرأ كـ `expired`.
   SubscriptionStatus get effectiveStatus {
     final end = endDate;
     if (end != null && end.isAfter(DateTime.now())) {

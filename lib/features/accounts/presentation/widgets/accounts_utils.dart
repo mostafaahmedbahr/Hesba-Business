@@ -34,7 +34,7 @@ String _formatGrouped(double v, int fractionDigits) {
 /// الترجمات لم تُحمَّل بعد (flutter test / أو أي خطأ مؤقت).
 String moneyWithCurrency(double value) {
   final ccy = 'currencyEGP'.tr();
-  final suffix = ccy == 'currencyEGP' ? 'ج.م' : ccy;
+  final suffix = ccy == 'currencyEGP' ? 'ج.م'.tr() : ccy;
   return '${formatMoney(value)} $suffix';
 }
 
@@ -68,7 +68,7 @@ abstract class AccountContact {
   static Future<bool> call(BuildContext context, String phone) async {
     final digits = dialablePhone(phone);
     if (digits.length < 7) {
-      AppToast.warning(context, 'رقم الهاتف غير صحيح');
+      AppToast.warning(context, 'رقم الهاتف غير صحيح'.tr());
       return false;
     }
     return _launch(context, Uri(scheme: 'tel', path: digits));
@@ -77,7 +77,7 @@ abstract class AccountContact {
   static Future<bool> whatsapp(BuildContext context, String phone) async {
     final digits = dialablePhone(phone);
     if (digits.length < 7) {
-      AppToast.warning(context, 'رقم الهاتف غير صحيح');
+      AppToast.warning(context, 'رقم الهاتف غير صحيح'.tr());
       return false;
     }
     return _launch(context, Uri.parse('https://wa.me/$digits'));
@@ -89,7 +89,7 @@ abstract class AccountContact {
       ClipboardData(text: digits.isEmpty ? phone : digits),
     );
     if (!context.mounted) return;
-    AppToast.success(context, 'تم نسخ الرقم');
+    AppToast.success(context, 'تم نسخ الرقم'.tr());
   }
 
   static Future<bool> _launch(BuildContext context, Uri uri) async {
@@ -104,7 +104,7 @@ abstract class AccountContact {
     }
     if (!context.mounted) return opened;
     if (!opened) {
-      AppToast.error(context, 'تعذر فتح التطبيق — تأكد أن تطبيق الاتصال متاح');
+      AppToast.error(context, 'تعذر فتح التطبيق — تأكد أن تطبيق الاتصال متاح'.tr());
     }
     return opened;
   }
@@ -172,7 +172,7 @@ void showPhoneActionsSheet(BuildContext context, String phone) {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'التواصل عبر الرقم',
+                          'التواصل عبر الرقم'.tr(),
                           style: TextStyle(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w800,
@@ -195,8 +195,8 @@ void showPhoneActionsSheet(BuildContext context, String phone) {
               SizedBox(height: 14.h),
               _PhoneActionTile(
                 icon: Icons.call_rounded,
-                label: 'اتصال مباشر',
-                subtitle: 'فتح لوحة الاتصال',
+                label: 'اتصال مباشر'.tr(),
+                subtitle: 'فتح لوحة الاتصال'.tr(),
                 color: AppTheme.successDark,
                 onTap: () {
                   Navigator.pop(sheetContext);
@@ -206,8 +206,8 @@ void showPhoneActionsSheet(BuildContext context, String phone) {
               SizedBox(height: 8.h),
               _PhoneActionTile(
                 icon: Icons.chat_rounded,
-                label: 'واتساب',
-                subtitle: 'فتح محادثة WhatsApp مع الرقم',
+                label: 'واتساب'.tr(),
+                subtitle: 'فتح محادثة WhatsApp مع الرقم'.tr(),
                 color: const Color(0xFF25D366),
                 onTap: () {
                   Navigator.pop(sheetContext);
@@ -217,8 +217,8 @@ void showPhoneActionsSheet(BuildContext context, String phone) {
               SizedBox(height: 8.h),
               _PhoneActionTile(
                 icon: Icons.copy_rounded,
-                label: 'نسخ الرقم',
-                subtitle: 'نسخ إلى الحافظة',
+                label: 'نسخ الرقم'.tr(),
+                subtitle: 'نسخ إلى الحافظة'.tr(),
                 color: AppTheme.primaryColor,
                 onTap: () {
                   Navigator.pop(sheetContext);

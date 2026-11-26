@@ -5,6 +5,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../core/theme/app_theme.dart';
 import '../../cubit/expenses_cubit.dart';
 import '../../cubit/expenses_state.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// شريط الحفظ الثابت أسفل الشاشة (المبلغ الحي + زر الحفظ مع BlocBuilder للتحميل).
 class ExpenseSaveBar extends StatelessWidget {
@@ -50,7 +52,7 @@ class ExpenseSaveBar extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'المبلغ',
+                    'المبلغ'.tr(),
                     style: TextStyle(
                       fontSize: 11.sp,
                       color: AppTheme.mutedGray,
@@ -61,7 +63,7 @@ class ExpenseSaveBar extends StatelessWidget {
                     fit: BoxFit.scaleDown,
                     alignment: AlignmentDirectional.centerStart,
                     child: Text(
-                      '${amount.toStringAsFixed(amount % 1 == 0 ? 0 : 2)} ج.م',
+                      uiTr('${amount.toStringAsFixed(amount % 1 == 0 ? 0 : 2)} ج.م'),
                       style: TextStyle(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.w900,
@@ -133,8 +135,8 @@ class ExpenseSaveBar extends StatelessWidget {
                                   SizedBox(width: 8.w),
                                   Text(
                                     isEditing
-                                        ? 'حفظ التعديلات'
-                                        : 'إضافة المصروف',
+                                        ? 'حفظ التعديلات'.tr()
+                                        : 'إضافة المصروف'.tr(),
                                     style: TextStyle(
                                       fontSize: 14.sp,
                                       fontWeight: FontWeight.w900,

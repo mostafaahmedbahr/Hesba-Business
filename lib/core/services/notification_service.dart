@@ -10,6 +10,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 import '../../features/notifications/data/models/local_reminder.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Remote (FCM) + local notification service.
 ///
@@ -28,7 +29,7 @@ class NotificationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   static const String remindersChannelId = 'hesba_reminders';
-  static const String remindersChannelName = 'تذكيرات حسبة';
+  static String get remindersChannelName => 'تذكيرات حسبة'.tr();
   static const int _reminderNotificationId = 1001;
   static const int _fcmNotificationId = 1002;
 
@@ -58,7 +59,7 @@ class NotificationService {
       ),
     );
 
-    final title = message.notification?.title ?? 'حسبة';
+    final title = message.notification?.title ?? 'حسبة'.tr();
     final body = message.notification?.body ?? '';
 final channel = AndroidNotificationChannel(
       remindersChannelId,
@@ -159,10 +160,10 @@ final channel = AndroidNotificationChannel(
   }
 
   Future<void> _createRemindersChannel() async {
-    const channel = AndroidNotificationChannel(
+  final channel= AndroidNotificationChannel(
       remindersChannelId,
       remindersChannelName,
-      description: 'تنبيهات دورية لتذكيرك بمتابعة محلك',
+      description: 'تنبيهات دورية لتذكيرك بمتابعة محلك'.tr(),
       importance: Importance.high,
       playSound: true,
       showBadge: true,
@@ -175,10 +176,10 @@ final channel = AndroidNotificationChannel(
   }
 
   Future<void> _createFcmChannel() async {
-    const channel = AndroidNotificationChannel(
+  final channel= AndroidNotificationChannel(
       'hesba_fcm',
-      'إشعارات حسبة',
-      description: 'إشعارات وتنبيهات من حسبة',
+      'إشعارات حسبة'.tr(),
+      description: 'إشعارات وتنبيهات من حسبة'.tr(),
       importance: Importance.max,
       playSound: true,
       showBadge: true,
@@ -377,7 +378,7 @@ final channel = AndroidNotificationChannel(
   void _onForegroundMessage(RemoteMessage message) {
     final title = message.notification?.title ??
         message.data['title'] ??
-        'حسبة';
+        'حسبة'.tr();
     final body = message.notification?.body ??
         message.data['body'] ??
         '';
@@ -393,11 +394,11 @@ final channel = AndroidNotificationChannel(
   }
 
   NotificationDetails _fcmDetails() {
-    return const NotificationDetails(
+    return NotificationDetails(
       android: AndroidNotificationDetails(
         'hesba_fcm',
-        'إشعارات حسبة',
-        channelDescription: 'إشعارات وتنبيهات من حسبة',
+        'إشعارات حسبة'.tr(),
+        channelDescription: 'إشعارات وتنبيهات من حسبة'.tr(),
         icon: '@mipmap/ic_launcher',
         importance: Importance.max,
         playSound: true,
@@ -412,11 +413,11 @@ final channel = AndroidNotificationChannel(
   NotificationDetails reminderDetails() => _reminderDetails();
 
   NotificationDetails _reminderDetails() {
-    return const NotificationDetails(
+    return NotificationDetails(
       android: AndroidNotificationDetails(
         remindersChannelId,
         remindersChannelName,
-        channelDescription: 'تنبيهات دورية لتذكيرك بمتابعة محلك',
+        channelDescription: 'تنبيهات دورية لتذكيرك بمتابعة محلك'.tr(),
         icon: '@mipmap/ic_launcher',
         importance: Importance.high,
         priority: Priority.high,

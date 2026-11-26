@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../core/theme/app_theme.dart';
 import '../expense_category_meta.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// هيدر الإضافة (رجوع + مبلغ حي).
 class ExpenseAddHeader extends StatelessWidget {
@@ -46,7 +47,7 @@ class ExpenseAddHeader extends StatelessWidget {
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
-        isEditing ? 'تعديل المصروف' : 'مصروف جديد',
+        isEditing ? 'تعديل المصروف'.tr() : 'مصروف جديد'.tr(),
         style: TextStyle(
           fontSize: 15.sp,
           fontWeight: FontWeight.w800,
@@ -102,7 +103,7 @@ class ExpenseAddHeader extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'قيمة المصروف',
+                              'قيمة المصروف'.tr(),
                               style: TextStyle(
                                 fontSize: 12.sp,
                                 fontWeight: FontWeight.w600,
@@ -132,7 +133,7 @@ class ExpenseAddHeader extends StatelessWidget {
                                   Padding(
                                     padding: EdgeInsets.only(bottom: 5.h),
                                     child: Text(
-                                      'ج.م',
+                                      'ج.م'.tr(),
                                       style: TextStyle(
                                         fontSize: 14.sp,
                                         fontWeight: FontWeight.w700,
@@ -171,7 +172,7 @@ class ExpenseAddHeader extends StatelessWidget {
                             ),
                             SizedBox(height: 3.h),
                             Text(
-                              category.isEmpty ? 'التصنيف' : category,
+                              category.isEmpty ? 'التصنيف'.tr() : category,
                               style: TextStyle(
                                 fontSize: 10.5.sp,
                                 fontWeight: FontWeight.w800,

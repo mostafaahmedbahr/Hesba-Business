@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '../../../../core/utils/reminder_labels.dart';
 import '../view_model/notification_cubit.dart';
 import '../../../subscription/presentation/subscription_gate.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// شيت إضافة / تعديل تذكير.
 class ReminderFormSheet extends StatefulWidget {
@@ -79,13 +80,13 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
     // العنوان فاضي: خطأ تحت الخانة + تنبيه (مش رجوع صامت).
     if (_title.text.trim().isEmpty) {
       setState(() => _titleError = true);
-      if (mounted) AppToast.error(context, 'اكتب عنوان التذكير الأول');
+      if (mounted) AppToast.error(context, 'اكتب عنوان التذكير الأول'.tr());
       return;
     }
     // لو الإذن مقفول الإشعار عمره ما هيوصلك.
     final granted = await widget.notificationCubit.ensurePermission();
     if (!granted && mounted) {
-      AppToast.error(context, 'فعّل إذن الإشعارات من إعدادات الموبايل عشان التذكير يوصلك');
+      AppToast.error(context, 'فعّل إذن الإشعارات من إعدادات الموبايل عشان التذكير يوصلك'.tr());
       return;
     }
     // الأسبوعي لازم يوم واحد على الأقل: خطأ تحت الأيام + تنبيه.
@@ -94,7 +95,7 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
         : <int>[];
     if (_repeat == ReminderRepeat.weekly && days.isEmpty) {
       setState(() => _daysError = true);
-      if (mounted) AppToast.error(context, 'اختار يوم واحد على الأقل');
+      if (mounted) AppToast.error(context, 'اختار يوم واحد على الأقل'.tr());
       return;
     }
     setState(() => _saving = true);
@@ -121,22 +122,22 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
     }
     if (!mounted) return;
     // يأكدلك إنه هييجي إمتى قبل ما يقفل.
-    AppToast.success(context, 'تمام! هيجيلك ${_fireInfo()}');
+    AppToast.success(context, uiTr('تمام! هيجيلك ${_fireInfo()}'));
     Navigator.pop(context);
   }
 
   /// سطر "هيجيلك إمتى" (النهاردة / بكرة / أيام كذا + الوقت).
   String _fireInfo() {
-    final when = _repeat == ReminderRepeat.weekly ? _daysInfo() : _isToday() ? 'النهاردة' : 'بكرة';
+    final when = _repeat == ReminderRepeat.weekly ? _daysInfo() : _isToday() ? 'النهاردة'.tr() : 'بكرة'.tr();
     return '$when ${timeText(context, _hour, _minute)}';
   }
 
   /// وصف الأيام (كل يوم / يومين... / أسماء).
   String _daysInfo() {
     final sorted = _days.toList()..sort();
-    if (sorted.length >= 7) return 'كل يوم';
-    if (sorted.length > 3) return '${sorted.length} أيام في الأسبوع';
-    return 'أيام ${sorted.map((d) => weekdayShort(context, d)).join('، ')}';
+    if (sorted.length >= 7) return 'كل يوم'.tr();
+    if (sorted.length > 3) return uiTr('${sorted.length} أيام في الأسبوع');
+    return uiTr('أيام ${sorted.map((d) => weekdayShort(context, d)).join('، ')}');
   }
 
   /// هل الوقت لسه جاي النهاردة؟ (يومي بس).
@@ -212,7 +213,7 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
                         ),
                       ),
                       Text(
-                        'اختار الوقت والتكرار وهنفكرك',
+                        'اختار الوقت والتكرار وهنفكرك'.tr(),
                         style: TextStyle(fontSize: 11.sp, color: AppTheme.slateGray),
                       ),
                     ],
@@ -239,7 +240,7 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
             SizedBox(height: 8.h),
             _Field(
               controller: _title,
-              hint: 'مثال: مراجعة مبيعات اليوم',
+              hint: 'مثال: مراجعة مبيعات اليوم'.tr(),
               icon: Icons.title_rounded,
               isDark: isDark,
               onChanged: (_) {
@@ -251,7 +252,7 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
               Padding(
                 padding: EdgeInsets.only(top: 6.h, right: 4.w),
                 child: Text(
-                  'اكتب عنوان التذكير الأول',
+                  'اكتب عنوان التذكير الأول'.tr(),
                   style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w700, color: AppTheme.danger),
                 ),
               ),
@@ -261,7 +262,7 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
             SizedBox(height: 8.h),
             _Field(
               controller: _body,
-              hint: 'اكتب تفاصيل قصيرة...',
+              hint: 'اكتب تفاصيل قصيرة...'.tr(),
               icon: Icons.notes_rounded,
               isDark: isDark,
               maxLines: 2,
@@ -315,7 +316,7 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
                           ),
                           SizedBox(height: 3.h),
                           Text(
-                            'اضغط لتغيير الوقت',
+                            'اضغط لتغيير الوقت'.tr(),
                             style: TextStyle(
                               fontSize: 11.sp,
                               color: Colors.white.withValues(alpha: 0.80),
@@ -330,8 +331,8 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12.r),
                       ),
-                      child: const Text(
-                        'تغيير',
+                      child: Text(
+                        'تغيير'.tr(),
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w800,
@@ -376,7 +377,7 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
               Row(
                 children: [
                   Text(
-                    '${_days.length} ${_days.length == 1 ? 'يوم' : 'أيام'} مختارة',
+                    '${_days.length} ${_days.length == 1 ? 'يوم'.tr() : 'أيام'.tr()} ${'مختارة'.tr()}',
                     style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w800, color: AppTheme.primaryColor),
                   ),
                   const Spacer(),
@@ -396,7 +397,7 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
                         border: Border.all(color: AppTheme.primaryColor.withValues(alpha: 0.16)),
                       ),
                       child: Text(
-                        _days.length >= 7 ? 'مسح الكل' : 'كل الأيام',
+                        _days.length >= 7 ? 'مسح الكل'.tr() : 'كل الأيام'.tr(),
                         style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w800, color: AppTheme.primaryColor),
                       ),
                     ),
@@ -444,7 +445,7 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
                 Padding(
                   padding: EdgeInsets.only(top: 8.h, right: 4.w),
                   child: Text(
-                    'اختار يوم واحد على الأقل',
+                    'اختار يوم واحد على الأقل'.tr(),
                     style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w700, color: AppTheme.danger),
                   ),
                 ),

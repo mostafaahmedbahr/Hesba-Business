@@ -8,6 +8,7 @@ import '../../../../core/utils/error_message.dart';
 import '../../data/repos/account_repo.dart';
 import '../widgets/app_scaffold.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// طلب حذف الحساب — متطلب Google Play للتطبيقات التي تتيح إنشاء حساب.
 ///
@@ -41,7 +42,7 @@ class _DeleteAccountViewState extends State<DeleteAccountView> {
   Widget build(BuildContext context) {
     final isStaff = sl<UserRoleService>().isStaff;
     return AppScaffold(
-      title: 'حذف الحساب',
+      title: 'حذف الحساب'.tr(),
       body: isStaff
           ? const _StaffRestricted()
           : Form(
@@ -53,7 +54,7 @@ class _DeleteAccountViewState extends State<DeleteAccountView> {
                   const _WarningCard(),
                   SizedBox(height: 22.h),
                   Text(
-                    'كلمة المرور الحالية',
+                    'كلمة المرور الحالية'.tr(),
                     style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800),
                   ),
                   SizedBox(height: 8.h),
@@ -62,7 +63,7 @@ class _DeleteAccountViewState extends State<DeleteAccountView> {
                     obscureText: _obscure,
                     enabled: !_loading,
                     decoration: InputDecoration(
-                      hintText: 'أدخل كلمة المرور للتأكيد',
+                      hintText: 'أدخل كلمة المرور للتأكيد'.tr(),
                       prefixIcon: const Icon(Icons.lock_outline_rounded),
                       suffixIcon: IconButton(
                         icon: Icon(_obscure
@@ -75,11 +76,11 @@ class _DeleteAccountViewState extends State<DeleteAccountView> {
                       ),
                     ),
                     validator: (v) =>
-                        (v == null || v.isEmpty) ? 'كلمة المرور مطلوبة' : null,
+                        (v == null || v.isEmpty) ? 'كلمة المرور مطلوبة'.tr() : null,
                   ),
                   SizedBox(height: 18.h),
                   Text(
-                    'سبب الحذف (اختياري)',
+                    'سبب الحذف (اختياري)'.tr(),
                     style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800),
                   ),
                   SizedBox(height: 8.h),
@@ -89,7 +90,7 @@ class _DeleteAccountViewState extends State<DeleteAccountView> {
                     maxLines: 3,
                     maxLength: 500,
                     decoration: InputDecoration(
-                      hintText: 'ساعدنا بمعرفة السبب (اختياري)',
+                      hintText: 'ساعدنا بمعرفة السبب (اختياري)'.tr(),
                       prefixIcon: const Icon(Icons.edit_note_rounded),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
@@ -100,7 +101,7 @@ class _DeleteAccountViewState extends State<DeleteAccountView> {
                   _DeleteButton(loading: _loading, onPressed: _submit),
                   SizedBox(height: 16.h),
                   Text(
-                    'أو تواصل مباشرة: hesbabusiness1@gmail.com',
+                    'أو تواصل مباشرة: hesbabusiness1@gmail.com'.tr(),
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade500),
                   ),
@@ -118,15 +119,15 @@ class _DeleteAccountViewState extends State<DeleteAccountView> {
       context: context,
       barrierColor: Colors.black54,
       builder: (_) => AlertDialog(
-        title: const Text('تأكيد طلب الحذف'),
-        content: const Text(
-          'سيتم تسجيل خروجك وإرسال طلب حذف حسابك وبيانات محلك إلى فريق حسبة. '
-          'الحذف نهائي ولا يمكن التراجع عنه بعد تنفيذه. هل تريد المتابعة؟',
+        title: Text('تأكيد طلب الحذف'.tr()),
+        content: Text(
+          'سيتم تسجيل خروجك وإرسال طلب حذف حسابك وبيانات محلك إلى فريق حسبة. '.tr() +
+          'الحذف نهائي ولا يمكن التراجع عنه بعد تنفيذه. هل تريد المتابعة؟'.tr(),
         ),
         actions: [
           OutlinedButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('إلغاء'),
+            child: Text('إلغاء'.tr()),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -134,7 +135,7 @@ class _DeleteAccountViewState extends State<DeleteAccountView> {
               foregroundColor: Colors.white,
             ),
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('حذف الحساب'),
+            child: Text('حذف الحساب'.tr()),
           ),
         ],
       ),
@@ -153,8 +154,8 @@ class _DeleteAccountViewState extends State<DeleteAccountView> {
       sl<UserRoleService>().clear();
       if (!mounted) return;
       messenger.showSnackBar(
-        const SnackBar(
-          content: Text('تم استلام طلب الحذف — سيتواصل معك فريق حسبة لإتمامه.'),
+        SnackBar(
+          content: Text('تم استلام طلب الحذف — سيتواصل معك فريق حسبة لإتمامه.'.tr()),
         ),
       );
       Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false);
@@ -162,7 +163,7 @@ class _DeleteAccountViewState extends State<DeleteAccountView> {
       AppLogger.nonFatal('features/profile/presentation/views/delete_account_view.dart', e, logSt, severity: LoggingSeverity.warning);
       setState(() => _loading = false);
       final message = e.code == 'wrong-password' || e.code == 'invalid-credential'
-          ? 'كلمة المرور غير صحيحة'
+          ? 'كلمة المرور غير صحيحة'.tr()
           : translateError(e.toString());
       messenger.showSnackBar(SnackBar(content: Text(message)));
     } catch (e, logSt) {
@@ -178,11 +179,11 @@ class _WarningCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = const [
-      'سيتم حذف حسابك وبيانات محلك المرتبطة: المنتجات، المبيعات، المرتجعات، المصروفات، الموردين، العملاء والذمم، سجلات الاشتراك والمدفوعات.',
-      'قد تُحتفظ بعض السجلات المالية للمدة القانونية/الضرائبية وفق سياسة الخصوصية، دون أن تكون متاحة للاستخدام.',
-      'حذف حسابك يلغي أيضًا اشتراكك الحالي ولا يمكن استرجاع أي بيانات بعد اكتمال الحذف.',
-      'طلبات الحذف تُراجع وينفذها فريق حسبة يدويًا بعد التأكد من هويتك.',
+    final items = [
+      'سيتم حذف حسابك وبيانات محلك المرتبطة: المنتجات، المبيعات، المرتجعات، المصروفات، الموردين، العملاء والذمم، سجلات الاشتراك والمدفوعات.'.tr(),
+      'قد تُحتفظ بعض السجلات المالية للمدة القانونية/الضرائبية وفق سياسة الخصوصية، دون أن تكون متاحة للاستخدام.'.tr(),
+      'حذف حسابك يلغي أيضًا اشتراكك الحالي ولا يمكن استرجاع أي بيانات بعد اكتمال الحذف.'.tr(),
+      'طلبات الحذف تُراجع وينفذها فريق حسبة يدويًا بعد التأكد من هويتك.'.tr(),
     ];
     return Container(
       padding: EdgeInsets.all(16.w),
@@ -199,7 +200,7 @@ class _WarningCard extends StatelessWidget {
               const Icon(Icons.warning_amber_rounded, color: Color(0xFFE53935), size: 20),
               SizedBox(width: 8.w),
               Text(
-                'قبل المتابعة',
+                'قبل المتابعة'.tr(),
                 style: TextStyle(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w900,
@@ -245,13 +246,13 @@ class _StaffRestricted extends StatelessWidget {
             const Icon(Icons.lock_outline_rounded, size: 48, color: Colors.grey),
             SizedBox(height: 16.h),
             Text(
-              'حذف الحساب متاح لصاحب الحساب فقط',
+              'حذف الحساب متاح لصاحب الحساب فقط'.tr(),
               style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 8.h),
             Text(
-              'حسابات الموظفين تُدار من قِبل صاحب المحل — تواصل مع مالك المحل لإيقاف حسابك.',
+              'حسابات الموظفين تُدار من قِبل صاحب المحل — تواصل مع مالك المحل لإيقاف حسابك.'.tr(),
               style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade500, height: 1.5),
               textAlign: TextAlign.center,
             ),
@@ -290,7 +291,7 @@ class _DeleteButton extends StatelessWidget {
               )
             : const Icon(Icons.delete_forever_rounded),
         label: Text(
-          'إرسال طلب الحذف',
+          'إرسال طلب الحذف'.tr(),
           style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900),
         ),
       ),

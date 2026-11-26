@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../common_imports.dart';
 import '../cubit/reports_state.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// كارت الأكثر مبيعاً (top 5).
 class ReportsTopProducts extends StatelessWidget {
@@ -19,13 +20,13 @@ class ReportsTopProducts extends StatelessWidget {
         Row(children: [
           Container(width: 36.w, height: 36.w, decoration: BoxDecoration(gradient: const LinearGradient(colors: [AppTheme.warningAmber, AppTheme.goldLight]), borderRadius: BorderRadius.circular(10.r)), child: Icon(Icons.star_rounded, color: Colors.white, size: 18.sp)),
           SizedBox(width: 10.w),
-          Text('الأكثر مبيعاً', style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
+          Text('الأكثر مبيعاً'.tr(), style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
           const Spacer(),
-          Container(padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h), decoration: BoxDecoration(color: const Color(0xFFFEF3C7), borderRadius: BorderRadius.circular(20.r)), child: Text('${top.length} منتج', style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.w700, color: const Color(0xFFD97706)))),
+          Container(padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h), decoration: BoxDecoration(color: const Color(0xFFFEF3C7), borderRadius: BorderRadius.circular(20.r)), child: Text(uiTr('${top.length} منتج'), style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.w700, color: const Color(0xFFD97706)))),
         ]),
         SizedBox(height: 14.h),
         if (top.isEmpty)
-          Center(child: Padding(padding: EdgeInsets.symmetric(vertical: 20.h), child: Column(children: [Icon(Icons.inventory_2_outlined, size: 32.sp, color: const Color(0xFFCBD5E1)), SizedBox(height: 8.h), Text('لا توجد مبيعات', style: TextStyle(fontSize: 12.sp, color: AppTheme.mutedGray))])))
+          Center(child: Padding(padding: EdgeInsets.symmetric(vertical: 20.h), child: Column(children: [Icon(Icons.inventory_2_outlined, size: 32.sp, color: const Color(0xFFCBD5E1)), SizedBox(height: 8.h), Text('لا توجد مبيعات'.tr(), style: TextStyle(fontSize: 12.sp, color: AppTheme.mutedGray))])))
         else
           Column(
             children: List.generate(top.length, (i) {
@@ -39,7 +40,7 @@ class ReportsTopProducts extends StatelessWidget {
                   SizedBox(width: 10.w),
                   Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text(e.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : AppTheme.ink)),
-                    Text('${fmtReport(e.revenue)} ج.م • ${e.qty.toStringAsFixed(e.qty % 1 == 0 ? 0 : 1)} قطعة', style: TextStyle(fontSize: 11.sp, color: AppTheme.slateGray)),
+                    Text(uiTr('${fmtReport(e.revenue)} ج.م • ${e.qty.toStringAsFixed(e.qty % 1 == 0 ? 0 : 1)} قطعة'), style: TextStyle(fontSize: 11.sp, color: AppTheme.slateGray)),
                   ])),
                   Icon(Icons.trending_up_rounded, size: 16.sp, color: AppTheme.successDark),
                 ]),
@@ -67,11 +68,11 @@ class ReportsRecentActivity extends StatelessWidget {
         Row(children: [
           Container(width: 36.w, height: 36.w, decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF7C3AED), Color(0xFFA78BFA)]), borderRadius: BorderRadius.circular(10.r)), child: Icon(Icons.history_rounded, color: Colors.white, size: 18.sp)),
           SizedBox(width: 10.w),
-          Text('آخر الحركات', style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
+          Text('آخر الحركات'.tr(), style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
         ]),
         SizedBox(height: 14.h),
         if (recent.isEmpty)
-          Center(child: Padding(padding: EdgeInsets.symmetric(vertical: 16.h), child: Text('لا توجد حركات', style: TextStyle(color: AppTheme.mutedGray))))
+          Center(child: Padding(padding: EdgeInsets.symmetric(vertical: 16.h), child: Text('لا توجد حركات'.tr(), style: TextStyle(color: AppTheme.mutedGray))))
         else
           Column(
             children: recent.map((m) {
@@ -90,7 +91,7 @@ class ReportsRecentActivity extends StatelessWidget {
                     Text(m['title'] as String, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w700, color: isDark ? Colors.white : AppTheme.ink)),
                     Text(DateFormat('dd MMM • hh:mm a', 'ar').format(m['date'] as DateTime), style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray)),
                   ])),
-                  Text('${amount >= 0 ? '+' : ''}${fmtReport(amount)} ج.م', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: amount >= 0 ? AppTheme.successDark : AppTheme.danger)),
+                  Text(uiTr('${amount >= 0 ? '+' : ''}${fmtReport(amount)} ج.م'), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: amount >= 0 ? AppTheme.successDark : AppTheme.danger)),
                 ]),
               );
             }).toList(),

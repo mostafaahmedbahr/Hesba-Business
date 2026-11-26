@@ -15,7 +15,7 @@ import '../../../returns/data/models/return_model.dart';
 import '../../../sales/data/models/sale_model.dart';
 import 'package:hesba/core/services/app_logger.dart';
 
-/// "آخر الحركات" section of the home page (last sale / return / expense).
+/// "آخر الحركات".tr() section of the home page (last sale / return / expense).
 ///
 /// Extracted from `home_view.dart`: owns its shopId lookup, its one-shot
 /// Firestore reads (via [DashboardRepo]) and its own loading/empty states,

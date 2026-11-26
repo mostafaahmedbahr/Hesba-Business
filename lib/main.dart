@@ -181,7 +181,7 @@ class _AppRoot extends StatelessWidget {
             return MaterialApp(
               key: ValueKey(context.locale),
               navigatorKey: appNavigatorKey,
-              title: 'حسبة',
+              title: 'حسبة'.tr(),
               debugShowCheckedModeBanner: false,
               theme: AppTheme.lightTheme,
               darkTheme: AppTheme.darkTheme,

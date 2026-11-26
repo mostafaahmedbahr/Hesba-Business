@@ -14,7 +14,7 @@ class SaleCustomerSection extends StatefulWidget {
   final TextEditingController phoneController;
   final List<PersonModel> persons;
 
-  /// `true` عند اختيار "آجل" — يُظهر ملاحظة إن العميل مطلوب.
+  /// `true` عند اختيار "آجل".tr() — يُظهر ملاحظة إن العميل مطلوب.
   final bool creditRequired;
 
   /// زر اختيار/إضافة مورد من داخل فاتورة البيع — نفس الشاشة للموظف والصاحب.

@@ -6,6 +6,7 @@ import '../../../../common_imports.dart';
 import '../../data/models/debt_model.dart';
 import 'account_bits.dart';
 import 'accounts_utils.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// كارت مديونية: الاسم والهاتف + المبلغ المتبقي + حالة السداد +
 /// أزرار الاتصال وواتساب.
@@ -146,7 +147,7 @@ class DebtCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                       Text(
-                        'المتبقي',
+                        'المتبقي'.tr(),
                         style: TextStyle(
                           fontSize: 9.sp,
                           fontWeight: FontWeight.w700,
@@ -183,7 +184,7 @@ class DebtCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      'مدفوع: ${moneyWithCurrency(debt.paidAmount)} من ${moneyWithCurrency(debt.amount)}',
+                      uiTr('مدفوع: ${moneyWithCurrency(debt.paidAmount)} من ${moneyWithCurrency(debt.amount)}'),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// One payable channel shown to customers at checkout.
 class AdminPaymentMethod {
@@ -37,16 +38,16 @@ class AdminSettings {
   final int trialDays;
   final List<AdminPaymentMethod> paymentMethods;
 
-  static const defaults = AdminSettings(
+  static final defaults = AdminSettings(
     monthlyPrice: 99,
     threeMonthsPrice: 249,
     sixMonthsPrice: 449,
     yearlyPrice: 799,
     trialDays: 7,
     paymentMethods: [
-      AdminPaymentMethod(id: 'instapay', label: 'إنستاباي', number: '01110690299'),
-      AdminPaymentMethod(id: 'vodafone_cash', label: 'فودافون كاش', number: '01093312802'),
-      AdminPaymentMethod(id: 'etisalat_cash', label: 'اتصالات كاش', number: '01145049298'),
+      AdminPaymentMethod(id: 'instapay', label: 'إنستاباي'.tr(), number: '01110690299'),
+      AdminPaymentMethod(id: 'vodafone_cash', label: 'فودافون كاش'.tr(), number: '01093312802'),
+      AdminPaymentMethod(id: 'etisalat_cash', label: 'اتصالات كاش'.tr(), number: '01145049298'),
     ],
   );
 

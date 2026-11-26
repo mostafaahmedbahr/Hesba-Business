@@ -6,6 +6,7 @@ import '../../../../core/utils/error_message.dart';
 import '../../data/repos/sales_repo.dart';
 import 'sales_list_state.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// لوجيك قائمة المبيعات (الـ View غبية — بتنادي بس).
 class SalesListCubit extends Cubit<SalesListState> {
@@ -13,7 +14,7 @@ class SalesListCubit extends Cubit<SalesListState> {
   StreamSubscription? _sub; // ستريم المبيعات.
 
   SalesListCubit({required this._repo})
-      : super(const SalesListState());
+      : super(SalesListState());
 
   /// تجهيز القائمة: يجيب المحل + يشترك في المبيعات live.
   Future<void> bootstrap() async {
@@ -38,7 +39,7 @@ class SalesListCubit extends Cubit<SalesListState> {
     if (shopId == null || shopId.isEmpty) {
       emit(state.copyWith(
         status: SalesListStatus.failure,
-        errorMessage: 'لم يتم العثور على المتجر',
+        errorMessage: 'لم يتم العثور على المتجر'.tr(),
       ));
       return;
     }

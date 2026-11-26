@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../../core/services/app_logger.dart';
 import '../../../../core/theme/app_theme.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// شاشة تشخيص داخلية: تعرض آخر الأحداث المسجلة في [AppLogger]
 /// (الأحدث أولًا) مع الرسالة والمكدس والسياق.
@@ -22,10 +23,10 @@ class _DiagnosticsViewState extends State<DiagnosticsView> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('سجل التشخيص'),
+        title: Text('سجل التشخيص'.tr()),
         actions: [
           IconButton(
-            tooltip: 'نسخ السجل',
+            tooltip: 'نسخ السجل'.tr(),
             icon: const Icon(Icons.copy_all_outlined),
             onPressed: entries.isEmpty
                 ? null
@@ -33,12 +34,12 @@ class _DiagnosticsViewState extends State<DiagnosticsView> {
                     final text = entries.map(_formatEntry).join('\n');
                     Clipboard.setData(ClipboardData(text: text));
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('تم نسخ السجل')),
+                      SnackBar(content: Text('تم نسخ السجل'.tr())),
                     );
                   },
           ),
           IconButton(
-            tooltip: 'مسح السجل',
+            tooltip: 'مسح السجل'.tr(),
             icon: const Icon(Icons.delete_sweep_outlined),
             onPressed: entries.isEmpty
                 ? null
@@ -47,7 +48,7 @@ class _DiagnosticsViewState extends State<DiagnosticsView> {
         ],
       ),
       body: entries.isEmpty
-          ? const Center(
+          ? Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -55,7 +56,7 @@ class _DiagnosticsViewState extends State<DiagnosticsView> {
                     padding: EdgeInsets.all(16),
                     child: Icon(Icons.fact_check_outlined, size: 42),
                   ),
-                  Text('مفيش أخطاء مسجلة — كل شيء تمام 🎉'),
+                  Text('مفيش أخطاء مسجلة — كل شيء تمام 🎉'.tr()),
                 ],
               ),
             )

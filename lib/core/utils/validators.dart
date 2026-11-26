@@ -1,6 +1,10 @@
+import 'package:easy_localization/easy_localization.dart';
+
 class Validators {
-  static String? required(String? value, [String message = 'هذا الحقل مطلوب']) {
-    if (value == null || value.trim().isEmpty) return message;
+  static String? required(String? value, [String? message]) {
+    if (value == null || value.trim().isEmpty) {
+      return message ?? 'هذا الحقل مطلوب'.tr();
+    }
     return null;
   }
 
@@ -10,12 +14,12 @@ class Validators {
   /// أي حروف أو كلمات مع الرقم مرفوضة (مثال غلط: واتحدث01110690299).
   /// مثال صحيح: 010XXXXXXXX
   static String? egyptianPhone(String? value) {
-    if (value == null || value.trim().isEmpty) return 'اكتب رقم الهاتف';
+    if (value == null || value.trim().isEmpty) return 'اكتب رقم الهاتف'.tr();
     final normalized = _toLatinDigits(value.trim());
     // رفض أي حروف أو رموز قبل تنظيف الفواصل. قبل كده كان أي حرف بيشيل
     // مع الفواصل، فالرقم "واتحدث01110690299" كان بيعتبر صحيح.
     if (!RegExp(r'^[0-9+\s\-().]+$').hasMatch(normalized)) {
-      return 'رقم الهاتف غير صحيح (مثال: 010XXXXXXXX)';
+      return 'رقم الهاتف غير صحيح (مثال: 010XXXXXXXX)'.tr();
     }
     var cleaned = normalized.replaceAll(RegExp(r'[^0-9+]'), '');
     if (cleaned.startsWith('+20')) {
@@ -32,7 +36,7 @@ class Validators {
     }
     final regex = RegExp(r'^01[0125][0-9]{8}$');
     if (!regex.hasMatch(cleaned)) {
-      return 'رقم الهاتف غير صحيح (مثال: 010XXXXXXXX)';
+      return 'رقم الهاتف غير صحيح (مثال: 010XXXXXXXX)'.tr();
     }
     return null;
   }
@@ -63,53 +67,53 @@ class Validators {
   }
 
   static String? email(String? value) {
-    if (value == null || value.trim().isEmpty) return 'أدخل البريد الإلكتروني';
+    if (value == null || value.trim().isEmpty) return 'أدخل البريد الإلكتروني'.tr();
     final emailRegex = RegExp(r'^[\w\.\-+]+@([\w-]+\.)+[\w-]{2,63}$');
-    if (!emailRegex.hasMatch(value.trim())) return 'البريد الإلكتروني غير صالح';
+    if (!emailRegex.hasMatch(value.trim())) return 'البريد الإلكتروني غير صالح'.tr();
     return null;
   }
 
   /// Same policy as change-password: 8+ chars with upper, lower and digit.
   /// (Login never validates strength, so existing 6-char passwords keep working.)
   static String? password(String? value) {
-    if (value == null || value.isEmpty) return 'أدخل كلمة المرور';
-    if (value.length < 8) return 'كلمة المرور يجب أن تكون 8 أحرف على الأقل';
+    if (value == null || value.isEmpty) return 'أدخل كلمة المرور'.tr();
+    if (value.length < 8) return 'كلمة المرور يجب أن تكون 8 أحرف على الأقل'.tr();
     if (!RegExp(r'[A-Z]').hasMatch(value)) {
-      return 'كلمة المرور يجب أن تحتوي على حرف كبير (A-Z)';
+      return 'كلمة المرور يجب أن تحتوي على حرف كبير (A-Z)'.tr();
     }
     if (!RegExp(r'[a-z]').hasMatch(value)) {
-      return 'كلمة المرور يجب أن تحتوي على حرف صغير (a-z)';
+      return 'كلمة المرور يجب أن تحتوي على حرف صغير (a-z)'.tr();
     }
     if (!RegExp(r'[0-9]').hasMatch(value)) {
-      return 'كلمة المرور يجب أن تحتوي على رقم';
+      return 'كلمة المرور يجب أن تحتوي على رقم'.tr();
     }
     return null;
   }
 
   static String? confirmPassword(String? value, String password) {
-    if (value == null || value.isEmpty) return 'أكمل كلمة المرور';
-    if (value != password) return 'كلمتا المرور غير متطابقتين';
+    if (value == null || value.isEmpty) return 'أكمل كلمة المرور'.tr();
+    if (value != password) return 'كلمتا المرور غير متطابقتين'.tr();
     return null;
   }
 
   static String? phone(String? value) {
-    if (value == null || value.trim().isEmpty) return 'أدخل رقم الهاتف';
+    if (value == null || value.trim().isEmpty) return 'أدخل رقم الهاتف'.tr();
     final phoneRegex = RegExp(r'^[0-9]{10,15}$');
-    if (!phoneRegex.hasMatch(value.trim())) return 'رقم الهاتف غير صالح';
+    if (!phoneRegex.hasMatch(value.trim())) return 'رقم الهاتف غير صالح'.tr();
     return null;
   }
 
-  static String? number(String? value, [String message = 'أدخل رقم صحيح']) {
-    if (value == null || value.trim().isEmpty) return 'هذا الحقل مطلوب';
-    if (double.tryParse(value.trim()) == null) return message;
+  static String? number(String? value, [String? message]) {
+    if (value == null || value.trim().isEmpty) return 'هذا الحقل مطلوب'.tr();
+    if (double.tryParse(value.trim()) == null) return message ?? 'أدخل رقم صحيح'.tr();
     return null;
   }
 
   static String? positiveNumber(String? value) {
-    if (value == null || value.trim().isEmpty) return 'هذا الحقل مطلوب';
+    if (value == null || value.trim().isEmpty) return 'هذا الحقل مطلوب'.tr();
     final number = double.tryParse(value.trim());
-    if (number == null) return 'أدخل رقم صحيح';
-    if (number <= 0) return 'يجب أن يكون الرقم أكبر من صفر';
+    if (number == null) return 'أدخل رقم صحيح'.tr();
+    if (number <= 0) return 'يجب أن يكون الرقم أكبر من صفر'.tr();
     return null;
   }
 }

@@ -11,6 +11,7 @@ import '../models/subscription_plan.dart';
 import '../models/subscription_request_model.dart';
 import '../repos/subscription_repo.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Firestore implementation of the manual subscription system.
 ///
@@ -130,7 +131,7 @@ class SubscriptionRepoImpl implements SubscriptionRepo {
         .limit(10)
         .get();
     if (existing.docs.any((d) => d.data()['status'] == SubscriptionRequestModel.statusPending)) {
-      throw Exception('لديك طلب معلق بالفعل قيد المراجعة');
+      throw Exception('لديك طلب معلق بالفعل قيد المراجعة'.tr());
     }
     // Guarantees the subscription document exists before it is flagged.
     final subscription = await getSubscription(refresh: true);
@@ -160,7 +161,7 @@ class SubscriptionRepoImpl implements SubscriptionRepo {
       final subSnap = await tx.get(_subscriptionRef(uid));
       final storedStatus = subSnap.data()?['status'] ?? '';
       if (storedStatus == SubscriptionStatus.pending.id) {
-        throw Exception('لديك طلب معلق بالفعل قيد المراجعة');
+        throw Exception('لديك طلب معلق بالفعل قيد المراجعة'.tr());
       }
       tx.set(requestRef, {
         ...request.toJson(),

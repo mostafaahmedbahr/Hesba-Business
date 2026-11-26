@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../core/theme/app_theme.dart';
 import '../../../data/models/person_model.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// شارة نوع الشخص (عميل / مورد / الاثنين).
 class AddDebtPersonTypeChip extends StatelessWidget {
@@ -12,9 +13,9 @@ class AddDebtPersonTypeChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (label, color) = switch (type) {
-      PersonModel.typeSupplier => ('مورد', AppTheme.violetDeep),
-      PersonModel.typeBoth => ('عميل ومورد', AppTheme.amberDeep),
-      _ => ('عميل', AppTheme.primaryColor),
+      PersonModel.typeSupplier => ('مورد'.tr(), AppTheme.violetDeep),
+      PersonModel.typeBoth => ('عميل ومورد'.tr(), AppTheme.amberDeep),
+      _ => ('عميل'.tr(), AppTheme.primaryColor),
     };
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),

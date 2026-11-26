@@ -50,7 +50,7 @@ class ReminderEnableBanner extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
               ),
-              child: const Text('تفعيل', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
+              child: Text('تفعيل'.tr(), style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
             ),
           ],
         ),

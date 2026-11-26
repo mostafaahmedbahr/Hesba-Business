@@ -9,7 +9,7 @@ class ProductListLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const LoadingWidget(message: 'جاري تحميل المنتجات...');
+    return LoadingWidget(message: 'جاري تحميل المنتجات...'.tr());
   }
 }
 
@@ -67,7 +67,7 @@ class ProductListNoResults extends StatelessWidget {
         SizedBox(height: 12.h),
         Text('productsNoResults'.tr(), style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : AppTheme.ink)),
         SizedBox(height: 6.h),
-        Text('جرّب كلمة بحث أخرى أو غيّر الفلتر', style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray)),
+        Text('جرّب كلمة بحث أخرى أو غيّر الفلتر'.tr(), style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray)),
       ]),
     );
   }

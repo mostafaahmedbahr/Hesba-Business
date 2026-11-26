@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../core/theme/app_theme.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// زر حفظ المديونية (يتبدّل إلى مؤشر تحميل أثناء الحفظ).
 class AddDebtSaveButton extends StatelessWidget {
@@ -40,7 +41,7 @@ class AddDebtSaveButton extends StatelessWidget {
                 ),
               )
             : Text(
-                'حفظ المديونية',
+                'حفظ المديونية'.tr(),
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w900,

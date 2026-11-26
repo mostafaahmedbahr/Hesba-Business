@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import '../../data/models/sale_model.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// حالة قائمة المبيعات.
 enum SalesListStatus { initial, loading, success, failure }
@@ -14,7 +15,7 @@ class SalesListState extends Equatable {
   final String paymentFilter; // فلتر الدفع (الكل/نقدي/بطاقة/محفظة).
   final String? errorMessage;
 
-  const SalesListState({
+  SalesListState({
     this.status = SalesListStatus.initial,
     this.shopId = '',
     this.sales = const [],
@@ -41,8 +42,8 @@ class SalesListState extends Equatable {
               s.personPhone
                   .replaceAll(RegExp('[^0-9]'), '')
                   .contains(qDigits));
-      final matchesPayment =
-          paymentFilter == 'الكل' || paymentLabel(s.paymentMethod) == paymentFilter;
+      final isAll = paymentFilter == 'الكل' || paymentFilter == 'الكل'.tr();
+      final matchesPayment = isAll || paymentLabel(s.paymentMethod) == paymentFilter;
       return matchesSearch && matchesPayment;
     }).toList();
   }
@@ -64,21 +65,21 @@ class SalesListState extends Equatable {
   static String paymentLabel(String method) {
     switch (method) {
       case 'cash':
-        return 'نقدي';
+        return 'نقدي'.tr();
       case 'card':
-        return 'بطاقة';
+        return 'بطاقة'.tr();
       case 'mobile_wallet':
       case 'wallet':
-        return 'محفظة';
+        return 'محفظة'.tr();
       case 'credit':
-        return 'آجل';
+        return 'آجل'.tr();
       default:
         return method;
     }
   }
 
   /// فلاتر الدفع المتاحة.
-  static const paymentFilters = ['الكل', 'نقدي', 'بطاقة', 'محفظة', 'آجل'];
+  static List<String> get paymentFilters => ['الكل'.tr(), 'نقدي'.tr(), 'بطاقة'.tr(), 'محفظة'.tr(), 'آجل'.tr()];
 
   /// نسخ مع تعديل.
   SalesListState copyWith({

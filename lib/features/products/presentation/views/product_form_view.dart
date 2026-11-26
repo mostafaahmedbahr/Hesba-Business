@@ -58,7 +58,7 @@ class _ProductFormViewState extends State<ProductFormView> {
   final Map<String, TextEditingController> _controllers = {};
   // القيم الخاصة بالحقول غير النصية (صورة/تاريخ/مفتاح/chips).
   final Map<String, dynamic> _specValues = {};
-  // القوائم المنسدلة (key → الاختيار الحالي) + "أخرى" المخصص.
+  // القوائم المنسدلة (key → الاختيار الحالي) + "أخرى".tr() المخصص.
   final Map<String, String?> _dropdownValues = {};
   final Set<String> _dropdownTouched = {};
   final Map<String, bool> _customFlags = {};
@@ -78,7 +78,7 @@ class _ProductFormViewState extends State<ProductFormView> {
 
   List<String> get _allCategories {
     final base = List<String>.from(_categories);
-    // ادمج المخصصة قبل "أخرى" مع منع التكرار
+    // ادمج المخصصة قبل "أخرى".tr() مع منع التكرار
     final other = base.isNotEmpty ? base.removeLast() : null;
     final lowerBase = base.map((e) => e.trim().toLowerCase()).toSet();
     for (final c in _customCategories) {
@@ -755,7 +755,7 @@ class _ProductFormViewState extends State<ProductFormView> {
             for (final c in _allCategories)
               DropdownMenuItem(
                 value: c,
-                child: Text(c, style: TextStyle(fontSize: 13.sp)),
+                child: Text(c.tr(), style: TextStyle(fontSize: 13.sp)),
               ),
           ],
           onChanged: (v) => setState(() {
@@ -809,7 +809,7 @@ class _ProductFormViewState extends State<ProductFormView> {
     );
   }
 
-  /// قائمة منسدلة عامة (مقاس، وحدة قياس...) مع دعم "أخرى" الكتابة الحرة.
+  /// قائمة منسدلة عامة (مقاس، وحدة قياس...) مع دعم "أخرى".tr() الكتابة الحرة.
   Widget _renderDropdown(ProductFieldConfig f) {
     final current = _dropdownValues[f.key];
     final items = <DropdownMenuItem<String>>[
@@ -821,13 +821,13 @@ class _ProductFormViewState extends State<ProductFormView> {
       if (f.allowCustom && !f.options.contains('أخرى'))
         DropdownMenuItem(
           value: 'أخرى',
-          child: Text('أخرى', style: TextStyle(fontSize: 13.sp)),
+          child: Text('أخرى'.tr(), style: TextStyle(fontSize: 13.sp)),
         ),
       // قيمة قديمة غير موجودة في القائمة → نعرضها لمنع خطأ Assertion.
       if (current != null && current.isNotEmpty && !f.options.contains(current))
         DropdownMenuItem(
           value: current,
-          child: Text(current, style: TextStyle(fontSize: 13.sp)),
+          child: Text(current.tr(), style: TextStyle(fontSize: 13.sp)),
         ),
     ];
     return Column(

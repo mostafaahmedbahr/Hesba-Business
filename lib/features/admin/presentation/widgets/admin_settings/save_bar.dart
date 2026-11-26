@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hesba/core/theme/app_theme.dart';
 import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// شريط الحفظ الثابت أسفل الشاشة: حالة التغييرات + زر التجاهل + زر الحفظ.
 class AdminSettingsSaveBar extends StatelessWidget {
@@ -30,10 +31,10 @@ class AdminSettingsSaveBar extends StatelessWidget {
             ? Icons.edit_note_rounded
             : Icons.check_circle_outline_rounded;
     final statusLabel = saving
-        ? 'جاري حفظ التغييرات...'
+        ? 'جاري حفظ التغييرات...'.tr()
         : dirty
-            ? 'لديك تغييرات غير محفوظة'
-            : 'كل الإعدادات محفوظة';
+            ? 'لديك تغييرات غير محفوظة'.tr()
+            : 'كل الإعدادات محفوظة'.tr();
 
     final status = Row(
       mainAxisSize: MainAxisSize.min,
@@ -71,7 +72,7 @@ class AdminSettingsSaveBar extends StatelessWidget {
               child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
             )
           : const Icon(Icons.save_outlined, size: 19),
-      label: Text(saving ? 'جاري الحفظ...' : 'حفظ الإعدادات'),
+      label: Text(saving ? 'جاري الحفظ...'.tr() : 'حفظ الإعدادات'.tr()),
     );
 
     return DecoratedBox(
@@ -103,7 +104,7 @@ class AdminSettingsSaveBar extends StatelessWidget {
                   Expanded(child: status),
                   TextButton(
                     onPressed: dirty && !saving ? onDiscard : null,
-                    child: const Text('تجاهل التغييرات'),
+                    child: Text('تجاهل التغييرات'.tr()),
                   ),
                   const SizedBox(width: AdminSpace.xs),
                   saveButton,
@@ -120,8 +121,8 @@ class AdminSettingsSaveBar extends StatelessWidget {
                       TextButton.icon(
                         onPressed: onDiscard,
                         icon: const Icon(Icons.undo_rounded, size: 16),
-                        label: const Text(
-                          'تجاهل',
+                        label: Text(
+                          'تجاهل'.tr(),
                           style: TextStyle(fontSize: 11.5),
                         ),
                       ),

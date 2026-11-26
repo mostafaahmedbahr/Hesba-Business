@@ -7,7 +7,7 @@ import '../../../../dashboard/presentation/states/dashboard_state.dart';
 import 'balance_breakdown_dialog.dart';
 import 'home_amount_format.dart';
 
-/// كارت "الرصيد الحالي" = صافي المبيعات - المصروفات، مع تفصيل عند الضغط.
+/// كارت "الرصيد الحالي".tr() = صافي المبيعات - المصروفات، مع تفصيل عند الضغط.
 class CurrentBalanceCard extends StatelessWidget {
   final DashboardState state;
   const CurrentBalanceCard({super.key, required this.state});
@@ -74,7 +74,7 @@ class CurrentBalanceCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('الرصيد الحالي',
+                      Text('الرصيد الحالي'.tr(),
                           style: TextStyle(
                               fontSize: 15.sp,
                               fontWeight: FontWeight.w900,
@@ -82,7 +82,7 @@ class CurrentBalanceCard extends StatelessWidget {
                                   ? Colors.white
                                   : AppTheme.ink)),
                       SizedBox(height: 2.h),
-                      Text('المفروض يكون معاك آخر اليوم',
+                      Text('المفروض يكون معاك آخر اليوم'.tr(),
                           style: TextStyle(
                               fontSize: 11.sp,
                               color: isDark
@@ -110,10 +110,10 @@ class CurrentBalanceCard extends StatelessWidget {
                   ),
                   child: Text(
                     isNegative
-                        ? 'عجز'
+                        ? 'عجز'.tr()
                         : isZero
-                            ? 'متوازن'
-                            : 'متاح',
+                            ? 'متوازن'.tr()
+                            : 'متاح'.tr(),
                     style: TextStyle(
                         fontSize: 10.5.sp,
                         fontWeight: FontWeight.w800,
@@ -181,11 +181,11 @@ class CurrentBalanceCard extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  _miniRow('المبيعات', '+ ${formatHomeAmount(sales)}', AppTheme.primaryColor, isDark),
+                  _miniRow('المبيعات'.tr(), '+ ${formatHomeAmount(sales)}', AppTheme.primaryColor, isDark),
                   SizedBox(height: 8.h),
-                  _miniRow('المرتجعات', '- ${formatHomeAmount(returns)}', AppTheme.warningAmber, isDark),
+                  _miniRow('المرتجعات'.tr(), '- ${formatHomeAmount(returns)}', AppTheme.warningAmber, isDark),
                   SizedBox(height: 8.h),
-                  _miniRow('المصروفات', '- ${formatHomeAmount(expenses)}', AppTheme.danger, isDark),
+                  _miniRow('المصروفات'.tr(), '- ${formatHomeAmount(expenses)}', AppTheme.danger, isDark),
                   Padding(
                     padding: EdgeInsets.symmetric(vertical: 10.h),
                     child: Divider(
@@ -195,7 +195,7 @@ class CurrentBalanceCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('= الرصيد الحالي',
+                      Text('= الرصيد الحالي'.tr(),
                           style: TextStyle(
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w800,
@@ -216,7 +216,7 @@ class CurrentBalanceCard extends StatelessWidget {
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             Icon(Icons.touch_app_rounded, size: 13.sp, color: isDark ? AppTheme.darkTextSecondary : AppTheme.slateGray),
             SizedBox(width: 6.w),
-            Text('اضغط لعرض تفصيل طرق الدفع', style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.w700, color: isDark ? AppTheme.darkTextSecondary : AppTheme.slateGray)),
+            Text('اضغط لعرض تفصيل طرق الدفع'.tr(), style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.w700, color: isDark ? AppTheme.darkTextSecondary : AppTheme.slateGray)),
           ]),
           ],
         ),

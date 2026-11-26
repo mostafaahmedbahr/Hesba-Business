@@ -10,6 +10,7 @@ import '../../data/models/payment_model.dart';
 import '../../data/repos/accounts_repo.dart';
 import '../states/debt_details_state.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// يدير شاشة كشف الحساب: ستريم المديونية وسجل الدفعات،
 /// وتسجيل دفعة جديدة داخل transaction.
@@ -37,7 +38,7 @@ class DebtDetailsCubit extends Cubit<DebtDetailsState> {
           // السجل الأصلي يفضل محفوظًا دائمًا — لو اختفى يبقى خطأ واضح.
           emit(DebtDetailsState(
             status: DebtDetailsStatus.failure,
-            errorMessage: 'تعذر قراءة الحساب',
+            errorMessage: 'تعذر قراءة الحساب'.tr(),
           ));
           return;
         }

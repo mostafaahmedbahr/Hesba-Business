@@ -10,6 +10,7 @@ import '../../data/models/user_profile.dart';
 import '../../data/repos/account_repo.dart';
 import '../cubit/profile_cubit.dart';
 import '../states/profile_state.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
@@ -72,7 +73,7 @@ class ProfileView extends StatelessWidget {
               _ProfileTile(
                 icon: Icons.location_on_rounded,
                 label: 'profileAddress'.tr(),
-                value: '${profile.address}، ${profile.city}، ${profile.state}',
+                value: uiTr('${profile.address}، ${profile.city}، ${profile.state}'),
               ),
             ],
           );

@@ -6,6 +6,7 @@ import '../widgets/splash_background.dart';
 import '../widgets/splash_body_content.dart';
 import 'package:hesba/core/widgets/exit_guard.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
@@ -136,7 +137,7 @@ class _RoleLoadErrorView extends StatelessWidget {
                   size: 56, color: isDark ? Colors.white : const Color(0xFF0A1A45)),
               const SizedBox(height: 16),
               Text(
-                'تعذر تحميل بيانات حسابك',
+                'تعذر تحميل بيانات حسابك'.tr(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 18,
@@ -146,7 +147,7 @@ class _RoleLoadErrorView extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                'تأكد من اتصالك بالإنترنت وحاول مرة أخرى. لو استمرت المشكلة سجّل الخروج وادخل تاني.',
+                'تأكد من اتصالك بالإنترنت وحاول مرة أخرى. لو استمرت المشكلة سجّل الخروج وادخل تاني.'.tr(),
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 13, height: 1.6, color: secondary),
               ),
@@ -162,13 +163,13 @@ class _RoleLoadErrorView extends StatelessWidget {
                           height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('إعادة المحاولة'),
+                      : Text('إعادة المحاولة'.tr()),
                 ),
               ),
               const SizedBox(height: 10),
               TextButton(
                 onPressed: onLogout,
-                child: const Text('تسجيل الخروج'),
+                child: Text('تسجيل الخروج'.tr()),
               ),
             ],
           ),

@@ -9,6 +9,8 @@ import 'package:hesba/features/admin/presentation/cubit/admin_list_cubit.dart';
 import 'package:hesba/features/reports/data/reports_calculator.dart';
 import 'package:hesba/features/sales/data/models/sale_model.dart';
 import 'package:hesba/features/sales/presentation/cubit/sales_list_state.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 class SalesView extends StatefulWidget {
   const SalesView({super.key});
@@ -20,7 +22,7 @@ class SalesView extends StatefulWidget {
 class _SalesViewState extends State<SalesView> {
   final _searchCtrl = TextEditingController();
   String _query = '';
-  String _method = 'الكل';
+  String _method = 'الكل'.tr();
 
   @override
   void dispose() {
@@ -42,7 +44,7 @@ class _SalesViewState extends State<SalesView> {
               children: [
                 AdminSearchField(
                   controller: _searchCtrl,
-                  hint: 'ابحث برقم العملية أو المحل...',
+                  hint: 'ابحث برقم العملية أو المحل...'.tr(),
                   enabled: false,
                 ),
                 Expanded(child: LoadingWidget()),
@@ -60,14 +62,14 @@ class _SalesViewState extends State<SalesView> {
               children: [
                 AdminSearchField(
                   controller: _searchCtrl,
-                  hint: 'ابحث برقم العملية أو المحل...',
+                  hint: 'ابحث برقم العملية أو المحل...'.tr(),
                   enabled: false,
                 ),
                 Expanded(
                   child: adminEmpty(
                     Icons.point_of_sale_outlined,
-                    'لا توجد مبيعات بعد',
-                    'عند تسجيل أول عملية بيع ستظهر هنا',
+                    'لا توجد مبيعات بعد'.tr(),
+                    'عند تسجيل أول عملية بيع ستظهر هنا'.tr(),
                   ),
                 ),
               ],
@@ -76,7 +78,7 @@ class _SalesViewState extends State<SalesView> {
 
           final methods = _extractMethods(state.docs);
           final filtered = _applyFilter(state.docs);
-          final filtering = _query.isNotEmpty || _method != 'الكل';
+          final filtering = _query.isNotEmpty || _method != 'الكل'.tr();
           final revenue = filtered.fold<num>(
             0,
             (acc, d) => acc + ((d.data()['total'] as num?) ?? 0),
@@ -101,27 +103,27 @@ class _SalesViewState extends State<SalesView> {
             onRefresh: () => context.read<AdminListCubit>().firstPage(),
             child: Column(
               children: [
-                const AdminPageHeader(
-                  title: 'المبيعات',
-                  description: 'عمليات البيع في جميع المحلات المسجلة',
+                AdminPageHeader(
+                  title: 'المبيعات'.tr(),
+                  description: 'عمليات البيع في جميع المحلات المسجلة'.tr(),
                 ),
                 AdminSummaryHeader(
                   icon: Icons.point_of_sale_outlined,
-                  title: 'إجمالي الإيرادات (المعروض)',
+                  title: 'إجمالي الإيرادات (المعروض)'.tr(),
                   total: revenue.toInt(),
-                  unit: 'ج',
+                  unit: 'ج'.tr(),
                   stats: [
-                    'العمليات: ${filtered.length}',
-                    'الربح${unknownLines > 0 ? ' (تقديري)' : ''}: ${AdminFmt.money(profit)}',
+                    uiTr('العمليات: ${filtered.length}'),
+                    uiTr('الربح${unknownLines > 0 ? ' (تقديري)'.tr() : ''}: ${AdminFmt.money(profit)}'),
                     if (totalDiscount > 0)
-                      'الخصم: ${AdminFmt.money(totalDiscount)}',
+                      uiTr('الخصم: ${AdminFmt.money(totalDiscount)}'),
                   ],
                   loading: state.loading,
                   onRefresh: () => context.read<AdminListCubit>().firstPage(),
                 ),
                 AdminSearchField(
                   controller: _searchCtrl,
-                  hint: 'ابحث برقم العملية أو المحل...',
+                  hint: 'ابحث برقم العملية أو المحل...'.tr(),
                   onChanged: (v) => setState(() => _query = v),
                 ),
                 AdminFilterChips(
@@ -132,7 +134,7 @@ class _SalesViewState extends State<SalesView> {
                     for (final m in methods)
                       AdminChipItem(
                         m,
-                        m == 'الكل' ? m : SalesListState.paymentLabel(m),
+                        m == 'الكل'.tr() ? m : SalesListState.paymentLabel(m),
                       ),
                   ],
                 ),
@@ -142,15 +144,15 @@ class _SalesViewState extends State<SalesView> {
                     onClear: () => setState(() {
                       _query = '';
                       _searchCtrl.clear();
-                      _method = 'الكل';
+                      _method = 'الكل'.tr();
                     }),
                   ),
                 Expanded(
                   child: filtered.isEmpty
                       ? adminEmpty(
                           Icons.search_off_outlined,
-                          'لا توجد نتائج مطابقة لبحثك',
-                          'جرّب كلمة مختلفة أو امسح الفلتر',
+                          'لا توجد نتائج مطابقة لبحثك'.tr(),
+                          'جرّب كلمة مختلفة أو امسح الفلتر'.tr(),
                         )
                       : ListView.separated(
                           padding: const EdgeInsets.fromLTRB(
@@ -176,7 +178,7 @@ class _SalesViewState extends State<SalesView> {
                 if (state.hasMore)
                   AdminLoadMore(
                     loading: state.loading,
-                    label: 'تحميل المزيد (${state.docs.length} معروض)',
+                    label: uiTr('تحميل المزيد (${state.docs.length} معروض)'),
                     onLoad: () => context.read<AdminListCubit>().nextPage(),
                   ),
               ],
@@ -195,7 +197,7 @@ class _SalesViewState extends State<SalesView> {
       final m = (d.data()['paymentMethod'] as String?)?.trim() ?? '';
       if (m.isNotEmpty) set.add(m);
     }
-    return ['الكل', ...set.toList()..sort()];
+    return ['الكل'.tr(), ...set.toList()..sort()];
   }
 
   List<QueryDocumentSnapshot<Map<String, dynamic>>> _applyFilter(
@@ -204,7 +206,7 @@ class _SalesViewState extends State<SalesView> {
     final q = _query.trim();
     return docs.where((d) {
       final data = d.data();
-      if (_method != 'الكل' &&
+      if (_method != 'الكل'.tr() &&
           (data['paymentMethod'] as String? ?? '') != _method) {
         return false;
       }
@@ -299,7 +301,7 @@ class _SaleCardState extends State<_SaleCard> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'اسم المحل',
+                      'اسم المحل'.tr(),
                       style: TextStyle(color: secondary, fontSize: 11),
                     ),
                   ],
@@ -315,8 +317,8 @@ class _SaleCardState extends State<_SaleCard> {
                   color: AdminColors.success.withValues(alpha: 0.09),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Text(
-                  'عملية بيع',
+                child: Text(
+                  'عملية بيع'.tr(),
                   style: TextStyle(
                     color: AdminColors.success,
                     fontSize: 11,
@@ -332,7 +334,7 @@ class _SaleCardState extends State<_SaleCard> {
           // الحالة المطوية: كارد صغير بالأرقام المهمة بس.
           if (!_expanded) ...[
             Text(
-              '$itemsCount أصناف • ${_qty(pieces)} قطعة',
+              uiTr('$itemsCount أصناف • ${_qty(pieces)} قطعة'),
               style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 6),
@@ -341,26 +343,26 @@ class _SaleCardState extends State<_SaleCard> {
               runSpacing: 4,
               children: [
                 _miniStat(
-                  'ربح',
+                  'ربح'.tr(),
                   '${AdminFmt.money(profit)}${unknownLines > 0 ? '*' : ''}',
                   AdminColors.success,
                   context,
                 ),
                 _miniStat(
-                  'بيع',
+                  'بيع'.tr(),
                   AdminFmt.money(total),
                   AdminColors.info,
                   context,
                 ),
                 _miniStat(
-                  'شراء',
+                  'شراء'.tr(),
                   AdminFmt.money(purchase),
                   AdminColors.warning,
                   context,
                 ),
                 if (discount > 0)
                   _miniStat(
-                    'خصم',
+                    'خصم'.tr(),
                     AdminFmt.money(discount),
                     AdminColors.error,
                     context,
@@ -398,7 +400,7 @@ class _SaleCardState extends State<_SaleCard> {
                               ),
                               const SizedBox(width: 5),
                               Text(
-                                'تفاصيل البيع',
+                                'تفاصيل البيع'.tr(),
                                 style: TextStyle(
                                   color: secondary,
                                   fontSize: 11,
@@ -410,7 +412,7 @@ class _SaleCardState extends State<_SaleCard> {
                           const SizedBox(height: 8),
 
                           Text(
-                            '$itemsCount أصناف • ${_qty(pieces)} قطعة',
+                            uiTr('$itemsCount أصناف • ${_qty(pieces)} قطعة'),
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w800,
@@ -420,15 +422,15 @@ class _SaleCardState extends State<_SaleCard> {
                           const SizedBox(height: 6),
                           _metricLine(
                             Icons.trending_up_rounded,
-                            'الربح',
-                            '${AdminFmt.money(profit)}${unknownLines > 0 ? ' (تقديري)' : ''}',
+                            'الربح'.tr(),
+                            '${AdminFmt.money(profit)}${unknownLines > 0 ? ' (تقديري)'.tr() : ''}',
                             AdminColors.success,
                             secondary,
                           ),
                           const SizedBox(height: 4),
                           _metricLine(
                             Icons.point_of_sale_outlined,
-                            'سعر البيع',
+                            'سعر البيع'.tr(),
                             AdminFmt.money(total),
                             AdminColors.info,
                             secondary,
@@ -436,8 +438,8 @@ class _SaleCardState extends State<_SaleCard> {
                           const SizedBox(height: 4),
                           _metricLine(
                             Icons.shopping_cart_outlined,
-                            'سعر الشراء',
-                            '${AdminFmt.money(purchase)}${unknownLines > 0 ? ' (جزئي)' : ''}',
+                            'سعر الشراء'.tr(),
+                            '${AdminFmt.money(purchase)}${unknownLines > 0 ? ' (جزئي)'.tr() : ''}',
                             AdminColors.warning,
                             secondary,
                           ),
@@ -445,7 +447,7 @@ class _SaleCardState extends State<_SaleCard> {
                             const SizedBox(height: 4),
                             _metricLine(
                               Icons.discount_outlined,
-                              'الخصم',
+                              'الخصم'.tr(),
                               AdminFmt.money(discount),
                               AdminColors.error,
                               secondary,
@@ -563,7 +565,7 @@ class _SaleCardState extends State<_SaleCard> {
                 onPressed: () =>
                     showAdminSheet(context, _SaleDetailsSheet(doc: doc)),
                 icon: const Icon(Icons.open_in_full_outlined, size: 16),
-                label: const Text('تفاصيل كاملة'),
+                label: Text('تفاصيل كاملة'.tr()),
               ),
             ),
 
@@ -700,7 +702,7 @@ class _SaleBreakdown extends StatelessWidget {
       children: [
         if (sale.items.isEmpty)
           Text(
-            'لا توجد أصناف مسجلة',
+            'لا توجد أصناف مسجلة'.tr(),
             style: TextStyle(
               color: AdminColors.textSecondary(context),
               fontSize: 12,
@@ -708,30 +710,30 @@ class _SaleBreakdown extends StatelessWidget {
           ),
         for (final item in sale.items) _itemRow(context, item),
         const Divider(height: 16),
-        _totalRow(context, 'قبل الخصم', subtotal),
+        _totalRow(context, 'قبل الخصم'.tr(), subtotal),
         if (discount > 0) ...[
           const SizedBox(height: 2),
-          _totalRow(context, 'الخصم', -discount, negative: true),
+          _totalRow(context, 'الخصم'.tr(), -discount, negative: true),
         ],
         const SizedBox(height: 2),
-        _totalRow(context, 'سعر البيع (بعد الخصم)', total, bold: true),
+        _totalRow(context, 'سعر البيع (بعد الخصم)'.tr(), total, bold: true),
         const SizedBox(height: 2),
         _totalRow(
           context,
-          unknown > 0 ? 'سعر الشراء (تقديري)' : 'سعر الشراء',
+          unknown > 0 ? 'سعر الشراء (تقديري)'.tr() : 'سعر الشراء'.tr(),
           purchase,
         ),
         const SizedBox(height: 2),
         _totalRow(
           context,
-          unknown > 0 ? 'الربح (تقديري)' : 'الربح',
+          unknown > 0 ? 'الربح (تقديري)'.tr() : 'الربح'.tr(),
           profit,
           bold: true,
           profit: true,
         ),
         const SizedBox(height: 2),
         Text(
-          'الربح = سعر البيع − سعر الشراء',
+          'الربح = سعر البيع − سعر الشراء'.tr(),
           style: TextStyle(
             fontSize: 10.5,
             color: AdminColors.textMuted(context),
@@ -740,7 +742,7 @@ class _SaleBreakdown extends StatelessWidget {
         if (unknown > 0) ...[
           const SizedBox(height: 4),
           Text(
-            '* ${AdminFmt.number(unknown)} سطر بلا سعر شراء — استُبعد من حساب التكلفة',
+            uiTr('* ${AdminFmt.number(unknown)} سطر بلا سعر شراء — استُبعد من حساب التكلفة'),
             style: TextStyle(color: AdminColors.warning, fontSize: 10.5),
           ),
         ],
@@ -751,8 +753,8 @@ class _SaleBreakdown extends StatelessWidget {
   Widget _itemRow(BuildContext context, SaleItemModel item) {
     // الفواتير القديمة بلا سعر شراء → نعرض سعر البيع فقط، ولا نفترض تكلفة صفرية.
     final prices = item.costPrice > 0
-        ? 'شراء: ${AdminFmt.money(item.costPrice)} • بيع: ${AdminFmt.money(item.unitPrice)}'
-        : 'سعر البيع: ${AdminFmt.money(item.unitPrice)}';
+        ? uiTr('شراء: ${AdminFmt.money(item.costPrice)} • بيع: ${AdminFmt.money(item.unitPrice)}')
+        : uiTr('سعر البيع: ${AdminFmt.money(item.unitPrice)}');
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
@@ -870,34 +872,34 @@ class _SaleDetailsSheet extends StatelessWidget {
     final pieces = sale.items.fold<double>(0, (acc, i) => acc + i.quantity);
 
     return AdminSheetShell(
-      title: sale.shopName.isEmpty ? 'فاتورة مبيعات' : sale.shopName,
-      subtitle: 'فاتورة مبيعات • ${AdminFmt.date(d['createdAt'])}',
+      title: sale.shopName.isEmpty ? 'فاتورة مبيعات'.tr() : sale.shopName,
+      subtitle: uiTr('فاتورة مبيعات • ${AdminFmt.date(d['createdAt'])}'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           AdminInfoRow(
             icon: Icons.storefront_outlined,
-            label: 'المحل',
+            label: 'المحل'.tr(),
             value: sale.shopName.isEmpty ? '-' : sale.shopName,
           ),
           const Divider(height: 16),
           AdminInfoRow(
             icon: Icons.inventory_2_outlined,
-            label: 'الكمية',
+            label: 'الكمية'.tr(),
             value:
-                '${AdminFmt.number(sale.items.length)} أصناف • ${_qty(pieces)} قطعة',
+                uiTr('${AdminFmt.number(sale.items.length)} أصناف • ${_qty(pieces)} قطعة'),
           ),
           const Divider(height: 14),
           AdminInfoRow(
             icon: Icons.wallet_outlined,
-            label: 'طريقة الدفع',
+            label: 'طريقة الدفع'.tr(),
             value: methodLabel.isEmpty ? '-' : methodLabel,
           ),
           if (customer.isNotEmpty) ...[
             const Divider(height: 14),
             AdminInfoRow(
               icon: Icons.person_outline_rounded,
-              label: 'العميل',
+              label: 'العميل'.tr(),
               value: customer,
             ),
           ],
@@ -905,14 +907,14 @@ class _SaleDetailsSheet extends StatelessWidget {
             const Divider(height: 14),
             AdminInfoRow(
               icon: Icons.notes_outlined,
-              label: 'ملاحظة',
+              label: 'ملاحظة'.tr(),
               value: sale.note.trim(),
             ),
           ],
           const Divider(height: 18),
           _SaleBreakdown(data: d),
           const Divider(height: 18),
-          CopyableId(id: doc.id, full: true, label: 'رقم العملية'),
+          CopyableId(id: doc.id, full: true, label: 'رقم العملية'.tr()),
         ],
       ),
     );

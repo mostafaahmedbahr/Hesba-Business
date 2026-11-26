@@ -1,5 +1,6 @@
 import '../../../../common_imports.dart';
 import '../../data/models/debt_model.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// أتار شخص: أول حرفين من الاسم داخل دائرة بتدرج لوني —
 /// العملاء أزرق، والموردين بنفسجي.
@@ -75,17 +76,17 @@ class DebtStatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final (label, fg, bg) = switch (status) {
       DebtStatus.unpaid => (
-          'غير مدفوع',
+          'غير مدفوع'.tr(),
           AppTheme.danger,
           AppTheme.dangerSoft,
         ),
       DebtStatus.partial => (
-          'سداد جزئي',
+          'سداد جزئي'.tr(),
           AppTheme.amberDeep,
           const Color(0xFFFEF3C7),
         ),
       DebtStatus.paid => (
-          'مدفوع',
+          'مدفوع'.tr(),
           AppTheme.successDark,
           const Color(0xFFDCFCE7),
         ),
@@ -140,7 +141,7 @@ class DirectionPill extends StatelessWidget {
         border: Border.all(color: fg.withValues(alpha: 0.22)),
       ),
       child: Text(
-        isReceivable ? 'ليّا فلوس' : 'عليّ فلوس',
+        isReceivable ? 'ليّا فلوس'.tr() : 'عليّ فلوس'.tr(),
         style: TextStyle(
           fontSize: 10.sp,
           fontWeight: FontWeight.w900,

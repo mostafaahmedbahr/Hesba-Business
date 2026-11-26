@@ -4,6 +4,7 @@ import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
 import 'package:hesba/features/admin/presentation/widgets/shop_details/count_tile.dart';
 import 'package:hesba/features/admin/presentation/widgets/shop_details/shop_location_row.dart';
 import 'package:hesba/features/admin/presentation/widgets/shop_details/subscription_summary.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// تاب «نظرة عامة»: المعرفات + بيانات المحل + ملخص الاشتراك + العدّادات.
 class ShopOverviewTab extends StatelessWidget {
@@ -40,44 +41,44 @@ class ShopOverviewTab extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(AdminSpace.md, AdminSpace.xs, AdminSpace.md, AdminSpace.lg),
       children: [
         AdminSection(
-          title: 'المعرفات',
+          title: 'المعرفات'.tr(),
           icon: Icons.badge_outlined,
           child: Column(
             children: [
-              CopyableId(id: shopId, full: true, label: 'معرف المحل'),
+              CopyableId(id: shopId, full: true, label: 'معرف المحل'.tr()),
               const Divider(height: 20),
               if (ownerId.isEmpty)
-                const AdminInfoRow(icon: Icons.person_outline, label: 'معرف المالك', value: '-')
+                AdminInfoRow(icon: Icons.person_outline, label: 'معرف المالك'.tr(), value: '-')
               else
-                CopyableId(id: ownerId, full: true, label: 'معرف المالك'),
+                CopyableId(id: ownerId, full: true, label: 'معرف المالك'.tr()),
             ],
           ),
         ),
         const SizedBox(height: AdminSpace.md),
         AdminSection(
-          title: 'بيانات المحل',
+          title: 'بيانات المحل'.tr(),
           icon: Icons.storefront_outlined,
           child: Column(
             children: [
-              AdminInfoRow(icon: Icons.phone_outlined, label: 'هاتف المحل', value: str(shop['shopPhone'] ?? shop['phone'])),
+              AdminInfoRow(icon: Icons.phone_outlined, label: 'هاتف المحل'.tr(), value: str(shop['shopPhone'] ?? shop['phone'])),
               const Divider(height: 14),
-              AdminInfoRow(icon: Icons.category_outlined, label: 'نوع النشاط', value: str(shop['businessType'])),
+              AdminInfoRow(icon: Icons.category_outlined, label: 'نوع النشاط'.tr(), value: str(shop['businessType']).tr()),
               const Divider(height: 14),
-              AdminInfoRow(icon: Icons.location_city_outlined, label: 'المدينة', value: str(shop['city'])),
+              AdminInfoRow(icon: Icons.location_city_outlined, label: 'المدينة'.tr(), value: str(shop['city']).tr()),
               const Divider(height: 14),
               AdminInfoRow(
                 icon: Icons.home_outlined,
-                label: 'العنوان',
+                label: 'العنوان'.tr(),
                 value: str(firstText([shop['address'], shop['locationAddress']])),
               ),
               const Divider(height: 14),
-              AdminInfoRow(icon: Icons.map_outlined, label: 'المنطقة', value: str(shop['state'])),
+              AdminInfoRow(icon: Icons.map_outlined, label: 'المنطقة'.tr(), value: str(shop['state']).tr()),
               const Divider(height: 14),
               ShopLocationRow(shop: shop),
               const Divider(height: 14),
-              AdminInfoRow(icon: Icons.calendar_month_outlined, label: 'تاريخ الإنشاء', value: AdminFmt.date(shop['createdAt'])),
+              AdminInfoRow(icon: Icons.calendar_month_outlined, label: 'تاريخ الإنشاء'.tr(), value: AdminFmt.date(shop['createdAt'])),
               const Divider(height: 14),
-              AdminInfoRow(icon: Icons.update_outlined, label: 'آخر تحديث', value: AdminFmt.date(shop['updatedAt'])),
+              AdminInfoRow(icon: Icons.update_outlined, label: 'آخر تحديث'.tr(), value: AdminFmt.date(shop['updatedAt'])),
             ],
           ),
         ),
@@ -86,11 +87,11 @@ class ShopOverviewTab extends StatelessWidget {
         const SizedBox(height: AdminSpace.md),
         Row(
           children: [
-            Expanded(child: ShopCountTile(title: 'المنتجات', icon: Icons.inventory_2_outlined, color: AppTheme.primaryColor, collection: 'products', shopId: shopId, tab: 1, onGo: goTab)),
+            Expanded(child: ShopCountTile(title: 'المنتجات'.tr(), icon: Icons.inventory_2_outlined, color: AppTheme.primaryColor, collection: 'products', shopId: shopId, tab: 1, onGo: goTab)),
             const SizedBox(width: AdminSpace.md),
-            Expanded(child: ShopCountTile(title: 'المبيعات', icon: Icons.point_of_sale_outlined, color: AdminColors.success, collection: 'sales', shopId: shopId, tab: 2, onGo: goTab)),
+            Expanded(child: ShopCountTile(title: 'المبيعات'.tr(), icon: Icons.point_of_sale_outlined, color: AdminColors.success, collection: 'sales', shopId: shopId, tab: 2, onGo: goTab)),
             const SizedBox(width: AdminSpace.md),
-            Expanded(child: ShopCountTile(title: 'المصروفات', icon: Icons.money_off_outlined, color: AdminColors.error, collection: 'expenses', shopId: shopId, tab: 3, onGo: goTab)),
+            Expanded(child: ShopCountTile(title: 'المصروفات'.tr(), icon: Icons.money_off_outlined, color: AdminColors.error, collection: 'expenses', shopId: shopId, tab: 3, onGo: goTab)),
           ],
         ),
       ],

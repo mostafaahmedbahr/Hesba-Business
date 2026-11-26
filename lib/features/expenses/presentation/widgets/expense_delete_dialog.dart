@@ -1,4 +1,6 @@
 import '../../../../common_imports.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// تأكيد حذف مصروف.
 class ExpenseDeleteDialog extends StatelessWidget {
@@ -27,10 +29,10 @@ class ExpenseDeleteDialog extends StatelessWidget {
               child: Icon(Icons.delete_rounded, size: 26.sp, color: AppTheme.danger),
             ),
             SizedBox(height: 12.h),
-            Text('حذف المصروف؟', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900)),
+            Text('حذف المصروف؟'.tr(), style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900)),
             SizedBox(height: 8.h),
             Text(
-              'هل أنت متأكد من حذف "$title"؟ لا يمكن التراجع.',
+              uiTr('هل أنت متأكد من حذف "$title"؟ لا يمكن التراجع.'),
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 12.5.sp, color: AppTheme.slateGray, height: 1.5),
             ),
@@ -43,7 +45,7 @@ class ExpenseDeleteDialog extends StatelessWidget {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                     padding: EdgeInsets.symmetric(vertical: 12.h),
                   ),
-                  child: const Text('إلغاء'),
+                  child: Text('إلغاء'.tr()),
                 ),
               ),
               SizedBox(width: 10.w),
@@ -55,7 +57,7 @@ class ExpenseDeleteDialog extends StatelessWidget {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                     padding: EdgeInsets.symmetric(vertical: 12.h),
                   ),
-                  child: const Text('حذف', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+                  child: Text('حذف'.tr(), style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
                 ),
               ),
             ]),

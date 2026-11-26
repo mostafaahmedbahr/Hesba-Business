@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,6 +9,8 @@ import 'package:hesba/features/admin/data/repos/admin_repo.dart';
 import 'package:hesba/features/admin/presentation/cubit/admin_list_cubit.dart';
 import 'package:hesba/features/subscription/data/models/subscription_plan.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 class SubscriptionsView extends StatefulWidget {
   const SubscriptionsView({super.key});
@@ -47,7 +50,7 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
           if (state.loading && state.docs.isEmpty) {
             return Column(
               children: [
-                AdminSearchField(controller: _searchCtrl, hint: 'ابحث باسم المحل أو رقم المستخدم أو الباقة...', enabled: false),
+                AdminSearchField(controller: _searchCtrl, hint: 'ابحث باسم المحل أو رقم المستخدم أو الباقة...'.tr(), enabled: false),
                 Expanded(child: LoadingWidget()),
               ],
             );
@@ -60,20 +63,20 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
               onRefresh: () => context.read<AdminListCubit>().firstPage(),
               child: ListView(
                 children: [
-                  const AdminPageHeader(title: 'الاشتراكات', description: 'حالات اشتراكات جميع المحلات في النظام'),
+                  AdminPageHeader(title: 'الاشتراكات'.tr(), description: 'حالات اشتراكات جميع المحلات في النظام'.tr()),
                   AdminSummaryHeader(
                       icon: Icons.workspace_premium_outlined,
-                      title: 'إجمالي الاشتراكات',
+                      title: 'إجمالي الاشتراكات'.tr(),
                       total: 0,
-                      unit: 'اشتراك',
+                      unit: 'اشتراك'.tr(),
                       loading: false,
                       onRefresh: () => context.read<AdminListCubit>().firstPage()),
-                  AdminSearchField(controller: _searchCtrl, hint: 'ابحث باسم المحل أو رقم المستخدم أو الباقة...', enabled: false),
+                  AdminSearchField(controller: _searchCtrl, hint: 'ابحث باسم المحل أو رقم المستخدم أو الباقة...'.tr(), enabled: false),
                   _statusChips(),
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.35,
-                    child: adminEmpty(Icons.workspace_premium_outlined, 'لا توجد اشتراكات',
-                        _status == 'all' ? 'عند بدء أول اشتراك سيظهر هنا' : 'لا توجد اشتراكات بهذه الحالة'),
+                    child: adminEmpty(Icons.workspace_premium_outlined, 'لا توجد اشتراكات'.tr(),
+                        _status == 'all' ? 'عند بدء أول اشتراك سيظهر هنا'.tr() : 'لا توجد اشتراكات بهذه الحالة'.tr()),
                   ),
                 ],
               ),
@@ -87,18 +90,18 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
             onRefresh: () => context.read<AdminListCubit>().firstPage(),
             child: Column(
               children: [
-                const AdminPageHeader(title: 'الاشتراكات', description: 'حالات اشتراكات جميع المحلات في النظام'),
+                AdminPageHeader(title: 'الاشتراكات'.tr(), description: 'حالات اشتراكات جميع المحلات في النظام'.tr()),
                 _summary(context, state),
                 AdminSearchField(
                   controller: _searchCtrl,
-                  hint: 'ابحث باسم المحل أو رقم المستخدم أو الباقة...',
+                  hint: 'ابحث باسم المحل أو رقم المستخدم أو الباقة...'.tr(),
                   onChanged: (v) => setState(() => _query = v),
                 ),
                 _statusChips(countFor: (s) => _countFor(state.docs, s)),
                 if (searching)
                   AdminResultCount(
                     count: filtered.length,
-                    clearLabel: 'مسح البحث',
+                    clearLabel: 'مسح البحث'.tr(),
                     onClear: () => setState(() {
                       _query = '';
                       _searchCtrl.clear();
@@ -106,7 +109,7 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                   ),
                 Expanded(
                   child: filtered.isEmpty
-                      ? adminEmpty(Icons.search_off_outlined, 'لا توجد نتائج مطابقة لبحثك')
+                      ? adminEmpty(Icons.search_off_outlined, 'لا توجد نتائج مطابقة لبحثك'.tr())
                       : LayoutBuilder(
                           builder: (context, constraints) {
                             final wide = constraints.maxWidth >= 760;
@@ -147,7 +150,7 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                 if (state.hasMore)
                   AdminLoadMore(
                     loading: state.loading,
-                    label: 'تحميل المزيد (${state.docs.length} معروض)',
+                    label: uiTr('تحميل المزيد (${state.docs.length} معروض)'),
                     onLoad: () => context.read<AdminListCubit>().nextPage(),
                   ),
               ],
@@ -165,10 +168,14 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
     int count(String s) => state.docs.where((d) => (d.data()['status'] as String?) == s).length;
     return AdminSummaryHeader(
       icon: Icons.workspace_premium_outlined,
-      title: 'إجمالي الاشتراكات',
+      title: 'إجمالي الاشتراكات'.tr(),
       total: state.docs.length,
-      unit: 'اشتراك',
-      stats: ['نشط ${count('active')}', 'تجريبي ${count('trial')}', 'منتهي ${count('expired')}'],
+      unit: 'اشتراك'.tr(),
+      stats: [
+        uiTr('نشط ${count('active')}'),
+        uiTr('تجريبي ${count('trial')}'),
+        uiTr('منتهي ${count('expired')}'),
+      ],
       loading: state.loading,
       onRefresh: () => context.read<AdminListCubit>().firstPage(),
     );
@@ -303,7 +310,7 @@ class _SubCard extends StatelessWidget {
                         style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800, fontSize: 14)),
                     const SizedBox(height: 2),
                     Directionality(
-                      textDirection: TextDirection.rtl,
+                      textDirection: ui.TextDirection.rtl,
                       child: Row(
                         children: [
                           if (shopName != null && shopName!.isNotEmpty) ...[
@@ -358,7 +365,7 @@ class _SubCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(AdminRadius.pill),
                   ),
                   child: Text(
-                    remaining <= 0 ? 'انتهى' : 'متبقي $remaining يوم',
+                    remaining <= 0 ? 'انتهى'.tr() : uiTr('متبقي $remaining يوم'),
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
@@ -379,9 +386,9 @@ class _SubCard extends StatelessWidget {
                 children: [
                   Icon(Icons.timelapse_outlined, size: 13, color: sub),
                   const SizedBox(width: 4),
-                  Text('فترة تجريبية', style: TextStyle(fontSize: 11.5, color: sub, fontWeight: FontWeight.w600)),
+                  Text('فترة تجريبية'.tr(), style: TextStyle(fontSize: 11.5, color: sub, fontWeight: FontWeight.w600)),
                   const Spacer(),
-                  Text('اضغط للتفاصيل', style: TextStyle(fontSize: 11, color: sub)),
+                  Text('اضغط للتفاصيل'.tr(), style: TextStyle(fontSize: 11, color: sub)),
                   Icon(Icons.chevron_left_rounded, size: 18, color: AdminColors.textMuted(context)),
                 ],
               ),
@@ -446,7 +453,7 @@ class _SubDetailsSheet extends StatelessWidget {
 
     return AdminSheetShell(
       title: _planLabel(planId),
-      subtitle: 'اشتراك ${AdminStatuses.labelOf(status)}',
+      subtitle: uiTr('اشتراك ${AdminStatuses.labelOf(status)}'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -459,7 +466,7 @@ class _SubDetailsSheet extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(_planLabel(planId), style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900)),
-                    Text('${plan?.days ?? '-'} يوم • ${plan == null ? '-' : AdminFmt.money(plan.price)}',
+                    Text('${plan?.days ?? '-uiTr('} يوم • ${plan == null ? ')-' : AdminFmt.money(plan.price)}',
                         style: TextStyle(color: AdminColors.textSecondary(context), fontSize: 12)),
                   ],
                 ),
@@ -480,24 +487,24 @@ class _SubDetailsSheet extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              (remaining ?? 0) <= 0 ? 'انتهت المدة' : 'متبقي ${remaining ?? 0} يوم من أصل ${end!.difference(start!).inDays} يوم',
+              (remaining ?? 0) <= 0 ? 'انتهت المدة'.tr() : uiTr('متبقي ${remaining ?? 0} يوم من أصل ${end!.difference(start!).inDays} يوم'),
               style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
             ),
           ],
           const SizedBox(height: 14),
-          AdminInfoRow(icon: Icons.storefront_outlined, label: 'المحل المشترك', value: shopName ?? '-'),
+          AdminInfoRow(icon: Icons.storefront_outlined, label: 'المحل المشترك'.tr(), value: shopName ?? '-'),
           const Divider(height: 14),
-          CopyableId(id: userId, full: true, label: 'معرف المستخدم'),
+          CopyableId(id: userId, full: true, label: 'معرف المستخدم'.tr()),
           const Divider(height: 20),
-          CopyableId(id: docId, full: true, label: 'معرف المستند'),
+          CopyableId(id: docId, full: true, label: 'معرف المستند'.tr()),
           const Divider(height: 20),
-          AdminInfoRow(icon: Icons.timelapse_outlined, label: 'تجريبي', value: isTrial ? 'نعم' : 'لا'),
+          AdminInfoRow(icon: Icons.timelapse_outlined, label: 'تجريبي'.tr(), value: isTrial ? 'نعم'.tr() : 'لا'.tr()),
           const Divider(height: 14),
-          AdminInfoRow(icon: Icons.play_arrow_outlined, label: 'البدء', value: AdminFmt.date(start)),
+          AdminInfoRow(icon: Icons.play_arrow_outlined, label: 'البدء'.tr(), value: AdminFmt.date(start)),
           const Divider(height: 14),
-          AdminInfoRow(icon: Icons.stop_outlined, label: 'الانتهاء', value: AdminFmt.date(end)),
+          AdminInfoRow(icon: Icons.stop_outlined, label: 'الانتهاء'.tr(), value: AdminFmt.date(end)),
           const Divider(height: 14),
-          AdminInfoRow(icon: Icons.update_outlined, label: 'آخر تحديث', value: AdminFmt.date(updated)),
+          AdminInfoRow(icon: Icons.update_outlined, label: 'آخر تحديث'.tr(), value: AdminFmt.date(updated)),
         ],
       ),
     );
@@ -506,10 +513,10 @@ class _SubDetailsSheet extends StatelessWidget {
 
 String _planLabel(String id) {
   return switch (id) {
-    'monthly' => 'شهري',
-    'threeMonths' => '3 شهور',
-    'sixMonths' => '6 شهور',
-    'yearly' => 'سنوي',
+    'monthly' => 'شهري'.tr(),
+    'threeMonths' => '3 شهور'.tr(),
+    'sixMonths' => '6 شهور'.tr(),
+    'yearly' => 'سنوي'.tr(),
     '' => '-',
     _ => id,
   };

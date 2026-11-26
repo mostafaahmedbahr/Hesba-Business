@@ -2,6 +2,8 @@ import 'package:flutter/services.dart';
 
 import '../../../../common_imports.dart';
 import 'accounts_utils.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// هيدر الحسابات — Premium: AppBar مثبّت فوق تدرّج أزرق عميق،
 /// مع بطاقتين زجاجيتين توضّحان «ليّا فلوس» و«عليّ فلوس» والصافي.
@@ -44,8 +46,8 @@ class AccountsHeader extends StatelessWidget {
         icon: const Icon(Icons.arrow_back_rounded),
         onPressed: () => Navigator.pop(context),
       ),
-      title: const Text(
-        'الحسابات',
+      title: Text(
+        'الحسابات'.tr(),
         style: TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.w800,
@@ -126,8 +128,8 @@ class AccountsHeader extends StatelessWidget {
                                   Flexible(
                                     child: Text(
                                       openCount == 0
-                                          ? 'لا توجد حسابات مفتوحة'
-                                          : '$openCount حساب مفتوح',
+                                          ? 'لا توجد حسابات مفتوحة'.tr()
+                                          : uiTr('$openCount حساب مفتوح'),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
@@ -175,7 +177,7 @@ class AccountsHeader extends StatelessWidget {
                                   ),
                                   SizedBox(width: 4.w),
                                   Text(
-                                    'مديونية جديدة',
+                                    'مديونية جديدة'.tr(),
                                     style: TextStyle(
                                       fontSize: 12.sp,
                                       fontWeight: FontWeight.w900,
@@ -194,8 +196,8 @@ class AccountsHeader extends StatelessWidget {
                         children: [
                           Expanded(
                             child: _GlassStat(
-                              label: 'ليّا فلوس',
-                              hint: 'مستحقة ليك عند العملاء والموردين',
+                              label: 'ليّا فلوس'.tr(),
+                              hint: 'مستحقة ليك عند العملاء والموردين'.tr(),
                               amount: receivableTotal,
                               icon: Icons.call_received_rounded,
                               accent: const Color(0xFF34D399),
@@ -204,8 +206,8 @@ class AccountsHeader extends StatelessWidget {
                           SizedBox(width: 10.w),
                           Expanded(
                             child: _GlassStat(
-                              label: 'عليّ فلوس',
-                              hint: 'مستحقة للموردين عليك',
+                              label: 'عليّ فلوس'.tr(),
+                              hint: 'مستحقة للموردين عليك'.tr(),
                               amount: payableTotal,
                               icon: Icons.call_made_rounded,
                               accent: const Color(0xFFFDA4AF),
@@ -230,8 +232,8 @@ class AccountsHeader extends StatelessWidget {
                           Flexible(
                             child: Text(
                               netPositive
-                                  ? 'الصافي لصالحك: ${moneyWithCurrency(net)}'
-                                  : 'الصافي عليك: ${moneyWithCurrency(-net)}',
+                                  ? uiTr('الصافي لصالحك: ${moneyWithCurrency(net)}')
+                                  : uiTr('الصافي عليك: ${moneyWithCurrency(-net)}'),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(

@@ -4,6 +4,8 @@ import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
 
 import 'plan_spec.dart';
 import 'section.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// ملخص التسعير: سعر/شهر لكل باقة + أفضل توفير + الفترة التجريبية + طرق الدفع.
 class PricingSummary extends StatelessWidget {
@@ -40,8 +42,8 @@ class PricingSummary extends StatelessWidget {
         .fold<double>(0, (m, v) => v > m ? v : m);
 
     return SettingsSection(
-      title: 'ملخص التسعير',
-      subtitle: 'معاينة سريعة للقيم الحالية قبل الحفظ',
+      title: 'ملخص التسعير'.tr(),
+      subtitle: 'معاينة سريعة للقيم الحالية قبل الحفظ'.tr(),
       icon: Icons.insights_rounded,
       color: AppTheme.violetDeep,
       child: Column(
@@ -66,27 +68,27 @@ class PricingSummary extends StatelessWidget {
             children: [
               SummaryPill(
                 icon: Icons.savings_outlined,
-                label: 'أفضل توفير',
+                label: 'أفضل توفير'.tr(),
                 value: bestSaving > 0 ? '${bestSaving.round()}%' : '—',
                 color: AppTheme.successColor,
               ),
               SummaryPill(
                 icon: Icons.hourglass_bottom_rounded,
-                label: 'التجربة',
-                value: trialDays > 0 ? '$trialDays يوم' : 'بدون',
+                label: 'التجربة'.tr(),
+                value: trialDays > 0 ? uiTr('$trialDays يوم') : 'بدون'.tr(),
                 color: AdminColors.warning,
               ),
               SummaryPill(
                 icon: Icons.account_balance_wallet_outlined,
-                label: 'الدفع',
-                value: '$methods طرق',
+                label: 'الدفع'.tr(),
+                value: uiTr('$methods طرق'),
                 color: AppTheme.primaryColor,
               ),
             ],
           ),
           const SizedBox(height: AdminSpace.md),
           Text(
-            'الأسعار بالجنيه المصري، وبتظهر في تطبيق العملاء بعد الحفظ مباشرة.',
+            'الأسعار بالجنيه المصري، وبتظهر في تطبيق العملاء بعد الحفظ مباشرة.'.tr(),
             style: TextStyle(
               fontSize: 10.5,
               height: 1.6,
@@ -132,7 +134,7 @@ class PerMonthBar extends StatelessWidget {
             ),
             const SizedBox(width: AdminSpace.sm),
             Text(
-              value > 0 ? '${AdminFmt.money(value.round())} / شهر' : '—',
+              value > 0 ? uiTr('${AdminFmt.money(value.round())} / شهر') : '—',
               style: TextStyle(
                 fontSize: 10.5,
                 fontWeight: FontWeight.w800,

@@ -8,6 +8,8 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/error_message.dart';
 import '../../../../core/utils/toast.dart';
 import '../../../main/presentation/widgets/main_app_bar.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// شاشة تشغيلية بسيطة: إنشاء نسخة احتياطية محلية + مشاركتها/رفعها.
 /// الاستعادة تتم بسكربت Admin SDK على الكمبيوتر — راجع
@@ -58,7 +60,7 @@ class _BackupViewState extends State<BackupView> {
       });
       await _loadFiles();
       if (!mounted) return;
-      AppToast.success(context, 'تم إنشاء النسخة الاحتياطية بنجاح');
+      AppToast.success(context, 'تم إنشاء النسخة الاحتياطية بنجاح'.tr());
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -73,7 +75,7 @@ class _BackupViewState extends State<BackupView> {
       await SharePlus.instance.share(
         ShareParams(
           files: [XFile(path)],
-          subject: 'نسخة احتياطية لتطبيق حسبة',
+          subject: 'نسخة احتياطية لتطبيق حسبة'.tr(),
         ),
       );
     } catch (e) {
@@ -86,7 +88,7 @@ class _BackupViewState extends State<BackupView> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: MainAppBar(title: 'النسخ الاحتياطي'),
+      appBar: MainAppBar(title: 'النسخ الاحتياطي'.tr()),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.w),
         child: Column(
@@ -106,16 +108,16 @@ class _BackupViewState extends State<BackupView> {
                     Icon(Icons.backup, color: AppTheme.primaryColor, size: 30.sp),
                     SizedBox(height: 10.h),
                     Text(
-                      'نسخة كاملة من بيانات المحل',
+                      'نسخة كاملة من بيانات المحل'.tr(),
                       style: TextStyle(
                           fontSize: 16.sp, fontWeight: FontWeight.w800),
                     ),
                     SizedBox(height: 6.h),
                     Text(
-                      'تتضمن المنتجات والمبيعات والمرتجعات والمصروفات والمخزون '
-                      'والحسابات والذمم والموردين والمستخدمين والاشتراك. '
-                      'التواريخ والمعرّفات الأصلية محفوظة، فيمكن استخدامها '
-                      'لإعادة الرفع على Firebase بدون تكرار أو تغيير تواريخ.',
+                      'تتضمن المنتجات والمبيعات والمرتجعات والمصروفات والمخزون '.tr() +
+                      'والحسابات والذمم والموردين والمستخدمين والاشتراك. '.tr() +
+                      'التواريخ والمعرّفات الأصلية محفوظة، فيمكن استخدامها '.tr() +
+                      'لإعادة الرفع على Firebase بدون تكرار أو تغيير تواريخ.'.tr(),
                       style: TextStyle(
                         fontSize: 12.sp,
                         height: 1.6,
@@ -147,7 +149,7 @@ class _BackupViewState extends State<BackupView> {
                       )
                     : const Icon(Icons.download),
                 label: Text(
-                  _busy ? 'جارٍ تجهيز النسخة...' : 'إنشاء نسخة احتياطية',
+                  _busy ? 'جارٍ تجهيز النسخة...'.tr() : 'إنشاء نسخة احتياطية'.tr(),
                   style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14.sp),
                 ),
               ),
@@ -172,13 +174,13 @@ class _BackupViewState extends State<BackupView> {
             ],
             SizedBox(height: 24.h),
             Text(
-              'النسخ المحفوظة على هذا الجهاز',
+              'النسخ المحفوظة على هذا الجهاز'.tr(),
               style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800),
             ),
             SizedBox(height: 8.h),
             if (_files.isEmpty)
               Text(
-                'لا توجد نسخ بعد.',
+                'لا توجد نسخ بعد.'.tr(),
                 style: TextStyle(fontSize: 12.sp, color: scheme.onSurfaceVariant),
               )
             else
@@ -219,10 +221,10 @@ class _BackupViewState extends State<BackupView> {
                 borderRadius: BorderRadius.circular(12.r),
               ),
               child: Text(
-                'تنبيه: النسخة الموجودة على الجهاز فقط لا تحميك من ضياعه. '
-                'استخدم زر المشاركة لرفعها على Google Drive أو واتساب أو أي '
-                'مكان آمن. استعادة البيانات على Firebase تتم من سكربت Admin '
-                'SDK على الكمبيوتر وليس من داخل التطبيق.',
+                'تنبيه: النسخة الموجودة على الجهاز فقط لا تحميك من ضياعه. '.tr() +
+                'استخدم زر المشاركة لرفعها على Google Drive أو واتساب أو أي '.tr() +
+                'مكان آمن. استعادة البيانات على Firebase تتم من سكربت Admin '.tr() +
+                'SDK على الكمبيوتر وليس من داخل التطبيق.'.tr(),
                 style: TextStyle(
                   fontSize: 11.sp,
                   height: 1.6,
@@ -269,23 +271,23 @@ class _SummaryCard extends StatelessWidget {
                 Icon(Icons.check_circle,
                     color: AppTheme.successColor, size: 20.sp),
                 SizedBox(width: 8.w),
-                Text('تم التصدير',
+                Text('تم التصدير'.tr(),
                     style: TextStyle(
                         fontSize: 14.sp, fontWeight: FontWeight.w800)),
               ],
             ),
             SizedBox(height: 12.h),
-            Text('عدد المستندات: ${result.docCount}',
+            Text(uiTr('عدد المستندات: ${result.docCount}'),
                 style: TextStyle(fontSize: 12.sp)),
-            Text('الحجم: ${_size(result.sizeBytes)}',
+            Text(uiTr('الحجم: ${_size(result.sizeBytes)}'),
                 style: TextStyle(fontSize: 12.sp)),
             if (result.fromCache)
               Padding(
                 padding: EdgeInsets.only(top: 8.h),
                 child: Text(
-                  'تنبيه: جزء من البيانات جاء من كاش الجهاز (لا يوجد اتصال '
-                  'بالخادم لحظة التصدير). أعد التصدير وأنت متصل قبل الاعتماد '
-                  'على النسخة.',
+                  'تنبيه: جزء من البيانات جاء من كاش الجهاز (لا يوجد اتصال '.tr() +
+                  'بالخادم لحظة التصدير). أعد التصدير وأنت متصل قبل الاعتماد '.tr() +
+                  'على النسخة.'.tr(),
                   style: TextStyle(
                     fontSize: 11.sp,
                     color: Colors.orange.shade800,
@@ -310,7 +312,7 @@ class _SummaryCard extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: onShare,
               icon: const Icon(Icons.share),
-              label: const Text('مشاركة / حفظ النسخة'),
+              label: Text('مشاركة / حفظ النسخة'.tr()),
             ),
           ],
         ),

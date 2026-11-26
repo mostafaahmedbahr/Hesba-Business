@@ -106,7 +106,7 @@ class _SalesListCardState extends State<SalesListCard> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(sale.total.toStringAsFixed(2), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: AppTheme.successDark, height: 1)),
-                      Text('ج.م', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w700, color: AppTheme.mutedGray)),
+                      Text('ج.م'.tr(), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w700, color: AppTheme.mutedGray)),
                     ],
                   ),
                   SizedBox(width: 4.w),

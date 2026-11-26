@@ -2,6 +2,8 @@ import 'package:flutter/services.dart';
 
 import '../../../../common_imports.dart';
 import '../cubit/expenses_state.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// هيدر المصروفات (رقم hero متحرك + النهاردة).
 class ExpenseListHeader extends StatelessWidget {
@@ -36,7 +38,7 @@ class ExpenseListHeader extends StatelessWidget {
         icon: const Icon(Icons.arrow_back_rounded),
         onPressed: () => Navigator.pop(context),
       ),
-      title: const Text('المصروفات', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
+      title: Text('المصروفات'.tr(), style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
       flexibleSpace: FlexibleSpaceBar(
         collapseMode: CollapseMode.parallax,
         background: Container(
@@ -64,7 +66,7 @@ class ExpenseListHeader extends StatelessWidget {
                       child: Row(mainAxisSize: MainAxisSize.min, children: [
                         Icon(Icons.savings_rounded, size: 12.sp, color: Colors.white),
                         SizedBox(width: 5.w),
-                        Text(count == 0 ? 'لا توجد مصروفات' : '$count ${count == 1 ? 'مصروف' : 'مصروفات'}', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: Colors.white)),
+                        Text(count == 0 ? 'لا توجد مصروفات'.tr() : '$count ${count == 1 ? 'مصروف'.tr() : 'مصروفات'.tr()}', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: Colors.white)),
                       ]),
                     ),
                     const Spacer(),
@@ -82,7 +84,7 @@ class ExpenseListHeader extends StatelessWidget {
                           child: Row(mainAxisSize: MainAxisSize.min, children: [
                             Icon(Icons.add_rounded, size: 16.sp, color: const Color(0xFFBE123C)),
                             SizedBox(width: 4.w),
-                            Text('مصروف جديد', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w900, color: const Color(0xFFBE123C))),
+                            Text('مصروف جديد'.tr(), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w900, color: const Color(0xFFBE123C))),
                           ]),
                         ),
                       ),
@@ -103,14 +105,14 @@ class ExpenseListHeader extends StatelessWidget {
                           SizedBox(width: 8.w),
                           Padding(
                             padding: EdgeInsets.only(bottom: 7.h),
-                            child: Text('ج.م', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.88))),
+                            child: Text('ج.م'.tr(), style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.88))),
                           ),
                         ],
                       ),
                     ),
                   ),
                   SizedBox(height: 3.h),
-                  Text('إجمالي المصروفات', style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w600, color: Colors.white.withValues(alpha: 0.80))),
+                  Text('إجمالي المصروفات'.tr(), style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w600, color: Colors.white.withValues(alpha: 0.80))),
                   SizedBox(height: 10.h),
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
@@ -120,7 +122,7 @@ class ExpenseListHeader extends StatelessWidget {
                       SizedBox(width: 8.w),
                       Flexible(
                         child: Text(
-                          todayCount == 0 ? 'مفيش مصروفات النهاردة' : 'النهاردة: $todayCount • ${fmtExp(todayValue)} ج.م',
+                          todayCount == 0 ? 'مفيش مصروفات النهاردة'.tr() : uiTr('النهاردة: $todayCount • ${fmtExp(todayValue)} ج.م'),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: Colors.white),

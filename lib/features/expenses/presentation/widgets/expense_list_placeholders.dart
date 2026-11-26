@@ -1,6 +1,7 @@
 import 'package:hesba/core/widgets/loading_widget.dart';
 
 import '../../../../common_imports.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// لودر القائمة.
 class ExpenseListLoading extends StatelessWidget {
@@ -8,7 +9,7 @@ class ExpenseListLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const LoadingWidget(message: 'جاري تحميل المصروفات...');
+    return LoadingWidget(message: 'جاري تحميل المصروفات...'.tr());
   }
 }
 
@@ -33,9 +34,9 @@ class ExpenseListEmpty extends StatelessWidget {
               child: Icon(Icons.savings_rounded, size: 44.sp, color: AppTheme.danger),
             ),
             SizedBox(height: 16.h),
-            Text('لا توجد مصروفات مسجلة', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
+            Text('لا توجد مصروفات مسجلة'.tr(), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
             SizedBox(height: 8.h),
-            Text('ابدأ بإضافة أول مصروف وتابع رصيدك بدقة', textAlign: TextAlign.center, style: TextStyle(fontSize: 12.sp, color: AppTheme.slateGray, height: 1.5)),
+            Text('ابدأ بإضافة أول مصروف وتابع رصيدك بدقة'.tr(), textAlign: TextAlign.center, style: TextStyle(fontSize: 12.sp, color: AppTheme.slateGray, height: 1.5)),
             SizedBox(height: 20.h),
             SizedBox(
               width: double.infinity,
@@ -44,7 +45,7 @@ class ExpenseListEmpty extends StatelessWidget {
                 onPressed: onAdd,
                 style: FilledButton.styleFrom(backgroundColor: AppTheme.danger, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r))),
                 icon: const Icon(Icons.add_rounded),
-                label: Text('إضافة مصروف', style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w800)),
+                label: Text('إضافة مصروف'.tr(), style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w800)),
               ),
             ),
           ],
@@ -69,11 +70,11 @@ class ExpenseListNoResults extends StatelessWidget {
       child: Column(children: [
         Container(width: 56.w, height: 56.w, decoration: BoxDecoration(color: const Color(0xFFFFE4E6), shape: BoxShape.circle), child: Icon(Icons.search_off_rounded, size: 28.sp, color: AppTheme.roseLight)),
         SizedBox(height: 12.h),
-        Text('لا توجد نتائج', style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : AppTheme.ink)),
+        Text('لا توجد نتائج'.tr(), style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : AppTheme.ink)),
         SizedBox(height: 6.h),
-        Text('جرّب كلمة بحث أخرى أو غيّر الفلتر', style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray)),
+        Text('جرّب كلمة بحث أخرى أو غيّر الفلتر'.tr(), style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray)),
         SizedBox(height: 14.h),
-        OutlinedButton(onPressed: onClear, style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r))), child: const Text('مسح الفلتر')),
+        OutlinedButton(onPressed: onClear, style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r))), child: Text('مسح الفلتر'.tr())),
       ]),
     );
   }
@@ -108,7 +109,7 @@ class ExpenseListError extends StatelessWidget {
                   onPressed: onRetry,
                   style: FilledButton.styleFrom(backgroundColor: AppTheme.danger, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r))),
                   icon: const Icon(Icons.refresh_rounded, size: 18),
-                  label: Text('إعادة المحاولة', style: TextStyle(fontWeight: FontWeight.w700, color: Colors.white)),
+                  label: Text('إعادة المحاولة'.tr(), style: TextStyle(fontWeight: FontWeight.w700, color: Colors.white)),
                 ),
               ),
             ],

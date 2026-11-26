@@ -8,6 +8,8 @@ import 'package:hesba/core/widgets/loading_widget.dart';
 import 'package:hesba/features/admin/data/repos/admin_repo.dart';
 import 'package:hesba/features/admin/presentation/cubit/admin_list_cubit.dart';
 import 'package:hesba/features/admin/presentation/views/shop_details_view.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 class ShopsView extends StatelessWidget {
   const ShopsView({super.key});
@@ -33,7 +35,7 @@ class _ShopsBody extends StatefulWidget {
 class _ShopsBodyState extends State<_ShopsBody> {
   final _searchCtrl = TextEditingController();
   String _query = '';
-  String _selectedType = 'الكل';
+  String _selectedType = 'الكل'.tr();
 
   @override
   void dispose() {
@@ -48,7 +50,7 @@ class _ShopsBodyState extends State<_ShopsBody> {
         if (state.loading && state.docs.isEmpty) {
           return Column(
             children: [
-              AdminSearchField(controller: _searchCtrl, hint: 'ابحث بالاسم، المدينة، الهاتف...', enabled: false),
+              AdminSearchField(controller: _searchCtrl, hint: 'ابحث بالاسم، المدينة، الهاتف...'.tr(), enabled: false),
               Expanded(child: LoadingWidget()),
             ],
           );
@@ -59,34 +61,34 @@ class _ShopsBodyState extends State<_ShopsBody> {
         if (state.docs.isEmpty) {
           return Column(
             children: [
-              AdminSearchField(controller: _searchCtrl, hint: 'ابحث بالاسم، المدينة، الهاتف...', enabled: false),
+              AdminSearchField(controller: _searchCtrl, hint: 'ابحث بالاسم، المدينة، الهاتف...'.tr(), enabled: false),
               Expanded(
-                  child: adminEmpty(Icons.storefront_outlined, 'لا توجد محلات بعد', 'عند تسجيل أول محل سيظهر هنا')),
+                  child: adminEmpty(Icons.storefront_outlined, 'لا توجد محلات بعد'.tr(), 'عند تسجيل أول محل سيظهر هنا'.tr())),
             ],
           );
         }
 
         final types = _extractTypes(state.docs);
         final filtered = _applyFilter(state.docs);
-        final filtering = _query.isNotEmpty || _selectedType != 'الكل';
+        final filtering = _query.isNotEmpty || _selectedType != 'الكل'.tr();
 
         return RefreshIndicator(
           onRefresh: () => context.read<AdminListCubit>().firstPage(),
           child: Column(
             children: [
-              const AdminPageHeader(title: 'المحلات', description: 'إدارة ومراجعة جميع المحلات المسجلة في النظام'),
+              AdminPageHeader(title: 'المحلات'.tr(), description: 'إدارة ومراجعة جميع المحلات المسجلة في النظام'.tr()),
               AdminSummaryHeader(
                 icon: Icons.storefront_outlined,
-                title: 'إجمالي المحلات',
+                title: 'إجمالي المحلات'.tr(),
                 total: state.docs.length,
-                unit: 'محل',
-                stats: [if (!filtering) 'الكل معروض' else 'عرض ${filtered.length} من ${state.docs.length}'],
+                unit: 'محل'.tr(),
+                stats: [if (!filtering) 'الكل معروض'.tr() else uiTr('عرض ${filtered.length} من ${state.docs.length}')],
                 loading: state.loading,
                 onRefresh: () => context.read<AdminListCubit>().firstPage(),
               ),
               AdminSearchField(
                 controller: _searchCtrl,
-                hint: 'ابحث بالاسم، المدينة، الهاتف...',
+                hint: 'ابحث بالاسم، المدينة، الهاتف...'.tr(),
                 onChanged: (v) => setState(() => _query = v),
               ),
               AdminFilterChips(
@@ -100,12 +102,12 @@ class _ShopsBodyState extends State<_ShopsBody> {
                   onClear: () => setState(() {
                     _query = '';
                     _searchCtrl.clear();
-                    _selectedType = 'الكل';
+                    _selectedType = 'الكل'.tr();
                   }),
                 ),
               Expanded(
                 child: filtered.isEmpty
-                    ? adminEmpty(Icons.search_off_outlined, 'لا توجد نتائج مطابقة لبحثك', 'جرّب كلمة مختلفة أو امسح الفلتر')
+                    ? adminEmpty(Icons.search_off_outlined, 'لا توجد نتائج مطابقة لبحثك'.tr(), 'جرّب كلمة مختلفة أو امسح الفلتر'.tr())
                     : LayoutBuilder(
                         builder: (context, constraints) {
                           final wide = constraints.maxWidth >= 760;
@@ -137,7 +139,7 @@ class _ShopsBodyState extends State<_ShopsBody> {
               if (state.hasMore)
                 AdminLoadMore(
                   loading: state.loading,
-                  label: 'تحميل المزيد (${state.docs.length} معروض)',
+                  label: uiTr('تحميل المزيد (${state.docs.length} معروض)'),
                   onLoad: () => context.read<AdminListCubit>().nextPage(),
                 ),
             ],
@@ -154,7 +156,7 @@ class _ShopsBodyState extends State<_ShopsBody> {
       if (t.isNotEmpty) set.add(t);
     }
     final list = set.toList()..sort();
-    return ['الكل', ...list];
+    return ['الكل'.tr(), ...list];
   }
 
   List<QueryDocumentSnapshot<Map<String, dynamic>>> _applyFilter(
@@ -163,7 +165,7 @@ class _ShopsBodyState extends State<_ShopsBody> {
     final q = _query.trim();
     return docs.where((d) {
       final data = d.data();
-      if (_selectedType != 'الكل' && (data['businessType'] as String? ?? '') != _selectedType) return false;
+      if (_selectedType != 'الكل'.tr() && (data['businessType'] as String? ?? '') != _selectedType) return false;
       if (q.isEmpty) return true;
       final haystack = [
         data['shopName'],
@@ -235,7 +237,7 @@ class _ShopCard extends StatelessWidget {
                   children: [
                     Flexible(
                       child: Text(
-                        (name == null || name.isEmpty) ? 'بدون اسم' : name,
+                        (name == null || name.isEmpty) ? 'بدون اسم'.tr() : name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800, fontSize: 14.5),

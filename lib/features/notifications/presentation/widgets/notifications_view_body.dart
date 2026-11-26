@@ -13,6 +13,8 @@ import '../view_model/activity_state.dart';
 import '../view_model/notification_state.dart';
 import '../view_model/notification_cubit.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// جسم الشاشة (تاب تذكيراتي | تاب سجل العمليات).
 class NotificationsViewBody extends StatefulWidget {
@@ -104,8 +106,8 @@ class _NotificationsViewBodyState extends State<NotificationsViewBody> {
                     ),
                     child: Row(
                       children: [
-                        _TabBtn(icon: Icons.add_alert_rounded, label: 'تذكيراتي', selected: _tab == 0, onTap: () => _setTab(0)),
-                        _TabBtn(icon: Icons.receipt_long_rounded, label: 'سجل العمليات', selected: _tab == 1, onTap: () => _setTab(1)),
+                        _TabBtn(icon: Icons.add_alert_rounded, label: 'تذكيراتي'.tr(), selected: _tab == 0, onTap: () => _setTab(0)),
+                        _TabBtn(icon: Icons.receipt_long_rounded, label: 'سجل العمليات'.tr(), selected: _tab == 1, onTap: () => _setTab(1)),
                       ],
                     ),
                   ),
@@ -115,9 +117,9 @@ class _NotificationsViewBodyState extends State<NotificationsViewBody> {
             if (_tab == 0) ...[
               // لودر أول فتح (بدل اللاج والشاشة الفاضية).
               if (state.isLoading)
-                const SliverFillRemaining(
+                SliverFillRemaining(
                   hasScrollBody: false,
-                  child: LoadingWidget(message: 'جاري تحميل تذكيراتك...'),
+                  child: LoadingWidget(message: 'جاري تحميل تذكيراتك...'.tr()),
                 )
               else ...[
                 if (!state.permissionGranted)
@@ -216,7 +218,7 @@ class _TabBtn extends StatelessWidget {
   }
 }
 
-/// زرار "تذكير جديد" بعرض الشاشة.
+/// زرار "تذكير جديد".tr() بعرض الشاشة.
 class _AddReminderBtn extends StatelessWidget {
   final VoidCallback onTap;
   const _AddReminderBtn({required this.onTap});
@@ -238,7 +240,7 @@ class _AddReminderBtn extends StatelessWidget {
           children: [
             Icon(Icons.add_rounded, size: 19.sp, color: Colors.white),
             SizedBox(width: 7.w),
-            Text('تذكير جديد', style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w900, color: Colors.white)),
+            Text('تذكير جديد'.tr(), style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w900, color: Colors.white)),
           ],
         ),
       ),
@@ -264,14 +266,14 @@ class _ActivitySection extends StatelessWidget {
               Row(children: [
                 Expanded(
                   child: Text(
-                    'كل عملية بتعملها بتتسجل هنا (${list.length})',
+                    uiTr('كل عملية بتعملها بتتسجل هنا (${list.length})'),
                     style: TextStyle(fontSize: 12.sp, color: isDark ? AppTheme.darkTextSecondary : AppTheme.slateGray),
                   ),
                 ),
                 if (list.isNotEmpty && state.unreadCount > 0)
                   TextButton(
                     onPressed: () => context.read<ActivityCubit>().markAllRead(),
-                    child: Text('تعليم كمقروء', style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w800, color: AppTheme.primaryColor)),
+                    child: Text('تعليم كمقروء'.tr(), style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w800, color: AppTheme.primaryColor)),
                   ),
               ]),
               SizedBox(height: 10.h),
@@ -287,9 +289,9 @@ class _ActivitySection extends StatelessWidget {
                   child: Column(children: [
                     Icon(Icons.inbox_rounded, size: 34.sp, color: AppTheme.mutedGray),
                     SizedBox(height: 10.h),
-                    Text('لا توجد عمليات بعد', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : AppTheme.ink)),
+                    Text('لا توجد عمليات بعد'.tr(), style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: isDark ? Colors.white : AppTheme.ink)),
                     SizedBox(height: 4.h),
-                    Text('أي بيع أو منتج أو مصروف أو مرتجع هيظهر هنا', textAlign: TextAlign.center, style: TextStyle(fontSize: 11.5.sp, color: AppTheme.mutedGray)),
+                    Text('أي بيع أو منتج أو مصروف أو مرتجع هيظهر هنا'.tr(), textAlign: TextAlign.center, style: TextStyle(fontSize: 11.5.sp, color: AppTheme.mutedGray)),
                   ]),
                 )
               else

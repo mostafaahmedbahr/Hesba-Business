@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hesba/core/models/admin_settings.dart';
@@ -6,6 +7,7 @@ import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
 import 'package:hesba/features/subscription/presentation/widgets/payment_brand_logo.dart';
 
 import 'price_decoration.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// كارت طريقة دفع واحدة (أيقونة البراند + حقل الرقم + زر النسخ).
 class PaymentMethodCard extends StatelessWidget {
@@ -40,7 +42,7 @@ class PaymentMethodCard extends StatelessWidget {
                 style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800),
               ),
               Text(
-                'رقم المحفظة / الحساب',
+                'رقم المحفظة / الحساب'.tr(),
                 style: TextStyle(
                   fontSize: 10,
                   color: AdminColors.textMuted(context),
@@ -57,7 +59,7 @@ class PaymentMethodCard extends StatelessWidget {
       controller: controller,
       enabled: enabled,
       keyboardType: TextInputType.phone,
-      textDirection: TextDirection.ltr,
+      textDirection: ui.TextDirection.ltr,
       textAlign: TextAlign.left,
       inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9+\s-]'))],
       autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -67,19 +69,19 @@ class PaymentMethodCard extends StatelessWidget {
         suffixIcon: controller.text.trim().isEmpty
             ? null
             : IconButton(
-                tooltip: 'نسخ الرقم',
+                tooltip: 'نسخ الرقم'.tr(),
                 icon: const Icon(Icons.copy_rounded, size: 16),
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: controller.text.trim()));
-                  AppToast.success(context, 'تم نسخ الرقم');
+                  AppToast.success(context, 'تم نسخ الرقم'.tr());
                 },
               ),
       ),
       validator: (v) {
         final value = (v ?? '').trim();
-        if (value.isEmpty) return 'اكتب رقم المحفظة';
+        if (value.isEmpty) return 'اكتب رقم المحفظة'.tr();
         if (value.replaceAll(RegExp(r'[^0-9]'), '').length < 8) {
-          return 'الرقم قصير جدًا';
+          return 'الرقم قصير جدًا'.tr();
         }
         return null;
       },

@@ -8,6 +8,7 @@ import '../expense_reminder_scheduler.dart';
 import '../repos/expenses_repo.dart';
 import 'package:hesba/core/services/shop_id_resolver.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class ExpensesRepoImpl implements ExpensesRepo {
   final FirebaseFirestore firestore;
@@ -49,24 +50,24 @@ class ExpensesRepoImpl implements ExpensesRepo {
     String recurrence = ExpenseModel.recurrenceNone,
     String dueTime = '',
   }) async {
-    if (title.trim().isEmpty) throw Exception('عنوان المصروف مطلوب');
-    if (amount <= 0) throw Exception('المبلغ يجب أن يكون أكبر من صفر');
-    if (category.isEmpty) throw Exception('اختر تصنيف المصروف');
+    if (title.trim().isEmpty) throw Exception('عنوان المصروف مطلوب'.tr());
+    if (amount <= 0) throw Exception('المبلغ يجب أن يكون أكبر من صفر'.tr());
+    if (category.isEmpty) throw Exception('اختر تصنيف المصروف'.tr());
 
     final resolvedShopId = await _resolveShopId(shopId);
     final resolvedOwnerId = await _resolveOwnerId(ownerId);
 
     if (resolvedShopId == null || resolvedShopId.isEmpty) {
-      throw Exception('لم يتم العثور على المتجر');
+      throw Exception('لم يتم العثور على المتجر'.tr());
     }
     if (resolvedOwnerId == null || resolvedOwnerId.isEmpty) {
-      throw Exception('يجب تسجيل الدخول أولاً');
+      throw Exception('يجب تسجيل الدخول أولاً'.tr());
     }
 
     final isRecurring = recurrence != ExpenseModel.recurrenceNone;
     final time = _parseDueTime(dueTime);
     if (isRecurring && time == null) {
-      throw Exception('حدد موعد الاستحقاق (الساعة والدقيقة)');
+      throw Exception('حدد موعد الاستحقاق (الساعة والدقيقة)'.tr());
     }
     final anchorDue = isRecurring
         ? DateTime(date.year, date.month, date.day, time!.hour, time.minute)
@@ -127,29 +128,29 @@ class ExpensesRepoImpl implements ExpensesRepo {
     String recurrence = ExpenseModel.recurrenceNone,
     String dueTime = '',
   }) async {
-    if (title.trim().isEmpty) throw Exception('عنوان المصروف مطلوب');
-    if (amount <= 0) throw Exception('المبلغ يجب أن يكون أكبر من صفر');
-    if (category.isEmpty) throw Exception('اختر تصنيف المصروف');
+    if (title.trim().isEmpty) throw Exception('عنوان المصروف مطلوب'.tr());
+    if (amount <= 0) throw Exception('المبلغ يجب أن يكون أكبر من صفر'.tr());
+    if (category.isEmpty) throw Exception('اختر تصنيف المصروف'.tr());
 
     final resolvedShopId = await _resolveShopId(shopId);
     final resolvedOwnerId = await _resolveOwnerId(ownerId);
 
     if (resolvedShopId == null || resolvedShopId.isEmpty) {
-      throw Exception('لم يتم العثور على المتجر');
+      throw Exception('لم يتم العثور على المتجر'.tr());
     }
     if (resolvedOwnerId == null || resolvedOwnerId.isEmpty) {
-      throw Exception('يجب تسجيل الدخول أولاً');
+      throw Exception('يجب تسجيل الدخول أولاً'.tr());
     }
 
     final docRef = firestore.collection(AppConstants.expensesCollection).doc(expenseId);
     final existingSnap = await docRef.get();
     final existingData = existingSnap.data();
     if (!existingSnap.exists || existingData == null) {
-      throw Exception('المصروف غير موجود');
+      throw Exception('المصروف غير موجود'.tr());
     }
     // Ownership check: never touch another shop's document by ID.
     if (existingData['shopId'] != resolvedShopId || existingData['ownerId'] != resolvedOwnerId) {
-      throw Exception('غير مصرح بتعديل هذا المصروف');
+      throw Exception('غير مصرح بتعديل هذا المصروف'.tr());
     }
     final existingCreatedAt = (existingData['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
     final existingRecurrence =
@@ -159,7 +160,7 @@ class ExpensesRepoImpl implements ExpensesRepo {
     final isRecurring = recurrence != ExpenseModel.recurrenceNone;
     final time = _parseDueTime(dueTime);
     if (isRecurring && time == null) {
-      throw Exception('حدد موعد الاستحقاق (الساعة والدقيقة)');
+      throw Exception('حدد موعد الاستحقاق (الساعة والدقيقة)'.tr());
     }
 
     // يعيد حساب الموعد القادم فقط لو تغيّرت الجدولة (التكرار / الوقت / التاريخ)
@@ -227,7 +228,7 @@ class ExpensesRepoImpl implements ExpensesRepo {
     } catch (logErr, logSt) {
       AppLogger.nonFatal('features/expenses/data/repos_impl/expenses_repo_impl.dart', logErr, logSt, severity: LoggingSeverity.warning);
       // fallback بدون index — حمّل الكل وفلتر محلياً (للمالك فقط، أبداً الكل).
-      if (_uid == null) throw Exception('يجب تسجيل الدخول أولاً');
+      if (_uid == null) throw Exception('يجب تسجيل الدخول أولاً'.tr());
       final snap = await firestore.collection(AppConstants.expensesCollection).orderBy('createdAt', descending: true).limit(500).get();
       final all = snap.docs.map((d) => ExpenseModel.fromJson(d.data())).toList();
       if (resolvedShopId != null && resolvedShopId.isNotEmpty) {
@@ -318,13 +319,13 @@ class ExpensesRepoImpl implements ExpensesRepo {
   @override
   Future<void> deleteExpense({required String expenseId, required String shopId}) async {
     final resolvedShopId = await _resolveShopId(shopId);
-    if (resolvedShopId == null) throw Exception('لم يتم العثور على المتجر');
+    if (resolvedShopId == null) throw Exception('لم يتم العثور على المتجر'.tr());
     final docRef = firestore.collection(AppConstants.expensesCollection).doc(expenseId);
     final snap = await docRef.get();
     final data = snap.data();
-    if (!snap.exists || data == null) throw Exception('المصروف غير موجود');
+    if (!snap.exists || data == null) throw Exception('المصروف غير موجود'.tr());
     if (data['shopId'] != resolvedShopId || (data['ownerId'] as String?) != _uid) {
-      throw Exception('غير مصرح بحذف هذا المصروف');
+      throw Exception('غير مصرح بحذف هذا المصروف'.tr());
     }
     // لو قالب متكرر — الغاء كل تذكيراته الجدولة.
     if ((data['recurrence'] as String?) != null &&

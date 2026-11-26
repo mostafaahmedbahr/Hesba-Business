@@ -109,7 +109,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                           ),
                           SizedBox(width: 6.w),
                           Text(
-                            match ? 'كلمتا المرور متطابقتان' : 'changePasswordMismatch'.tr(),
+                            match ? 'كلمتا المرور متطابقتان'.tr() : 'changePasswordMismatch'.tr(),
                             style: TextStyle(
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w600,
@@ -138,7 +138,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
     if (!RegExp(r'[A-Z]').hasMatch(v)) return 'changePasswordNewUpper'.tr();
     if (!RegExp(r'[a-z]').hasMatch(v)) return 'changePasswordNewLower'.tr();
     if (!RegExp(r'[0-9]').hasMatch(v)) return 'changePasswordNewDigit'.tr();
-    if (v == _currentController.text) return 'الجديدة لازم تختلف عن الحالية';
+    if (v == _currentController.text) return 'الجديدة لازم تختلف عن الحالية'.tr();
     return null;
   }
 

@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/repos/admin_search_repo.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 abstract class GlobalSearchState extends Equatable {
   const GlobalSearchState();
@@ -155,7 +156,7 @@ class GlobalSearchCubit extends Cubit<GlobalSearchState> {
           emit(SearchResults(current.hits, hasMore: current.hasMore));
         }
       } else {
-        emit(const SearchError('تعذر تنفيذ البحث، حاول مرة أخرى'));
+        emit(SearchError('تعذر تنفيذ البحث، حاول مرة أخرى'.tr()));
       }
     }
   }

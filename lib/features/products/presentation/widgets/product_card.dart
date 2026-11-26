@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 import '../../../../common_imports.dart';
 import '../../../../core/models/product.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// كارت منتج (صورة + سعر + مخزون).
 class ProductCard extends StatelessWidget {
@@ -138,7 +139,7 @@ class ProductCard extends StatelessWidget {
                               ),
                               if (product.costPrice > 0)
                                 Text(
-                                  'شراء ${_formatPrice(product.costPrice)}',
+                                  uiTr('شراء ${_formatPrice(product.costPrice)}'),
                                   style: TextStyle(
                                     fontSize: 10.sp,
                                     color: AppTheme.mutedGray,

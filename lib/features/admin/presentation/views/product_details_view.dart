@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
 import 'package:hesba/core/theme/app_theme.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class ProductDetailsView extends StatelessWidget {
   const ProductDetailsView({super.key, required this.data, required this.id});
@@ -10,14 +11,14 @@ class ProductDetailsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = (data['name'] as String?) ?? 'تفاصيل المنتج';
+    final name = (data['name'] as String?) ?? 'تفاصيل المنتج'.tr();
     final imageUrl = (data['imageUrl'] as String?) ?? '';
     return Scaffold(
       appBar: AppBar(
         title: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis),
         actions: [
           IconButton(
-            tooltip: 'نسخ معرف المنتج',
+            tooltip: 'نسخ معرف المنتج'.tr(),
             icon: const Icon(Icons.copy_outlined, size: 20),
             onPressed: () => CopyableId.copy(context, id),
           ),
@@ -93,22 +94,22 @@ class ProductDetailsView extends StatelessWidget {
           ),
           const SizedBox(height: AdminSpace.md),
           AdminSection(
-            title: 'المعرفات',
+            title: 'المعرفات'.tr(),
             icon: Icons.badge_outlined,
             child: Column(
               children: [
-                CopyableId(id: id, full: true, label: 'معرف المنتج'),
+                CopyableId(id: id, full: true, label: 'معرف المنتج'.tr()),
                 const Divider(height: 20),
                 if (((data['shopId'] as String?) ?? '').isNotEmpty)
                   CopyableId(
                     id: data['shopId'] as String,
                     full: true,
-                    label: 'معرف المحل',
+                    label: 'معرف المحل'.tr(),
                   )
                 else
-                  const AdminInfoRow(
+                  AdminInfoRow(
                     icon: Icons.storefront_outlined,
-                    label: 'معرف المحل',
+                    label: 'معرف المحل'.tr(),
                     value: '-',
                   ),
               ],
@@ -116,19 +117,19 @@ class ProductDetailsView extends StatelessWidget {
           ),
           const SizedBox(height: AdminSpace.md),
           AdminSection(
-            title: 'بيانات المنتج',
+            title: 'بيانات المنتج'.tr(),
             icon: Icons.inventory_2_outlined,
             child: Column(
               children: [
                 AdminInfoRow(
                   icon: Icons.category_outlined,
-                  label: 'التصنيف',
+                  label: 'التصنيف'.tr(),
                   value: (data['category'] as String?) ?? '-',
                 ),
                 const Divider(height: 14),
                 AdminInfoRow(
                   icon: Icons.local_shipping_outlined,
-                  label: 'المورد',
+                  label: 'المورد'.tr(),
                   value: (((data['supplierName'] as String?) ?? '').isNotEmpty)
                       ? data['supplierName'] as String
                       : '-',
@@ -136,25 +137,25 @@ class ProductDetailsView extends StatelessWidget {
                 const Divider(height: 14),
                 AdminInfoRow(
                   icon: Icons.payments_outlined,
-                  label: 'السعر',
+                  label: 'السعر'.tr(),
                   value: AdminFmt.money((data['price'] as num?) ?? 0),
                 ),
                 const Divider(height: 14),
                 AdminInfoRow(
                   icon: Icons.inventory_outlined,
-                  label: 'الكمية بالمخزون',
+                  label: 'الكمية بالمخزون'.tr(),
                   value: '${data['stock'] ?? 0}',
                 ),
                 const Divider(height: 14),
                 AdminInfoRow(
                   icon: Icons.calendar_month_outlined,
-                  label: 'تاريخ الإضافة',
+                  label: 'تاريخ الإضافة'.tr(),
                   value: AdminFmt.date(data['createdAt']),
                 ),
                 const Divider(height: 14),
                 AdminInfoRow(
                   icon: Icons.update_outlined,
-                  label: 'آخر تحديث',
+                  label: 'آخر تحديث'.tr(),
                   value: AdminFmt.date(data['updatedAt']),
                 ),
               ],

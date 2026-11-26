@@ -9,6 +9,7 @@ import '../widgets/category_custom_section.dart';
 import '../widgets/category_defaults_section.dart';
 import '../widgets/category_header.dart';
 import '../widgets/category_search_field.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// شاشة الأقسام (عرض بس — اللوجيك في Cubit).
 class CategoryManagementView extends StatelessWidget {
@@ -61,8 +62,8 @@ class _LoadingView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(title: const Text('إدارة الأقسام'), centerTitle: true),
-      body: const LoadingWidget(message: 'جاري تحميل الأقسام...'),
+      appBar: AppBar(title: Text('إدارة الأقسام'.tr()), centerTitle: true),
+      body: LoadingWidget(message: 'جاري تحميل الأقسام...'.tr()),
     );
   }
 }
@@ -77,7 +78,7 @@ class _NoShopView extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(title: const Text('إدارة الأقسام'), centerTitle: true),
+      appBar: AppBar(title: Text('إدارة الأقسام'.tr()), centerTitle: true),
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -93,7 +94,7 @@ class _NoShopView extends StatelessWidget {
             ),
             SizedBox(height: 14.h),
             Text(
-              message ?? 'لم يتم العثور على المتجر',
+              message ?? 'لم يتم العثور على المتجر'.tr(),
               style: TextStyle(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w800,

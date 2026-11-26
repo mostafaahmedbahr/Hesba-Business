@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../core/theme/app_theme.dart';
 import '../../../data/models/expense_model.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// خيار تكرار المصروف (مرة واحدة / يومي / أسبوعي / شهري).
 class ExpenseRecurrenceOption {
@@ -13,15 +14,15 @@ class ExpenseRecurrenceOption {
 }
 
 /// الخيارات المتاحة للتكرار (مُعرّفة مرة واحدة).
-const List<ExpenseRecurrenceOption> kExpenseRecurrenceOptions = [
-  ExpenseRecurrenceOption('مرة واحدة', Icons.looks_one_rounded,
+List<ExpenseRecurrenceOption> kExpenseRecurrenceOptions = [
+  ExpenseRecurrenceOption('مرة واحدة'.tr(), Icons.looks_one_rounded,
       ExpenseModel.recurrenceNone),
   ExpenseRecurrenceOption(
-      'يومي', Icons.event_repeat_rounded, ExpenseModel.recurrenceDaily),
+      'يومي'.tr(), Icons.event_repeat_rounded, ExpenseModel.recurrenceDaily),
   ExpenseRecurrenceOption(
-      'أسبوعي', Icons.calendar_view_week_rounded, ExpenseModel.recurrenceWeekly),
+      'أسبوعي'.tr(), Icons.calendar_view_week_rounded, ExpenseModel.recurrenceWeekly),
   ExpenseRecurrenceOption(
-      'شهري', Icons.calendar_month_rounded, ExpenseModel.recurrenceMonthly),
+      'شهري'.tr(), Icons.calendar_month_rounded, ExpenseModel.recurrenceMonthly),
 ];
 
 /// شريحة اختيار التكرار.

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hesba/core/theme/app_theme.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// قائمة اختيار بنفس مظهر باقي حقول التسجيل.
 class RegisterDropdown extends StatelessWidget {
@@ -76,7 +77,7 @@ class RegisterDropdown extends StatelessWidget {
         focusedErrorBorder: _border(isDark: isDark, color: AppTheme.danger, width: 1.6),
       ),
       items: items
-          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+          .map((e) => DropdownMenuItem(value: e, child: Text(e.tr())))
           .toList(),
       onChanged: items.isEmpty
           ? null

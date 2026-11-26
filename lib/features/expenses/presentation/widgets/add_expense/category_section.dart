@@ -6,6 +6,7 @@ import '../../../../../core/constants/app_constants.dart';
 import '../../../../../core/theme/app_theme.dart';
 import '../expense_category_meta.dart';
 import 'category_chip.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// قسم التصنيف: شبكة الاختيارات + تحذير عند عدم الاختيار.
 class ExpenseCategorySection extends StatelessWidget {
@@ -50,7 +51,7 @@ class ExpenseCategorySection extends StatelessWidget {
               right: 4.w,
             ),
             child: Text(
-              'اختار التصنيف الأول',
+              'اختار التصنيف الأول'.tr(),
               style: TextStyle(
                 fontSize: 11.5.sp,
                 fontWeight: FontWeight.w700,

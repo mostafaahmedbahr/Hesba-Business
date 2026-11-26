@@ -9,6 +9,7 @@ import '../data/models/subscription_model.dart';
 import '../data/repos/subscription_repo.dart';
 import 'widgets/subscription_blocked_dialog.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// The one check every Add / Edit / Delete goes through before it runs.
 ///
@@ -53,7 +54,7 @@ class SubscriptionGate {
         if (context.mounted) {
           AppToast.error(
             context,
-            'الصلاحية مرفوضة: تأكد من تفعيل حسابك وارتباطه بالمحل وسريان الاشتراك.',
+            'الصلاحية مرفوضة: تأكد من تفعيل حسابك وارتباطه بالمحل وسريان الاشتراك.'.tr(),
           );
         }
         return false;

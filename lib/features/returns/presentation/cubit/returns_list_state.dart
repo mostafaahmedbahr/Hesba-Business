@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import '../../data/models/return_model.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// حالة قائمة المرتجعات.
 enum ReturnsListStatus { initial, loading, success, failure }
@@ -14,7 +15,7 @@ class ReturnsListState extends Equatable {
   final String reasonFilter; // فلتر السبب (الكل + الأسباب الموجودة).
   final String? errorMessage;
 
-  const ReturnsListState({
+  ReturnsListState({
     this.status = ReturnsListStatus.initial,
     this.shopId = '',
     this.returns = const [],
@@ -42,7 +43,8 @@ class ReturnsListState extends Equatable {
               r.personPhone
                   .replaceAll(RegExp('[^0-9]'), '')
                   .contains(qDigits));
-      final matchesReason = reasonFilter == 'الكل' || r.reason == reasonFilter;
+      final isAll = reasonFilter == 'الكل' || reasonFilter == 'الكل'.tr();
+      final matchesReason = isAll || r.reason.tr() == reasonFilter;
       return matchesSearch && matchesReason;
     }).toList();
   }
@@ -62,7 +64,7 @@ class ReturnsListState extends Equatable {
 
   /// الأسباب الموجودة (للفلتر).
   List<String> get reasons {
-    final set = <String>{'الكل'};
+    final set = <String>{'الكل'.tr()};
     for (final r in returns) {
       if (r.reason.trim().isNotEmpty) set.add(r.reason);
     }

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../../../../common_imports.dart';
 import '../../data/models/local_reminder.dart';
 import '../../../../core/utils/reminder_labels.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// كارت تذكير (وقت + عنوان + تكرار + تفعيل/تجربة/تعديل/حذف).
 class ReminderCard extends StatelessWidget {
@@ -182,12 +183,12 @@ class _RepeatPill extends StatelessWidget {
   String _label(BuildContext context) {
     if (reminder.repeat != ReminderRepeat.weekly) return 'repeatDaily'.tr();
     final days = reminder.weekdays.toSet().toList()..sort();
-    if (days.length >= 7) return 'كل يوم';
+    if (days.length >= 7) return 'كل يوم'.tr();
     if (days.isEmpty) return 'repeatWeekly'.tr();
     if (days.length <= 2) {
       return '${'repeatWeekly'.tr()} • ${days.map((d) => weekdayShort(context, d)).join('، ')}';
     }
-    return '${'repeatWeekly'.tr()} • ${days.length} أيام';
+    return uiTr('${'repeatWeekly'.tr()} • ${days.length} أيام');
   }
 
   @override

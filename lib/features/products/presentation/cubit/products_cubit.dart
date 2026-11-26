@@ -14,7 +14,7 @@ class ProductsCubit extends Cubit<ProductsState> {
   StreamSubscription<List<Product>>? _sub;
 
   ProductsCubit({required this._repo})
-      : super(const ProductsState());
+      : super(ProductsState());
 
   void init() {
     _sub ??= _repo.watchProducts().listen(

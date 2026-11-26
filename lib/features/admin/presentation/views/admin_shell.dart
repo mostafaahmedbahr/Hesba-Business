@@ -25,21 +25,22 @@ import 'package:hesba/features/admin/presentation/views/sales_view.dart';
 import 'package:hesba/features/admin/presentation/views/shops_view.dart';
 import 'package:hesba/features/admin/presentation/views/subscription_requests_view.dart';
 import 'package:hesba/features/admin/presentation/views/subscriptions_view.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class AdminShell extends StatefulWidget {
   const AdminShell({super.key});
 
-  static const items = [
-    _NavItem('الرئيسية', 'نظرة عامة على النظام', Icons.dashboard_outlined, Icons.dashboard),
-    _NavItem('المحلات', 'إدارة المحلات المسجلة', Icons.storefront_outlined, Icons.storefront),
-    _NavItem('الاشتراكات', 'حالات اشتراكات المحلات', Icons.workspace_premium_outlined, Icons.workspace_premium),
-    _NavItem('طلبات الاشتراك', 'مراجعة طلبات الدفع', Icons.receipt_long_outlined, Icons.receipt_long),
-    _NavItem('المنتجات', 'منتجات جميع المحلات', Icons.inventory_2_outlined, Icons.inventory_2),
-    _NavItem('المبيعات', 'مبيعات جميع المحلات', Icons.point_of_sale_outlined, Icons.point_of_sale),
-    _NavItem('المصروفات', 'مصروفات جميع المحلات', Icons.money_off_outlined, Icons.money_off),
-    _NavItem('النشاطات', 'سجل عمليات النظام', Icons.history_outlined, Icons.history),
-    _NavItem('الملاحظات', 'شكاوى واقتراحات المستخدمين', Icons.feedback_outlined, Icons.feedback),
-    _NavItem('الإعدادات', 'أسعار الباقات وطرق الدفع', Icons.settings_outlined, Icons.settings),
+  static final items= [
+    _NavItem('الرئيسية'.tr(), 'نظرة عامة على النظام'.tr(), Icons.dashboard_outlined, Icons.dashboard),
+    _NavItem('المحلات'.tr(), 'إدارة المحلات المسجلة'.tr(), Icons.storefront_outlined, Icons.storefront),
+    _NavItem('الاشتراكات'.tr(), 'حالات اشتراكات المحلات'.tr(), Icons.workspace_premium_outlined, Icons.workspace_premium),
+    _NavItem('طلبات الاشتراك'.tr(), 'مراجعة طلبات الدفع'.tr(), Icons.receipt_long_outlined, Icons.receipt_long),
+    _NavItem('المنتجات'.tr(), 'منتجات جميع المحلات'.tr(), Icons.inventory_2_outlined, Icons.inventory_2),
+    _NavItem('المبيعات'.tr(), 'مبيعات جميع المحلات'.tr(), Icons.point_of_sale_outlined, Icons.point_of_sale),
+    _NavItem('المصروفات'.tr(), 'مصروفات جميع المحلات'.tr(), Icons.money_off_outlined, Icons.money_off),
+    _NavItem('النشاطات'.tr(), 'سجل عمليات النظام'.tr(), Icons.history_outlined, Icons.history),
+    _NavItem('الملاحظات'.tr(), 'شكاوى واقتراحات المستخدمين'.tr(), Icons.feedback_outlined, Icons.feedback),
+    _NavItem('الإعدادات'.tr(), 'أسعار الباقات وطرق الدفع'.tr(), Icons.settings_outlined, Icons.settings),
   ];
 
   @override
@@ -211,7 +212,7 @@ class _TopBar extends StatelessWidget implements PreferredSizeWidget {
       title: Text(title),
       actions: [
         IconButton(
-          tooltip: 'بحث شامل',
+          tooltip: 'بحث شامل'.tr(),
           icon: const Icon(Icons.search),
           onPressed: () => showDialog(
             context: context,
@@ -220,7 +221,7 @@ class _TopBar extends StatelessWidget implements PreferredSizeWidget {
         ),
         _PendingBell(),
         IconButton(
-          tooltip: 'تسجيل الخروج',
+          tooltip: 'تسجيل الخروج'.tr(),
           icon: const Icon(Icons.logout_outlined),
           onPressed: () => _confirmLogout(context),
         ),
@@ -232,9 +233,9 @@ class _TopBar extends StatelessWidget implements PreferredSizeWidget {
   Future<void> _confirmLogout(BuildContext context) async {
     final ok = await showAdminConfirm(
       context,
-      title: 'تسجيل الخروج',
-      message: 'هل أنت متأكد من تسجيل الخروج من لوحة الإدارة؟',
-      confirmLabel: 'تسجيل الخروج',
+      title: 'تسجيل الخروج'.tr(),
+      message: 'هل أنت متأكد من تسجيل الخروج من لوحة الإدارة؟'.tr(),
+      confirmLabel: 'تسجيل الخروج'.tr(),
       danger: true,
     );
     if (ok && context.mounted) {
@@ -266,7 +267,7 @@ class _PendingBellState extends State<_PendingBell> {
       builder: (context, snap) {
         final count = snap.data?.docs.length ?? 0;
         return IconButton(
-          tooltip: 'طلبات الاشتراك المعلقة',
+          tooltip: 'طلبات الاشتراك المعلقة'.tr(),
           onPressed: () => context.read<AdminNavCubit>().select(3),
           icon: Badge(
             isLabelVisible: count > 0,
@@ -298,7 +299,7 @@ class _Sidebar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final email = sl<AdminRepo>().currentAdminEmail() ?? 'مدير النظام';
+    final email = sl<AdminRepo>().currentAdminEmail() ?? 'مدير النظام'.tr();
     return Column(
       children: [
         _Logo(expanded: expanded),
@@ -307,7 +308,7 @@ class _Sidebar extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: AdminSpace.lg, vertical: AdminSpace.xs),
             child: Align(
               alignment: Alignment.centerRight,
-              child: Text('القائمة الرئيسية',
+              child: Text('القائمة الرئيسية'.tr(),
                   style: Theme.of(context)
                       .textTheme
                       .bodySmall
@@ -334,8 +335,8 @@ class _Sidebar extends StatelessWidget {
         if (onToggleCollapsed != null)
           _NavTile(
             icon: collapsed ? Icons.menu_open_outlined : Icons.menu_outlined,
-            label: collapsed ? '' : 'طي القائمة',
-            hint: 'طي / فتح القائمة',
+            label: collapsed ? '' : 'طي القائمة'.tr(),
+            hint: 'طي / فتح القائمة'.tr(),
             selected: false,
             expanded: expanded,
             onTap: onToggleCollapsed,
@@ -374,9 +375,9 @@ class _Logo extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('حسبة',
+                  Text('حسبة'.tr(),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900, height: 1.1)),
-                  Text('لوحة الإدارة',
+                  Text('لوحة الإدارة'.tr(),
                       style: Theme.of(context)
                           .textTheme
                           .bodySmall
@@ -485,7 +486,7 @@ class _ProfileFooter extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('مدير النظام', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5)),
+                    Text('مدير النظام'.tr(), style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5)),
                     Text(email,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

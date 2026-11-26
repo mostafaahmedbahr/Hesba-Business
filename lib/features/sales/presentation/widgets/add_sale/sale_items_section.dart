@@ -5,7 +5,7 @@ import '../../../../../common_imports.dart';
 import '../../../../../core/models/product.dart';
 import '../../widgets/sale_product_card.dart';
 
-/// قسم الأصناف: عنوان + كروت الأصناف + زر "إضافة صنف".
+/// قسم الأصناف: عنوان + كروت الأصناف + زر "إضافة صنف".tr().
 class SaleItemsSection extends StatelessWidget {
   final bool isDark;
   final int itemsCount;

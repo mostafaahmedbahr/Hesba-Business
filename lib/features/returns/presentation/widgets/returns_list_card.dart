@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../../common_imports.dart';
 import '../../../../core/utils/phone_contact.dart';
 import '../../data/models/return_model.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// كارت مرتجع مختصر — ضغطة تفتح التفاصيل.
 class ReturnsListCard extends StatefulWidget {
@@ -25,7 +26,7 @@ class _ReturnsListCardState extends State<ReturnsListCard> {
     final dateStr = DateFormat('dd/MM/yyyy  •  hh:mm a', 'ar').format(ret.createdAt);
     final idShort = ret.returnId.length >= 6 ? ret.returnId.substring(0, 6) : ret.returnId;
     final itemsLabel = ret.items.isEmpty
-        ? (ret.reason.isEmpty ? 'مرتجع' : ret.reason)
+        ? (ret.reason.isEmpty ? 'مرتجع'.tr() : ret.reason)
         : ret.items.length == 1
             ? ret.items.first.productName
             : '${ret.items.first.productName} +${ret.items.length - 1}';
@@ -78,7 +79,7 @@ class _ReturnsListCardState extends State<ReturnsListCard> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text('-${ret.total.toStringAsFixed(2)}', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: AppTheme.danger, height: 1)),
-                      Text('ج.م', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w700, color: AppTheme.mutedGray)),
+                      Text('ج.م'.tr(), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w700, color: AppTheme.mutedGray)),
                     ],
                   ),
                   SizedBox(width: 6.w),
@@ -301,7 +302,7 @@ class _Details extends StatelessWidget {
                         ),
                       ),
                       SizedBox(width: 8.w),
-                      Text('${it.total.toStringAsFixed(2)} ج.م', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: AppTheme.slateGray)),
+                      Text(uiTr('${it.total.toStringAsFixed(2)} ج.م'), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: AppTheme.slateGray)),
                     ],
                   ),
                 )),

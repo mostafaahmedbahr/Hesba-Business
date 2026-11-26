@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../../core/theme/app_theme.dart';
 
@@ -59,7 +60,7 @@ class ExpenseCategoryChip extends StatelessWidget {
             Icon(icon, size: 17.sp, color: selected ? Colors.white : color),
             SizedBox(width: 7.w),
             Text(
-              label,
+              label.tr(),
               style: TextStyle(
                 fontSize: 12.5.sp,
                 fontWeight: selected ? FontWeight.w900 : FontWeight.w700,

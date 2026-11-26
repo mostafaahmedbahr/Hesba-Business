@@ -22,6 +22,8 @@ import '../widgets/add_expense/recurrence_section.dart';
 import '../widgets/add_expense/save_bar.dart';
 import '../widgets/add_expense/section_title.dart';
 import '../widgets/add_expense/time_picker_row.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// شاشة إضافة/تعديل مصروف (هيدر حي + شريط حفظ ثابت).
 class AddExpenseView extends StatefulWidget {
@@ -66,14 +68,14 @@ class _AddExpenseViewState extends State<AddExpenseView> {
   bool get isRecurring => _recurrence != ExpenseModel.recurrenceNone;
 
   String get _recurrenceHint {
-    const prefix = 'هتتسجّل تلقائيًا ';
+    final prefix = 'هتتسجّل تلقائيًا '.tr();
     switch (_recurrence) {
       case ExpenseModel.recurrenceDaily:
-        return '$prefixيوميًا — وإشعار قبل الميعاد بساعتين';
+        return uiTr('$prefixيوميًا — وإشعار قبل الميعاد بساعتين');
       case ExpenseModel.recurrenceWeekly:
-        return '$prefixأسبوعيًا — وإشعار قبل الميعاد بيوم';
+        return uiTr('$prefixأسبوعيًا — وإشعار قبل الميعاد بيوم');
       case ExpenseModel.recurrenceMonthly:
-        return '$prefixشهريًا — وإشعار قبل الميعاد بيومين';
+        return uiTr('$prefixشهريًا — وإشعار قبل الميعاد بيومين');
       default:
         return '';
     }
@@ -128,7 +130,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
     if (!innerContext.mounted) return;
     if (!_formKey.currentState!.validate()) return;
     if (_category.isEmpty) {
-      AppToast.error(innerContext, 'اختر تصنيف المصروف');
+      AppToast.error(innerContext, 'اختر تصنيف المصروف'.tr());
       return;
     }
     // تأكد من حل الـ IDs لو لسه فاضية.
@@ -264,12 +266,12 @@ class _AddExpenseViewState extends State<AddExpenseView> {
             HapticFeedback.mediumImpact();
             AppToast.success(
               ctx,
-              _isEditing ? 'تم تعديل المصروف بنجاح' : 'تم إضافة المصروف بنجاح',
+              _isEditing ? 'تم تعديل المصروف بنجاح'.tr() : 'تم إضافة المصروف بنجاح'.tr(),
             );
             Navigator.pop(ctx, true);
           }
           if (state.status == ExpensesStatus.error) {
-            AppToast.error(ctx, state.errorMessage ?? 'حدث خطأ');
+            AppToast.error(ctx, state.errorMessage ?? 'حدث خطأ'.tr());
           }
         },
         child: Builder(
@@ -295,7 +297,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              ExpenseSectionTitle('التصنيف', isDark: isDark),
+                              ExpenseSectionTitle('التصنيف'.tr(), isDark: isDark),
                               SizedBox(height: 10.h),
                               ExpenseCategorySection(
                                 category: _category,
@@ -306,7 +308,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
                               SizedBox(height: 20.h),
 
                               // المبلغ + العنوان.
-                              ExpenseSectionTitle('التفاصيل', isDark: isDark),
+                              ExpenseSectionTitle('التفاصيل'.tr(), isDark: isDark),
                               SizedBox(height: 10.h),
                               ExpenseDetailsCard(
                                 amountController: _amountController,
@@ -319,7 +321,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
                               SizedBox(height: 20.h),
 
                               // التكرار (مرة واحدة / يومي / أسبوعي / شهري).
-                              ExpenseSectionTitle('التكرار', isDark: isDark),
+                              ExpenseSectionTitle('التكرار'.tr(), isDark: isDark),
                               SizedBox(height: 10.h),
                               ExpenseRecurrenceSection(
                                 recurrence: _recurrence,
@@ -341,7 +343,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
 
                               // التاريخ + ملاحظة.
                               ExpenseSectionTitle(
-                                'التاريخ والملاحظات',
+                                'التاريخ والملاحظات'.tr(),
                                 isDark: isDark,
                               ),
                               SizedBox(height: 10.h),
@@ -353,8 +355,8 @@ class _AddExpenseViewState extends State<AddExpenseView> {
                               SizedBox(height: 12.h),
                               ExpenseField(
                                 controller: _noteController,
-                                label: 'ملاحظات (اختياري)',
-                                hint: 'ملاحظات إضافية...',
+                                label: 'ملاحظات (اختياري)'.tr(),
+                                hint: 'ملاحظات إضافية...'.tr(),
                                 icon: Icons.notes_rounded,
                                 isDark: isDark,
                                 maxLines: 2,

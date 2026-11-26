@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../core/theme/app_theme.dart';
 import '../../../data/models/debt_model.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// اختيار اتجاه عملية المورد: «عليّ فلوس» / «ليّا فلوس».
 class AddDebtDirectionSelector extends StatelessWidget {
@@ -22,8 +23,8 @@ class AddDebtDirectionSelector extends StatelessWidget {
       children: [
         Expanded(
           child: _DirectionCard(
-            title: 'عليّ فلوس',
-            subtitle: 'أدفع للمورد',
+            title: 'عليّ فلوس'.tr(),
+            subtitle: 'أدفع للمورد'.tr(),
             icon: Icons.call_made_rounded,
             color: AppTheme.danger,
             selected: direction == DebtDirection.payable,
@@ -33,8 +34,8 @@ class AddDebtDirectionSelector extends StatelessWidget {
         SizedBox(width: 10.w),
         Expanded(
           child: _DirectionCard(
-            title: 'ليّا فلوس',
-            subtitle: 'أحصّل من المورد',
+            title: 'ليّا فلوس'.tr(),
+            subtitle: 'أحصّل من المورد'.tr(),
             icon: Icons.call_received_rounded,
             color: AppTheme.successDark,
             selected: direction == DebtDirection.receivable,

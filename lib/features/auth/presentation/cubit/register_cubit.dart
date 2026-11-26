@@ -4,6 +4,7 @@ import '../../data/models/register_model.dart';
 import '../../data/repos/auth_repo.dart';
 import '../states/register_state.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class RegisterCubit extends Cubit<RegisterState> {
   final AuthRepo _authRepo;
@@ -55,14 +56,14 @@ class RegisterCubit extends Cubit<RegisterState> {
 
   String _mapError(dynamic error) {
     final msg = error.toString();
-    if (msg.contains('email-already-in-use')) return 'البريد الإلكتروني مستخدم بالفعل';
-    if (msg.contains('invalid-email')) return 'البريد الإلكتروني غير صالح';
-    if (msg.contains('weak-password')) return 'كلمة المرور ضعيفة جداً';
-    if (msg.contains('operation-not-allowed')) return 'إنشاء الحسابات غير متاح حالياً';
-    if (msg.contains('user-disabled')) return 'هذا الحساب معطل';
-    if (msg.contains('too-many-requests')) return 'محاولات كثيرة، حاول مرة أخرى لاحقاً';
-    if (msg.contains('permission-denied')) return 'حدث خطأ في قاعدة البيانات — راجع قواعد الأمان في Firebase';
-    if (msg.contains('network-request-failed')) return 'تحقق من اتصال الإنترنت';
-    return 'حدث خطأ أثناء إنشاء الحساب، حاول مرة أخرى';
+    if (msg.contains('email-already-in-use')) return 'البريد الإلكتروني مستخدم بالفعل'.tr();
+    if (msg.contains('invalid-email')) return 'البريد الإلكتروني غير صالح'.tr();
+    if (msg.contains('weak-password')) return 'كلمة المرور ضعيفة جداً'.tr();
+    if (msg.contains('operation-not-allowed')) return 'إنشاء الحسابات غير متاح حالياً'.tr();
+    if (msg.contains('user-disabled')) return 'هذا الحساب معطل'.tr();
+    if (msg.contains('too-many-requests')) return 'محاولات كثيرة، حاول مرة أخرى لاحقاً'.tr();
+    if (msg.contains('permission-denied')) return 'حدث خطأ في قاعدة البيانات — راجع قواعد الأمان في Firebase'.tr();
+    if (msg.contains('network-request-failed')) return 'تحقق من اتصال الإنترنت'.tr();
+    return 'حدث خطأ أثناء إنشاء الحساب، حاول مرة أخرى'.tr();
   }
 }

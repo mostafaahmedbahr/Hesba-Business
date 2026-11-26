@@ -11,6 +11,8 @@ import 'package:hesba/features/admin/data/repos/admin_repo.dart';
 import 'package:hesba/features/admin/presentation/cubit/admin_list_cubit.dart';
 import 'package:hesba/features/admin/presentation/cubit/request_review_cubit.dart';
 import 'package:hesba/features/subscription/data/models/subscription_request_model.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 class SubscriptionRequestsView extends StatefulWidget {
   const SubscriptionRequestsView({super.key});
@@ -42,7 +44,7 @@ class _SubscriptionRequestsViewState extends State<SubscriptionRequestsView> {
           if (state.loading && state.docs.isEmpty) {
             return Column(
               children: [
-                AdminSearchField(controller: _searchCtrl, hint: 'ابحث بالمحل أو المالك أو الهاتف...', enabled: false),
+                AdminSearchField(controller: _searchCtrl, hint: 'ابحث بالمحل أو المالك أو الهاتف...'.tr(), enabled: false),
                 Expanded(child: LoadingWidget()),
               ],
             );
@@ -60,40 +62,40 @@ class _SubscriptionRequestsViewState extends State<SubscriptionRequestsView> {
             onRefresh: () => context.read<AdminListCubit>().firstPage(),
             child: Column(
               children: [
-                const AdminPageHeader(title: 'طلبات الاشتراك', description: 'مراجعة طلبات الدفع والموافقة عليها أو رفضها'),
+                AdminPageHeader(title: 'طلبات الاشتراك'.tr(), description: 'مراجعة طلبات الدفع والموافقة عليها أو رفضها'.tr()),
                 AdminSummaryHeader(
                   icon: Icons.receipt_long_outlined,
-                  title: _status == SubscriptionRequestModel.statusPending ? 'طلبات معلقة' : 'طلبات الاشتراك',
+                  title: _status == SubscriptionRequestModel.statusPending ? 'طلبات معلقة'.tr() : 'طلبات الاشتراك'.tr(),
                   total: state.docs.length,
-                  unit: 'طلب',
+                  unit: 'طلب'.tr(),
                   stats: [
                     if (_status == SubscriptionRequestModel.statusPending)
-                      'إجمالي المبالغ: ${AdminFmt.money(pendingTotal)}'
+                      uiTr('إجمالي المبالغ: ${AdminFmt.money(pendingTotal)}')
                     else
-                      'الحالة: ${_requestStatusLabel(_status)}'
+                      uiTr('الحالة: ${_requestStatusLabel(_status)}')
                   ],
                   loading: state.loading,
                   onRefresh: () => context.read<AdminListCubit>().firstPage(),
                 ),
                 AdminSearchField(
                   controller: _searchCtrl,
-                  hint: 'ابحث بالمحل أو المالك أو الهاتف...',
+                  hint: 'ابحث بالمحل أو المالك أو الهاتف...'.tr(),
                   onChanged: (v) => setState(() => _query = v),
                 ),
                 AdminFilterChips(
                   selected: _status,
                   onSelect: (k) => setState(() => _status = k),
                   items: [
-                    AdminChipItem(SubscriptionRequestModel.statusPending, 'معلقة', dot: AdminStatuses.colorOf('pending')),
-                    const AdminChipItem('all', 'الكل'),
-                    AdminChipItem(SubscriptionRequestModel.statusApproved, 'مقبولة', dot: AdminStatuses.colorOf('approved')),
-                    AdminChipItem(SubscriptionRequestModel.statusRejected, 'مرفوضة', dot: AdminStatuses.colorOf('rejected')),
+                    AdminChipItem(SubscriptionRequestModel.statusPending, 'معلقة'.tr(), dot: AdminStatuses.colorOf('pending')),
+                    AdminChipItem('all', 'الكل'.tr()),
+                    AdminChipItem(SubscriptionRequestModel.statusApproved, 'مقبولة'.tr(), dot: AdminStatuses.colorOf('approved')),
+                    AdminChipItem(SubscriptionRequestModel.statusRejected, 'مرفوضة'.tr(), dot: AdminStatuses.colorOf('rejected')),
                   ],
                 ),
                 if (searching)
                   AdminResultCount(
                     count: filtered.length,
-                    clearLabel: 'مسح البحث',
+                    clearLabel: 'مسح البحث'.tr(),
                     onClear: () => setState(() {
                       _query = '';
                       _searchCtrl.clear();
@@ -104,11 +106,11 @@ class _SubscriptionRequestsViewState extends State<SubscriptionRequestsView> {
                       ? adminEmpty(
                           Icons.receipt_long_outlined,
                           searching
-                              ? 'لا توجد نتائج مطابقة لبحثك'
+                              ? 'لا توجد نتائج مطابقة لبحثك'.tr()
                               : _status == SubscriptionRequestModel.statusPending
-                                  ? 'لا توجد طلبات معلقة'
-                                  : 'لا توجد طلبات بهذه الحالة',
-                          searching ? null : 'عند وصول طلب جديد سيظهر هنا')
+                                  ? 'لا توجد طلبات معلقة'.tr()
+                                  : 'لا توجد طلبات بهذه الحالة'.tr(),
+                          searching ? null : 'عند وصول طلب جديد سيظهر هنا'.tr())
                       : ListView.separated(
                           padding: const EdgeInsets.fromLTRB(0, AdminSpace.xs, 0, AdminSpace.lg),
                           itemCount: filtered.length,
@@ -126,7 +128,7 @@ class _SubscriptionRequestsViewState extends State<SubscriptionRequestsView> {
                 if (state.hasMore)
                   AdminLoadMore(
                     loading: state.loading,
-                    label: 'تحميل المزيد (${state.docs.length} معروض)',
+                    label: uiTr('تحميل المزيد (${state.docs.length} معروض)'),
                     onLoad: () => context.read<AdminListCubit>().nextPage(),
                   ),
               ],
@@ -166,10 +168,10 @@ class _SubscriptionRequestsViewState extends State<SubscriptionRequestsView> {
 
 String _requestStatusLabel(String s) {
   return switch (s) {
-    'pending' => 'معلق',
-    'approved' => 'مقبول',
-    'rejected' => 'مرفوض',
-    'all' => 'الكل',
+    'pending' => 'معلق'.tr(),
+    'approved' => 'مقبول'.tr(),
+    'rejected' => 'مرفوض'.tr(),
+    'all' => 'الكل'.tr(),
     _ => s,
   };
 }
@@ -251,10 +253,10 @@ class _RequestCard extends StatelessWidget {
 
 String _planLabel(String id) {
   return switch (id) {
-    'monthly' => 'شهري',
-    'threeMonths' => '3 شهور',
-    'sixMonths' => '6 شهور',
-    'yearly' => 'سنوي',
+    'monthly' => 'شهري'.tr(),
+    'threeMonths' => '3 شهور'.tr(),
+    'sixMonths' => '6 شهور'.tr(),
+    'yearly' => 'سنوي'.tr(),
     _ => id,
   };
 }
@@ -297,7 +299,7 @@ class _RequestDetailsDialogState extends State<RequestDetailsDialog> {
             child: BlocConsumer<RequestReviewCubit, RequestReviewState>(
               listener: (context, state) {
                 if (state is ReviewDone) {
-                  AppToast.success(context, state.approved ? 'تمت الموافقة على الطلب' : 'تم رفض الطلب');
+                  AppToast.success(context, state.approved ? 'تمت الموافقة على الطلب'.tr() : 'تم رفض الطلب'.tr());
                   Navigator.of(context).pop();
                 } else if (state is ReviewError) {
                   AppToast.error(context, state.message);
@@ -316,7 +318,7 @@ class _RequestDetailsDialogState extends State<RequestDetailsDialog> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('مراجعة طلب الاشتراك',
+                                Text('مراجعة طلب الاشتراك'.tr(),
                                     style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900)),
                                 const SizedBox(height: 2),
                                 Text('${r.shopName} — ${r.ownerName}',
@@ -356,13 +358,13 @@ class _RequestDetailsDialogState extends State<RequestDetailsDialog> {
                         const SizedBox(height: AdminSpace.md),
                         TextField(
                           controller: _reason,
-                          decoration: const InputDecoration(labelText: 'سبب الرفض (يظهر للمالك عند الرفض)'),
+                          decoration: InputDecoration(labelText: 'سبب الرفض (يظهر للمالك عند الرفض)'.tr()),
                           maxLines: 2,
                         ),
                       ],
                       if (!r.isPending && (r.adminNote?.isNotEmpty ?? false)) ...[
                         const SizedBox(height: AdminSpace.md),
-                        AdminInfoRow(icon: Icons.note_outlined, label: 'ملاحظة الإدارة', value: r.adminNote!),
+                        AdminInfoRow(icon: Icons.note_outlined, label: 'ملاحظة الإدارة'.tr(), value: r.adminNote!),
                       ],
                       const SizedBox(height: AdminSpace.xl),
                       Row(
@@ -376,17 +378,17 @@ class _RequestDetailsDialogState extends State<RequestDetailsDialog> {
                                         final cubit = context.read<RequestReviewCubit>();
                                         final ok = await showAdminConfirm(
                                           context,
-                                          title: 'موافقة على الطلب',
+                                          title: 'موافقة على الطلب'.tr(),
                                           message:
-                                              'سيتم تفعيل خطة «${r.plan.id}» (${r.plan.days} يوم) لهذا المحل، وتُضاف المدة لأي فترة سارية. متأكد؟',
-                                          confirmLabel: 'موافقة',
+                                              uiTr('سيتم تفعيل خطة «${r.plan.id}» (${r.plan.days} يوم) لهذا المحل، وتُضاف المدة لأي فترة سارية. متأكد؟'),
+                                          confirmLabel: 'موافقة'.tr(),
                                         );
                                         if (!ok) return;
                                         cubit.approve(r);
                                       },
                                 child: loading
                                     ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                                    : const Text('موافقة'),
+                                    : Text('موافقة'.tr()),
                               ),
                             ),
                             const SizedBox(width: AdminSpace.sm),
@@ -399,16 +401,16 @@ class _RequestDetailsDialogState extends State<RequestDetailsDialog> {
                                         final cubit = context.read<RequestReviewCubit>();
                                         final ok = await showAdminConfirm(
                                           context,
-                                          title: 'رفض الطلب',
+                                          title: 'رفض الطلب'.tr(),
                                           message:
-                                              'سيتم رفض الطلب. أي فترة اشتراك سارية لدى المحل تظل كما هي ولن يفقد صلاحية التعديل إلا بعد انتهائها. متأكد؟',
-                                          confirmLabel: 'رفض',
+                                              'سيتم رفض الطلب. أي فترة اشتراك سارية لدى المحل تظل كما هي ولن يفقد صلاحية التعديل إلا بعد انتهائها. متأكد؟'.tr(),
+                                          confirmLabel: 'رفض'.tr(),
                                           danger: true,
                                         );
                                         if (!ok) return;
                                         cubit.reject(r, _reason.text.trim());
                                       },
-                                child: const Text('رفض'),
+                                child: Text('رفض'.tr()),
                               ),
                             ),
                             const SizedBox(width: AdminSpace.sm),
@@ -416,7 +418,7 @@ class _RequestDetailsDialogState extends State<RequestDetailsDialog> {
                           Expanded(
                             child: FilledButton.tonal(
                               onPressed: () => Navigator.of(context).pop(),
-                              child: const Text('إغلاق'),
+                              child: Text('إغلاق'.tr()),
                             ),
                           ),
                         ],
@@ -447,15 +449,15 @@ class _ReceiptPane extends StatelessWidget {
             children: [
               const AdminIconTile(icon: Icons.receipt_long_outlined, color: AppTheme.primaryColor, size: 34, iconSize: 18),
               const SizedBox(width: AdminSpace.sm),
-              Text('إيصال الدفع', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
+              Text('إيصال الدفع'.tr(), style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
               const Spacer(),
               if (url.isNotEmpty)
-                Text('اضغط للتكبير', style: TextStyle(fontSize: 11, color: AdminColors.textMuted(context))),
+                Text('اضغط للتكبير'.tr(), style: TextStyle(fontSize: 11, color: AdminColors.textMuted(context))),
             ],
           ),
           const SizedBox(height: AdminSpace.md),
           if (url.isEmpty)
-            adminEmpty(Icons.image_not_supported_outlined, 'لا يوجد إيصال مرفق')
+            adminEmpty(Icons.image_not_supported_outlined, 'لا يوجد إيصال مرفق'.tr())
           else
             Center(
               child: InkWell(
@@ -467,7 +469,7 @@ class _ReceiptPane extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AdminRadius.card),
                   child: CachedNetworkImage(imageUrl: url, height: 300, fit: BoxFit.contain, memCacheHeight: 600,
                       placeholder: (_, _) => const Center(child: CircularProgressIndicator()),
-                      errorWidget: (_, _, _) => adminEmpty(Icons.broken_image_outlined, 'تعذر تحميل الإيصال')),
+                      errorWidget: (_, _, _) => adminEmpty(Icons.broken_image_outlined, 'تعذر تحميل الإيصال'.tr())),
                 ),
               ),
             ),
@@ -484,7 +486,7 @@ class _ReceiptFullScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('إيصال الدفع')),
+      appBar: AppBar(title: Text('إيصال الدفع'.tr())),
       body: InteractiveViewer(
         minScale: 0.5,
         maxScale: 4,
@@ -513,33 +515,33 @@ class _DetailsPane extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('بيانات الطلب', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
+          Text('بيانات الطلب'.tr(), style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
           const SizedBox(height: AdminSpace.md),
-          CopyableId(id: r.requestId, full: true, label: 'معرف الطلب'),
+          CopyableId(id: r.requestId, full: true, label: 'معرف الطلب'.tr()),
           const Divider(height: 20),
           if (r.userId.isNotEmpty) ...[
-            CopyableId(id: r.userId, full: true, label: 'معرف المستخدم'),
+            CopyableId(id: r.userId, full: true, label: 'معرف المستخدم'.tr()),
             const Divider(height: 20),
           ],
-          AdminInfoRow(icon: Icons.storefront_outlined, label: 'المحل', value: r.shopName),
+          AdminInfoRow(icon: Icons.storefront_outlined, label: 'المحل'.tr(), value: r.shopName),
           const Divider(height: 14),
-          AdminInfoRow(icon: Icons.person_outline, label: 'المالك', value: r.ownerName),
+          AdminInfoRow(icon: Icons.person_outline, label: 'المالك'.tr(), value: r.ownerName),
           const Divider(height: 14),
-          AdminInfoRow(icon: Icons.phone_outlined, label: 'الهاتف', value: r.phone),
+          AdminInfoRow(icon: Icons.phone_outlined, label: 'الهاتف'.tr(), value: r.phone),
           const Divider(height: 14),
           AdminInfoRow(
               icon: Icons.workspace_premium_outlined,
-              label: 'الباقة',
-              value: '${_planLabel(r.plan.id)} • ${r.plan.days} يوم'),
+              label: 'الباقة'.tr(),
+              value: uiTr('${_planLabel(r.plan.id)} • ${r.plan.days} يوم')),
           const Divider(height: 14),
-          AdminInfoRow(icon: Icons.payments_outlined, label: 'المبلغ', value: AdminFmt.money(r.amount)),
+          AdminInfoRow(icon: Icons.payments_outlined, label: 'المبلغ'.tr(), value: AdminFmt.money(r.amount)),
           const Divider(height: 14),
-          AdminInfoRow(icon: Icons.wallet_outlined, label: 'طريقة الدفع', value: _payLabel(r.paymentMethod)),
+          AdminInfoRow(icon: Icons.wallet_outlined, label: 'طريقة الدفع'.tr(), value: _payLabel(r.paymentMethod)),
           const Divider(height: 14),
-          AdminInfoRow(icon: Icons.calendar_month_outlined, label: 'تاريخ الطلب', value: AdminFmt.dateTime(r.createdAt)),
+          AdminInfoRow(icon: Icons.calendar_month_outlined, label: 'تاريخ الطلب'.tr(), value: AdminFmt.dateTime(r.createdAt)),
           if (r.reviewedAt != null) ...[
             const Divider(height: 14),
-            AdminInfoRow(icon: Icons.rate_review_outlined, label: 'تاريخ المراجعة', value: AdminFmt.dateTime(r.reviewedAt)),
+            AdminInfoRow(icon: Icons.rate_review_outlined, label: 'تاريخ المراجعة'.tr(), value: AdminFmt.dateTime(r.reviewedAt)),
           ],
         ],
       ),
@@ -548,9 +550,9 @@ class _DetailsPane extends StatelessWidget {
 
   String _payLabel(String id) {
     return switch (id) {
-      'instapay' => 'انستاباي',
-      'vodafone_cash' => 'فودافون كاش',
-      'etisalat_cash' => 'اتصالات كاش',
+      'instapay' => 'انستاباي'.tr(),
+      'vodafone_cash' => 'فودافون كاش'.tr(),
+      'etisalat_cash' => 'اتصالات كاش'.tr(),
       '' => '-',
       _ => id,
     };

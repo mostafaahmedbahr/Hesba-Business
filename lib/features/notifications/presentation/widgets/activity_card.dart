@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../common_imports.dart';
 import '../../data/models/activity_model.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// كارت عملية واحدة (بيع/منتج/مصروف/مرتجع).
 class ActivityCard extends StatelessWidget {
@@ -145,10 +146,10 @@ List<Color> _gradFor(ActivityType t) {
 /// وقت مختصر (منذ د/س/يوم).
 String _timeAgo(DateTime dt) {
   final diff = DateTime.now().difference(dt);
-  if (diff.inMinutes < 1) return 'الآن';
-  if (diff.inMinutes < 60) return 'منذ ${diff.inMinutes} د';
-  if (diff.inHours < 24) return 'منذ ${diff.inHours} س';
-  if (diff.inDays == 1) return 'أمس';
-  if (diff.inDays < 7) return 'منذ ${diff.inDays} يوم';
+  if (diff.inMinutes < 1) return 'الآن'.tr();
+  if (diff.inMinutes < 60) return uiTr('منذ ${diff.inMinutes} د');
+  if (diff.inHours < 24) return uiTr('منذ ${diff.inHours} س');
+  if (diff.inDays == 1) return 'أمس'.tr();
+  if (diff.inDays < 7) return uiTr('منذ ${diff.inDays} يوم');
   return DateFormat('d MMM', 'ar').format(dt);
 }

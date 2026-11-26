@@ -9,6 +9,7 @@ import '../widgets/reminder_form_sheet.dart';
 import '../../../subscription/presentation/subscription_gate.dart';
 import 'notification_state.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// فيو موديل التذكيرات (كل لوجيك الشاشة هنا).
 class NotificationCubit extends Cubit<NotificationState> {
@@ -94,7 +95,7 @@ class NotificationCubit extends Cubit<NotificationState> {
     try {
       await _repo.sendTestNotification(
         title: r.title,
-        body: r.body.isEmpty ? 'تذكير حسبة' : r.body,
+        body: r.body.isEmpty ? 'تذكير حسبة'.tr() : r.body,
       );
       return true;
     } catch (logErr, logSt) {
@@ -198,9 +199,9 @@ class NotificationCubit extends Cubit<NotificationState> {
     final ok = await context.read<NotificationCubit>().testReminder(r);
     if (!context.mounted) return;
     if (ok) {
-      AppToast.success(context, 'وصل؟ كده الإشعارات شغالة وتذكيرك هييجي في وقته');
+      AppToast.success(context, 'وصل؟ كده الإشعارات شغالة وتذكيرك هييجي في وقته'.tr());
     } else {
-      AppToast.error(context, 'موصلش — فعّل إذن الإشعارات من إعدادات الموبايل');
+      AppToast.error(context, 'موصلش — فعّل إذن الإشعارات من إعدادات الموبايل'.tr());
     }
   }
 

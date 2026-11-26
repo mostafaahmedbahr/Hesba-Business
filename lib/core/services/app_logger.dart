@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// شدة الحدث المُسجّل.
 enum LoggingSeverity { debug, info, warning, error }
@@ -63,7 +64,7 @@ abstract class AppLogger {
   }) =>
       _record(
         severity,
-        'خطأ غير قاتل في $context',
+        uiTr('خطأ غير قاتل في $context'),
         context: context,
         error: error,
         stackTrace: stackTrace,
@@ -103,7 +104,7 @@ abstract class AppLogger {
         stackTrace: stackTrace,
       );
 
-  /// مسح الحلقة (زر "مسح السجل" في شاشة التشخيص).
+  /// مسح الحلقة (زر "مسح السجل".tr() في شاشة التشخيص).
   static void clear() => _entries.clear();
 
   /// يربط معالجات الأخطاء العامة — يُستدعى مرة واحدة في main().

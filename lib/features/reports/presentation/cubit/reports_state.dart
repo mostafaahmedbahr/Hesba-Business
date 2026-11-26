@@ -4,6 +4,7 @@ import '../../../expenses/data/models/expense_model.dart';
 import '../../../returns/data/models/return_model.dart';
 import '../../../sales/data/models/sale_model.dart';
 import '../../data/report_metrics.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// فترة التقرير.
 enum ReportPeriod { today, week, month, all }
@@ -13,13 +14,13 @@ extension ReportPeriodX on ReportPeriod {
   String get label {
     switch (this) {
       case ReportPeriod.today:
-        return 'اليوم';
+        return 'اليوم'.tr();
       case ReportPeriod.week:
-        return '7 أيام';
+        return '7 أيام'.tr();
       case ReportPeriod.month:
-        return '30 يوم';
+        return '30 يوم'.tr();
       case ReportPeriod.all:
-        return 'الكل';
+        return 'الكل'.tr();
     }
   }
 
@@ -144,7 +145,7 @@ class ReportsState extends Equatable {
   List<Map<String, dynamic>> get recentActivity {
     final all = <Map<String, dynamic>>[];
     for (final s in sales.take(3)) {
-      all.add({'title': s.items.isEmpty ? 'فاتورة' : s.items.first.productName, 'amount': s.total, 'date': s.createdAt, 'kind': 0});
+      all.add({'title': s.items.isEmpty ? 'فاتورة'.tr() : s.items.first.productName, 'amount': s.total, 'date': s.createdAt, 'kind': 0});
     }
     for (final r in returns.take(2)) {
       all.add({'title': r.items.isEmpty ? r.reason : r.items.first.productName, 'amount': -r.total, 'date': r.createdAt, 'kind': 1});

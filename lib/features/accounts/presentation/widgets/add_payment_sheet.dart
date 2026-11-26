@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../../../../common_imports.dart';
 import '../../data/models/debt_model.dart';
 import 'accounts_utils.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// يفتح Bottom Sheet تسجيل دفعة على مديونية — جزئي أو كامل.
 ///
@@ -61,11 +62,11 @@ class _AddPaymentSheetState extends State<_AddPaymentSheet> {
       _amountCtrl.text.trim().replaceAll(',', ''),
     );
     if (amount == null || amount <= 0) {
-      setState(() => _amountError = 'أدخل مبلغًا أكبر من صفر');
+      setState(() => _amountError = 'أدخل مبلغًا أكبر من صفر'.tr());
       return;
     }
     if (amount > widget.debt.remaining + 0.0001) {
-      setState(() => _amountError = 'الدفعة أكبر من المتبقي');
+      setState(() => _amountError = 'الدفعة أكبر من المتبقي'.tr());
       return;
     }
     setState(() {
@@ -138,7 +139,7 @@ class _AddPaymentSheetState extends State<_AddPaymentSheet> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'تسجيل دفعة',
+                          'تسجيل دفعة'.tr(),
                           style: TextStyle(
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w900,
@@ -182,19 +183,19 @@ class _AddPaymentSheetState extends State<_AddPaymentSheet> {
                 child: Row(
                   children: [
                     _SummaryCell(
-                      label: 'الأصل',
+                      label: 'الأصل'.tr(),
                       value: moneyWithCurrency(debt.amount),
                       color: textColor,
                     ),
                     _SummaryDivider(),
                     _SummaryCell(
-                      label: 'المدفوع',
+                      label: 'المدفوع'.tr(),
                       value: moneyWithCurrency(debt.paidAmount),
                       color: AppTheme.successDark,
                     ),
                     _SummaryDivider(),
                     _SummaryCell(
-                      label: 'المتبقي',
+                      label: 'المتبقي'.tr(),
                       value: moneyWithCurrency(debt.remaining),
                       color: accent,
                     ),
@@ -231,7 +232,7 @@ class _AddPaymentSheetState extends State<_AddPaymentSheet> {
                           child: Center(
                             widthFactor: 1,
                             child: Text(
-                              'ج.م',
+                              'ج.م'.tr(),
                               style: TextStyle(
                                 fontSize: 12.sp,
                                 fontWeight: FontWeight.w900,
@@ -280,7 +281,7 @@ class _AddPaymentSheetState extends State<_AddPaymentSheet> {
                             ),
                             SizedBox(height: 2.h),
                             Text(
-                              'دفع الكل',
+                              'دفع الكل'.tr(),
                               style: TextStyle(
                                 fontSize: 10.sp,
                                 fontWeight: FontWeight.w900,
@@ -304,7 +305,7 @@ class _AddPaymentSheetState extends State<_AddPaymentSheet> {
                   filled: true,
                   fillColor:
                       isDark ? AppTheme.darkSurfaceAlt : AppTheme.canvasLight,
-                  hintText: 'ملاحظة على الدفعة (اختياري)',
+                  hintText: 'ملاحظة على الدفعة (اختياري)'.tr(),
                   prefixIcon: Icon(
                     Icons.notes_rounded,
                     size: 18.sp,
@@ -358,7 +359,7 @@ class _AddPaymentSheetState extends State<_AddPaymentSheet> {
                           ),
                         )
                       : Text(
-                          'حفظ الدفعة',
+                          'حفظ الدفعة'.tr(),
                           style: TextStyle(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w900,

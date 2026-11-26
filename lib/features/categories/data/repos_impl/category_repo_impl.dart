@@ -6,6 +6,7 @@ import '../models/category_shop_context.dart';
 import '../repos/category_repo.dart';
 import 'package:hesba/core/services/app_logger.dart';
 import 'package:hesba/core/services/shop_id_resolver.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// تنفيذ Firestore لعقد الأقسام.
 class CategoryRepoImpl implements CategoryRepo {
@@ -80,10 +81,10 @@ class CategoryRepoImpl implements CategoryRepo {
   @override
   Future<void> addCategory(String shopId, String category) async {
     final resolved = await _resolveShopId(shopId);
-    if (resolved == null || resolved.isEmpty) throw Exception('لم يتم العثور على المتجر');
+    if (resolved == null || resolved.isEmpty) throw Exception('لم يتم العثور على المتجر'.tr());
     final trimmed = category.trim();
-    if (trimmed.isEmpty) throw Exception('اسم القسم مطلوب');
-    if (trimmed.length < 2) throw Exception('الاسم قصير جداً');
+    if (trimmed.isEmpty) throw Exception('اسم القسم مطلوب'.tr());
+    if (trimmed.length < 2) throw Exception('الاسم قصير جداً'.tr());
     final doc = _shopDoc(resolved);
     // transaction عشان جهازين مايضربوش بعض.
     await _firestore.runTransaction((tx) async {
@@ -92,7 +93,7 @@ class CategoryRepoImpl implements CategoryRepo {
       final existing = existingRaw?.map((e) => e.toString().trim()).where((e) => e.isNotEmpty).toList() ?? <String>[];
       // يمنع التكرار.
       if (existing.map((e) => e.toLowerCase()).toSet().contains(trimmed.toLowerCase())) {
-        throw Exception('القسم موجود بالفعل');
+        throw Exception('القسم موجود بالفعل'.tr());
       }
       final updated = [...existing, trimmed];
       if (snap.exists) {
@@ -106,7 +107,7 @@ class CategoryRepoImpl implements CategoryRepo {
   @override
   Future<void> removeCategory(String shopId, String category) async {
     final resolved = await _resolveShopId(shopId);
-    if (resolved == null || resolved.isEmpty) throw Exception('لم يتم العثور على المتجر');
+    if (resolved == null || resolved.isEmpty) throw Exception('لم يتم العثور على المتجر'.tr());
     final doc = _shopDoc(resolved);
     final snap = await doc.get();
     if (!snap.exists) return;

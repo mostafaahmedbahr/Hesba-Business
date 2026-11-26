@@ -1,4 +1,5 @@
 import '../../../../core/models/product.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 enum ProductsStatus { loading, success, failure }
 
@@ -7,7 +8,7 @@ class ProductsState {
   final List<Product> products;
   final String? errorMessage;
 
-  /// Shop business type (e.g. 'محل ملابس') - selects which product
+  /// Shop business type (e.g. 'محل ملابس'.tr()) - selects which product
   /// sub-categories the user can pick from.
   final String? shopType;
 
@@ -17,7 +18,7 @@ class ProductsState {
   /// فلتر القسم (الكل + الأقسام).
   final String categoryFilter;
 
-  const ProductsState({
+  ProductsState({
     this.status = ProductsStatus.loading,
     this.products = const [],
     this.errorMessage,
@@ -34,7 +35,8 @@ class ProductsState {
           p.name.toLowerCase().contains(q) ||
           p.code.toLowerCase().contains(q) ||
           p.category.toLowerCase().contains(q);
-      final matchesCat = categoryFilter == 'الكل' || p.category == categoryFilter;
+      final isAll = categoryFilter == 'الكل' || categoryFilter == 'الكل'.tr();
+      final matchesCat = isAll || p.category.tr() == categoryFilter;
       return matchesSearch && matchesCat;
     }).toList();
   }
@@ -55,7 +57,7 @@ class ProductsState {
 
   /// الأقسام الموجودة (للفلتر).
   List<String> get categories {
-    final set = <String>{'الكل'};
+    final set = <String>{'الكل'.tr()};
     for (final p in products) {
       if (p.category.trim().isNotEmpty) set.add(p.category);
     }

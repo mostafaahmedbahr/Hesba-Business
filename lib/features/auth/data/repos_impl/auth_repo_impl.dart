@@ -7,6 +7,7 @@ import '../../../subscription/data/repos/subscription_repo.dart';
 import '../models/register_model.dart';
 import '../repos/auth_repo.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class AuthRepoImpl implements AuthRepo {
   final FirebaseAuth firebaseAuth;
@@ -53,7 +54,7 @@ class AuthRepoImpl implements AuthRepo {
     final user = credential.user;
 
     if (user == null) {
-      throw Exception('فشل إنشاء الحساب');
+      throw Exception('فشل إنشاء الحساب'.tr());
     }
 
     // 2. Generate shop ID

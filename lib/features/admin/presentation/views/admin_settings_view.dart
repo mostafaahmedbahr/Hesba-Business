@@ -19,6 +19,8 @@ import 'package:hesba/features/admin/presentation/widgets/admin_settings/restore
 import 'package:hesba/features/admin/presentation/widgets/admin_settings/save_bar.dart';
 import 'package:hesba/features/admin/presentation/widgets/admin_settings/section.dart';
 import 'package:hesba/features/admin/presentation/widgets/admin_settings/trial_section.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 class AdminSettingsView extends StatelessWidget {
   const AdminSettingsView({super.key});
@@ -30,7 +32,7 @@ class AdminSettingsView extends StatelessWidget {
       child: BlocConsumer<AdminSettingsCubit, AdminSettingsState>(
         listener: (context, state) {
           if (state is SettingsSaved) {
-            AppToast.success(context, 'تم حفظ الإعدادات وتحديثها للعملاء');
+            AppToast.success(context, 'تم حفظ الإعدادات وتحديثها للعملاء'.tr());
           } else if (state is SettingsSaveFailed) {
             AppToast.error(context, state.message);
           }
@@ -175,11 +177,11 @@ class _SettingsFormState extends State<_SettingsForm> {
     FocusScope.of(context).unfocus();
     final ok = await showAdminConfirm(
       context,
-      title: 'استعادة الإعدادات الافتراضية',
+      title: 'استعادة الإعدادات الافتراضية'.tr(),
       message:
-          'هيتم استبدال الأسعار والفترة التجريبية وأرقام الدفع بالقيم الافتراضية. '
-          'التغييرات مش هتتحفظ غير لما تضغط "حفظ الإعدادات".',
-      confirmLabel: 'استعادة',
+          'هيتم استبدال الأسعار والفترة التجريبية وأرقام الدفع بالقيم الافتراضية. '.tr() +
+          'التغييرات مش هتتحفظ غير لما تضغط "حفظ الإعدادات".'.tr(),
+      confirmLabel: 'استعادة'.tr(),
       danger: true,
     );
     if (!ok || !mounted) return;
@@ -217,8 +219,8 @@ class _SettingsFormState extends State<_SettingsForm> {
     final plans = <PlanSpec>[
       PlanSpec(
         id: 'monthly',
-        title: 'الباقة الشهرية',
-        subtitle: 'الأساس — دفع كل شهر',
+        title: 'الباقة الشهرية'.tr(),
+        subtitle: 'الأساس — دفع كل شهر'.tr(),
         controller: _monthly,
         months: 1,
         icon: Icons.calendar_view_month_rounded,
@@ -226,8 +228,8 @@ class _SettingsFormState extends State<_SettingsForm> {
       ),
       PlanSpec(
         id: 'threeMonths',
-        title: 'باقة 3 شهور',
-        subtitle: 'مناسبة للمحلات الموسمية',
+        title: 'باقة 3 شهور'.tr(),
+        subtitle: 'مناسبة للمحلات الموسمية'.tr(),
         controller: _three,
         months: 3,
         icon: Icons.date_range_rounded,
@@ -235,8 +237,8 @@ class _SettingsFormState extends State<_SettingsForm> {
       ),
       PlanSpec(
         id: 'sixMonths',
-        title: 'باقة 6 شهور',
-        subtitle: 'توفير أكبر لمدة أطول',
+        title: 'باقة 6 شهور'.tr(),
+        subtitle: 'توفير أكبر لمدة أطول'.tr(),
         controller: _six,
         months: 6,
         icon: Icons.calendar_month_rounded,
@@ -244,8 +246,8 @@ class _SettingsFormState extends State<_SettingsForm> {
       ),
       PlanSpec(
         id: 'yearly',
-        title: 'الباقة السنوية',
-        subtitle: 'أفضل قيمة على المدى الطويل',
+        title: 'الباقة السنوية'.tr(),
+        subtitle: 'أفضل قيمة على المدى الطويل'.tr(),
         controller: _yearly,
         months: 12,
         icon: Icons.workspace_premium_rounded,
@@ -268,12 +270,12 @@ class _SettingsFormState extends State<_SettingsForm> {
     );
 
     final pricing = SettingsSection(
-      title: 'أسعار الباقات',
-      subtitle: 'الأسعار اللي بتظهر للعميل عند تجديد الاشتراك — بالجنيه المصري',
+      title: 'أسعار الباقات'.tr(),
+      subtitle: 'الأسعار اللي بتظهر للعميل عند تجديد الاشتراك — بالجنيه المصري'.tr(),
       icon: Icons.sell_outlined,
       color: AppTheme.primaryColor,
       trailing: SettingsSectionTag(
-        label: '${plans.length} باقات',
+        label: uiTr('${plans.length} باقات'),
         color: AppTheme.primaryColor,
       ),
       child: LayoutBuilder(
@@ -312,12 +314,12 @@ class _SettingsFormState extends State<_SettingsForm> {
     );
 
     final payments = SettingsSection(
-      title: 'طرق الدفع',
-      subtitle: 'الأرقام اللي بيحوّل عليها العميل عند تجديد الاشتراك',
+      title: 'طرق الدفع'.tr(),
+      subtitle: 'الأرقام اللي بيحوّل عليها العميل عند تجديد الاشتراك'.tr(),
       icon: Icons.account_balance_wallet_outlined,
       color: AppTheme.successColor,
       trailing: SettingsSectionTag(
-        label: '${widget.settings.paymentMethods.length} طرق',
+        label: uiTr('${widget.settings.paymentMethods.length} طرق'),
         color: AppTheme.successColor,
       ),
       child: Column(
@@ -426,8 +428,8 @@ class _SettingsFormState extends State<_SettingsForm> {
                       ),
                     ),
                     icon: const Icon(Icons.bug_report_outlined, size: 18),
-                    label: const Text(
-                      'سجل التشخيص (الأخطاء الأخيرة)',
+                    label: Text(
+                      'سجل التشخيص (الأخطاء الأخيرة)'.tr(),
                       style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
                     ),
                   ),

@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../core/theme/app_theme.dart';
 import '../../../../dashboard/presentation/states/dashboard_state.dart';
 import 'home_amount_format.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// كارت "صافي مبيعات اليوم" — المبيعات ناقص المرتجعات.
 class NetSalesCard extends StatelessWidget {
@@ -147,8 +148,8 @@ class NetSalesCard extends StatelessWidget {
                     Flexible(
                       child: Text(
                         hasReturns
-                            ? 'المبيعات ${formatHomeAmount(sales)} - المرتجعات ${formatHomeAmount(returns)}'
-                            : 'إجمالي مبيعات اليوم ${formatHomeAmount(sales)} $currency',
+                            ? uiTr('المبيعات ${formatHomeAmount(sales)} - المرتجعات ${formatHomeAmount(returns)}')
+                            : uiTr('إجمالي مبيعات اليوم ${formatHomeAmount(sales)} $currency'),
                         style: TextStyle(
                             fontSize: 11.sp,
                             color: Colors.white.withValues(alpha: 0.92),

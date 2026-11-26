@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 extension StringExtensions on String {
   String get capitalize {
@@ -16,6 +17,6 @@ extension DateTimeExtensions on DateTime {
 }
 
 extension DoubleExtensions on double {
-  String get toCurrency => '${toStringAsFixed(2)} ج.م';
+  String get toCurrency => uiTr('${toStringAsFixed(2)} ج.م');
   String get toFixed2 => toStringAsFixed(2);
 }

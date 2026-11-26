@@ -10,6 +10,8 @@ import '../states/debt_details_state.dart';
 import '../widgets/account_bits.dart';
 import '../widgets/accounts_utils.dart';
 import '../widgets/add_payment_sheet.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// كشف الحساب — تفاصيل مديونية واحدة + سجل كل الحركات والدفعات.
 ///
@@ -46,11 +48,11 @@ class _DebtDetailsBody extends StatelessWidget {
         final ok = await cubit.addPayment(amount: amount, note: note);
         if (ok) {
           if (context.mounted) {
-            AppToast.success(context, 'تم تسجيل الدفعة بنجاح');
+            AppToast.success(context, 'تم تسجيل الدفعة بنجاح'.tr());
           }
           return null;
         }
-        return cubit.state.errorMessage ?? 'تعذر تسجيل الدفعة';
+        return cubit.state.errorMessage ?? 'تعذر تسجيل الدفعة'.tr();
       },
     );
   }
@@ -69,7 +71,7 @@ class _DebtDetailsBody extends StatelessWidget {
         // error with an explicit retry instead of an endless loader.
         if (state.status == DebtDetailsStatus.failure) {
           return Scaffold(
-            appBar: AppBar(title: const Text('كشف الحساب')),
+            appBar: AppBar(title: Text('كشف الحساب'.tr())),
             body: Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
@@ -77,14 +79,14 @@ class _DebtDetailsBody extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      state.errorMessage ?? 'تعذر قراءة الحساب',
+                      state.errorMessage ?? 'تعذر قراءة الحساب'.tr(),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () =>
                           context.read<DebtDetailsCubit>().refresh(),
-                      child: const Text('إعادة المحاولة'),
+                      child: Text('إعادة المحاولة'.tr()),
                     ),
                   ],
                 ),
@@ -111,8 +113,8 @@ class _DebtDetailsBody extends StatelessWidget {
             scrolledUnderElevation: 0,
             surfaceTintColor: Colors.transparent,
             centerTitle: true,
-            title: const Text(
-              'كشف الحساب',
+            title: Text(
+              'كشف الحساب'.tr(),
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w800,
@@ -121,7 +123,7 @@ class _DebtDetailsBody extends StatelessWidget {
             ),
             actions: [
               IconButton(
-                tooltip: 'اتصال / واتساب',
+                tooltip: 'اتصال / واتساب'.tr(),
                 icon: const Icon(Icons.phone_in_talk_rounded),
                 onPressed: () =>
                     showPhoneActionsSheet(context, debt.personPhone),
@@ -138,7 +140,7 @@ class _DebtDetailsBody extends StatelessWidget {
                     ? ElevatedButton.icon(
                         onPressed: null,
                         icon: const Icon(Icons.verified_rounded),
-                        label: const Text('الحساب مسدد بالكامل'),
+                        label: Text('الحساب مسدد بالكامل'.tr()),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.successDark,
                           disabledBackgroundColor:
@@ -154,7 +156,7 @@ class _DebtDetailsBody extends StatelessWidget {
                         onPressed: () => _openPaymentSheet(context),
                         icon: const Icon(Icons.add_rounded),
                         label: Text(
-                          'تسجيل دفعة — متبقي ${moneyWithCurrency(debt.remaining)}',
+                          uiTr('تسجيل دفعة — متبقي ${moneyWithCurrency(debt.remaining)}'),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.primaryColor,
@@ -200,7 +202,7 @@ class _DebtDetailsBody extends StatelessWidget {
                         ),
                         SizedBox(width: 6.w),
                         Text(
-                          'سجل الحركات',
+                          'سجل الحركات'.tr(),
                           style: TextStyle(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w900,
@@ -230,7 +232,7 @@ class _DebtDetailsBody extends StatelessWidget {
                         const Spacer(),
                         Flexible(
                           child: Text(
-                            'لا يُحذف السجل بعد السداد',
+                            'لا يُحذف السجل بعد السداد'.tr(),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -253,7 +255,7 @@ class _DebtDetailsBody extends StatelessWidget {
                       _TimelineTile(
                         icon: Icons.note_add_rounded,
                         iconColor: accent,
-                        title: 'تسجيل المديونية',
+                        title: 'تسجيل المديونية'.tr(),
                         amount: '+${moneyWithCurrency(debt.amount)}',
                         amountColor: accent,
                         date: debt.createdAt,
@@ -266,7 +268,7 @@ class _DebtDetailsBody extends StatelessWidget {
                         (p) => _TimelineTile(
                           icon: Icons.payments_rounded,
                           iconColor: AppTheme.successDark,
-                          title: 'دفعة',
+                          title: 'دفعة'.tr(),
                           amount: '-${moneyWithCurrency(p.amount)}',
                           amountColor: AppTheme.successDark,
                           date: p.createdAt,
@@ -300,7 +302,7 @@ class _DebtDetailsBody extends StatelessWidget {
                                 ),
                                 SizedBox(width: 7.w),
                                 Text(
-                                  'تم سداد الحساب بالكامل',
+                                  'تم سداد الحساب بالكامل'.tr(),
                                   style: TextStyle(
                                     fontSize: 11.sp,
                                     fontWeight: FontWeight.w900,
@@ -407,7 +409,7 @@ class _PersonHeader extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8.r),
                       ),
                       child: Text(
-                        isSupplier ? 'مورد' : 'عميل',
+                        isSupplier ? 'مورد'.tr() : 'عميل'.tr(),
                         style: TextStyle(
                           fontSize: 9.5.sp,
                           fontWeight: FontWeight.w900,
@@ -462,19 +464,19 @@ class _SummaryCard extends StatelessWidget {
           Row(
             children: [
               _SummaryStat(
-                label: 'المبلغ الأصلي',
+                label: 'المبلغ الأصلي'.tr(),
                 value: moneyWithCurrency(debt.amount),
                 color: isDark ? Colors.white : AppTheme.ink,
               ),
               _VDivider(),
               _SummaryStat(
-                label: 'المدفوع',
+                label: 'المدفوع'.tr(),
                 value: moneyWithCurrency(debt.paidAmount),
                 color: AppTheme.successDark,
               ),
               _VDivider(),
               _SummaryStat(
-                label: 'المتبقي',
+                label: 'المتبقي'.tr(),
                 value: moneyWithCurrency(debt.remaining),
                 color: debt.status == DebtStatus.paid
                     ? AppTheme.successDark
@@ -487,7 +489,7 @@ class _SummaryCard extends StatelessWidget {
           Row(
             children: [
               Text(
-                'نسبة السداد',
+                'نسبة السداد'.tr(),
                 style: TextStyle(
                   fontSize: 9.5.sp,
                   fontWeight: FontWeight.w700,
@@ -496,7 +498,7 @@ class _SummaryCard extends StatelessWidget {
               ),
               const Spacer(),
               Text(
-                '$pct٪',
+                uiTr('$pct٪'),
                 style: TextStyle(
                   fontSize: 11.sp,
                   fontWeight: FontWeight.w900,

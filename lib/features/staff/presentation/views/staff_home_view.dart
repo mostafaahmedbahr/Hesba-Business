@@ -16,6 +16,8 @@ import '../../../expenses/presentation/views/add_expense_view.dart';
 import '../../../returns/presentation/views/add_return_view.dart';
 import '../../../sales/presentation/views/add_sale_view.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// الواجهة الوحidade التي يراها الحساب الفرعي. لا تحتوي على أي من
 /// تقارير أو أرباح أو بيانات — أربع عمليات إدخال فقط.
@@ -52,7 +54,7 @@ class _StaffHomeBodyState extends State<_StaffHomeBody> {
     try {
       final doc = await sl<AccountRepo>().getStaffActiveState(uid);
       if (doc == false && mounted) {
-        AppToast.warning(context, 'تم إيقاف هذا الحساب');
+        AppToast.warning(context, 'تم إيقاف هذا الحساب'.tr());
         await Future.delayed(const Duration(milliseconds: 400));
         if (!mounted) return;
         await sl<AccountRepo>().logout();
@@ -82,7 +84,7 @@ class _StaffHomeBodyState extends State<_StaffHomeBody> {
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         elevation: 0,
-        title: const Text('لوحة الموظف'),
+        title: Text('لوحة الموظف'.tr()),
         automaticallyImplyLeading: false,
         flexibleSpace: Container(
           decoration: const BoxDecoration(
@@ -95,17 +97,17 @@ class _StaffHomeBodyState extends State<_StaffHomeBody> {
         ),
         actions: [
           IconButton(
-            tooltip: 'تشخيص الصلاحيات',
+            tooltip: 'تشخيص الصلاحيات'.tr(),
             icon: const Icon(Icons.health_and_safety_outlined),
             onPressed: _showDiagnostics,
           ),
           IconButton(
-            tooltip: 'تغيير كلمة المرور',
+            tooltip: 'تغيير كلمة المرور'.tr(),
             icon: const Icon(Icons.lock_reset_outlined),
             onPressed: () => _open(context, const ChangePasswordView()),
           ),
           IconButton(
-            tooltip: 'تسجيل الخروج',
+            tooltip: 'تسجيل الخروج'.tr(),
             icon: const Icon(Icons.logout_rounded),
             onPressed: () => _logout(context),
           ),
@@ -133,26 +135,26 @@ class _StaffHomeBodyState extends State<_StaffHomeBody> {
                   Icon(Icons.badge_outlined, color: Colors.white.withValues(alpha: 0.9), size: 34.sp),
                   SizedBox(height: 12.h),
                   Text(
-                    'مرحبًا${label.isEmpty ? '' : '، $label'}',
+                    uiTr('مرحبًا${label.isEmpty ? '' : uiTr('، $label')}'),
                     style: TextStyle(fontSize: 19.sp, fontWeight: FontWeight.w900, color: Colors.white),
                   ),
                   SizedBox(height: 6.h),
                   Text(
-                    'يمكنك تسجيل عمليات البيع والشراء والمرتجع والمصروفات فقط.',
+                    'يمكنك تسجيل عمليات البيع والشراء والمرتجع والمصروفات فقط.'.tr(),
                     style: TextStyle(fontSize: 12.5.sp, color: Colors.white.withValues(alpha: 0.85)),
                   ),
                 ],
               ),
             ),
             SizedBox(height: 24.h),
-            Text('العمليات المسموحة',
+            Text('العمليات المسموحة'.tr(),
                 style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900)),
             SizedBox(height: 12.h),
             _ActionCard(
               icon: Icons.point_of_sale_rounded,
               color: AppTheme.primaryColor,
-              title: 'بيع جديد',
-              subtitle: 'تسجيل فاتورة بيع',
+              title: 'بيع جديد'.tr(),
+              subtitle: 'تسجيل فاتورة بيع'.tr(),
               // نفس شاشة البيع الكاملة زي صاحب المحل: 4 طرق دفع + عميل/مورد.
               onTap: () => _open(context, const AddSaleView()),
             ),
@@ -166,20 +168,20 @@ class _StaffHomeBodyState extends State<_StaffHomeBody> {
             _ActionCard(
               icon: Icons.assignment_return_outlined,
               color: AppTheme.warningAmber,
-              title: 'مرتجع جديد',
-              subtitle: 'تسجيل مرتجع على فاتورة',
+              title: 'مرتجع جديد'.tr(),
+              subtitle: 'تسجيل مرتجع على فاتورة'.tr(),
               onTap: () => _open(context, const AddReturnView(restricted: true)),
             ),
             _ActionCard(
               icon: Icons.savings_outlined,
               color: AppTheme.danger,
-              title: 'مصروف جديد',
-              subtitle: 'تسجيل مصروف',
+              title: 'مصروف جديد'.tr(),
+              subtitle: 'تسجيل مصروف'.tr(),
               onTap: () => _open(context, const AddExpenseView(restricted: true)),
             ),
             SizedBox(height: 24.h),
             Text(
-              'لا يمكن لهذا الحساب الاطلاع على التقارير أو الأرباح أو بيانات المحل، ولا إضافة منتجات أو تعديلها.',
+              'لا يمكن لهذا الحساب الاطلاع على التقارير أو الأرباح أو بيانات المحل، ولا إضافة منتجات أو تعديلها.'.tr(),
               style: TextStyle(fontSize: 11.5.sp, color: AppTheme.mutedGray, height: 1.5),
               textAlign: TextAlign.center,
             ),
@@ -198,10 +200,10 @@ class _StaffHomeBodyState extends State<_StaffHomeBody> {
     try {
       final doc = await firestore.collection('users').doc(uid).get();
       final data = doc.data() ?? {};
-      lines.add('الدور: ${data['role'] ?? '(مفقود)'}');
-      lines.add('رقم صاحب المحل: ${data['ownerId'] ?? '(مفقود)'}');
-      lines.add('رقم المحل: ${data['shopId'] ?? '(مفقود)'}');
-      lines.add('مفعّل: ${data['isActive'] ?? true}');
+      lines.add(uiTr('الدور: ${data['role'] ?? '(مفقود)'}'));
+      lines.add(uiTr('رقم صاحب المحل: ${data['ownerId'] ?? '(مفقود)'}'));
+      lines.add(uiTr('رقم المحل: ${data['shopId'] ?? '(مفقود)'}'));
+      lines.add(uiTr('مفعّل: ${data['isActive'] ?? true}'));
       final ownerId = data['ownerId'] as String?;
       if (ownerId != null && ownerId.isNotEmpty) {
         final sub = await firestore
@@ -211,17 +213,17 @@ class _StaffHomeBodyState extends State<_StaffHomeBody> {
             .doc('current')
             .get();
         final s = sub.data() ?? {};
-        lines.add('حالة اشتراك صاحب المحل: ${s['status'] ?? '(مفقود)'}');
+        lines.add(uiTr('حالة اشتراك صاحب المحل: ${s['status'] ?? '(مفقود)'}'));
       }
     } catch (e, logSt) {
       AppLogger.nonFatal('features/staff/presentation/views/staff_home_view.dart', e, logSt, severity: LoggingSeverity.warning);
-      lines.add('تعذر القراءة: $e');
+      lines.add(uiTr('تعذر القراءة: $e'));
     }
     if (!mounted) return;
     await showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('تشخيص الصلاحيات'),
+        title: Text('تشخيص الصلاحيات'.tr()),
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -237,7 +239,7 @@ class _StaffHomeBodyState extends State<_StaffHomeBody> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('إغلاق'),
+            child: Text('إغلاق'.tr()),
           ),
         ],
       ),
@@ -248,11 +250,11 @@ class _StaffHomeBodyState extends State<_StaffHomeBody> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('تسجيل الخروج؟'),
-        content: const Text('سيتم إغلاق جلسة الموظف على هذا الجهاز.'),
+        title: Text('تسجيل الخروج؟'.tr()),
+        content: Text('سيتم إغلاق جلسة الموظف على هذا الجهاز.'.tr()),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('إلغاء')),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('خروج')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('إلغاء'.tr())),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text('خروج'.tr())),
         ],
       ),
     );

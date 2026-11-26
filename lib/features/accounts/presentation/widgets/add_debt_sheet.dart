@@ -12,6 +12,8 @@ import 'add_debt/segmented_party.dart';
 import 'add_debt/sheet_header.dart';
 import 'add_debt/sheet_label.dart';
 import 'add_debt/suggestions_panel.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// نتيجة الإرسال من نموذج إضافة المديونية.
 typedef AddDebtSubmit = Future<String?> Function({
@@ -149,11 +151,11 @@ class _AddDebtSheetState extends State<_AddDebtSheet> {
     );
 
     setState(() {
-      _nameError = name.isEmpty ? 'الاسم مطلوب' : null;
+      _nameError = name.isEmpty ? 'الاسم مطلوب'.tr() : null;
       // نفس تحقق التسجيل: موبايل مصري (010/011/012/015).
       _phoneError = Validators.egyptianPhone(phone);
       _amountError =
-          (amount == null || amount <= 0) ? 'أدخل مبلغًا أكبر من صفر' : null;
+          (amount == null || amount <= 0) ? 'أدخل مبلغًا أكبر من صفر'.tr() : null;
     });
     if (_nameError != null || _phoneError != null || _amountError != null) {
       return;
@@ -221,7 +223,7 @@ class _AddDebtSheetState extends State<_AddDebtSheet> {
                       SizedBox(height: 14.h),
                     ],
                     // الاسم.
-                    AddDebtSheetLabel(_isSupplier ? 'اسم المورد' : 'اسم العميل'),
+                    AddDebtSheetLabel(_isSupplier ? 'اسم المورد'.tr() : 'اسم العميل'.tr()),
                     SizedBox(height: 6.h),
                     TextField(
                       controller: _nameCtrl,
@@ -229,7 +231,7 @@ class _AddDebtSheetState extends State<_AddDebtSheet> {
                       textInputAction: TextInputAction.next,
                       onChanged: (_) => setState(() {}),
                       decoration: _inputDecoration(
-                        hint: _isSupplier ? 'اسم المورد' : 'اسم العميل',
+                        hint: _isSupplier ? 'اسم المورد'.tr() : 'اسم العميل'.tr(),
                         icon: Icons.person_rounded,
                         errorText: _nameError,
                         isDark: isDark,
@@ -237,7 +239,7 @@ class _AddDebtSheetState extends State<_AddDebtSheet> {
                     ),
                     SizedBox(height: 12.h),
                     // الهاتف.
-                    const AddDebtSheetLabel('رقم الهاتف'),
+                    AddDebtSheetLabel('رقم الهاتف'.tr()),
                     SizedBox(height: 6.h),
                     TextField(
                       controller: _phoneCtrl,
@@ -276,12 +278,12 @@ class _AddDebtSheetState extends State<_AddDebtSheet> {
                         icon: Icons.link_rounded,
                         color: AppTheme.successDark,
                         text:
-                            'الرقم مسجّل باسم «${_exactMatch!.name}» — سيتم ربط المديونية بنفس جهة الاتصال.',
+                            uiTr('الرقم مسجّل باسم «${_exactMatch!.name}» — سيتم ربط المديونية بنفس جهة الاتصال.'),
                       ),
                     ],
                     SizedBox(height: 12.h),
                     // المبلغ.
-                    const AddDebtSheetLabel('المبلغ المستحق'),
+                    AddDebtSheetLabel('المبلغ المستحق'.tr()),
                     SizedBox(height: 6.h),
                     TextField(
                       controller: _amountCtrl,
@@ -298,7 +300,7 @@ class _AddDebtSheetState extends State<_AddDebtSheet> {
                           child: Center(
                             widthFactor: 1,
                             child: Text(
-                              'ج.م',
+                              'ج.م'.tr(),
                               style: TextStyle(
                                 fontSize: 12.sp,
                                 fontWeight: FontWeight.w900,
@@ -311,14 +313,14 @@ class _AddDebtSheetState extends State<_AddDebtSheet> {
                     ),
                     SizedBox(height: 12.h),
                     // ملاحظات.
-                    const AddDebtSheetLabel('ملاحظات (اختياري)'),
+                    AddDebtSheetLabel('ملاحظات (اختياري)'.tr()),
                     SizedBox(height: 6.h),
                     TextField(
                       controller: _noteCtrl,
                       maxLines: 2,
                       minLines: 1,
                       decoration: _inputDecoration(
-                        hint: 'مثال: بضاعة شهر نوفمبر، دفعة عربون...',
+                        hint: 'مثال: بضاعة شهر نوفمبر، دفعة عربون...'.tr(),
                         icon: Icons.notes_rounded,
                         isDark: isDark,
                       ),

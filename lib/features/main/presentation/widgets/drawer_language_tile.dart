@@ -23,7 +23,7 @@ class DrawerLanguageTile extends StatelessWidget {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(isEnglish ? 'English' : 'العربية', style: TextStyle(fontSize: 12.sp, color: AppTheme.slateGray, fontWeight: FontWeight.w600)),
+          Text(isEnglish ? 'English' : 'العربية'.tr(), style: TextStyle(fontSize: 12.sp, color: AppTheme.slateGray, fontWeight: FontWeight.w600)),
           SizedBox(width: 6.w),
           Switch(
             value: isEnglish,

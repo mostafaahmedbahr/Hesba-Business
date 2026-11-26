@@ -5,11 +5,12 @@ import 'package:hesba/core/widgets/dialogs.dart';
 import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// عنوان الموقع + زر فتحه على خرائط جوجل.
 ///
 /// الترتيب: رابط محفوظ صالح ← رابط مبني من الإحداثيات ← بحث بالعنوان النصي
-/// ← "لم يتم تحديد موقع المحل" (ما بنعرضش رابط معطوب أبدًا).
+/// ← "لم يتم تحديد موقع المحل".tr() (ما بنعرضش رابط معطوب أبدًا).
 class ShopLocationRow extends StatelessWidget {
   const ShopLocationRow({super.key, required this.shop});
 
@@ -30,7 +31,7 @@ class ShopLocationRow extends StatelessWidget {
 
     final String value;
     if (url == null) {
-      value = 'لم يتم تحديد موقع المحل';
+      value = 'لم يتم تحديد موقع المحل'.tr();
     } else if (address.isNotEmpty) {
       value = address;
     } else if (latitude != null && longitude != null) {
@@ -49,7 +50,7 @@ class ShopLocationRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('الموقع',
+                  Text('الموقع'.tr(),
                       style: TextStyle(
                           fontSize: 11,
                           color: AdminColors.textSecondary(context),
@@ -78,8 +79,8 @@ class ShopLocationRow extends StatelessWidget {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
               icon: const Icon(Icons.open_in_new_rounded, size: 14, color: Colors.white),
-              label: const Text(
-                'عرض الموقع على Google Maps',
+              label: Text(
+                'عرض الموقع على Google Maps'.tr(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white),
@@ -128,7 +129,7 @@ class ShopLocationRow extends StatelessWidget {
     }
     if (!context.mounted) return;
     if (!opened) {
-      AppDialogs.showSnackBar(context, 'تعذر فتح الموقع على خرائط جوجل', isError: true);
+      AppDialogs.showSnackBar(context, 'تعذر فتح الموقع على خرائط جوجل'.tr(), isError: true);
     }
   }
 }

@@ -6,6 +6,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../models/staff_model.dart';
 import '../repos/staff_repo.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// إدارة الحسابات الفرعية. إنشاء حساب الموظف يتم عبر تطبيق Firebase
 /// مؤقت حتى لا يتم تسجيل الدخول تلقائيًا بحساب الموظف ويُطرد صاحب المحل.
@@ -41,14 +42,14 @@ class StaffRepoImpl implements StaffRepo {
     required String password,
   }) async {
     final ownerUid = _uid;
-    if (ownerUid == null) throw Exception('يجب تسجيل الدخول أولاً');
+    if (ownerUid == null) throw Exception('يجب تسجيل الدخول أولاً'.tr());
 
     final ownerDoc =
         await _firestore.collection(AppConstants.usersCollection).doc(ownerUid).get();
     final data = ownerDoc.data();
     final shopId = data?['shopId'] as String?;
     if (shopId == null || shopId.isEmpty) {
-      throw Exception('لم يتم العثور على المتجر');
+      throw Exception('لم يتم العثور على المتجر'.tr());
     }
 
     // البحث عن التطبيق المؤقت بشكل آمن: firstWhere يرمي StateError
@@ -74,7 +75,7 @@ class StaffRepoImpl implements StaffRepo {
       );
       final staffUid = credential.user?.uid;
       if (staffUid == null || staffUid.isEmpty) {
-        throw Exception('فشل إنشاء الحساب');
+        throw Exception('فشل إنشاء الحساب'.tr());
       }
       final now = FieldValue.serverTimestamp();
       await _firestore.collection(AppConstants.usersCollection).doc(staffUid).set({
@@ -111,7 +112,7 @@ class StaffRepoImpl implements StaffRepo {
     required bool isActive,
   }) async {
     final ownerUid = _uid;
-    if (ownerUid == null) throw Exception('يجب تسجيل الدخول أولاً');
+    if (ownerUid == null) throw Exception('يجب تسجيل الدخول أولاً'.tr());
     await _firestore.collection(AppConstants.usersCollection).doc(uid).update({
       'name': name.trim(),
       'ownerName': name.trim(),

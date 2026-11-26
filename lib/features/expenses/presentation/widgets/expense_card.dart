@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 class ExpenseCard extends StatelessWidget {
   final String title;
@@ -58,25 +60,25 @@ class ExpenseCard extends StatelessWidget {
                   children: [
                     Text(title, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700)),
                     SizedBox(height: 2.h),
-                    Text(category, style: TextStyle(fontSize: 11.sp, color: theme.hintColor)),
+                    Text(category.tr(), style: TextStyle(fontSize: 11.sp, color: theme.hintColor)),
                   ],
                 ),
               ),
               Text(
-                '${amount.toStringAsFixed(2)} ج.م',
+                uiTr('${amount.toStringAsFixed(2)} ج.م'),
                 style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: _categoryColor(context)),
               ),
               if (onEdit != null)
                 IconButton(
                   onPressed: onEdit,
                   icon: Icon(Icons.edit_outlined, color: theme.colorScheme.primary, size: 20.sp),
-                  tooltip: 'تعديل',
+                  tooltip: 'تعديل'.tr(),
                 ),
               if (onDelete != null)
                 IconButton(
                   onPressed: onDelete,
                   icon: Icon(Icons.delete_outline, color: Colors.red.shade400, size: 20.sp),
-                  tooltip: 'حذف',
+                  tooltip: 'حذف'.tr(),
                 ),
             ],
           ),

@@ -383,7 +383,7 @@ class _CityDropdown extends StatelessWidget {
         for (final city in items)
           DropdownMenuItem(
             value: city,
-            child: Text(city, style: TextStyle(fontSize: 13.sp)),
+            child: Text(city.tr(), style: TextStyle(fontSize: 13.sp)),
           ),
       ],
       onChanged: (v) {

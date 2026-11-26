@@ -12,6 +12,7 @@ import '../widgets/expense_list_search.dart';
 import 'add_expense_view.dart';
 import '../../../subscription/presentation/subscription_gate.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// شاشة المصروفات (عرض بس — اللوجيك في Cubit).
 class ExpensesView extends StatelessWidget {
@@ -72,7 +73,7 @@ class _ExpensesBody extends StatelessWidget {
     return BlocConsumer<ExpensesCubit, ExpensesState>(
       listener: (context, state) {
         if (state.status == ExpensesStatus.error && state.expenses.isNotEmpty) {
-          AppToast.error(context, state.errorMessage ?? 'حدث خطأ');
+          AppToast.error(context, state.errorMessage ?? 'حدث خطأ'.tr());
         }
       },
       builder: (context, state) {
@@ -95,7 +96,7 @@ class _ExpensesBody extends StatelessWidget {
               SliverFillRemaining(
                 hasScrollBody: false,
                 child: ExpenseListError(
-                  message: state.errorMessage ?? 'حدث خطأ',
+                  message: state.errorMessage ?? 'حدث خطأ'.tr(),
                   onRetry: () => context.read<ExpensesCubit>().loadExpenses(shopId: shopId ?? ''),
                 ),
               ),
@@ -127,7 +128,7 @@ class _ExpensesBody extends StatelessWidget {
             backgroundColor: AppTheme.danger,
             foregroundColor: Colors.white,
             icon: const Icon(Icons.add_rounded),
-            label: Text('إضافة مصروف', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800)),
+            label: Text('إضافة مصروف'.tr(), style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800)),
           ),
           body: RefreshIndicator(
             color: AppTheme.danger,
@@ -160,7 +161,7 @@ class _ExpensesBody extends StatelessWidget {
                     child: ExpenseListNoResults(
                       onClear: () {
                         cubit.setSearch('');
-                        cubit.setCategoryFilter('الكل');
+                        cubit.setCategoryFilter('الكل'.tr());
                       },
                     ),
                   )

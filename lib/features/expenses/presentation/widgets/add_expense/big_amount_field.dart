@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../core/theme/app_theme.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// حقل المبلغ الكبير.
 class ExpenseBigAmountField extends StatelessWidget {
@@ -36,7 +37,7 @@ class ExpenseBigAmountField extends StatelessWidget {
           fontWeight: FontWeight.w900,
           color: const Color(0xFFCBD5E1),
         ),
-        suffixText: 'ج.م',
+        suffixText: 'ج.م'.tr(),
         suffixStyle: TextStyle(
           fontSize: 14.sp,
           fontWeight: FontWeight.w800,
@@ -65,9 +66,9 @@ class ExpenseBigAmountField extends StatelessWidget {
         contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
       ),
       validator: (v) {
-        if (v == null || v.isEmpty) return 'المبلغ مطلوب';
+        if (v == null || v.isEmpty) return 'المبلغ مطلوب'.tr();
         final a = double.tryParse(toLatin(v));
-        if (a == null || a <= 0) return 'أدخل مبلغ صحيح';
+        if (a == null || a <= 0) return 'أدخل مبلغ صحيح'.tr();
         return null;
       },
       onChanged: (_) => onChanged(),

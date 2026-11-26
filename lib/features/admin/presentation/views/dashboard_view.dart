@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'dart:math' as math;
 
 import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
@@ -8,6 +9,8 @@ import 'package:hesba/core/theme/app_theme.dart';
 import 'package:hesba/core/widgets/loading_widget.dart';
 import 'package:hesba/features/admin/presentation/cubit/admin_dashboard_cubit.dart';
 import 'package:hesba/features/admin/presentation/cubit/admin_nav_cubit.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 class DashboardView extends StatelessWidget {
   const DashboardView({super.key});
@@ -27,44 +30,44 @@ class DashboardView extends StatelessWidget {
         final p = s.profitSummary;
         void go(int i) => context.read<AdminNavCubit>().select(i);
         final cards = <Widget>[
-          AdminStatCard(icon: Icons.storefront_outlined, label: 'المحلات', value: AdminFmt.number(s.shops), onTap: () => go(1)),
+          AdminStatCard(icon: Icons.storefront_outlined, label: 'المحلات'.tr(), value: AdminFmt.number(s.shops), onTap: () => go(1)),
           AdminStatCard(
-              icon: Icons.check_circle_outline, label: 'اشتراكات نشطة', value: AdminFmt.number(s.active), color: AdminColors.success, onTap: () => go(2)),
+              icon: Icons.check_circle_outline, label: 'اشتراكات نشطة'.tr(), value: AdminFmt.number(s.active), color: AdminColors.success, onTap: () => go(2)),
           AdminStatCard(
-              icon: Icons.hourglass_bottom_outlined, label: 'فترة تجريبية', value: AdminFmt.number(s.trial), color: AdminColors.info, onTap: () => go(2)),
+              icon: Icons.hourglass_bottom_outlined, label: 'فترة تجريبية'.tr(), value: AdminFmt.number(s.trial), color: AdminColors.info, onTap: () => go(2)),
           AdminStatCard(
-              icon: Icons.cancel_outlined, label: 'اشتراكات منتهية', value: AdminFmt.number(s.expired), color: AdminColors.error, onTap: () => go(2)),
+              icon: Icons.cancel_outlined, label: 'اشتراكات منتهية'.tr(), value: AdminFmt.number(s.expired), color: AdminColors.error, onTap: () => go(2)),
           AdminStatCard(
-              icon: Icons.pending_actions_outlined, label: 'طلبات معلقة', value: AdminFmt.number(s.pending), color: AdminColors.warning, onTap: () => go(3)),
+              icon: Icons.pending_actions_outlined, label: 'طلبات معلقة'.tr(), value: AdminFmt.number(s.pending), color: AdminColors.warning, onTap: () => go(3)),
           AdminStatCard(
-              icon: Icons.inventory_2_outlined, label: 'المنتجات', value: AdminFmt.number(s.products), color: AppTheme.primaryColor, onTap: () => go(4)),
+              icon: Icons.inventory_2_outlined, label: 'المنتجات'.tr(), value: AdminFmt.number(s.products), color: AppTheme.primaryColor, onTap: () => go(4)),
           AdminStatCard(
-              icon: Icons.point_of_sale_outlined, label: 'عدد المبيعات', value: AdminFmt.number(s.sales), color: AdminColors.success, onTap: () => go(5)),
+              icon: Icons.point_of_sale_outlined, label: 'عدد المبيعات'.tr(), value: AdminFmt.number(s.sales), color: AdminColors.success, onTap: () => go(5)),
           AdminStatCard(
-              icon: Icons.money_off_outlined, label: 'المصروفات', value: AdminFmt.number(s.expenses), color: AdminColors.error, onTap: () => go(6)),
+              icon: Icons.money_off_outlined, label: 'المصروفات'.tr(), value: AdminFmt.number(s.expenses), color: AdminColors.error, onTap: () => go(6)),
           AdminStatCard(
             icon: Icons.trending_up_rounded,
-            label: 'إجمالي الأرباح',
+            label: 'إجمالي الأرباح'.tr(),
             value: AdminFmt.money(p.profit),
             color: AppTheme.successColor,
             subtitle: [
               if (p.capped)
-                'أحدث ${AdminFmt.number(p.salesCounted)} عملية بيع'
+                uiTr('أحدث ${AdminFmt.number(p.salesCounted)} عملية بيع')
               else
-                'كل المحلات • ${AdminFmt.number(p.salesCounted)} عملية بيع',
-              'قبل المصروفات',
+                uiTr('كل المحلات • ${AdminFmt.number(p.salesCounted)} عملية بيع'),
+              'قبل المصروفات'.tr(),
               if (p.unknownCostLines > 0)
-                'تقديري — ${AdminFmt.number(p.unknownCostLines)} سطر بلا تكلفة',
+                uiTr('تقديري — ${AdminFmt.number(p.unknownCostLines)} سطر بلا تكلفة'),
             ].join(' • '),
             onTap: () => go(5),
           ),
           AdminStatCard(
             icon: Icons.payments_outlined,
-            label: 'صافي الإيرادات',
+            label: 'صافي الإيرادات'.tr(),
             value: AdminFmt.money(p.revenue),
             color: AppTheme.violetDeep,
             subtitle:
-                'التكلفة: ${AdminFmt.money(p.cost)} • المرتجعات: ${AdminFmt.money(p.returnsTotal)}',
+                uiTr('التكلفة: ${AdminFmt.money(p.cost)} • المرتجعات: ${AdminFmt.money(p.returnsTotal)}'),
             onTap: () => go(5),
           ),
         ];
@@ -75,14 +78,14 @@ class DashboardView extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: AdminPageHeader(
-                      title: 'لوحة التحكم',
-                      description: 'نظرة عامة على أداء النظام — اضغط على أي بطاقة للانتقال للقسم',
+                      title: 'لوحة التحكم'.tr(),
+                      description: 'نظرة عامة على أداء النظام — اضغط على أي بطاقة للانتقال للقسم'.tr(),
                     ),
                   ),
                   Tooltip(
-                    message: 'إعادة حساب إجماليات الأرباح من كل السجلات',
+                    message: 'إعادة حساب إجماليات الأرباح من كل السجلات'.tr(),
                     child: IconButton(
                       icon: const Icon(Icons.calculate_outlined),
                       onPressed: () => context.read<AdminDashboardCubit>().rebuildProfit(),
@@ -141,30 +144,30 @@ class _ChartsGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final charts = <_ChartSpec>[
       _ChartSpec(
-        title: 'الاشتراكات الجديدة',
-        description: 'عدد الاشتراكات الجديدة المسجلة كل شهر خلال آخر 12 شهرًا',
+        title: 'الاشتراكات الجديدة'.tr(),
+        description: 'عدد الاشتراكات الجديدة المسجلة كل شهر خلال آخر 12 شهرًا'.tr(),
         icon: Icons.workspace_premium_outlined,
         data: s.subscriptionsByMonth,
         color: AppTheme.primaryColor,
       ),
       _ChartSpec(
-        title: 'المحلات الجديدة',
-        description: 'عدد المحلات التي انضمت للمنصة كل شهر خلال آخر 12 شهرًا',
+        title: 'المحلات الجديدة'.tr(),
+        description: 'عدد المحلات التي انضمت للمنصة كل شهر خلال آخر 12 شهرًا'.tr(),
         icon: Icons.storefront_outlined,
         data: s.shopsByMonth,
         color: AppTheme.secondaryColor,
       ),
       _ChartSpec(
-        title: 'صافي الإيرادات',
-        description: 'صافي إيرادات المبيعات شهريًا (بعد الخصم والمرتجعات) بالجنيه خلال آخر 12 شهرًا',
+        title: 'صافي الإيرادات'.tr(),
+        description: 'صافي إيرادات المبيعات شهريًا (بعد الخصم والمرتجعات) بالجنيه خلال آخر 12 شهرًا'.tr(),
         icon: Icons.payments_outlined,
         data: s.revenueByMonth,
         color: AppTheme.violetDeep,
         money: true,
       ),
       _ChartSpec(
-        title: 'صافي الأرباح',
-        description: 'ربح المحلات الشهري بعد الخصم والمرتجعات، محسوب بتكلفة البيع وقتها (سعر البيع − سعر الشراء وقت البيع) بالجنيه خلال آخر 12 شهرًا',
+        title: 'صافي الأرباح'.tr(),
+        description: 'ربح المحلات الشهري بعد الخصم والمرتجعات، محسوب بتكلفة البيع وقتها (سعر البيع − سعر الشراء وقت البيع) بالجنيه خلال آخر 12 شهرًا'.tr(),
         icon: Icons.savings_outlined,
         data: s.profitSummary.profitByMonth,
         color: AppTheme.successColor,
@@ -200,7 +203,7 @@ class _ChartsGrid extends StatelessWidget {
                 const SizedBox(width: 5),
                 Expanded(
                   child: Text(
-                    'مرّر المؤشر على أي عمود أو اضغط عليه لعرض الشهر والرقم بالتفصيل.',
+                    'مرّر المؤشر على أي عمود أو اضغط عليه لعرض الشهر والرقم بالتفصيل.'.tr(),
                     style: TextStyle(
                       fontSize: 10.5,
                       color: AdminColors.textMuted(context),
@@ -265,7 +268,7 @@ class _ChartCard extends StatelessWidget {
             children: [
               Expanded(
                 child: _MiniStat(
-                  label: 'الإجمالي',
+                  label: 'الإجمالي'.tr(),
                   value: _amount(total, spec.money),
                   valueColor: spec.color,
                 ),
@@ -273,16 +276,16 @@ class _ChartCard extends StatelessWidget {
               _StatDivider(),
               Expanded(
                 child: _MiniStat(
-                  label: 'المتوسط',
+                  label: 'المتوسط'.tr(),
                   value: _amount(average, spec.money),
                 ),
               ),
               _StatDivider(),
               Expanded(
                 child: _MiniStat(
-                  label: 'أعلى شهر',
+                  label: 'أعلى شهر'.tr(),
                   value: _amount(peak.value, spec.money),
-                  caption: hasData ? peak.fullLabel : 'لا توجد بيانات',
+                  caption: hasData ? peak.fullLabel : 'لا توجد بيانات'.tr(),
                 ),
               ),
             ],
@@ -292,7 +295,7 @@ class _ChartCard extends StatelessWidget {
             height: 190,
             child: hasData
                 ? _MonthlyBars(series: series, color: spec.color, money: spec.money)
-                : adminEmpty(Icons.bar_chart_outlined, 'لا توجد بيانات لهذه الفترة'),
+                : adminEmpty(Icons.bar_chart_outlined, 'لا توجد بيانات لهذه الفترة'.tr()),
           ),
           const SizedBox(height: AdminSpace.sm),
           Row(
@@ -500,7 +503,7 @@ class _MonthlyBars extends StatelessWidget {
                     show: true,
                     alignment: Alignment.topRight,
                     padding: const EdgeInsets.only(right: 4, bottom: 2),
-                    labelResolver: (_) => 'المتوسط',
+                    labelResolver: (_) => 'المتوسط'.tr(),
                     style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: color),
                   ),
                 ),
@@ -555,7 +558,7 @@ class _MonthlyBars extends StatelessWidget {
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
                     ),
-                    textDirection: TextDirection.rtl,
+                    textDirection: ui.TextDirection.rtl,
                     children: [
                       TextSpan(
                         text: _amount(point.value, money),
@@ -579,19 +582,19 @@ class _MonthlyBars extends StatelessWidget {
 
 // ── Monthly series helpers ───────────────────────────────────
 
-const _arMonths = [
-  'يناير',
-  'فبراير',
-  'مارس',
-  'أبريل',
-  'مايو',
-  'يونيو',
-  'يوليو',
-  'أغسطس',
-  'سبتمبر',
-  'أكتوبر',
-  'نوفمبر',
-  'ديسمبر',
+  final _arMonths= [
+  'يناير'.tr(),
+  'فبراير'.tr(),
+  'مارس'.tr(),
+  'أبريل'.tr(),
+  'مايو'.tr(),
+  'يونيو'.tr(),
+  'يوليو'.tr(),
+  'أغسطس'.tr(),
+  'سبتمبر'.tr(),
+  'أكتوبر'.tr(),
+  'نوفمبر'.tr(),
+  'ديسمبر'.tr(),
 ];
 
 class _MonthPoint {
@@ -633,10 +636,10 @@ String _compact(num value) {
   final sign = value < 0 ? '-' : '';
   final absolute = value.abs();
   if (absolute >= 1000000) {
-    return '$sign${_trim(absolute / 1000000)} مليون';
+    return uiTr('$sign${_trim(absolute / 1000000)} مليون');
   }
   if (absolute >= 10000) {
-    return '$sign${_trim(absolute / 1000)} ألف';
+    return uiTr('$sign${_trim(absolute / 1000)} ألف');
   }
   return AdminFmt.number(value);
 }
@@ -646,7 +649,7 @@ String _amount(num value, bool money) {
   final text = value == value.roundToDouble()
       ? AdminFmt.number(value.round())
       : _trim(value);
-  return money ? '$text ج' : text;
+  return money ? uiTr('$text ج') : text;
 }
 
 String _trim(num value) {

@@ -82,7 +82,7 @@ class SupplierFormCubit extends Cubit<SupplierFormState> {
   void onNameChanged(String v) => emit(
     state.copyWith(
       name: v,
-      // لو فيه خطأ "الاسم مطلوب" ظاهر والحقل اتكتب فيه — شيله فورًا.
+      // لو فيه خطأ "الاسم مطلوب".tr() ظاهر والحقل اتكتب فيه — شيله فورًا.
       nameError: v.trim().isNotEmpty ? null : state.nameError,
       errorMessage:
           _isNameKey(state.errorMessage) ? null : state.errorMessage,

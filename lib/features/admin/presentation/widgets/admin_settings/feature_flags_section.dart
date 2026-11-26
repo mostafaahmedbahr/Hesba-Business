@@ -6,6 +6,7 @@ import '../../../../../core/theme/app_theme.dart';
 import '../../../../../core/utils/toast.dart';
 import '../../views/admin_ds.dart';
 import 'section.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// مفاتيح التحكم عن بُعد اللي بتتحكم في شكل تطبيق العميل.
 /// القيمة بتتكتب في Firestore: feature_flags/home
@@ -47,8 +48,8 @@ class _FeatureFlagsSectionState extends State<FeatureFlagsSection> {
       AppToast.success(
         context,
         value
-            ? 'قسم الاشتراك هيظهر في الرئيسية'
-            : 'قسم الاشتراك هيختفي من الرئيسية',
+            ? 'قسم الاشتراك هيظهر في الرئيسية'.tr()
+            : 'قسم الاشتراك هيختفي من الرئيسية'.tr(),
       );
     } catch (e, logSt) {
       AppLogger.nonFatal(
@@ -58,7 +59,7 @@ class _FeatureFlagsSectionState extends State<FeatureFlagsSection> {
         severity: LoggingSeverity.warning,
       );
       if (mounted) {
-        AppToast.error(context, 'فشل حفظ المفتاح — تأكد من صلاحيات الأدمن');
+        AppToast.error(context, 'فشل حفظ المفتاح — تأكد من صلاحيات الأدمن'.tr());
       }
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -74,8 +75,8 @@ class _FeatureFlagsSectionState extends State<FeatureFlagsSection> {
       AppToast.success(
         context,
         value
-            ? 'زرار النسخ الاحتياطي هيظهر للعملاء'
-            : 'زرار النسخ الاحتياطي هيختفي من العملاء',
+            ? 'زرار النسخ الاحتياطي هيظهر للعملاء'.tr()
+            : 'زرار النسخ الاحتياطي هيختفي من العملاء'.tr(),
       );
     } catch (e, logSt) {
       AppLogger.nonFatal(
@@ -85,7 +86,7 @@ class _FeatureFlagsSectionState extends State<FeatureFlagsSection> {
         severity: LoggingSeverity.warning,
       );
       if (mounted) {
-        AppToast.error(context, 'فشل حفظ المفتاح — تأكد من صلاحيات الأدمن');
+        AppToast.error(context, 'فشل حفظ المفتاح — تأكد من صلاحيات الأدمن'.tr());
       }
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -95,12 +96,12 @@ class _FeatureFlagsSectionState extends State<FeatureFlagsSection> {
   @override
   Widget build(BuildContext context) {
     return SettingsSection(
-      title: 'مفاتيح العرض',
-      subtitle: 'تحكّم في ظهور أقسام تطبيق العملاء فوراً من غير تحديث التطبيق',
+      title: 'مفاتيح العرض'.tr(),
+      subtitle: 'تحكّم في ظهور أقسام تطبيق العملاء فوراً من غير تحديث التطبيق'.tr(),
       icon: Icons.tune_rounded,
       color: AppTheme.violetDeep,
       trailing: SettingsSectionTag(
-        label: !_loaded ? '...' : (_showSubscription ? 'مفعل' : 'موقف'),
+        label: !_loaded ? '...' : (_showSubscription ? 'مفعل'.tr() : 'موقف'.tr()),
         color: _showSubscription ? AppTheme.successColor : AppTheme.danger,
       ),
       child: Material(
@@ -124,14 +125,14 @@ class _FeatureFlagsSectionState extends State<FeatureFlagsSection> {
                       : Icons.visibility_off_rounded,
                   color: AppTheme.primaryColor,
                 ),
-                title: const Text(
-                  'قسم الاشتراك في الرئيسية',
+                title: Text(
+                  'قسم الاشتراك في الرئيسية'.tr(),
                   style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800),
                 ),
                 subtitle: Text(
                   _showSubscription
-                      ? 'ظاهر حالياً للعملاء'
-                      : 'مخفي حالياً من العملاء',
+                      ? 'ظاهر حالياً للعملاء'.tr()
+                      : 'مخفي حالياً من العملاء'.tr(),
                   style: TextStyle(
                     fontSize: 10.5,
                     color: AdminColors.textSecondary(context),
@@ -147,14 +148,14 @@ class _FeatureFlagsSectionState extends State<FeatureFlagsSection> {
                   _showBackup ? Icons.backup : Icons.visibility_off_rounded,
                   color: AppTheme.primaryColor,
                 ),
-                title: const Text(
-                  'زرار النسخ الاحتياطي',
+                title: Text(
+                  'زرار النسخ الاحتياطي'.tr(),
                   style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800),
                 ),
                 subtitle: Text(
                   _showBackup
-                      ? 'ظاهر حالياً في قائمة العميل'
-                      : 'مخفي حالياً من قائمة العميل',
+                      ? 'ظاهر حالياً في قائمة العميل'.tr()
+                      : 'مخفي حالياً من قائمة العميل'.tr(),
                   style: TextStyle(
                     fontSize: 10.5,
                     color: AdminColors.textSecondary(context),

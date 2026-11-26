@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../common_imports.dart';
 import '../cubit/reports_state.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// شبكة الإحصائيات (إجمالي/صافي المبيعات + المرتجعات + المصروفات).
 class ReportsSummaryGrid extends StatelessWidget {
@@ -13,15 +14,15 @@ class ReportsSummaryGrid extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(children: [
       Row(children: [
-        Expanded(child: _StatCard(icon: Icons.payments_rounded, label: 'reportsTotalSales'.tr(), value: '${fmtReport(state.totalSales)} ج.م', subtitle: '${state.sales.length} فاتورة', gradient: const [AppTheme.primaryColor, AppTheme.brightBlue], isDark: isDark)),
+        Expanded(child: _StatCard(icon: Icons.payments_rounded, label: 'reportsTotalSales'.tr(), value: uiTr('${fmtReport(state.totalSales)} ج.م'), subtitle: uiTr('${state.sales.length} فاتورة'), gradient: const [AppTheme.primaryColor, AppTheme.brightBlue], isDark: isDark)),
         SizedBox(width: 10.w),
-        Expanded(child: _StatCard(icon: Icons.trending_up_rounded, label: 'reportsNetSales'.tr(), value: '${fmtReport(state.netSales)} ج.م', subtitle: 'بعد المرتجعات', gradient: const [AppTheme.successDark, Color(0xFF34D399)], isDark: isDark)),
+        Expanded(child: _StatCard(icon: Icons.trending_up_rounded, label: 'reportsNetSales'.tr(), value: uiTr('${fmtReport(state.netSales)} ج.م'), subtitle: 'بعد المرتجعات'.tr(), gradient: const [AppTheme.successDark, Color(0xFF34D399)], isDark: isDark)),
       ]),
       SizedBox(height: 10.h),
       Row(children: [
-        Expanded(child: _StatCard(icon: Icons.assignment_return_rounded, label: 'reportsTotalReturns'.tr(), value: '${fmtReport(state.totalReturns)} ج.م', subtitle: '${state.returns.length} عملية', gradient: const [AppTheme.warningAmber, AppTheme.goldLight], isDark: isDark, alert: state.returns.isNotEmpty)),
+        Expanded(child: _StatCard(icon: Icons.assignment_return_rounded, label: 'reportsTotalReturns'.tr(), value: uiTr('${fmtReport(state.totalReturns)} ج.م'), subtitle: uiTr('${state.returns.length} عملية'), gradient: const [AppTheme.warningAmber, AppTheme.goldLight], isDark: isDark, alert: state.returns.isNotEmpty)),
         SizedBox(width: 10.w),
-        Expanded(child: _StatCard(icon: Icons.savings_rounded, label: 'reportsTotalExpenses'.tr(), value: '${fmtReport(state.totalExpenses)} ج.م', subtitle: '${state.expenses.length} مصروف', gradient: const [AppTheme.danger, AppTheme.roseLight], isDark: isDark)),
+        Expanded(child: _StatCard(icon: Icons.savings_rounded, label: 'reportsTotalExpenses'.tr(), value: uiTr('${fmtReport(state.totalExpenses)} ج.م'), subtitle: uiTr('${state.expenses.length} مصروف'), gradient: const [AppTheme.danger, AppTheme.roseLight], isDark: isDark)),
       ]),
     ]);
   }
@@ -77,10 +78,10 @@ class ReportsBalanceCard extends StatelessWidget {
           Container(width: 40.w, height: 40.w, decoration: BoxDecoration(gradient: LinearGradient(colors: isNeg ? [AppTheme.danger, AppTheme.roseLight] : [AppTheme.successDark, const Color(0xFF34D399)]), borderRadius: BorderRadius.circular(11.r)), child: Icon(isNeg ? Icons.trending_down_rounded : Icons.account_balance_wallet_rounded, color: Colors.white, size: 20.sp)),
           SizedBox(width: 10.w),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('ملخص الفترة', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
+            Text('ملخص الفترة'.tr(), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
             Text('${state.period.label} • ${DateFormat('d MMM', 'ar').format(state.period.start)} - ${DateFormat('d MMM', 'ar').format(state.period.end)}', style: TextStyle(fontSize: 11.sp, color: AppTheme.slateGray)),
           ])),
-          Container(padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h), decoration: BoxDecoration(color: isNeg ? AppTheme.dangerSoft : const Color(0xFFECFDF5), borderRadius: BorderRadius.circular(20.r), border: Border.all(color: isNeg ? AppTheme.danger.withValues(alpha: 0.14) : AppTheme.successDark.withValues(alpha: 0.14))), child: Text(isNeg ? 'عجز' : 'رابح', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: isNeg ? AppTheme.danger : AppTheme.successDark))),
+          Container(padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h), decoration: BoxDecoration(color: isNeg ? AppTheme.dangerSoft : const Color(0xFFECFDF5), borderRadius: BorderRadius.circular(20.r), border: Border.all(color: isNeg ? AppTheme.danger.withValues(alpha: 0.14) : AppTheme.successDark.withValues(alpha: 0.14))), child: Text(isNeg ? 'عجز'.tr() : 'رابح'.tr(), style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: isNeg ? AppTheme.danger : AppTheme.successDark))),
         ]),
         SizedBox(height: 14.h),
         Container(
@@ -97,7 +98,7 @@ class ReportsBalanceCard extends StatelessWidget {
             Divider(height: 20.h, color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft),
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               Text('reportsNetProfit'.tr(), style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
-              Text('${fmtReport(balance)} ج.م', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: isNeg ? AppTheme.danger : AppTheme.successDark)),
+              Text(uiTr('${fmtReport(balance)} ج.م'), style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: isNeg ? AppTheme.danger : AppTheme.successDark)),
             ]),
           ]),
         ),
@@ -124,7 +125,7 @@ class _MiniRow extends StatelessWidget {
           SizedBox(width: 8.w),
           Text(label, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600, color: isDark ? AppTheme.darkTextSecondary : const Color(0xFF475569))),
         ]),
-        Text('$value ج.م', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: color)),
+        Text(uiTr('$value ج.م'), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: color)),
       ],
     );
   }
@@ -176,7 +177,7 @@ class ReportsProfitCard extends StatelessWidget {
             Divider(height: 20.h, color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft),
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               Text('reportsNetProfit'.tr(), style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : AppTheme.ink)),
-              Text('${fmtReport(m.netProfit)} ج.م', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: netNeg ? AppTheme.danger : AppTheme.successDark)),
+              Text(uiTr('${fmtReport(m.netProfit)} ج.م'), style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: netNeg ? AppTheme.danger : AppTheme.successDark)),
             ]),
           ]),
         ),

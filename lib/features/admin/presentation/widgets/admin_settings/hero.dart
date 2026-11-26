@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hesba/core/theme/app_theme.dart';
 import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// هيدر إعدادات المنصة: العنوان + وصف + شارات الحالة (حفظ/أسعار/تجريب/دفع).
 class SettingsHero extends StatelessWidget {
@@ -48,8 +50,8 @@ class SettingsHero extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'إعدادات المنصة',
+                    Text(
+                      'إعدادات المنصة'.tr(),
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 19,
@@ -59,7 +61,7 @@ class SettingsHero extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'أسعار الباقات، الفترة التجريبية، وأرقام الدفع — كلها في مكان واحد وبتظهر للعملاء فور الحفظ.',
+                      'أسعار الباقات، الفترة التجريبية، وأرقام الدفع — كلها في مكان واحد وبتظهر للعملاء فور الحفظ.'.tr(),
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.78),
                         fontSize: 12,
@@ -81,16 +83,16 @@ class SettingsHero extends StatelessWidget {
               HeroChip(
                 icon: Icons.payments_outlined,
                 label: monthlyPrice > 0
-                    ? '${AdminFmt.money(monthlyPrice)} / شهر'
-                    : 'حدد سعر الشهر',
+                    ? uiTr('${AdminFmt.money(monthlyPrice)} / شهر')
+                    : 'حدد سعر الشهر'.tr(),
               ),
               HeroChip(
                 icon: Icons.hourglass_bottom_rounded,
-                label: trialDays > 0 ? '$trialDays يوم تجربة' : 'بدون فترة تجريبية',
+                label: trialDays > 0 ? uiTr('$trialDays يوم تجربة') : 'بدون فترة تجريبية'.tr(),
               ),
               HeroChip(
                 icon: Icons.account_balance_wallet_outlined,
-                label: '$methods طرق دفع',
+                label: uiTr('$methods طرق دفع'),
               ),
             ],
           ),
@@ -120,10 +122,10 @@ class HeroStatus extends StatelessWidget {
             ? Icons.edit_note_rounded
             : Icons.check_circle_outline_rounded;
     final label = saving
-        ? 'جاري الحفظ'
+        ? 'جاري الحفظ'.tr()
         : dirty
-            ? 'غير محفوظ'
-            : 'محفوظ';
+            ? 'غير محفوظ'.tr()
+            : 'محفوظ'.tr();
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),

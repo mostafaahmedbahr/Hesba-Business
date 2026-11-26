@@ -6,6 +6,8 @@ import 'package:hesba/core/widgets/loading_widget.dart';
 import 'package:hesba/features/admin/data/repos/admin_repo.dart';
 import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
 import 'package:hesba/features/sales/presentation/cubit/sales_list_state.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// تاب عام لعرض عناصر محل (منتجات / مبيعات / مصروفات) حسب [collection].
 class ShopItemsTab extends StatelessWidget {
@@ -19,7 +21,7 @@ class ShopItemsTab extends StatelessWidget {
       future: sl<AdminRepo>().getShopItems(collection: collection, shopId: shopId),
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) return const LoadingWidget();
-        if (snap.hasError) return adminError('تعذر تحميل البيانات', () => (context as Element).markNeedsBuild());
+        if (snap.hasError) return adminError('تعذر تحميل البيانات'.tr(), () => (context as Element).markNeedsBuild());
         final docs = [...(snap.data ?? [])]
           ..sort((a, b) {
             final da = AdminFmt.toDate(a.data()['createdAt']);
@@ -32,7 +34,7 @@ class ShopItemsTab extends StatelessWidget {
         if (docs.isEmpty) {
           return adminEmpty(
             collection == 'products' ? Icons.inventory_2_outlined : collection == 'sales' ? Icons.point_of_sale_outlined : Icons.money_off_outlined,
-            'لا توجد عناصر',
+            'لا توجد عناصر'.tr(),
           );
         }
         return ListView.separated(
@@ -43,7 +45,7 @@ class ShopItemsTab extends StatelessWidget {
             if (i == 0) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: AdminSpace.xs),
-                child: Text('العدد: ${docs.length}${docs.length >= 50 ? ' (أول 50)' : ''}',
+                child: Text(uiTr('العدد: ${docs.length}${docs.length >= 50 ? ' (أول 50)'.tr() : ''}'),
                     style: Theme.of(context)
                         .textTheme
                         .bodySmall
@@ -73,7 +75,7 @@ class ShopItemsTab extends StatelessWidget {
                   children: [
                     Text((data['name'] as String?) ?? '-', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
                     const SizedBox(height: 2),
-                    Text('${data['category'] ?? '-'} • الكمية: ${data['stock'] ?? 0}',
+                    Text('${data['category'] ?? '-uiTr('} • الكمية: ${data[')stock'] ?? 0}',
                         style: TextStyle(color: AdminColors.textSecondary(context), fontSize: 12)),
                     const SizedBox(height: 2),
                     CopyableId(id: id),
@@ -153,7 +155,7 @@ class ShopItemsTab extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('فاتورة مبيعات', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
+                    Text('فاتورة مبيعات'.tr(), style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
                     const SizedBox(height: 2),
                     Text(
                       '${AdminFmt.dateNum(data['createdAt'])}${methodLabel.isNotEmpty ? ' • $methodLabel' : ''}',
@@ -178,13 +180,13 @@ class ShopItemsTab extends StatelessWidget {
             for (final item in items) _saleItemRow(context, item),
           ],
           const Divider(height: 16),
-          _saleTotalRow(context, 'قبل الخصم', subtotal),
+          _saleTotalRow(context, 'قبل الخصم'.tr(), subtotal),
           if (discount > 0) ...[
             const SizedBox(height: 2),
-            _saleTotalRow(context, 'الخصم', -discount, negative: true),
+            _saleTotalRow(context, 'الخصم'.tr(), -discount, negative: true),
           ],
           const SizedBox(height: 2),
-          _saleTotalRow(context, 'بعد الخصم', total, bold: true),
+          _saleTotalRow(context, 'بعد الخصم'.tr(), total, bold: true),
         ],
       ),
     );
@@ -201,8 +203,8 @@ class ShopItemsTab extends StatelessWidget {
     final lineTotal = (item['total'] as num?) ?? (qtyNum * price);
 
     final prices = cost > 0
-        ? 'شراء: ${AdminFmt.money(cost)} • بيع: ${AdminFmt.money(price)}'
-        : 'سعر البيع: ${AdminFmt.money(price)}';
+        ? uiTr('شراء: ${AdminFmt.money(cost)} • بيع: ${AdminFmt.money(price)}')
+        : uiTr('سعر البيع: ${AdminFmt.money(price)}');
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),

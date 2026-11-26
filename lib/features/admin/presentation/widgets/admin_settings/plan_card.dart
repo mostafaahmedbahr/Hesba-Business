@@ -6,6 +6,8 @@ import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
 import 'plan_spec.dart';
 import 'price_decoration.dart';
 import 'section.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// كارت إدخال سعر باقة (+ نسبة التوفير مقابل السعر الأساسي).
 class PlanCard extends StatelessWidget {
@@ -74,7 +76,7 @@ class PlanCard extends StatelessWidget {
               ),
               if (isBest) ...[
                 const SizedBox(width: 4),
-                SettingsSectionTag(label: 'الأكثر توفيرًا', color: spec.color),
+                SettingsSectionTag(label: 'الأكثر توفيرًا'.tr(), color: spec.color),
               ],
             ],
           ),
@@ -86,10 +88,10 @@ class PlanCard extends StatelessWidget {
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             autovalidateMode: AutovalidateMode.onUserInteraction,
             style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
-            decoration: priceDecoration(context, spec.color, suffixText: 'ج.م'),
+            decoration: priceDecoration(context, spec.color, suffixText: 'ج.م'.tr()),
             validator: (v) {
               final n = int.tryParse((v ?? '').trim());
-              if (n == null || n <= 0) return 'اكتب سعرًا صحيحًا';
+              if (n == null || n <= 0) return 'اكتب سعرًا صحيحًا'.tr();
               return null;
             },
           ),
@@ -99,8 +101,8 @@ class PlanCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   spec.months == 1
-                      ? 'سعر الاشتراك الأساسي'
-                      : '≈ ${AdminFmt.money(_perMonth.round())} / شهر',
+                      ? 'سعر الاشتراك الأساسي'.tr()
+                      : uiTr('≈ ${AdminFmt.money(_perMonth.round())} / شهر'),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -112,7 +114,7 @@ class PlanCard extends StatelessWidget {
               ),
               if (spec.months > 1 && saving > 0)
                 SettingsSectionTag(
-                  label: 'توفير ${saving.round()}%',
+                  label: uiTr('توفير ${saving.round()}%'),
                   color: AppTheme.successColor,
                 ),
             ],

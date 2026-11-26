@@ -4,6 +4,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 import '../../../core/services/notification_service.dart';
 import 'models/expense_model.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// جدولة/إلغاء إشعارات التذكير لالتزام مصروف متكرر (daily/weekly/monthly).
 ///
@@ -59,7 +60,7 @@ abstract class ExpenseReminderScheduler {
         await NotificationService().local.zonedSchedule(
               reminderId(template.expenseId, slot),
               template.title,
-              '$money ج.م • $recurrenceLabel • ${dateFormat.format(due)}',
+              uiTr('$money ج.م • $recurrenceLabel • ${dateFormat.format(due)}'),
               tz.TZDateTime.from(reminderAt.toUtc(), tz.UTC),
               NotificationService().reminderDetails(),
               androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,

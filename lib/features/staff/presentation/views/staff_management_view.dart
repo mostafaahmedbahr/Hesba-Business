@@ -13,6 +13,7 @@ import '../../data/models/staff_model.dart';
 import '../../data/repos/staff_repo.dart';
 import '../cubit/staff_cubit.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// شاشة يستخدمها صاحب المحل فقط لإنشاء وإدارة الحسابات الفرعية.
 class StaffManagementView extends StatelessWidget {
@@ -34,7 +35,7 @@ class _StaffManagementBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('الحسابات الفرعية',style: TextStyle(
+        title: Text('الحسابات الفرعية'.tr(),style: TextStyle(
           color: Colors.white
         ),),
         backgroundColor: Colors.transparent,
@@ -55,7 +56,7 @@ class _StaffManagementBody extends StatelessWidget {
         backgroundColor: AppTheme.primaryColor,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.person_add_alt_1_rounded),
-        label: const Text('إضافة موظف'),
+        label: Text('إضافة موظف'.tr()),
       ),
       body: BlocConsumer<StaffCubit, StaffState>(
         listener: (context, state) {
@@ -65,7 +66,7 @@ class _StaffManagementBody extends StatelessWidget {
         },
         builder: (context, state) {
           if (state.loading) {
-            return LoadingWidget(message: 'جاري تحميل الحسابات...');
+            return LoadingWidget(message: 'جاري تحميل الحسابات...'.tr());
           }
           if (state.staff.isEmpty) {
             return Center(
@@ -78,13 +79,13 @@ class _StaffManagementBody extends StatelessWidget {
                         size: 70.sp, color: AppTheme.primaryColor.withValues(alpha: 0.5)),
                     SizedBox(height: 16.h),
                     Text(
-                      'لا توجد حسابات فرعية',
+                      'لا توجد حسابات فرعية'.tr(),
                       style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w800),
                       textAlign: TextAlign.center,
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      'أنشئ حسابًا لموظفك ليتمكن من تسجيل البيع والشراء والمرتجع والمصروفات فقط، بدون الاطلاع على التقارير أو الأرباح.',
+                      'أنشئ حسابًا لموظفك ليتمكن من تسجيل البيع والشراء والمرتجع والمصروفات فقط، بدون الاطلاع على التقارير أو الأرباح.'.tr(),
                       style: TextStyle(fontSize: 13.sp, color: AppTheme.mutedGray),
                       textAlign: TextAlign.center,
                     ),
@@ -120,7 +121,7 @@ class _StaffManagementBody extends StatelessWidget {
       builder: (_) => BlocProvider.value(value: cubit, child: const _AddStaffSheet()),
     );
     if (result == true && context.mounted) {
-      AppToast.success(context, 'تم إنشاء الحساب الفرعي');
+      AppToast.success(context, 'تم إنشاء الحساب الفرعي'.tr());
     }
   }
 }
@@ -190,7 +191,7 @@ class _StaffCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20.r),
                   ),
                   child: Text(
-                    staff.isActive ? 'نشط' : 'موقوف',
+                    staff.isActive ? 'نشط'.tr() : 'موقوف'.tr(),
                     style: TextStyle(
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w800,
@@ -202,7 +203,7 @@ class _StaffCard extends StatelessWidget {
             ),
             if (staff.phone.isNotEmpty) ...[
               SizedBox(height: 10.h),
-              Text('الهاتف: ${staff.phone}',
+              Text(uiTr('الهاتف: ${staff.phone}'),
                   style: TextStyle(fontSize: 12.sp, color: AppTheme.mutedGray)),
             ],
             SizedBox(height: 12.h),
@@ -212,7 +213,7 @@ class _StaffCard extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: () => _edit(context),
                     icon: const Icon(Icons.edit_outlined, size: 16),
-                    label: const Text('تعديل'),
+                    label: Text('تعديل'.tr()),
                   ),
                 ),
                 SizedBox(width: 8.w),
@@ -222,17 +223,17 @@ class _StaffCard extends StatelessWidget {
                       try {
                         await context.read<StaffCubit>().resetPassword(staff.email);
                         if (context.mounted) {
-                          AppToast.success(context, 'تم إرسال رابط تغيير كلمة المرور');
+                          AppToast.success(context, 'تم إرسال رابط تغيير كلمة المرور'.tr());
                         }
                       } catch (e, logSt) {
                         AppLogger.nonFatal('features/staff/presentation/views/staff_management_view.dart', e, logSt, severity: LoggingSeverity.error);
                         if (context.mounted) {
-                          AppToast.error(context, 'تعذر إرسال الرابط');
+                          AppToast.error(context, 'تعذر إرسال الرابط'.tr());
                         }
                       }
                     },
                     icon: const Icon(Icons.lock_reset_outlined, size: 16),
-                    label: const Text('كلمة المرور'),
+                    label: Text('كلمة المرور'.tr()),
                   ),
                 ),
                 SizedBox(width: 8.w),
@@ -240,7 +241,7 @@ class _StaffCard extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: () => _toggleActive(context),
                     icon: Icon(staff.isActive ? Icons.block_outlined : Icons.check_circle_outline, size: 16),
-                    label: Text(staff.isActive ? 'إيقاف' : 'تفعيل'),
+                    label: Text(staff.isActive ? 'إيقاف'.tr() : 'تفعيل'.tr()),
                   ),
                 ),
               ],
@@ -270,13 +271,13 @@ class _StaffCard extends StatelessWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(staff.isActive ? 'إيقاف الحساب؟' : 'تفعيل الحساب؟'),
+        title: Text(staff.isActive ? 'إيقاف الحساب؟'.tr() : 'تفعيل الحساب؟'.tr()),
         content: Text(staff.isActive
-            ? 'لن يتمكن الموظف من الدخول أو تسجيل أي عملية حتى تُعيد تفعيله.'
-            : 'سيتمكن الموظف من تسجيل العمليات مرة أخرى.'),
+            ? 'لن يتمكن الموظف من الدخول أو تسجيل أي عملية حتى تُعيد تفعيله.'.tr()
+            : 'سيتمكن الموظف من تسجيل العمليات مرة أخرى.'.tr()),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('إلغاء')),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('تأكيد')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('إلغاء'.tr())),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text('تأكيد'.tr())),
         ],
       ),
     );
@@ -360,15 +361,15 @@ class _EditStaffDialogState extends State<_EditStaffDialog> {
                   children: [
                     _field(
                       controller: _name,
-                      label: 'اسم الموظف',
+                      label: 'اسم الموظف'.tr(),
                       icon: Icons.person_outline,
                       isDark: isDark,
-                      validator: (v) => Validators.required(v, 'اكتب اسم الموظف'),
+                      validator: (v) => Validators.required(v, 'اكتب اسم الموظف'.tr()),
                     ),
                     SizedBox(height: 12.h),
                     _field(
                       controller: _phone,
-                      label: 'الهاتف (اختياري)',
+                      label: 'الهاتف (اختياري)'.tr(),
                       icon: Icons.phone_outlined,
                       keyboardType: TextInputType.phone,
                       isDark: isDark,
@@ -413,7 +414,7 @@ class _EditStaffDialogState extends State<_EditStaffDialog> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'تعديل بيانات الموظف',
+                  'تعديل بيانات الموظف'.tr(),
                   style: TextStyle(
                       fontSize: 17.sp,
                       fontWeight: FontWeight.w900,
@@ -513,7 +514,7 @@ class _EditStaffDialogState extends State<_EditStaffDialog> {
           side: BorderSide(
               color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft),
         ),
-        child: Text('إلغاء',
+        child: Text('إلغاء'.tr(),
             style: TextStyle(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w800,
@@ -541,7 +542,7 @@ class _EditStaffDialogState extends State<_EditStaffDialog> {
                 children: [
                   Icon(Icons.check_rounded, size: 18.sp, color: Colors.white),
                   SizedBox(width: 8.w),
-                  Text('حفظ التعديلات',
+                  Text('حفظ التعديلات'.tr(),
                       style: TextStyle(
                           fontSize: 13.5.sp,
                           fontWeight: FontWeight.w900,
@@ -638,13 +639,13 @@ class _AddStaffSheetState extends State<_AddStaffSheet> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('إضافة حساب فرعي',
+                          Text('إضافة حساب فرعي'.tr(),
                               style: TextStyle(
                                   fontSize: 17.sp,
                                   fontWeight: FontWeight.w900,
                                   color: Colors.white)),
                           SizedBox(height: 3.h),
-                          Text('بيانات الدخول للموظف الجديد',
+                          Text('بيانات الدخول للموظف الجديد'.tr(),
                               style: TextStyle(
                                   fontSize: 11.5.sp,
                                   color: Colors.white.withValues(alpha: 0.85))),
@@ -659,15 +660,15 @@ class _AddStaffSheetState extends State<_AddStaffSheet> {
               SizedBox(height: 18.h),
               _field(
                 controller: _name,
-                label: 'اسم الموظف',
+                label: 'اسم الموظف'.tr(),
                 icon: Icons.person_outline,
                 validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'مطلوب' : null,
+                    (v == null || v.trim().isEmpty) ? 'مطلوب'.tr() : null,
               ),
               SizedBox(height: 12.h),
               _field(
                 controller: _email,
-                label: 'البريد الإلكتروني',
+                label: 'البريد الإلكتروني'.tr(),
                 icon: Icons.email_outlined,
                 keyboardType: TextInputType.emailAddress,
                 // نفس سياسة التحقق المستخدمة في شاشة إنشاء الحساب.
@@ -676,7 +677,7 @@ class _AddStaffSheetState extends State<_AddStaffSheet> {
               SizedBox(height: 12.h),
               _field(
                 controller: _phone,
-                label: 'الهاتف',
+                label: 'الهاتف'.tr(),
                 icon: Icons.phone_outlined,
                 keyboardType: TextInputType.phone,
                 // نفس سياسة موبايل مصر المستخدمة في شاشة إنشاء الحساب.
@@ -750,7 +751,7 @@ class _AddStaffSheetState extends State<_AddStaffSheet> {
                                   Icon(Icons.person_add_alt_1_rounded,
                                       size: 18.sp, color: Colors.white),
                                   SizedBox(width: 8.w),
-                                  Text('إنشاء الحساب',
+                                  Text('إنشاء الحساب'.tr(),
                                       style: TextStyle(
                                           fontSize: 14.sp,
                                           fontWeight: FontWeight.w900,
@@ -861,7 +862,7 @@ class _AddStaffSheetState extends State<_AddStaffSheet> {
       AppLogger.nonFatal('features/staff/presentation/views/staff_management_view.dart', e, logSt, severity: LoggingSeverity.error);
       if (mounted) {
         setState(() => _saving = false);
-        AppToast.error(context, 'تعذر إنشاء الحساب: ${e.toString()}');
+        AppToast.error(context, uiTr('تعذر إنشاء الحساب: ${e.toString()}'));
       }
     }
   }
@@ -892,7 +893,7 @@ class _PermissionHint extends StatelessWidget {
             children: [
               Icon(Icons.verified_user_outlined, size: 17.sp, color: accent),
               SizedBox(width: 7.w),
-              Text('صلاحيات محدودة',
+              Text('صلاحيات محدودة'.tr(),
                   style: TextStyle(
                       fontSize: 12.5.sp,
                       fontWeight: FontWeight.w900,
@@ -900,9 +901,9 @@ class _PermissionHint extends StatelessWidget {
             ],
           ),
           SizedBox(height: 8.h),
-          _hintLine('يستطيع: بيع، شراء، مرتجع، مصروف', isDark),
+          _hintLine('يستطيع: بيع، شراء، مرتجع، مصروف'.tr(), isDark),
           SizedBox(height: 4.h),
-          _hintLine('لا يطلع على التقارير أو الأرباح أو المنتجات', isDark),
+          _hintLine('لا يطلع على التقارير أو الأرباح أو المنتجات'.tr(), isDark),
         ],
       ),
     );

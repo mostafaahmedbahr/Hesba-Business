@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../core/theme/app_theme.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// صف اختيار موعد الاستحقاق (للمصروف المكرر فقط).
 class ExpenseTimePickerRow extends StatelessWidget {
@@ -60,7 +61,7 @@ class ExpenseTimePickerRow extends StatelessWidget {
                     CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'موعد الاستحقاق',
+                    'موعد الاستحقاق'.tr(),
                     style: TextStyle(
                       fontSize: 11.sp,
                       color: AppTheme.mutedGray,

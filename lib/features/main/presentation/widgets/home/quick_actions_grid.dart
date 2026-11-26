@@ -28,25 +28,25 @@ class QuickActionsGrid extends StatelessWidget {
       _QuickActionData(
           icon: Icons.point_of_sale_rounded,
           label: 'homeNewSale'.tr(),
-          subtitle: 'سجّل فاتورة',
+          subtitle: 'سجّل فاتورة'.tr(),
           gradient: const [AppTheme.primaryColor, AppTheme.brightBlue],
           accent: const Color(0xFFDBE6FF)),
       _QuickActionData(
           icon: Icons.add_shopping_cart_rounded,
           label: 'homeAddProduct'.tr(),
-          subtitle: 'أضف للمنتجات',
+          subtitle: 'أضف للمنتجات'.tr(),
           gradient: const [AppTheme.warningAmber, AppTheme.goldLight],
           accent: const Color(0xFFFFF3D6)),
       _QuickActionData(
           icon: Icons.replay_circle_filled_rounded,
           label: 'homeReturn'.tr(),
-          subtitle: 'إرجاع فاتورة',
+          subtitle: 'إرجاع فاتورة'.tr(),
           gradient: const [Color(0xFF7C3AED), Color(0xFFA78BFA)],
           accent: const Color(0xFFEDE9FF)),
       _QuickActionData(
           icon: Icons.savings_rounded,
           label: 'homeExpense'.tr(),
-          subtitle: 'تسجيل مصروف',
+          subtitle: 'تسجيل مصروف'.tr(),
           gradient: const [AppTheme.danger, AppTheme.roseLight],
           accent: const Color(0xFFFFE4E8)),
     ];

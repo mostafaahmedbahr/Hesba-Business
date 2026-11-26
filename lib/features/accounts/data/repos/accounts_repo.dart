@@ -46,7 +46,7 @@ abstract class AccountsRepo {
   /// تسجيل دفعة على مديونية — transaction ذرّية:
   /// تنشئ مستند الدفعة وتحدّث paidAmount، وترفض الدفع الزائد عن
   /// المتبقي. لو الدفعة غطّت المتبقي بالكامل تتغيّر الحالة مشتقّةً
-  /// إلى "مدفوع"، والسجل الأصلي يفضل محفوظًا.
+  /// إلى "مدفوع".tr()، والسجل الأصلي يفضل محفوظًا.
   Future<void> addPayment({
     required String debtId,
     required double amount,

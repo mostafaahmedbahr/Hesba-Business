@@ -5,6 +5,8 @@ import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
 
 import 'price_decoration.dart';
 import 'section.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// سيكشن الفترة التجريبية: حقل الأيام + presets + تلميح.
 class TrialSection extends StatelessWidget {
@@ -24,13 +26,13 @@ class TrialSection extends StatelessWidget {
   static const _presets = [3, 7, 14, 30];
 
   static String _labelOf(int days) =>
-      days == 3 || days == 7 ? '$days أيام' : '$days يوم';
+      days == 3 || days == 7 ? uiTr('$days أيام') : uiTr('$days يوم');
 
   @override
   Widget build(BuildContext context) {
     return SettingsSection(
-      title: 'الفترة التجريبية',
-      subtitle: 'مدة استخدام المنصة مجانًا للعميل الجديد',
+      title: 'الفترة التجريبية'.tr(),
+      subtitle: 'مدة استخدام المنصة مجانًا للعميل الجديد'.tr(),
       icon: Icons.hourglass_bottom_rounded,
       color: AdminColors.warning,
       child: Column(
@@ -51,13 +53,13 @@ class TrialSection extends StatelessWidget {
                   decoration: priceDecoration(
                     context,
                     AdminColors.warning,
-                    suffixText: 'يوم',
+                    suffixText: 'يوم'.tr(),
                     hintText: '7',
                   ),
                   validator: (v) {
                     final n = int.tryParse((v ?? '').trim());
-                    if (n == null || n < 0) return 'أدخل عدد أيام صحيح';
-                    if (n > 365) return 'الحد الأقصى 365 يوم';
+                    if (n == null || n < 0) return 'أدخل عدد أيام صحيح'.tr();
+                    if (n > 365) return 'الحد الأقصى 365 يوم'.tr();
                     return null;
                   },
                 ),
@@ -119,8 +121,8 @@ class TrialSection extends StatelessWidget {
                 Expanded(
                   child: Text(
                     days > 0
-                        ? 'العميل الجديد بيستخدم كل المميزات مجانًا لمدة $days يوم قبل أول دفعة.'
-                        : 'لو خلّيت المدة صفر، العميل هيحتاج يدفع قبل ما يستخدم المنصة.',
+                        ? uiTr('العميل الجديد بيستخدم كل المميزات مجانًا لمدة $days يوم قبل أول دفعة.')
+                        : 'لو خلّيت المدة صفر، العميل هيحتاج يدفع قبل ما يستخدم المنصة.'.tr(),
                     style: const TextStyle(
                       fontSize: 11,
                       height: 1.6,

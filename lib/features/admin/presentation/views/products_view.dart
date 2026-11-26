@@ -8,6 +8,8 @@ import 'package:hesba/core/widgets/loading_widget.dart';
 import 'package:hesba/features/admin/data/repos/admin_repo.dart';
 import 'package:hesba/features/admin/presentation/cubit/admin_list_cubit.dart';
 import 'package:hesba/features/admin/presentation/views/product_details_view.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 class ProductsView extends StatefulWidget {
   const ProductsView({super.key});
@@ -19,7 +21,7 @@ class ProductsView extends StatefulWidget {
 class _ProductsViewState extends State<ProductsView> {
   final _searchCtrl = TextEditingController();
   String _query = '';
-  String _category = 'الكل';
+  String _category = 'الكل'.tr();
 
   @override
   void dispose() {
@@ -38,7 +40,7 @@ class _ProductsViewState extends State<ProductsView> {
           if (state.loading && state.docs.isEmpty) {
             return Column(
               children: [
-                AdminSearchField(controller: _searchCtrl, hint: 'ابحث بالاسم، التصنيف، المحل...', enabled: false),
+                AdminSearchField(controller: _searchCtrl, hint: 'ابحث بالاسم، التصنيف، المحل...'.tr(), enabled: false),
                 Expanded(child: LoadingWidget()),
               ],
             );
@@ -49,33 +51,33 @@ class _ProductsViewState extends State<ProductsView> {
           if (state.docs.isEmpty) {
             return Column(
               children: [
-                AdminSearchField(controller: _searchCtrl, hint: 'ابحث بالاسم، التصنيف، المحل...', enabled: false),
-                Expanded(child: adminEmpty(Icons.inventory_2_outlined, 'لا توجد منتجات بعد', 'عند إضافة أول منتج سيظهر هنا')),
+                AdminSearchField(controller: _searchCtrl, hint: 'ابحث بالاسم، التصنيف، المحل...'.tr(), enabled: false),
+                Expanded(child: adminEmpty(Icons.inventory_2_outlined, 'لا توجد منتجات بعد'.tr(), 'عند إضافة أول منتج سيظهر هنا'.tr())),
               ],
             );
           }
 
           final cats = _extractCats(state.docs);
           final filtered = _applyFilter(state.docs);
-          final filtering = _query.isNotEmpty || _category != 'الكل';
+          final filtering = _query.isNotEmpty || _category != 'الكل'.tr();
 
           return RefreshIndicator(
             onRefresh: () => context.read<AdminListCubit>().firstPage(),
             child: Column(
               children: [
-                const AdminPageHeader(title: 'المنتجات', description: 'منتجات جميع المحلات المسجلة في النظام'),
+                AdminPageHeader(title: 'المنتجات'.tr(), description: 'منتجات جميع المحلات المسجلة في النظام'.tr()),
                 AdminSummaryHeader(
                   icon: Icons.inventory_2_outlined,
-                  title: 'إجمالي المنتجات',
+                  title: 'إجمالي المنتجات'.tr(),
                   total: state.docs.length,
-                  unit: 'منتج',
-                  stats: [if (!filtering) 'الكل معروض' else 'عرض ${filtered.length} من ${state.docs.length}'],
+                  unit: 'منتج'.tr(),
+                  stats: [if (!filtering) 'الكل معروض'.tr() else uiTr('عرض ${filtered.length} من ${state.docs.length}')],
                   loading: state.loading,
                   onRefresh: () => context.read<AdminListCubit>().firstPage(),
                 ),
                 AdminSearchField(
                   controller: _searchCtrl,
-                  hint: 'ابحث بالاسم، التصنيف، المحل...',
+                  hint: 'ابحث بالاسم، التصنيف، المحل...'.tr(),
                   onChanged: (v) => setState(() => _query = v),
                 ),
                 AdminFilterChips(
@@ -89,12 +91,12 @@ class _ProductsViewState extends State<ProductsView> {
                     onClear: () => setState(() {
                       _query = '';
                       _searchCtrl.clear();
-                      _category = 'الكل';
+                      _category = 'الكل'.tr();
                     }),
                   ),
                 Expanded(
                   child: filtered.isEmpty
-                      ? adminEmpty(Icons.search_off_outlined, 'لا توجد نتائج مطابقة لبحثك', 'جرّب كلمة مختلفة أو امسح الفلتر')
+                      ? adminEmpty(Icons.search_off_outlined, 'لا توجد نتائج مطابقة لبحثك'.tr(), 'جرّب كلمة مختلفة أو امسح الفلتر'.tr())
                       : LayoutBuilder(builder: (context, constraints) {
                           final wide = constraints.maxWidth >= 760;
                           if (wide) {
@@ -124,7 +126,7 @@ class _ProductsViewState extends State<ProductsView> {
                 if (state.hasMore)
                   AdminLoadMore(
                     loading: state.loading,
-                    label: 'تحميل المزيد (${state.docs.length} معروض)',
+                    label: uiTr('تحميل المزيد (${state.docs.length} معروض)'),
                     onLoad: () => context.read<AdminListCubit>().nextPage(),
                   ),
               ],
@@ -141,7 +143,7 @@ class _ProductsViewState extends State<ProductsView> {
       final c = (d.data()['category'] as String?)?.trim() ?? '';
       if (c.isNotEmpty) set.add(c);
     }
-    return ['الكل', ...set.toList()..sort()];
+    return ['الكل'.tr(), ...set.toList()..sort()];
   }
 
   List<QueryDocumentSnapshot<Map<String, dynamic>>> _applyFilter(
@@ -149,7 +151,7 @@ class _ProductsViewState extends State<ProductsView> {
     final q = _query.trim();
     return docs.where((d) {
       final data = d.data();
-      if (_category != 'الكل' && (data['category'] as String? ?? '') != _category) return false;
+      if (_category != 'الكل'.tr() && (data['category'] as String? ?? '') != _category) return false;
       if (q.isEmpty) return true;
       final haystack = [data['name'], data['category'], data['shopId'], d.id].whereType<String>().join(' ');
       return haystack.contains(q);
@@ -183,7 +185,7 @@ class _ProductCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
                 const SizedBox(height: 2),
-                Text('${d['category'] ?? '-'} • الكمية: ${d['stock'] ?? 0}',
+                Text('${d['category'] ?? '-uiTr('} • الكمية: ${d[')stock'] ?? 0}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(color: AdminColors.textSecondary(context), fontSize: 12)),

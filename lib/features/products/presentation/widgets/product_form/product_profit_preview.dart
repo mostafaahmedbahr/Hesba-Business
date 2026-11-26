@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../core/theme/app_theme.dart';
 import '../../../../../core/utils/number_parser.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// معاينة الربح/الخسارة اللحظية في قسم التسعير:
 /// تاخد نص السعر والتكلفة زي ما هما في الحقول، وتحسب الفرق والهامش.
@@ -49,8 +51,8 @@ class ProductProfitPreview extends StatelessWidget {
           Expanded(
             child: Text(
               positive
-                  ? 'ربح ${_num(profit)} ج.م • هامش ${margin.toStringAsFixed(1)}%'
-                  : 'خسارة ${_num(profit.abs())} ج.م',
+                  ? uiTr('ربح ${_num(profit)} ج.م • هامش ${margin.toStringAsFixed(1)}%')
+                  : uiTr('خسارة ${_num(profit.abs())} ج.م'),
               style: TextStyle(
                 fontSize: 11.5.sp,
                 fontWeight: FontWeight.w800,
@@ -65,7 +67,7 @@ class ProductProfitPreview extends StatelessWidget {
               borderRadius: BorderRadius.circular(20.r),
             ),
             child: Text(
-              positive ? 'مربح' : 'خسارة',
+              positive ? 'مربح'.tr() : 'خسارة'.tr(),
               style: TextStyle(
                 fontSize: 10.sp,
                 fontWeight: FontWeight.w700,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// زر «استعادة الإعدادات الافتراضية» أسفل الفورم.
 class RestoreDefaultsButton extends StatelessWidget {
@@ -17,8 +18,8 @@ class RestoreDefaultsButton extends StatelessWidget {
       child: TextButton.icon(
         onPressed: enabled ? onTap : null,
         icon: const Icon(Icons.restart_alt_rounded, size: 18),
-        label: const Text(
-          'استعادة الإعدادات الافتراضية',
+        label: Text(
+          'استعادة الإعدادات الافتراضية'.tr(),
           style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
         ),
       ),

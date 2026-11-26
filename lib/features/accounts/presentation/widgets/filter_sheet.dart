@@ -2,6 +2,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../common_imports.dart';
 import '../../data/models/debt_model.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// نتيجة تطبيق الفلاتر من الـ sheet.
 typedef FiltersApply = void Function(
@@ -73,9 +74,9 @@ class _FilterSheetState extends State<_FilterSheet> {
       initialDate: initial,
       firstDate: DateTime(2020),
       lastDate: now,
-      helpText: isFrom ? 'من تاريخ' : 'إلى تاريخ',
-      cancelText: 'إلغاء',
-      confirmText: 'اختيار',
+      helpText: isFrom ? 'من تاريخ'.tr() : 'إلى تاريخ'.tr(),
+      cancelText: 'إلغاء'.tr(),
+      confirmText: 'اختيار'.tr(),
     );
     if (picked == null) return;
     setState(() {
@@ -137,7 +138,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                   SizedBox(width: 10.w),
                   Expanded(
                     child: Text(
-                      'تصفية الحسابات',
+                      'تصفية الحسابات'.tr(),
                       style: TextStyle(
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w900,
@@ -158,7 +159,7 @@ class _FilterSheetState extends State<_FilterSheet> {
               SizedBox(height: 16.h),
               // حالة السداد.
               Text(
-                'حالة السداد',
+                'حالة السداد'.tr(),
                 style: TextStyle(
                   fontSize: 11.sp,
                   fontWeight: FontWeight.w800,
@@ -171,25 +172,25 @@ class _FilterSheetState extends State<_FilterSheet> {
                 runSpacing: 8.h,
                 children: [
                   _StatusChoice(
-                    label: 'الكل',
+                    label: 'الكل'.tr(),
                     selected: _status == null,
                     color: AppTheme.primaryColor,
                     onTap: () => setState(() => _status = null),
                   ),
                   _StatusChoice(
-                    label: 'غير مدفوع',
+                    label: 'غير مدفوع'.tr(),
                     selected: _status == DebtStatus.unpaid,
                     color: AppTheme.danger,
                     onTap: () => setState(() => _status = DebtStatus.unpaid),
                   ),
                   _StatusChoice(
-                    label: 'سداد جزئي',
+                    label: 'سداد جزئي'.tr(),
                     selected: _status == DebtStatus.partial,
                     color: AppTheme.amberDeep,
                     onTap: () => setState(() => _status = DebtStatus.partial),
                   ),
                   _StatusChoice(
-                    label: 'مدفوع',
+                    label: 'مدفوع'.tr(),
                     selected: _status == DebtStatus.paid,
                     color: AppTheme.successDark,
                     onTap: () => setState(() => _status = DebtStatus.paid),
@@ -199,7 +200,7 @@ class _FilterSheetState extends State<_FilterSheet> {
               SizedBox(height: 16.h),
               // التاريخ.
               Text(
-                'تاريخ تسجيل المديونية',
+                'تاريخ تسجيل المديونية'.tr(),
                 style: TextStyle(
                   fontSize: 11.sp,
                   fontWeight: FontWeight.w800,
@@ -211,7 +212,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                 children: [
                   Expanded(
                     child: _DateButton(
-                      label: 'من',
+                      label: 'من'.tr(),
                       value: _from,
                       onTap: () => _pickDate(isFrom: true),
                       onClear: () => setState(() => _from = null),
@@ -220,7 +221,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                   SizedBox(width: 8.w),
                   Expanded(
                     child: _DateButton(
-                      label: 'إلى',
+                      label: 'إلى'.tr(),
                       value: _to,
                       onTap: () => _pickDate(isFrom: false),
                       onClear: () => setState(() => _to = null),
@@ -248,8 +249,8 @@ class _FilterSheetState extends State<_FilterSheet> {
                         ),
                         padding: EdgeInsets.symmetric(vertical: 14.h),
                       ),
-                      child: const Text(
-                        'مسح الكل',
+                      child: Text(
+                        'مسح الكل'.tr(),
                         style: TextStyle(fontWeight: FontWeight.w800),
                       ),
                     ),
@@ -271,8 +272,8 @@ class _FilterSheetState extends State<_FilterSheet> {
                         ),
                         padding: EdgeInsets.symmetric(vertical: 14.h),
                       ),
-                      child: const Text(
-                        'تطبيق',
+                      child: Text(
+                        'تطبيق'.tr(),
                         style: TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: 13,
@@ -377,7 +378,7 @@ class _DateButton extends StatelessWidget {
                     ),
                     Text(
                       value == null
-                          ? 'بدون تحديد'
+                          ? 'بدون تحديد'.tr()
                           : DateFormat('d MMM y', 'ar').format(value!),
                       style: TextStyle(
                         fontSize: 11.sp,

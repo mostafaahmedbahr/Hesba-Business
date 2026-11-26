@@ -7,6 +7,8 @@ import '../../../sales/data/models/sale_model.dart';
 import '../models/return_model.dart';
 import '../repos/returns_repo.dart';
 import 'package:hesba/core/services/shop_id_resolver.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 class ReturnsRepoImpl implements ReturnsRepo {
   final FirebaseFirestore firestore;
@@ -41,11 +43,11 @@ class ReturnsRepoImpl implements ReturnsRepo {
     required String note,
     String? requestId,
   }) async {
-    if (items.isEmpty) throw Exception('يجب إضافة منتج واحد على الأقل');
+    if (items.isEmpty) throw Exception('يجب إضافة منتج واحد على الأقل'.tr());
     if (originalSaleId == null || originalSaleId.isEmpty) {
-      throw Exception('يجب اختيار فاتورة للمرتجع');
+      throw Exception('يجب اختيار فاتورة للمرتجع'.tr());
     }
-    if (reason.trim().isEmpty) throw Exception('اختر سبب المرتجع');
+    if (reason.trim().isEmpty) throw Exception('اختر سبب المرتجع'.tr());
 
     // Idempotency: a retry after a lost response must not restore stock or
     // settle the debt a second time. Return the original return document.
@@ -61,23 +63,23 @@ class ReturnsRepoImpl implements ReturnsRepo {
     final resolvedOwnerId = await _resolveOwnerId(ownerId);
 
     if (resolvedShopId == null || resolvedShopId.isEmpty) {
-      throw Exception('لم يتم العثور على المتجر');
+      throw Exception('لم يتم العثور على المتجر'.tr());
     }
     if (resolvedOwnerId == null || resolvedOwnerId.isEmpty) {
-      throw Exception('يجب تسجيل الدخول أولاً');
+      throw Exception('يجب تسجيل الدخول أولاً'.tr());
     }
 
     for (final item in items) {
-      if (item.productName.trim().isEmpty) throw Exception('اسم المنتج مطلوب');
-      if (item.quantity <= 0) throw Exception('الكمية يجب أن تكون أكبر من صفر: ${item.productName}');
-      if (item.unitPrice < 0) throw Exception('السعر غير صحيح: ${item.productName}');
+      if (item.productName.trim().isEmpty) throw Exception('اسم المنتج مطلوب'.tr());
+      if (item.quantity <= 0) throw Exception(uiTr('الكمية يجب أن تكون أكبر من صفر: ${item.productName}'));
+      if (item.unitPrice < 0) throw Exception(uiTr('السعر غير صحيح: ${item.productName}'));
     }
 
     // Validate against original sale and already returned quantities
     final saleDoc = await firestore.collection(AppConstants.salesCollection).doc(originalSaleId).get();
-    if (!saleDoc.exists) throw Exception('الفاتورة الأصلية غير موجودة');
+    if (!saleDoc.exists) throw Exception('الفاتورة الأصلية غير موجودة'.tr());
     final saleData = saleDoc.data()!;
-    if (saleData['shopId'] != resolvedShopId) throw Exception('الفاتورة لا تتبع نفس المتجر');
+    if (saleData['shopId'] != resolvedShopId) throw Exception('الفاتورة لا تتبع نفس المتجر'.tr());
     final saleItems = (saleData['items'] as List<dynamic>? ?? [])
         .map((e) => Map<String, dynamic>.from(e))
         .toList();
@@ -130,14 +132,14 @@ class ReturnsRepoImpl implements ReturnsRepo {
       } else if (soldQtyByKey.containsKey('name::${item.productName}')) {
         soldQty = soldQtyByKey['name::${item.productName}']!;
       } else {
-        throw Exception('المنتج ${item.productName} غير موجود في الفاتورة الأصلية');
+        throw Exception(uiTr('المنتج ${item.productName} غير موجود في الفاتورة الأصلية'));
       }
       final already = item.productId.isNotEmpty
           ? (returnedQtyByKey[item.productId] ?? 0)
           : (returnedQtyByKey['name::${item.productName}'] ?? 0);
       final available = soldQty - already;
       if (item.quantity > available + 0.001) {
-        throw Exception('الكمية للإرجاع أكبر من المتاح لـ ${item.productName} (المتاح: $available، المباع: $soldQty، المرجع سابقاً: $already)');
+        throw Exception(uiTr('الكمية للإرجاع أكبر من المتاح لـ ${item.productName} (المتاح: $available، المباع: $soldQty، المرجع سابقاً: $already)'));
       }
       // Ensure unitPrice matches original (preserve discount)
       double originalPrice = 0;
@@ -149,7 +151,7 @@ class ReturnsRepoImpl implements ReturnsRepo {
         }
       }
       if ((item.unitPrice - originalPrice).abs() > 0.01) {
-        throw Exception('سعر المنتج ${item.productName} يجب أن يكون نفس سعر البيع الأصلي (${originalPrice.toStringAsFixed(2)} ج.م)');
+        throw Exception(uiTr('سعر المنتج ${item.productName} يجب أن يكون نفس سعر البيع الأصلي (${originalPrice.toStringAsFixed(2)} ج.م)'));
       }
     }
 
@@ -277,7 +279,7 @@ class ReturnsRepoImpl implements ReturnsRepo {
             'ownerId': resolvedOwnerId,
             'shopId': resolvedShopId,
             'amount': adj,
-            'note': 'تسوية مرتجع — فاتورة #$invoiceShort',
+            'note': uiTr('تسوية مرتجع — فاتورة #$invoiceShort'),
             'createdAt': FieldValue.serverTimestamp(),
           });
           transaction.update(linkedDebtRef, {

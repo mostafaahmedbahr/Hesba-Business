@@ -1,5 +1,6 @@
 import '../../../../common_imports.dart';
 import 'expense_category_meta.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// بحث + فلاتر التصنيفات (بأيقونات).
 class ExpenseListSearch extends StatefulWidget {
@@ -44,7 +45,7 @@ class _ExpenseListSearchState extends State<ExpenseListSearch> {
           textInputAction: TextInputAction.search,
           style: TextStyle(fontSize: 13.5.sp),
           decoration: InputDecoration(
-            hintText: 'ابحث بالعنوان أو التصنيف أو الملاحظة',
+            hintText: 'ابحث بالعنوان أو التصنيف أو الملاحظة'.tr(),
             hintStyle: TextStyle(fontSize: 12.5.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
             prefixIcon: Container(margin: EdgeInsets.all(8.w), width: 36.w, height: 36.w, decoration: BoxDecoration(color: AppTheme.danger.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(10.r)), child: Icon(Icons.search_rounded, size: 18.sp, color: AppTheme.danger)),
             suffixIcon: widget.query.isEmpty
@@ -73,9 +74,9 @@ class _ExpenseListSearchState extends State<ExpenseListSearch> {
           itemBuilder: (context, i) {
             final cat = widget.categories[i];
             final selected = cat == widget.categoryFilter;
-            final color = cat == 'الكل' ? AppTheme.danger : expenseCatColor(cat);
+            final color = cat == 'الكل'.tr() ? AppTheme.danger : expenseCatColor(cat);
             return ChoiceChip(
-              avatar: cat == 'الكل'
+              avatar: cat == 'الكل'.tr()
                   ? null
                   : Icon(expenseCatIcon(cat), size: 14.sp, color: selected ? Colors.white : color),
               label: Text(cat, style: TextStyle(fontSize: 11.5.sp, fontWeight: selected ? FontWeight.w800 : FontWeight.w600, color: selected ? Colors.white : Theme.of(context).colorScheme.onSurfaceVariant)),

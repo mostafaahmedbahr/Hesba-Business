@@ -1,4 +1,5 @@
 import '../../../../common_imports.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// بحث يفلتر القائمتين (live).
 class CategorySearchField extends StatefulWidget {
@@ -41,7 +42,7 @@ class _CategorySearchFieldState extends State<CategorySearchField> {
         textInputAction: TextInputAction.search,
         style: TextStyle(fontSize: 13.5.sp),
         decoration: InputDecoration(
-          hintText: 'ابحث في الأقسام...',
+          hintText: 'ابحث في الأقسام...'.tr(),
           hintStyle: TextStyle(
             fontSize: 12.5.sp,
             color: Theme.of(context).colorScheme.onSurfaceVariant,

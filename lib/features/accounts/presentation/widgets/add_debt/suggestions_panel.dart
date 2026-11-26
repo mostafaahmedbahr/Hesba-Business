@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../core/theme/app_theme.dart';
 import '../../../data/models/person_model.dart';
 import 'person_type_chip.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// لوحة الاقتراحات أسفل حقلي الاسم/الرقم في «إضافة مديونية».
 class AddDebtSuggestionsPanel extends StatelessWidget {
@@ -37,7 +38,7 @@ class AddDebtSuggestionsPanel extends StatelessWidget {
             SizedBox(width: 8.w),
             Expanded(
               child: Text(
-                'شخص جديد — سيُحفظ اسمه ورقمه للاستخدام مستقبلًا',
+                'شخص جديد — سيُحفظ اسمه ورقمه للاستخدام مستقبلًا'.tr(),
                 style: TextStyle(
                   fontSize: 10.sp,
                   fontWeight: FontWeight.w700,
@@ -69,7 +70,7 @@ class AddDebtSuggestionsPanel extends StatelessWidget {
                     size: 12.sp, color: AppTheme.mutedGray),
                 SizedBox(width: 5.w),
                 Text(
-                  'مسجّلون من قبل — اختر بدلًا من الكتابة',
+                  'مسجّلون من قبل — اختر بدلًا من الكتابة'.tr(),
                   style: TextStyle(
                     fontSize: 9.5.sp,
                     fontWeight: FontWeight.w800,

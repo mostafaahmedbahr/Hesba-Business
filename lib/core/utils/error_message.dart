@@ -38,20 +38,20 @@ String friendlyError(Object error) {
   if (error is CloudinaryUploadException) {
     return switch (error.code) {
       'missing-configuration' || 'invalid-response' =>
-        'تعذر رفع الصورة — إعدادات الرفع غير مكتملة.',
-      'file-too-large' => 'الصورة كبيرة جداً، اختر صورة أصغر.',
-      'invalid-file-type' => 'صيغة الصورة غير مدعومة، اختر صورة أخرى.',
+        'تعذر رفع الصورة — إعدادات الرفع غير مكتملة.'.tr(),
+      'file-too-large' => 'الصورة كبيرة جداً، اختر صورة أصغر.'.tr(),
+      'invalid-file-type' => 'صيغة الصورة غير مدعومة، اختر صورة أخرى.'.tr(),
       'upload-failed' || 'preset-not-found' || 'upload-rejected' =>
-        'تعذر رفع الصورة، تحقق من الاتصال وحاول مرة أخرى.',
-      _ => 'تعذر رفع الصورة، حاول مرة أخرى.',
+        'تعذر رفع الصورة، تحقق من الاتصال وحاول مرة أخرى.'.tr(),
+      _ => 'تعذر رفع الصورة، حاول مرة أخرى.'.tr(),
     };
   }
 
   if (error is TimeoutException) {
-    return 'انتهت مهلة الاتصال، تحقق من الإنترنت وحاول مرة أخرى.';
+    return 'انتهت مهلة الاتصال، تحقق من الإنترنت وحاول مرة أخرى.'.tr();
   }
   if (error is SocketException) {
-    return 'لا يوجد اتصال بالإنترنت، تحقق من الشبكة وحاول مرة أخرى.';
+    return 'لا يوجد اتصال بالإنترنت، تحقق من الشبكة وحاول مرة أخرى.'.tr();
   }
 
   // FirebaseAuthException extends FirebaseException — one case covers both.
@@ -64,10 +64,10 @@ String friendlyError(Object error) {
 
   // FirebaseAuthException codes not covered above get an auth-specific fallback.
   if (error is FirebaseAuthException) {
-    return 'تعذر إتمام عملية الحساب، حاول مرة أخرى.';
+    return 'تعذر إتمام عملية الحساب، حاول مرة أخرى.'.tr();
   }
   if (error is FirebaseException) {
-    return 'تعذر إتمام العملية، حاول مرة أخرى.';
+    return 'تعذر إتمام العملية، حاول مرة أخرى.'.tr();
   }
 
   // Plain Exceptions thrown by our own repos are mostly already user-facing
@@ -87,19 +87,19 @@ String? _friendlyByCode(String code) {
   if (code.contains('permission-denied') ||
       code.contains('permission denied') ||
       code.contains('insufficient permission')) {
-    return 'الصلاحية مرفوضة: تعذّر تنفيذ العملية. تأكد من تفعيل حسابك وارتباطه بالمحل وسريان الاشتراك، ثم حاول مرة أخرى.';
+    return 'الصلاحية مرفوضة: تعذّر تنفيذ العملية. تأكد من تفعيل حسابك وارتباطه بالمحل وسريان الاشتراك، ثم حاول مرة أخرى.'.tr();
   }
   if (code.contains('unavailable') ||
       code.contains('network-request-failed') ||
       code.contains('connection failed') ||
       code.contains('failed to load')) {
-    return 'لا يوجد اتصال، تحقق من الإنترنت وحاول مرة أخرى.';
+    return 'لا يوجد اتصال، تحقق من الإنترنت وحاول مرة أخرى.'.tr();
   }
   if (code.contains('deadline-exceeded') || code.contains('timed out')) {
-    return 'انتهت مهلة الاتصال، حاول مرة أخرى.';
+    return 'انتهت مهلة الاتصال، حاول مرة أخرى.'.tr();
   }
   if (code.contains('aborted')) {
-    return 'تعذر الحفظ بسبب تعديل متزامن، حاول مرة أخرى.';
+    return 'تعذر الحفظ بسبب تعديل متزامن، حاول مرة أخرى.'.tr();
   }
   if (code.contains('unauthenticated') ||
       code.contains('session') ||
@@ -107,16 +107,16 @@ String? _friendlyByCode(String code) {
       code.contains('invalid-credential') ||
       code.contains('wrong-password') ||
       code.contains('user-disabled')) {
-    return 'انتهت جلسة الدخول، سجّل الدخول مرة أخرى.';
+    return 'انتهت جلسة الدخول، سجّل الدخول مرة أخرى.'.tr();
   }
   if (code.contains('already-in-use') || code.contains('email-already-in-use')) {
-    return 'البريد الإلكتروني مستخدم بالفعل.';
+    return 'البريد الإلكتروني مستخدم بالفعل.'.tr();
   }
   if (code.contains('resource-exhausted') || code.contains('too-many-requests')) {
-    return 'محاولات كثيرة، حاول مرة أخرى لاحقاً.';
+    return 'محاولات كثيرة، حاول مرة أخرى لاحقاً.'.tr();
   }
   if (code.contains('shop-not-resolved') || code.contains('invalid-id')) {
-    return 'تعذر تحديد المحل، أعد فتح الشاشة وحاول مرة أخرى.';
+    return 'تعذر تحديد المحل، أعد فتح الشاشة وحاول مرة أخرى.'.tr();
   }
   return null;
 }

@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:hesba/core/theme/app_theme.dart';
 import 'package:hesba/core/widgets/loading_widget.dart';
 import 'package:intl/intl.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 // ─────────────────────────────────────────────────────────────
 // Hesba Admin Design System — single source of truth.
@@ -88,13 +90,13 @@ class AdminStatuses {
 
   static String labelOf(String status) {
     return switch (status) {
-      'active' => 'نشط',
-      'trial' => 'تجريبي',
-      'pending' => 'معلق',
-      'expired' => 'منتهي',
-      'rejected' => 'مرفوض',
-      'approved' => 'مقبول',
-      'all' => 'الكل',
+      'active' => 'نشط'.tr(),
+      'trial' => 'تجريبي'.tr(),
+      'pending' => 'معلق'.tr(),
+      'expired' => 'منتهي'.tr(),
+      'rejected' => 'مرفوض'.tr(),
+      'approved' => 'مقبول'.tr(),
+      'all' => 'الكل'.tr(),
       '' => '-',
       _ => status,
     };
@@ -117,20 +119,20 @@ class AdminStatuses {
 class AdminFmt {
   const AdminFmt._();
 
-  static const _months = [
+  static final _months= [
     '',
-    'يناير',
-    'فبراير',
-    'مارس',
-    'أبريل',
-    'مايو',
-    'يونيو',
-    'يوليو',
-    'أغسطس',
-    'سبتمبر',
-    'أكتوبر',
-    'نوفمبر',
-    'ديسمبر',
+    'يناير'.tr(),
+    'فبراير'.tr(),
+    'مارس'.tr(),
+    'أبريل'.tr(),
+    'مايو'.tr(),
+    'يونيو'.tr(),
+    'يوليو'.tr(),
+    'أغسطس'.tr(),
+    'سبتمبر'.tr(),
+    'أكتوبر'.tr(),
+    'نوفمبر'.tr(),
+    'ديسمبر'.tr(),
   ];
 
   static DateTime? toDate(dynamic v) {
@@ -171,7 +173,7 @@ class AdminFmt {
   }
 
   /// "1,249 ج"
-  static String money(num? v) => '${number(v ?? 0)} ج';
+  static String money(num? v) => uiTr('${number(v ?? 0)} ج');
 
   /// "1,249"
   static String number(num v) => NumberFormat('#,##0', 'en').format(v);
@@ -605,7 +607,7 @@ class AdminLoadMore extends StatelessWidget {
             icon: loading
                 ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
                 : const Icon(Icons.expand_more, size: 20),
-            label: Text(loading ? 'جاري التحميل...' : label),
+            label: Text(loading ? 'جاري التحميل...'.tr() : label),
           ),
         ),
       ),
@@ -615,11 +617,11 @@ class AdminLoadMore extends StatelessWidget {
 
 /// "X نتيجة" + clear-filter row shown under search when filtering.
 class AdminResultCount extends StatelessWidget {
-  const AdminResultCount({super.key, required this.count, required this.onClear, this.clearLabel = 'مسح الفلتر'});
+  AdminResultCount({super.key, required this.count, required this.onClear, this.clearLabel});
 
   final int count;
   final VoidCallback onClear;
-  final String clearLabel;
+  final String? clearLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -627,7 +629,7 @@ class AdminResultCount extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: AdminSpace.lg, vertical: AdminSpace.xs),
       child: Row(
         children: [
-          Text('نتائج البحث: $count',
+          Text(uiTr('نتائج البحث: $count'),
               style: Theme.of(context)
                   .textTheme
                   .bodySmall
@@ -636,7 +638,7 @@ class AdminResultCount extends StatelessWidget {
           TextButton.icon(
             onPressed: onClear,
             icon: const Icon(Icons.clear, size: 16),
-            label: Text(clearLabel, style: const TextStyle(fontSize: 12)),
+            label: Text((clearLabel ?? 'مسح الفلتر').tr(), style: const TextStyle(fontSize: 12)),
           ),
         ],
       ),
@@ -686,7 +688,7 @@ class AdminStatusBadge extends StatelessWidget {
 /// The ONLY way IDs are displayed in the admin panel.
 /// Short mode (rows/tables): truncated id + tiny copy button.
 /// Full mode (details): label + full id + copy button.
-/// Always copies the FULL id and shows "تم نسخ الـ ID".
+/// Always copies the FULL id and shows "تم نسخ الـ ID".tr().
 class CopyableId extends StatelessWidget {
   const CopyableId({super.key, required this.id, this.full = false, this.label});
 
@@ -698,7 +700,7 @@ class CopyableId extends StatelessWidget {
     if (id.isEmpty) return;
     Clipboard.setData(ClipboardData(text: id));
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('تم نسخ الـ ID'), duration: Duration(seconds: 1), behavior: SnackBarBehavior.floating),
+      SnackBar(content: Text('تم نسخ الـ ID'.tr()), duration: Duration(seconds: 1), behavior: SnackBarBehavior.floating),
     );
   }
 
@@ -752,14 +754,14 @@ class CopyableId extends StatelessWidget {
               child: InkWell(
                 borderRadius: BorderRadius.circular(AdminRadius.pill),
                 onTap: () => copy(context, id),
-                child: const Padding(
+                child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(Icons.copy_outlined, size: 14, color: AppTheme.primaryColor),
                       SizedBox(width: 4),
-                      Text('نسخ', style: TextStyle(fontSize: 12, color: AppTheme.primaryColor, fontWeight: FontWeight.w800)),
+                      Text('نسخ'.tr(), style: TextStyle(fontSize: 12, color: AppTheme.primaryColor, fontWeight: FontWeight.w800)),
                     ],
                   ),
                 ),
@@ -801,7 +803,7 @@ class AdminInfoRow extends StatelessWidget {
         ),
         if (copyable && value != '-')
           IconButton(
-            tooltip: 'نسخ',
+            tooltip: 'نسخ'.tr(),
             icon: const Icon(Icons.copy_outlined, size: 17),
             onPressed: () => CopyableId.copy(context, value),
           ),
@@ -902,7 +904,7 @@ class AdminDialogShell extends StatelessWidget {
                     IconButton(
                       onPressed: () => Navigator.of(context).pop(),
                       icon: const Icon(Icons.close, size: 20),
-                      tooltip: 'إغلاق',
+                      tooltip: 'إغلاق'.tr(),
                     ),
                   ],
                 ),
@@ -931,10 +933,12 @@ Future<bool> showAdminConfirm(
   BuildContext context, {
   required String title,
   required String message,
-  String confirmLabel = 'تأكيد',
-  String cancelLabel = 'إلغاء',
+  String? confirmLabel,
+  String? cancelLabel,
   bool danger = false,
 }) async {
+  final confirm = confirmLabel ?? 'تأكيد';
+  final cancel = cancelLabel ?? 'إلغاء';
   final result = await showDialog<bool>(
     context: context,
     builder: (_) => AdminDialogShell(
@@ -942,12 +946,12 @@ Future<bool> showAdminConfirm(
       actions: [
         OutlinedButton(
           onPressed: () => Navigator.of(context).pop(false),
-          child: Text(cancelLabel),
+          child: Text(cancel.tr()),
         ),
         ElevatedButton(
           style: danger ? ElevatedButton.styleFrom(backgroundColor: AdminColors.error) : null,
           onPressed: () => Navigator.of(context).pop(true),
-          child: Text(confirmLabel),
+          child: Text(confirm.tr()),
         ),
       ],
       child: Text(message),
@@ -1079,7 +1083,7 @@ Widget adminError(String message, VoidCallback onRetry) {
             child: const Icon(Icons.error_outline, size: 36, color: AdminColors.error),
           ),
           const SizedBox(height: AdminSpace.md),
-          const Text('حدث خطأ أثناء تحميل البيانات', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
+          Text('حدث خطأ أثناء تحميل البيانات'.tr(), style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
           const SizedBox(height: AdminSpace.xs),
           Text(message,
               textAlign: TextAlign.center,
@@ -1090,7 +1094,7 @@ Widget adminError(String message, VoidCallback onRetry) {
           ElevatedButton.icon(
             onPressed: onRetry,
             icon: const Icon(Icons.refresh, size: 18),
-            label: const Text('إعادة المحاولة'),
+            label: Text('إعادة المحاولة'.tr()),
           ),
         ],
       ),

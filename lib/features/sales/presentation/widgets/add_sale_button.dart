@@ -1,4 +1,5 @@
 import '../../../../common_imports.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// زرار حفظ البيع (gradient + ظل).
 class AddSaleButton extends StatelessWidget {
@@ -42,7 +43,7 @@ class AddSaleButton extends StatelessWidget {
                   children: [
                     Icon(Icons.check_circle_rounded, size: 20.sp, color: Colors.white),
                     SizedBox(width: 8.w),
-                    Text('حفظ البيع', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: Colors.white)),
+                    Text('حفظ البيع'.tr(), style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: Colors.white)),
                   ],
                 ),
         ),

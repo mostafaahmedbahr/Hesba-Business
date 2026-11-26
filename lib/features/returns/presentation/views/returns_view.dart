@@ -93,7 +93,7 @@ class _ReturnsBody extends StatelessWidget {
           //   backgroundColor: AppTheme.warningAmber,
           //   foregroundColor: Colors.white,
           //   icon: const Icon(Icons.add_rounded),
-          //   label: Text('مرتجع جديد', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800)),
+          //   label: Text('مرتجع جديد'.tr(), style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800)),
           // ),
           body: RefreshIndicator(
             color: AppTheme.warningAmber,

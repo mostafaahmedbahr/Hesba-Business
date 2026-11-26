@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../../common_imports.dart';
 import '../../data/models/expense_model.dart';
 import 'expense_category_meta.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// كارت مصروف مختصر — ضغطة تفتح الملاحظة والأزرار.
 class ExpenseListCard extends StatefulWidget {
@@ -83,7 +84,7 @@ class _ExpenseListCardState extends State<ExpenseListCard> {
                           Container(
                             padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
                             decoration: BoxDecoration(color: color.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(8.r)),
-                            child: Text(expense.category.isEmpty ? 'عام' : expense.category, style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w800, color: color)),
+                            child: Text(expense.category.isEmpty ? 'عام'.tr() : expense.category, style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w800, color: color)),
                           ),
                           SizedBox(width: 6.w),
                           if (expense.isTemplate) ...[
@@ -100,10 +101,10 @@ class _ExpenseListCardState extends State<ExpenseListCard> {
                                   SizedBox(width: 3.w),
                                   Text(
                                     expense.recurrence == ExpenseModel.recurrenceDaily
-                                        ? 'يومي'
+                                        ? 'يومي'.tr()
                                         : expense.recurrence == ExpenseModel.recurrenceWeekly
-                                            ? 'أسبوعي'
-                                            : 'شهري',
+                                            ? 'أسبوعي'.tr()
+                                            : 'شهري'.tr(),
                                     style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w800, color: AppTheme.amberDeep),
                                   ),
                                 ],
@@ -136,7 +137,7 @@ class _ExpenseListCardState extends State<ExpenseListCard> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text('-${expense.amount.toStringAsFixed(expense.amount % 1 == 0 ? 0 : 2)}', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: AppTheme.danger, height: 1)),
-                      Text('ج.م', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w700, color: AppTheme.mutedGray)),
+                      Text('ج.م'.tr(), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w700, color: AppTheme.mutedGray)),
                     ],
                   ),
                   SizedBox(width: 4.w),
@@ -198,8 +199,8 @@ class _Details extends StatelessWidget {
                 Expanded(
                   child: Text(
                     expense.nextDue == null
-                        ? 'سيُسجَّل تلقائيًا ${expense.recurrence == ExpenseModel.recurrenceDaily ? 'يوميًا' : expense.recurrence == ExpenseModel.recurrenceWeekly ? 'أسبوعيًا' : 'شهريًا'}'
-                        : 'الموعد القادم: ${DateFormat('EEEE d MMMM • hh:mm a', 'ar').format(expense.nextDue!)}',
+                        ? uiTr('سيُسجَّل تلقائيًا ${expense.recurrence == ExpenseModel.recurrenceDaily ? 'يوميًا'.tr() : expense.recurrence == ExpenseModel.recurrenceWeekly ? 'أسبوعيًا'.tr() : 'شهريًا'.tr()}')
+                        : uiTr('الموعد القادم: ${DateFormat('EEEE d MMMM • hh:mm a', 'ar').format(expense.nextDue!)}'),
                     style: TextStyle(
                       fontSize: 10.5.sp,
                       fontWeight: FontWeight.w700,
@@ -232,7 +233,7 @@ class _Details extends StatelessWidget {
             Expanded(
               child: _RowBtn(
                 icon: Icons.edit_outlined,
-                label: 'تعديل',
+                label: 'تعديل'.tr(),
                 color: AppTheme.primaryColor,
                 onTap: () {
                   HapticFeedback.lightImpact();
@@ -244,7 +245,7 @@ class _Details extends StatelessWidget {
             Expanded(
               child: _RowBtn(
                 icon: Icons.delete_outline_rounded,
-                label: 'حذف',
+                label: 'حذف'.tr(),
                 color: AppTheme.danger,
                 onTap: () {
                   HapticFeedback.lightImpact();

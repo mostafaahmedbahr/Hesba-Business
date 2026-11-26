@@ -4,6 +4,7 @@ import '../../../../core/utils/error_message.dart';
 import '../../data/repos/category_repo.dart';
 import 'category_state.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// لوجيك الأقسام (الـ View غبية — بتنادي بس).
 class CategoryCubit extends Cubit<CategoryState> {
@@ -19,7 +20,7 @@ class CategoryCubit extends Cubit<CategoryState> {
     final ctx = await _repo.getShopContext();
     // مفيش محل.
     if (!ctx.hasShop) {
-      emit(state.copyWith(status: CategoryStatus.failure, shopId: '', businessType: ctx.businessType, errorMessage: 'لم يتم العثور على المتجر'));
+      emit(state.copyWith(status: CategoryStatus.failure, shopId: '', businessType: ctx.businessType, errorMessage: 'لم يتم العثور على المتجر'.tr()));
       return;
     }
     // يحدد الافتراضي حسب النشاط.
@@ -66,35 +67,35 @@ class CategoryCubit extends Cubit<CategoryState> {
     final trimmed = raw.trim();
     // فاضي؟
     if (trimmed.isEmpty) {
-      emit(state.copyWith(errorMessage: 'اكتب اسم القسم', status: CategoryStatus.failure));
+      emit(state.copyWith(errorMessage: 'اكتب اسم القسم'.tr(), status: CategoryStatus.failure));
       return false;
     }
     // قصير؟
     if (trimmed.length < 2) {
-      emit(state.copyWith(errorMessage: 'الاسم قصير جداً', status: CategoryStatus.failure));
+      emit(state.copyWith(errorMessage: 'الاسم قصير جداً'.tr(), status: CategoryStatus.failure));
       return false;
     }
     // مكرر في الافتراضي؟
     final lower = trimmed.toLowerCase();
     if (state.defaultCategories.map((e) => e.trim().toLowerCase()).toSet().contains(lower)) {
-      emit(state.copyWith(errorMessage: 'القسم موجود بالفعل في القائمة الافتراضية', status: CategoryStatus.failure));
+      emit(state.copyWith(errorMessage: 'القسم موجود بالفعل في القائمة الافتراضية'.tr(), status: CategoryStatus.failure));
       return false;
     }
     // مكرر في المخصصة؟
     if (state.customCategories.map((e) => e.trim().toLowerCase()).toSet().contains(lower)) {
-      emit(state.copyWith(errorMessage: 'القسم موجود بالفعل', status: CategoryStatus.failure));
+      emit(state.copyWith(errorMessage: 'القسم موجود بالفعل'.tr(), status: CategoryStatus.failure));
       return false;
     }
     // مفيش محل؟
     if (!state.hasShop) {
-      emit(state.copyWith(errorMessage: 'لم يتم العثور على المتجر', status: CategoryStatus.failure));
+      emit(state.copyWith(errorMessage: 'لم يتم العثور على المتجر'.tr(), status: CategoryStatus.failure));
       return false;
     }
     try {
       emit(state.copyWith(status: CategoryStatus.loading, clearError: true, clearSuccess: true));
       await _repo.addCategory(state.shopId, trimmed);
       await _loadCustom(state.shopId);
-      emit(state.copyWith(status: CategoryStatus.success, successMessage: 'تمت إضافة القسم', clearError: true));
+      emit(state.copyWith(status: CategoryStatus.success, successMessage: 'تمت إضافة القسم'.tr(), clearError: true));
       return true;
     } catch (e, logSt) {
       AppLogger.nonFatal('features/categories/presentation/cubit/category_cubit.dart', e, logSt, severity: LoggingSeverity.warning);
@@ -109,7 +110,7 @@ class CategoryCubit extends Cubit<CategoryState> {
     try {
       await _repo.removeCategory(state.shopId, category);
       await _loadCustom(state.shopId);
-      emit(state.copyWith(successMessage: 'تم حذف القسم', clearError: true));
+      emit(state.copyWith(successMessage: 'تم حذف القسم'.tr(), clearError: true));
       return true;
     } catch (e, logSt) {
       AppLogger.nonFatal('features/categories/presentation/cubit/category_cubit.dart', e, logSt, severity: LoggingSeverity.warning);

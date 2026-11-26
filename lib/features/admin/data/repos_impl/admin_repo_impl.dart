@@ -10,6 +10,8 @@ import '../../../../core/models/admin_settings.dart';
 import '../models/profit_summary.dart';
 import '../repos/admin_repo.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 class AdminRepoImpl implements AdminRepo {
   AdminRepoImpl({required this.auth, required this.firestore});
@@ -605,13 +607,13 @@ class AdminRepoImpl implements AdminRepo {
       final reqSnap = await tx.get(requestRef);
       final reqData = reqSnap.data();
       if (!reqSnap.exists || reqData == null) {
-        throw StateError('طلب الاشتراك غير موجود');
+        throw StateError('طلب الاشتراك غير موجود'.tr());
       }
       // Idempotency guard: re-approving an already-decided request must not
       // extend the plan a second time.
       if (reqData['status'] != SubscriptionRequestModel.statusPending) {
         throw StateError(
-            'هذا الطلب ليس قيد المراجعة (الحالة: ${reqData['status']})');
+            uiTr('هذا الطلب ليس قيد المراجعة (الحالة: ${reqData['status']})'));
       }
       final subSnap =
           await tx.get(userRef.collection('subscription').doc('current'));
@@ -622,7 +624,7 @@ class AdminRepoImpl implements AdminRepo {
       // admin list. Never let an old request overwrite the newer state.
       if (stored.status != SubscriptionStatus.pending ||
           stored.lastRequestId != request.requestId) {
-        throw StateError('هذا الطلب لم يعد قيد المراجعة');
+        throw StateError('هذا الطلب لم يعد قيد المراجعة'.tr());
       }
 
       final liveEnd = stored.livePeriodEnd;
@@ -693,12 +695,12 @@ class AdminRepoImpl implements AdminRepo {
       final reqSnap = await tx.get(requestRef);
       final reqData = reqSnap.data();
       if (!reqSnap.exists || reqData == null) {
-        throw StateError('طلب الاشتراك غير موجود');
+        throw StateError('طلب الاشتراك غير موجود'.tr());
       }
       // Idempotency guard: a decided request cannot be rejected again.
       if (reqData['status'] != SubscriptionRequestModel.statusPending) {
         throw StateError(
-            'هذا الطلب ليس قيد المراجعة (الحالة: ${reqData['status']})');
+            uiTr('هذا الطلب ليس قيد المراجعة (الحالة: ${reqData['status']})'));
       }
       final subSnap = await tx.get(subRef);
       final stored = SubscriptionModel.fromJson(subSnap.data() ?? const {});
@@ -707,7 +709,7 @@ class AdminRepoImpl implements AdminRepo {
       // a newer pending request's state on the subscription/mirror docs.
       if (stored.status != SubscriptionStatus.pending ||
           stored.lastRequestId != request.requestId) {
-        throw StateError('هذا الطلب لم يعد قيد المراجعة');
+        throw StateError('هذا الطلب لم يعد قيد المراجعة'.tr());
       }
 
       // A live period (trial or paid) ALWAYS survives a rejection: the shop

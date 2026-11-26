@@ -5,6 +5,8 @@ import '../../../../core/constants/app_constants.dart';
 import '../models/stock_purchase_item.dart';
 import '../repos/stock_purchase_repo.dart';
 import 'package:hesba/core/services/shop_id_resolver.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 class StockPurchaseRepoImpl implements StockPurchaseRepo {
   final FirebaseFirestore _firestore;
@@ -38,20 +40,20 @@ class StockPurchaseRepoImpl implements StockPurchaseRepo {
     required String note,
     required DateTime date,
   }) async {
-    if (items.isEmpty) throw Exception('يجب إضافة صنف واحد على الأقل');
+    if (items.isEmpty) throw Exception('يجب إضافة صنف واحد على الأقل'.tr());
     for (final item in items) {
-      if (item.quantity <= 0) throw Exception('الكمية غير صحيحة: ${item.productName}');
-      if (item.unitCost < 0) throw Exception('التكلفة غير صحيحة: ${item.productName}');
+      if (item.quantity <= 0) throw Exception(uiTr('الكمية غير صحيحة: ${item.productName}'));
+      if (item.unitCost < 0) throw Exception(uiTr('التكلفة غير صحيحة: ${item.productName}'));
     }
 
     final shop = await _resolveShop();
     final resolvedShopId = (shopId.isNotEmpty ? shopId : shop['shopId']);
     if (resolvedShopId == null || resolvedShopId.isEmpty) {
-      throw Exception('لم يتم العثور على المتجر');
+      throw Exception('لم يتم العثور على المتجر'.tr());
     }
     final resolvedOwnerId = ownerId.isNotEmpty ? ownerId : _uid;
     if (resolvedOwnerId == null || resolvedOwnerId.isEmpty) {
-      throw Exception('يجب تسجيل الدخول أولاً');
+      throw Exception('يجب تسجيل الدخول أولاً'.tr());
     }
 
     final purchaseRef = _firestore.collection(AppConstants.stockPurchasesCollection).doc();
@@ -66,10 +68,10 @@ class StockPurchaseRepoImpl implements StockPurchaseRepo {
             .collection(AppConstants.productsCollection)
             .doc(item.productId);
         final snap = await tx.get(productRef);
-        if (!snap.exists) throw Exception('المنتج غير موجود: ${item.productName}');
+        if (!snap.exists) throw Exception(uiTr('المنتج غير موجود: ${item.productName}'));
         final pData = snap.data()!;
         if (pData['shopId'] != resolvedShopId) {
-          throw Exception('المنتج لا يتبع هذا المحل: ${item.productName}');
+          throw Exception(uiTr('المنتج لا يتبع هذا المحل: ${item.productName}'));
         }
         final previous = (pData['stock'] as num?)?.toDouble() ?? 0;
         final next = previous + item.quantity;

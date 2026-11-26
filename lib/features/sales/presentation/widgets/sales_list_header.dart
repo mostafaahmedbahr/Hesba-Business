@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../../common_imports.dart';
 import '../cubit/sales_list_state.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// هيدر المبيعات (رقم hero متحرك + إحصائيات زجاجية).
 class SalesListHeader extends StatelessWidget {
@@ -62,7 +63,7 @@ class SalesListHeader extends StatelessWidget {
                       child: Row(mainAxisSize: MainAxisSize.min, children: [
                         Icon(Icons.receipt_long_rounded, size: 12.sp, color: Colors.white),
                         SizedBox(width: 5.w),
-                        Text(count == 0 ? 'لا توجد مبيعات' : '$count فاتورة', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: Colors.white)),
+                        Text(count == 0 ? 'لا توجد مبيعات'.tr() : uiTr('$count فاتورة'), style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: Colors.white)),
                       ]),
                     ),
                     const Spacer(),
@@ -80,7 +81,7 @@ class SalesListHeader extends StatelessWidget {
                           child: Row(mainAxisSize: MainAxisSize.min, children: [
                             Icon(Icons.add_rounded, size: 16.sp, color: AppTheme.primaryColor),
                             SizedBox(width: 4.w),
-                            Text('بيع جديد', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w900, color: AppTheme.primaryColor)),
+                            Text('بيع جديد'.tr(), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w900, color: AppTheme.primaryColor)),
                           ]),
                         ),
                       ),
@@ -101,7 +102,7 @@ class SalesListHeader extends StatelessWidget {
                           SizedBox(width: 8.w),
                           Padding(
                             padding: EdgeInsets.only(bottom: 7.h),
-                            child: Text('ج.م', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.88))),
+                            child: Text('ج.م'.tr(), style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.88))),
                           ),
                         ],
                       ),

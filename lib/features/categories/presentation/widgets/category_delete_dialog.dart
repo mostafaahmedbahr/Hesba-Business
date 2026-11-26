@@ -1,4 +1,6 @@
 import '../../../../common_imports.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// تأكيد حذف قسم.
 class CategoryDeleteDialog extends StatelessWidget {
@@ -32,12 +34,12 @@ class CategoryDeleteDialog extends StatelessWidget {
             ),
             SizedBox(height: 12.h),
             Text(
-              'حذف القسم؟',
+              'حذف القسم؟'.tr(),
               style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900),
             ),
             SizedBox(height: 8.h),
             Text(
-              'هل أنت متأكد من حذف "$name"؟ لن يظهر بعد ذلك في قائمة الأقسام.',
+              uiTr('هل أنت متأكد من حذف "$name"؟ لن يظهر بعد ذلك في قائمة الأقسام.'),
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 12.5.sp, color: AppTheme.slateGray, height: 1.5),
             ),
@@ -53,7 +55,7 @@ class CategoryDeleteDialog extends StatelessWidget {
                       ),
                       padding: EdgeInsets.symmetric(vertical: 12.h),
                     ),
-                    child: const Text('إلغاء'),
+                    child: Text('إلغاء'.tr()),
                   ),
                 ),
                 SizedBox(width: 10.w),
@@ -67,8 +69,8 @@ class CategoryDeleteDialog extends StatelessWidget {
                       ),
                       padding: EdgeInsets.symmetric(vertical: 12.h),
                     ),
-                    child: const Text(
-                      'حذف',
+                    child: Text(
+                      'حذف'.tr(),
                       style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
                     ),
                   ),

@@ -10,6 +10,8 @@ import '../models/sale_model.dart';
 import '../repos/sales_repo.dart';
 import 'package:hesba/core/services/shop_id_resolver.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 class SalesRepoImpl implements SalesRepo {
   final FirebaseFirestore firestore;
@@ -65,7 +67,7 @@ class SalesRepoImpl implements SalesRepo {
         end = rawEnd;
       }
       final endLive = end != null && end.isAfter(DateTime.now());
-      final status = s['status']?.toString() ?? 'غير موجود';
+      final status = s['status']?.toString() ?? 'غير موجود'.tr();
       final suspended = s['suspended'] == true;
       final userShop = u['shopId']?.toString() ?? '';
 
@@ -105,27 +107,27 @@ class SalesRepoImpl implements SalesRepo {
 
       late final String reason;
       if (uid != ownerId) {
-        reason = 'معرّف الحساب مختلف عن معرّف الفاتورة';
+        reason = 'معرّف الحساب مختلف عن معرّف الفاتورة'.tr();
       } else if (badAmounts) {
-        reason = 'قيم الفاتورة (الإجمالي/الخصم) غير صالحة';
+        reason = 'قيم الفاتورة (الإجمالي/الخصم) غير صالحة'.tr();
       } else if (sale.personId.isNotEmpty && !personSnap!.exists) {
-        reason = 'العميل المختار غير موجود';
+        reason = 'العميل المختار غير موجود'.tr();
       } else if (sale.personId.isNotEmpty && personShop != shopId) {
-        reason = 'العميل المختار غير مرتبط بهذا المحل';
+        reason = 'العميل المختار غير مرتبط بهذا المحل'.tr();
       } else if (!subDoc.exists) {
-        reason = 'لا يوجد اشتراك مسجّل لهذا الحساب';
+        reason = 'لا يوجد اشتراك مسجّل لهذا الحساب'.tr();
       } else if (suspended) {
-        reason = 'الحساب موقوف من الإدارة';
+        reason = 'الحساب موقوف من الإدارة'.tr();
       } else if (!endLive) {
-        reason = 'انتهت مدة الاشتراك';
+        reason = 'انتهت مدة الاشتراك'.tr();
       } else if (status != 'trial' && status != 'active') {
-        reason = 'حالة الاشتراك ($status) لا تسمح بالبيع — لازم الأدمن يوافق على التجديد';
+        reason = uiTr('حالة الاشتراك ($status) لا تسمح بالبيع — لازم الأدمن يوافق على التجديد');
       } else if (u['isActive'] == false) {
-        reason = 'الحساب غير مفعّل';
+        reason = 'الحساب غير مفعّل'.tr();
       } else if (userShop.isEmpty || userShop != shopId) {
-        reason = 'المحل المرتبط بالحساب مختلف عن محل المبيعة';
+        reason = 'المحل المرتبط بالحساب مختلف عن محل المبيعة'.tr();
       } else {
-        reason = 'الصلاحية مرفوضة من إعدادات الأمان';
+        reason = 'الصلاحية مرفوضة من إعدادات الأمان'.tr();
       }
 
       AppLogger.warning(
@@ -141,7 +143,7 @@ class SalesRepoImpl implements SalesRepo {
       return reason;
     } catch (logErr, logSt) {
       AppLogger.nonFatal('SALES_DIAG', logErr, logSt);
-      return 'تعذر التأكد من حالة الاشتراك، حاول مرة أخرى';
+      return 'تعذر التأكد من حالة الاشتراك، حاول مرة أخرى'.tr();
     }
   }
 
@@ -191,17 +193,17 @@ class SalesRepoImpl implements SalesRepo {
     String? requestId,
   }) async {
     if (items.isEmpty) {
-      throw Exception('يجب إضافة منتج واحد على الأقل');
+      throw Exception('يجب إضافة منتج واحد على الأقل'.tr());
     }
 
     final resolvedShopId = await _resolveShopId(shopId);
     final resolvedOwnerId = await _resolveOwnerId(ownerId);
 
     if (resolvedShopId == null || resolvedShopId.isEmpty) {
-      throw Exception('لم يتم العثور على المتجر');
+      throw Exception('لم يتم العثور على المتجر'.tr());
     }
     if (resolvedOwnerId == null || resolvedOwnerId.isEmpty) {
-      throw Exception('يجب تسجيل الدخول أولاً');
+      throw Exception('يجب تسجيل الدخول أولاً'.tr());
     }
 
     final shopName = await _resolveShopName(resolvedShopId);
@@ -209,13 +211,13 @@ class SalesRepoImpl implements SalesRepo {
     // Validate items
     for (final item in items) {
       if (item.productName.trim().isEmpty) {
-        throw Exception('اسم المنتج مطلوب');
+        throw Exception('اسم المنتج مطلوب'.tr());
       }
       if (item.quantity <= 0) {
-        throw Exception('الكمية يجب أن تكون أكبر من صفر: ${item.productName}');
+        throw Exception(uiTr('الكمية يجب أن تكون أكبر من صفر: ${item.productName}'));
       }
       if (item.unitPrice <= 0) {
-        throw Exception('سعر المنتج يجب أن يكون أكبر من صفر: ${item.productName}');
+        throw Exception(uiTr('سعر المنتج يجب أن يكون أكبر من صفر: ${item.productName}'));
       }
     }
 
@@ -229,7 +231,7 @@ class SalesRepoImpl implements SalesRepo {
     var personPhone = '';
     if (cleanCustomerName.isNotEmpty || cleanCustomerPhone.isNotEmpty) {
       if (cleanCustomerName.isEmpty || cleanCustomerPhone.isEmpty) {
-        throw Exception('اكتب اسم العميل ورقم هاتفه معًا');
+        throw Exception('اكتب اسم العميل ورقم هاتفه معًا'.tr());
       }
       // خطوة منفصلة عن كتابة الفاتورة: عميل جديد = إنشاء مستند persons أولًا.
       // لو القواعد رفضتها، رسالة البيع العامة كانت بتضلل المستخدم (بتقول إنها
@@ -249,7 +251,7 @@ class SalesRepoImpl implements SalesRepo {
           severity: LoggingSeverity.warning,
         );
         throw Exception(
-          'تعذّر حفظ بيانات العميل الجديد (الاسم والرقم). تأكد من سريان الاشتراك ونشر قواعد Firestore، أو اختر عميلًا موجودًا.',
+          'تعذّر حفظ بيانات العميل الجديد (الاسم والرقم). تأكد من سريان الاشتراك ونشر قواعد Firestore، أو اختر عميلًا موجودًا.'.tr(),
         );
       }
       personId = person.id;
@@ -261,7 +263,7 @@ class SalesRepoImpl implements SalesRepo {
     // البيع الآجل يفرض اختيار عميل — مفيش ذمة من غير شخص.
     if (isCredit &&
         (cleanCustomerName.isEmpty || cleanCustomerPhone.isEmpty)) {
-      throw Exception('البيع الآجل يتطلب اختيار عميل');
+      throw Exception('البيع الآجل يتطلب اختيار عميل'.tr());
     }
 
     final subtotal = items.fold<double>(0, (acc, item) => acc + item.total);
@@ -270,7 +272,7 @@ class SalesRepoImpl implements SalesRepo {
 
     // المديونية تتسجل بمبلغ > 0 (قواعد Firestore تتطلب ذلك).
     if (isCredit && total <= 0) {
-      throw Exception('لا يمكن تسجيل بيع آجل بإجمالي صفر');
+      throw Exception('لا يمكن تسجيل بيع آجل بإجمالي صفر'.tr());
     }
 
     // An idempotency key fixes the document id: a retry after a lost response
@@ -315,21 +317,21 @@ class SalesRepoImpl implements SalesRepo {
               .doc(item.productId);
           final snap = await transaction.get(productRef);
           if (!snap.exists) {
-            throw Exception('المنتج غير موجود: ${item.productName}');
+            throw Exception(uiTr('المنتج غير موجود: ${item.productName}'));
           }
           final data = snap.data()!;
           // The product must belong to the same shop as the sale.
           if ((data['shopId'] as String?) != resolvedShopId) {
-            throw Exception('المنتج لا يتبع هذا المحل: ${item.productName}');
+            throw Exception(uiTr('المنتج لا يتبع هذا المحل: ${item.productName}'));
           }
           final currentStock = (data['stock'] as num?)?.toDouble() ?? 0;
           final isActive = data['isActive'] as bool? ?? true;
           if (!isActive) {
-            throw Exception('المنتج غير متاح: ${item.productName}');
+            throw Exception(uiTr('المنتج غير متاح: ${item.productName}'));
           }
           if (currentStock < item.quantity) {
             throw Exception(
-                'الكمية المطلوبة غير متوفرة لـ ${item.productName} (المتاح: $currentStock)');
+                uiTr('الكمية المطلوبة غير متوفرة لـ ${item.productName} (المتاح: $currentStock)'));
           }
           // Decrement stock (نص كيلو = خصم 0.5 تماماً)
           transaction.update(productRef, {
@@ -352,8 +354,8 @@ class SalesRepoImpl implements SalesRepo {
             saleRef.id.length >= 6 ? saleRef.id.substring(0, 6) : saleRef.id;
         final saleNote = note.trim();
         final debtNote = saleNote.isEmpty
-            ? 'فاتورة #$invoiceShort'
-            : 'فاتورة #$invoiceShort — $saleNote';
+            ? uiTr('فاتورة #$invoiceShort')
+            : uiTr('فاتورة #$invoiceShort — $saleNote');
         final debt = DebtModel(
           id: debtRef.id,
           ownerId: resolvedOwnerId,
@@ -381,7 +383,7 @@ class SalesRepoImpl implements SalesRepo {
     } on FirebaseException catch (e) {
       final reason = await _describeDenial(sale);
       if (e.code == 'permission-denied') {
-        throw Exception('تعذر حفظ المبيعة: $reason');
+        throw Exception(uiTr('تعذر حفظ المبيعة: $reason'));
       }
       rethrow;
     }

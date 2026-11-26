@@ -14,6 +14,7 @@ import '../widgets/debt_card.dart';
 import '../widgets/filter_sheet.dart';
 import 'debt_details_view.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// شاشة الحسابات — ذمم العملاء والموردين مع إجماليات Premium في الأعلى.
 class AccountsView extends StatelessWidget {
@@ -60,7 +61,7 @@ class _AccountsBody extends StatelessWidget {
             note: note,
           );
           if (context.mounted) {
-            AppToast.success(context, 'تم حفظ المديونية بنجاح');
+            AppToast.success(context, 'تم حفظ المديونية بنجاح'.tr());
           }
           return null;
         } catch (e, logSt) {
@@ -123,7 +124,7 @@ class _AccountsBody extends StatelessWidget {
             foregroundColor: Colors.white,
             icon: const Icon(Icons.add_rounded),
             label: Text(
-              'مديونية جديدة',
+              'مديونية جديدة'.tr(),
               style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800),
             ),
           ),
@@ -265,14 +266,14 @@ class _AccountsTabs extends StatelessWidget {
       child: Row(
         children: [
           _TabButton(
-            label: 'العملاء',
+            label: 'العملاء'.tr(),
             icon: Icons.person_rounded,
             badge: customerOpen,
             selected: activeTab == AccountsTab.customer,
             onTap: () => onChanged(AccountsTab.customer),
           ),
           _TabButton(
-            label: 'الموردين',
+            label: 'الموردين'.tr(),
             icon: Icons.local_shipping_rounded,
             badge: supplierOpen,
             selected: activeTab == AccountsTab.supplier,
@@ -391,7 +392,7 @@ class _SearchField extends StatelessWidget {
       decoration: InputDecoration(
         filled: true,
         fillColor: isDark ? AppTheme.darkSurfaceAlt : Colors.white,
-        hintText: 'ابحث بالاسم أو رقم الهاتف...',
+        hintText: 'ابحث بالاسم أو رقم الهاتف...'.tr(),
         prefixIcon: Icon(
           Icons.search_rounded,
           size: 19.sp,
@@ -499,9 +500,9 @@ class _ActiveFilterBanner extends StatelessWidget {
             color: AppTheme.primaryColor,
           ),
           SizedBox(width: 6.w),
-          const Expanded(
+          Expanded(
             child: Text(
-              'الفلاتر مفعّلة — النتائج معروضة حسب اختيارك',
+              'الفلاتر مفعّلة — النتائج معروضة حسب اختيارك'.tr(),
               style: TextStyle(
                 fontSize: 10.5,
                 fontWeight: FontWeight.w800,
@@ -511,8 +512,8 @@ class _ActiveFilterBanner extends StatelessWidget {
           ),
           GestureDetector(
             onTap: onClear,
-            child: const Text(
-              'مسح',
+            child: Text(
+              'مسح'.tr(),
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w900,
@@ -565,7 +566,7 @@ class _ErrorState extends StatelessWidget {
             ),
             SizedBox(height: 16.h),
             Text(
-              'تعذر تحميل الحسابات',
+              'تعذر تحميل الحسابات'.tr(),
               style: TextStyle(
                 fontSize: 15.sp,
                 fontWeight: FontWeight.w900,
@@ -574,7 +575,7 @@ class _ErrorState extends StatelessWidget {
             ),
             SizedBox(height: 6.h),
             Text(
-              message ?? 'حدث خطأ غير متوقع — تحقق من الاتصال وحاول مرة أخرى',
+              message ?? 'حدث خطأ غير متوقع — تحقق من الاتصال وحاول مرة أخرى'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 11.sp,
@@ -587,7 +588,7 @@ class _ErrorState extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded),
-              label: const Text('إعادة المحاولة'),
+              label: Text('إعادة المحاولة'.tr()),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primaryColor,
                 foregroundColor: Colors.white,
@@ -626,7 +627,7 @@ class _NoResultsState extends StatelessWidget {
             ),
             SizedBox(height: 14.h),
             Text(
-              'لا توجد نتائج مطابقة',
+              'لا توجد نتائج مطابقة'.tr(),
               style: TextStyle(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w900,
@@ -635,7 +636,7 @@ class _NoResultsState extends StatelessWidget {
             ),
             SizedBox(height: 6.h),
             Text(
-              'جرّب كلمة أخرى أو امسح الفلاتر',
+              'جرّب كلمة أخرى أو امسح الفلاتر'.tr(),
               style: TextStyle(
                 fontSize: 11.sp,
                 fontWeight: FontWeight.w600,
@@ -645,8 +646,8 @@ class _NoResultsState extends StatelessWidget {
             SizedBox(height: 16.h),
             TextButton(
               onPressed: onClear,
-              child: const Text(
-                'مسح البحث والفلاتر',
+              child: Text(
+                'مسح البحث والفلاتر'.tr(),
                 style: TextStyle(
                   fontWeight: FontWeight.w800,
                   color: AppTheme.primaryColor,
@@ -715,8 +716,8 @@ class _EmptyState extends StatelessWidget {
             SizedBox(height: 18.h),
             Text(
               isSupplierTab
-                  ? 'لا توجد حسابات موردين بعد'
-                  : 'لا توجد مديونيات عملاء بعد',
+                  ? 'لا توجد حسابات موردين بعد'.tr()
+                  : 'لا توجد مديونيات عملاء بعد'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 15.sp,
@@ -727,8 +728,8 @@ class _EmptyState extends StatelessWidget {
             SizedBox(height: 6.h),
             Text(
               isSupplierTab
-                  ? 'سجّل أول مستحق لك أو عليك لمورد — وسيظهر هنا مع حالة السداد وسجل الدفعات.'
-                  : 'سجّل أول مديونية لعميل — وسيظهر هنا مع حالة السداد وسجل الدفعات.',
+                  ? 'سجّل أول مستحق لك أو عليك لمورد — وسيظهر هنا مع حالة السداد وسجل الدفعات.'.tr()
+                  : 'سجّل أول مديونية لعميل — وسيظهر هنا مع حالة السداد وسجل الدفعات.'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 11.sp,

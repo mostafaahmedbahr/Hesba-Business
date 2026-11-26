@@ -6,6 +6,7 @@ import 'package:hesba/features/admin/data/repos/admin_repo.dart';
 import 'package:hesba/features/admin/presentation/cubit/admin_auth_cubit.dart';
 import 'package:hesba/features/admin/presentation/cubit/admin_login_cubit.dart';
 import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class AdminLoginView extends StatelessWidget {
   const AdminLoginView({super.key});
@@ -49,7 +50,7 @@ class _AdminLoginBodyState extends State<_AdminLoginBody> {
     if (state is AdminLoginSuccess) {
       context.read<AdminAuthCubit>().checkSession();
     } else if (state is AdminLoginDenied) {
-      _showError(context, 'هذا الحساب لا يملك صلاحية الإدارة');
+      _showError(context, 'هذا الحساب لا يملك صلاحية الإدارة'.tr());
     } else if (state is AdminLoginFailure) {
       _showError(context, state.message);
     }
@@ -163,7 +164,7 @@ class _AdminLoginBodyState extends State<_AdminLoginBody> {
         ),
         const SizedBox(height: AdminSpace.md),
         Text(
-          'تسجيل دخول المسؤول',
+          'تسجيل دخول المسؤول'.tr(),
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w900,
                 height: 1.2,
@@ -171,7 +172,7 @@ class _AdminLoginBodyState extends State<_AdminLoginBody> {
         ),
         const SizedBox(height: 6),
         Text(
-          'أدخل بيانات حساب المسؤول للمتابعة إلى لوحة التحكم.',
+          'أدخل بيانات حساب المسؤول للمتابعة إلى لوحة التحكم.'.tr(),
           style: TextStyle(fontSize: 13, color: secondary, height: 1.5),
         ),
         const SizedBox(height: AdminSpace.xxl),
@@ -183,7 +184,7 @@ class _AdminLoginBodyState extends State<_AdminLoginBody> {
             children: [
               _LoginField(
                 controller: _email,
-                label: 'البريد الإلكتروني',
+                label: 'البريد الإلكتروني'.tr(),
                 hint: 'admin@hesba.app',
                 icon: Icons.alternate_email_rounded,
                 keyboardType: TextInputType.emailAddress,
@@ -191,10 +192,10 @@ class _AdminLoginBodyState extends State<_AdminLoginBody> {
                 autofillHints: const [AutofillHints.username],
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'البريد الإلكتروني مطلوب';
+                    return 'البريد الإلكتروني مطلوب'.tr();
                   }
                   if (!value.contains('@')) {
-                    return 'أدخل بريدًا إلكترونيًا صحيحًا';
+                    return 'أدخل بريدًا إلكترونيًا صحيحًا'.tr();
                   }
                   return null;
                 },
@@ -202,7 +203,7 @@ class _AdminLoginBodyState extends State<_AdminLoginBody> {
               const SizedBox(height: 14),
               _LoginField(
                 controller: _password,
-                label: 'كلمة المرور',
+                label: 'كلمة المرور'.tr(),
                 hint: '••••••••',
                 icon: Icons.lock_outline_rounded,
                 obscureText: _obscurePassword,
@@ -212,7 +213,7 @@ class _AdminLoginBodyState extends State<_AdminLoginBody> {
                   if (!loading) _submit();
                 },
                 suffixIcon: IconButton(
-                  tooltip: _obscurePassword ? 'إظهار كلمة المرور' : 'إخفاء كلمة المرور',
+                  tooltip: _obscurePassword ? 'إظهار كلمة المرور'.tr() : 'إخفاء كلمة المرور'.tr(),
                   onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                   icon: Icon(
                     _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
@@ -220,7 +221,7 @@ class _AdminLoginBodyState extends State<_AdminLoginBody> {
                   ),
                 ),
                 validator: (value) =>
-                    (value == null || value.isEmpty) ? 'كلمة المرور مطلوبة' : null,
+                    (value == null || value.isEmpty) ? 'كلمة المرور مطلوبة'.tr() : null,
               ),
             ],
           ),
@@ -235,7 +236,7 @@ class _AdminLoginBodyState extends State<_AdminLoginBody> {
             const SizedBox(width: 6),
             Flexible(
               child: Text(
-                'جلسة آمنة — بياناتك محمية ومشفّرة',
+                'جلسة آمنة — بياناتك محمية ومشفّرة'.tr(),
                 style: TextStyle(
                   fontSize: 11.5,
                   color: AdminColors.textMuted(context),
@@ -395,7 +396,7 @@ class _BrandContent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
-            children: const [
+            children: [
               Text(
                 'Hesba',
                 style: TextStyle(
@@ -408,7 +409,7 @@ class _BrandContent extends StatelessWidget {
               ),
               SizedBox(height: 2),
               Text(
-                'لوحة تحكم المنصة',
+                'لوحة تحكم المنصة'.tr(),
                 style: TextStyle(
                   color: Colors.white70,
                   fontSize: 12,
@@ -435,7 +436,7 @@ class _BrandContent extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: const [
+      children: [
         _LogoBadge(),
         SizedBox(height: 28),
         Text(
@@ -450,7 +451,7 @@ class _BrandContent extends StatelessWidget {
         ),
         SizedBox(height: 6),
         Text(
-          'لوحة تحكم المنصة',
+          'لوحة تحكم المنصة'.tr(),
           style: TextStyle(
             color: Colors.white70,
             fontSize: 13.5,
@@ -458,11 +459,11 @@ class _BrandContent extends StatelessWidget {
           ),
         ),
         SizedBox(height: 32),
-        _FeatureLine(icon: Icons.storefront_outlined, text: 'إدارة المتاجر والمنتجات'),
+        _FeatureLine(icon: Icons.storefront_outlined, text: 'إدارة المتاجر والمنتجات'.tr()),
         SizedBox(height: 16),
-        _FeatureLine(icon: Icons.workspace_premium_outlined, text: 'متابعة الاشتراكات والطلبات'),
+        _FeatureLine(icon: Icons.workspace_premium_outlined, text: 'متابعة الاشتراكات والطلبات'.tr()),
         SizedBox(height: 16),
-        _FeatureLine(icon: Icons.insights_outlined, text: 'تقارير ومؤشرات لحظية'),
+        _FeatureLine(icon: Icons.insights_outlined, text: 'تقارير ومؤشرات لحظية'.tr()),
         SizedBox(height: 36),
         _SecureNote(),
       ],
@@ -523,7 +524,7 @@ class _SecureNote extends StatelessWidget {
           const SizedBox(width: AdminSpace.sm),
           Expanded(
             child: Text(
-              'وصول مقيّد لحسابات الإدارة فقط',
+              'وصول مقيّد لحسابات الإدارة فقط'.tr(),
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.9),
                 fontSize: 11.5,
@@ -700,13 +701,13 @@ class _LoginButton extends StatelessWidget {
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white),
                     )
-                  : const Row(
+                  : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.login_rounded, size: 18, color: Colors.white),
                         SizedBox(width: AdminSpace.sm),
                         Text(
-                          'تسجيل الدخول',
+                          'تسجيل الدخول'.tr(),
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 15,
@@ -787,7 +788,7 @@ class _LoginFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(
-      '© 2026 Hesba — جميع الحقوق محفوظة',
+      '© 2026 Hesba — جميع الحقوق محفوظة'.tr(),
       style: TextStyle(
         fontSize: 11.5,
         color: AdminColors.textMuted(context),

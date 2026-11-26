@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../core/theme/app_theme.dart';
 import '../../states/accounts_state.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// اختيار نوع الطرف في «إضافة مديونية»: عميل / مورد.
 class AddDebtSegmentedParty extends StatelessWidget {
@@ -27,13 +28,13 @@ class AddDebtSegmentedParty extends StatelessWidget {
       child: Row(
         children: [
           _SegmentButton(
-            label: 'عميل',
+            label: 'عميل'.tr(),
             icon: Icons.person_rounded,
             selected: tab == AccountsTab.customer,
             onTap: () => onChanged(AccountsTab.customer),
           ),
           _SegmentButton(
-            label: 'مورد',
+            label: 'مورد'.tr(),
             icon: Icons.local_shipping_rounded,
             selected: tab == AccountsTab.supplier,
             onTap: () => onChanged(AccountsTab.supplier),

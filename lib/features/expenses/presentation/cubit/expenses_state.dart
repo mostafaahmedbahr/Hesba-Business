@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import '../../data/models/expense_model.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 enum ExpensesStatus { initial, loading, success, error }
 
@@ -13,7 +14,7 @@ class ExpensesState extends Equatable {
   final String searchQuery; // نص البحث.
   final String categoryFilter; // فلتر التصنيف (الكل + التصنيفات).
 
-  const ExpensesState({
+  ExpensesState({
     this.status = ExpensesStatus.initial,
     this.expenses = const [],
     this.addedExpense,
@@ -31,7 +32,8 @@ class ExpensesState extends Equatable {
           e.title.toLowerCase().contains(q) ||
           e.category.toLowerCase().contains(q) ||
           e.note.toLowerCase().contains(q);
-      final matchesCat = categoryFilter == 'الكل' || e.category == categoryFilter;
+      final isAll = categoryFilter == 'الكل' || categoryFilter == 'الكل'.tr();
+      final matchesCat = isAll || e.category.tr() == categoryFilter;
       return matchesSearch && matchesCat;
     }).toList();
   }
@@ -50,7 +52,7 @@ class ExpensesState extends Equatable {
 
   /// التصنيفات الموجودة (للفلتر).
   List<String> get categories {
-    final set = <String>{'الكل'};
+    final set = <String>{'الكل'.tr()};
     for (final e in expenses) {
       if (e.category.trim().isNotEmpty) set.add(e.category);
     }

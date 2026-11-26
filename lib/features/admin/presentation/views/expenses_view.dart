@@ -6,6 +6,8 @@ import 'package:hesba/core/widgets/loading_widget.dart';
 import 'package:hesba/features/admin/presentation/views/admin_ds.dart';
 import 'package:hesba/features/admin/data/repos/admin_repo.dart';
 import 'package:hesba/features/admin/presentation/cubit/admin_list_cubit.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 class ExpensesView extends StatefulWidget {
   const ExpensesView({super.key});
@@ -17,7 +19,7 @@ class ExpensesView extends StatefulWidget {
 class _ExpensesViewState extends State<ExpensesView> {
   final _searchCtrl = TextEditingController();
   String _query = '';
-  String _category = 'الكل';
+  String _category = 'الكل'.tr();
 
   @override
   void dispose() {
@@ -36,7 +38,7 @@ class _ExpensesViewState extends State<ExpensesView> {
           if (state.loading && state.docs.isEmpty) {
             return Column(
               children: [
-                AdminSearchField(controller: _searchCtrl, hint: 'ابحث بالعنوان أو التصنيف أو المحل...', enabled: false),
+                AdminSearchField(controller: _searchCtrl, hint: 'ابحث بالعنوان أو التصنيف أو المحل...'.tr(), enabled: false),
                 Expanded(child: LoadingWidget()),
               ],
             );
@@ -47,34 +49,34 @@ class _ExpensesViewState extends State<ExpensesView> {
           if (state.docs.isEmpty) {
             return Column(
               children: [
-                AdminSearchField(controller: _searchCtrl, hint: 'ابحث بالعنوان أو التصنيف أو المحل...', enabled: false),
-                Expanded(child: adminEmpty(Icons.money_off_outlined, 'لا توجد مصروفات بعد', 'عند تسجيل أول مصروف سيظهر هنا')),
+                AdminSearchField(controller: _searchCtrl, hint: 'ابحث بالعنوان أو التصنيف أو المحل...'.tr(), enabled: false),
+                Expanded(child: adminEmpty(Icons.money_off_outlined, 'لا توجد مصروفات بعد'.tr(), 'عند تسجيل أول مصروف سيظهر هنا'.tr())),
               ],
             );
           }
 
           final cats = _extractCats(state.docs);
           final filtered = _applyFilter(state.docs);
-          final filtering = _query.isNotEmpty || _category != 'الكل';
+          final filtering = _query.isNotEmpty || _category != 'الكل'.tr();
           final total = filtered.fold<num>(0, (acc, d) => acc + ((d.data()['amount'] as num?) ?? 0));
 
           return RefreshIndicator(
             onRefresh: () => context.read<AdminListCubit>().firstPage(),
             child: Column(
               children: [
-                const AdminPageHeader(title: 'المصروفات', description: 'مصروفات جميع المحلات المسجلة في النظام'),
+                AdminPageHeader(title: 'المصروفات'.tr(), description: 'مصروفات جميع المحلات المسجلة في النظام'.tr()),
                 AdminSummaryHeader(
                   icon: Icons.money_off_outlined,
-                  title: 'إجمالي المصروفات (المعروض)',
+                  title: 'إجمالي المصروفات (المعروض)'.tr(),
                   total: total.toInt(),
-                  unit: 'ج',
-                  stats: ['العدد: ${filtered.length}'],
+                  unit: 'ج'.tr(),
+                  stats: [uiTr('العدد: ${filtered.length}')],
                   loading: state.loading,
                   onRefresh: () => context.read<AdminListCubit>().firstPage(),
                 ),
                 AdminSearchField(
                   controller: _searchCtrl,
-                  hint: 'ابحث بالعنوان أو التصنيف أو المحل...',
+                  hint: 'ابحث بالعنوان أو التصنيف أو المحل...'.tr(),
                   onChanged: (v) => setState(() => _query = v),
                 ),
                 AdminFilterChips(
@@ -88,12 +90,12 @@ class _ExpensesViewState extends State<ExpensesView> {
                     onClear: () => setState(() {
                       _query = '';
                       _searchCtrl.clear();
-                      _category = 'الكل';
+                      _category = 'الكل'.tr();
                     }),
                   ),
                 Expanded(
                   child: filtered.isEmpty
-                      ? adminEmpty(Icons.search_off_outlined, 'لا توجد نتائج مطابقة لبحثك', 'جرّب كلمة مختلفة أو امسح الفلتر')
+                      ? adminEmpty(Icons.search_off_outlined, 'لا توجد نتائج مطابقة لبحثك'.tr(), 'جرّب كلمة مختلفة أو امسح الفلتر'.tr())
                       : ListView.separated(
                           padding: const EdgeInsets.fromLTRB(0, AdminSpace.xs, 0, AdminSpace.lg),
                           itemCount: filtered.length,
@@ -107,7 +109,7 @@ class _ExpensesViewState extends State<ExpensesView> {
                 if (state.hasMore)
                   AdminLoadMore(
                     loading: state.loading,
-                    label: 'تحميل المزيد (${state.docs.length} معروض)',
+                    label: uiTr('تحميل المزيد (${state.docs.length} معروض)'),
                     onLoad: () => context.read<AdminListCubit>().nextPage(),
                   ),
               ],
@@ -124,7 +126,7 @@ class _ExpensesViewState extends State<ExpensesView> {
       final c = (d.data()['category'] as String?)?.trim() ?? '';
       if (c.isNotEmpty) set.add(c);
     }
-    return ['الكل', ...set.toList()..sort()];
+    return ['الكل'.tr(), ...set.toList()..sort()];
   }
 
   List<QueryDocumentSnapshot<Map<String, dynamic>>> _applyFilter(
@@ -132,7 +134,7 @@ class _ExpensesViewState extends State<ExpensesView> {
     final q = _query.trim();
     return docs.where((d) {
       final data = d.data();
-      if (_category != 'الكل' && (data['category'] as String? ?? '') != _category) return false;
+      if (_category != 'الكل'.tr() && (data['category'] as String? ?? '') != _category) return false;
       if (q.isEmpty) return true;
       final haystack = [data['title'], data['category'], data['shopName'], data['shopId'], d.id].whereType<String>().join(' ');
       return haystack.contains(q);
@@ -198,7 +200,7 @@ class _ExpenseCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'اسم المحل',
+                      'اسم المحل'.tr(),
                       style: TextStyle(
                         color: secondary,
                         fontSize: 11,
@@ -217,8 +219,8 @@ class _ExpenseCard extends StatelessWidget {
                   color: AdminColors.error.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Text(
-                  'مصروف',
+                child: Text(
+                  'مصروف'.tr(),
                   style: TextStyle(
                     color: AdminColors.error,
                     fontSize: 11,
@@ -256,7 +258,7 @@ class _ExpenseCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 5),
                           Text(
-                            'التصنيف',
+                            'التصنيف'.tr(),
                             style: TextStyle(
                               color: secondary,
                               fontSize: 11,

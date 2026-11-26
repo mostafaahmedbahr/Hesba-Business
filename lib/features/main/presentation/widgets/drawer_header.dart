@@ -2,6 +2,7 @@ import '../../../../common_imports.dart';
 import '../../../profile/data/repos/account_repo.dart';
 import '../../../profile/presentation/cubit/profile_cubit.dart';
 import '../../../profile/presentation/states/profile_state.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class CustomDrawerHeader extends StatelessWidget {
   final bool isDark;
@@ -47,7 +48,7 @@ class CustomDrawerHeader extends StatelessWidget {
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
                         decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20.r)),
-                        child: Text('حسبة • Hesba', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w800, color: AppTheme.primaryColor)),
+                        child: Text('حسبة • Hesba'.tr(), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w800, color: AppTheme.primaryColor)),
                       ),
                     ],
                   ),

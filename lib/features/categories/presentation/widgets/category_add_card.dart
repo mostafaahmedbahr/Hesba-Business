@@ -4,6 +4,7 @@ import '../../../../common_imports.dart';
 import '../cubit/category_cubit.dart';
 import '../cubit/category_state.dart';
 import '../../../subscription/presentation/subscription_gate.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// كارت الإضافة (خانة + زرار).
 class CategoryAddCard extends StatefulWidget {
@@ -67,7 +68,7 @@ class _CategoryAddCardState extends State<CategoryAddCard> {
               ),
               SizedBox(width: 10.w),
               Text(
-                'قسم جديد',
+                'قسم جديد'.tr(),
                 style: TextStyle(
                   fontSize: 13.5.sp,
                   fontWeight: FontWeight.w900,
@@ -76,7 +77,7 @@ class _CategoryAddCardState extends State<CategoryAddCard> {
               ),
               const Spacer(),
               Text(
-                'يظهر فوراً في المنتج',
+                'يظهر فوراً في المنتج'.tr(),
                 style: TextStyle(fontSize: 10.5.sp, color: AppTheme.mutedGray),
               ),
             ],
@@ -91,7 +92,7 @@ class _CategoryAddCardState extends State<CategoryAddCard> {
                   onSubmitted: (_) => _submit(),
                   style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w600),
                   decoration: InputDecoration(
-                    hintText: 'مثال: إكسسوارات',
+                    hintText: 'مثال: إكسسوارات'.tr(),
                     hintStyle: TextStyle(fontSize: 12.sp, color: AppTheme.mutedGray),
                     filled: true,
                     fillColor: isDark ? AppTheme.darkSurfaceAlt : AppTheme.canvasLight,
@@ -136,7 +137,7 @@ class _CategoryAddCardState extends State<CategoryAddCard> {
                           ),
                         )
                       : Text(
-                          'إضافة',
+                          'إضافة'.tr(),
                           style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800),
                         ),
                 ),

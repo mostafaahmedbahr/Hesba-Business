@@ -15,6 +15,8 @@ import '../../data/models/stock_purchase_item.dart';
 import '../../data/repos/products_repo.dart';
 import '../../data/repos/stock_purchase_repo.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// شاشة تسجيل فاتورة شراء مخزون. متاحة لصاحب المحل وللحساب الفرعي
 /// (النسخة المقيّدة لا تعرض أي بيانات سوى أسماء الأصناف المطلوبة للإدخال).
@@ -93,7 +95,7 @@ class _AddStockPurchaseViewState extends State<AddStockPurchaseView> {
     if (!mounted) return;
     if (!_formKey.currentState!.validate()) return;
     if (_shopId == null || _shopId!.isEmpty) {
-      AppToast.error(context, 'لم يتم العثور على المتجر');
+      AppToast.error(context, 'لم يتم العثور على المتجر'.tr());
       return;
     }
 
@@ -102,11 +104,11 @@ class _AddStockPurchaseViewState extends State<AddStockPurchaseView> {
       final q = NumberParser.parseDouble(row.quantity.text);
       final cost = NumberParser.parseDouble(row.cost.text);
       if (q <= 0) {
-        AppToast.warning(context, 'الكمية يجب أن تكون أكبر من صفر');
+        AppToast.warning(context, 'الكمية يجب أن تكون أكبر من صفر'.tr());
         return;
       }
       if (cost < 0) {
-        AppToast.warning(context, 'التكلفة غير صحيحة');
+        AppToast.warning(context, 'التكلفة غير صحيحة'.tr());
         return;
       }
       items.add(StockPurchaseItem(
@@ -130,7 +132,7 @@ class _AddStockPurchaseViewState extends State<AddStockPurchaseView> {
         date: _date,
       );
       if (mounted) {
-        AppToast.success(context, 'تم تسجيل فاتورة الشراء');
+        AppToast.success(context, 'تم تسجيل فاتورة الشراء'.tr());
         Navigator.pop(context, true);
       }
     } catch (e, logSt) {
@@ -143,7 +145,7 @@ class _AddStockPurchaseViewState extends State<AddStockPurchaseView> {
 
   String _friendlyError(String msg) {
     if (msg.contains('permission-denied')) {
-      return 'ليست لديك صلاحية لتسجيل الشراء (اشتراك المحل غير فعّال أو الحساب موقوف)';
+      return 'ليست لديك صلاحية لتسجيل الشراء (اشتراك المحل غير فعّال أو الحساب موقوف)'.tr();
     }
     return msg.replaceAll(RegExp(r'^Exception:\s*'), '');
   }
@@ -153,7 +155,7 @@ class _AddStockPurchaseViewState extends State<AddStockPurchaseView> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('شراء مخزون جديد'),
+        title: Text('شراء مخزون جديد'.tr()),
         backgroundColor: AppTheme.primaryColor,
         foregroundColor: Colors.white,
       ),
@@ -162,7 +164,7 @@ class _AddStockPurchaseViewState extends State<AddStockPurchaseView> {
         child: ListView(
           padding: EdgeInsets.all(16.w),
           children: [
-            Text('التاريخ: ${_date.year}-${_date.month.toString().padLeft(2, '0')}-${_date.day.toString().padLeft(2, '0')}',
+            Text(uiTr('التاريخ: ${_date.year}-${_date.month.toString().padLeft(2, '0')}-${_date.day.toString().padLeft(2, '0')}'),
                 style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600)),
             SizedBox(height: 8.h),
             OutlinedButton.icon(
@@ -176,12 +178,12 @@ class _AddStockPurchaseViewState extends State<AddStockPurchaseView> {
                 if (picked != null) setState(() => _date = picked);
               },
               icon: const Icon(Icons.calendar_today_outlined, size: 16),
-              label: const Text('تغيير التاريخ'),
+              label: Text('تغيير التاريخ'.tr()),
             ),
             SizedBox(height: 20.h),
             Row(
               children: [
-                Text('الأصناف', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900)),
+                Text('الأصناف'.tr(), style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900)),
                 const Spacer(),
                 if (_loadingProducts)
                   const LoadingWidget(size: 16, compact: true),
@@ -207,14 +209,14 @@ class _AddStockPurchaseViewState extends State<AddStockPurchaseView> {
             OutlinedButton.icon(
               onPressed: () => setState(() => _rows.add(_RowControllers())),
               icon: const Icon(Icons.add_circle_outline),
-              label: const Text('إضافة صنف'),
+              label: Text('إضافة صنف'.tr()),
             ),
             SizedBox(height: 20.h),
             TextFormField(
               controller: _noteController,
               maxLines: 2,
-              decoration: const InputDecoration(
-                labelText: 'ملاحظة (اختياري)',
+              decoration: InputDecoration(
+                labelText: 'ملاحظة (اختياري)'.tr(),
                 prefixIcon: Icon(Icons.note_alt_outlined),
               ),
             ),
@@ -228,7 +230,7 @@ class _AddStockPurchaseViewState extends State<AddStockPurchaseView> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('الإجمالي', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700)),
+                  Text('الإجمالي'.tr(), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700)),
                   Text(_total.toStringAsFixed(2),
                       style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w900, color: AppTheme.successDark)),
                 ],
@@ -257,7 +259,7 @@ class _AddStockPurchaseViewState extends State<AddStockPurchaseView> {
               ),
               child: _saving
                   ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : const Text('حفظ فاتورة الشراء', style: TextStyle(fontWeight: FontWeight.w800)),
+                  : Text('حفظ فاتورة الشراء'.tr(), style: TextStyle(fontWeight: FontWeight.w800)),
             ),
           ),
         ),
@@ -306,7 +308,7 @@ class _PurchaseRowCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text('الصنف ${index + 1}', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800)),
+              Text(uiTr('الصنف ${index + 1}'), style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800)),
               const Spacer(),
               if (onDelete != null)
                 IconButton(
@@ -336,11 +338,11 @@ class _PurchaseRowCard extends StatelessWidget {
                 controller: controller,
                 focusNode: focusNode,
                 onTap: onFieldFocusChanged,
-                decoration: const InputDecoration(
-                  labelText: 'اسم الصنف',
+                decoration: InputDecoration(
+                  labelText: 'اسم الصنف'.tr(),
                   prefixIcon: Icon(Icons.inventory_2_outlined),
                 ),
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'اختر صنفًا' : null,
+                validator: (v) => (v == null || v.trim().isEmpty) ? 'اختر صنفًا'.tr() : null,
                 onChanged: (v) {
                   controllers.name.text = v;
                   if (controllers.product != null && controllers.product!.name != v) {
@@ -357,10 +359,10 @@ class _PurchaseRowCard extends StatelessWidget {
                 child: TextFormField(
                   controller: controllers.quantity,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(labelText: 'الكمية'),
+                  decoration: InputDecoration(labelText: 'الكمية'.tr()),
                   validator: (v) {
                     final q = NumberParser.parseDouble(v ?? '');
-                    return q > 0 ? null : 'أكبر من صفر';
+                    return q > 0 ? null : 'أكبر من صفر'.tr();
                   },
                 ),
               ),
@@ -369,10 +371,10 @@ class _PurchaseRowCard extends StatelessWidget {
                 child: TextFormField(
                   controller: controllers.cost,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(labelText: 'سعر الشراء'),
+                  decoration: InputDecoration(labelText: 'سعر الشراء'.tr()),
                   validator: (v) {
                     final c = NumberParser.parseDouble(v ?? '');
-                    return c >= 0 ? null : 'غير صحيح';
+                    return c >= 0 ? null : 'غير صحيح'.tr();
                   },
                 ),
               ),

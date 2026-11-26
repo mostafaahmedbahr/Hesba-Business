@@ -10,6 +10,8 @@ import 'package:hesba/features/admin/presentation/views/shop_details_view.dart';
 import 'package:hesba/features/admin/presentation/views/subscription_requests_view.dart';
 import 'package:hesba/features/subscription/data/models/subscription_request_model.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 class GlobalSearchView extends StatelessWidget {
   const GlobalSearchView({super.key});
@@ -32,17 +34,17 @@ class GlobalSearchView extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text('بحث شامل',
+                        child: Text('بحث شامل'.tr(),
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900)),
                       ),
                       IconButton(
                           onPressed: () => Navigator.of(context).pop(),
                           icon: const Icon(Icons.close, size: 20),
-                          tooltip: 'إغلاق'),
+                          tooltip: 'إغلاق'.tr()),
                     ],
                   ),
                   const SizedBox(height: AdminSpace.xs),
-                  Text('ابحث عن محل أو منتج أو طلب اشتراك',
+                  Text('ابحث عن محل أو منتج أو طلب اشتراك'.tr(),
                       style: Theme.of(context)
                           .textTheme
                           .bodySmall
@@ -50,9 +52,9 @@ class GlobalSearchView extends StatelessWidget {
                   const SizedBox(height: AdminSpace.md),
                   TextField(
                     autofocus: true,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       prefixIcon: Icon(Icons.search),
-                      hintText: 'ابحث عن محل أو منتج أو طلب...',
+                      hintText: 'ابحث عن محل أو منتج أو طلب...'.tr(),
                     ),
                     onChanged: (v) => context.read<GlobalSearchCubit>().search(v),
                   ),
@@ -74,7 +76,7 @@ class GlobalSearchView extends StatelessWidget {
                       }
                       if (state is SearchResults) {
                         if (state.hits.isEmpty) {
-                          return adminEmpty(Icons.search_off_outlined, 'لا توجد نتائج');
+                          return adminEmpty(Icons.search_off_outlined, 'لا توجد نتائج'.tr());
                         }
                         return SizedBox(
                           height: 320,
@@ -127,7 +129,7 @@ class GlobalSearchView extends StatelessWidget {
                       return Center(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: AdminSpace.lg),
-                          child: Text('اكتب كلمة للبحث في المحلات والمنتجات والطلبات',
+                          child: Text('اكتب كلمة للبحث في المحلات والمنتجات والطلبات'.tr(),
                               style: TextStyle(color: AdminColors.textMuted(context), fontSize: 12.5)),
                         ),
                       );
@@ -155,16 +157,16 @@ class GlobalSearchView extends StatelessWidget {
             : TextButton.icon(
                 onPressed: () => context.read<GlobalSearchCubit>().loadMore(),
                 icon: const Icon(Icons.expand_more, size: 18),
-                label: const Text('تحميل المزيد'),
+                label: Text('تحميل المزيد'.tr()),
               ),
       ),
     );
   }
 
   String _labelFor(String kind) => switch (kind) {
-        'shop' => 'محل',
-        'product' => 'منتج',
-        _ => 'طلب اشتراك',
+        'shop' => 'محل'.tr(),
+        'product' => 'منتج'.tr(),
+        _ => 'طلب اشتراك'.tr(),
       };
 
   IconData _iconFor(String kind) => switch (kind) {
@@ -191,7 +193,7 @@ class GlobalSearchView extends StatelessWidget {
       if (kind == 'shop') {
         if (data == null) {
           messenger.showSnackBar(
-            const SnackBar(content: Text('المحل غير موجود'), behavior: SnackBarBehavior.floating),
+            SnackBar(content: Text('المحل غير موجود'.tr()), behavior: SnackBarBehavior.floating),
           );
           return;
         }
@@ -203,7 +205,7 @@ class GlobalSearchView extends StatelessWidget {
       } else if (kind == 'product') {
         if (data == null) {
           messenger.showSnackBar(
-            const SnackBar(content: Text('المنتج غير موجود'), behavior: SnackBarBehavior.floating),
+            SnackBar(content: Text('المنتج غير موجود'.tr()), behavior: SnackBarBehavior.floating),
           );
           return;
         }
@@ -214,7 +216,7 @@ class GlobalSearchView extends StatelessWidget {
         // طلب اشتراك: افتح حوار مراجعة الطلب نفسه بدل الذهاب للقائمة.
         if (data == null) {
           messenger.showSnackBar(
-            const SnackBar(content: Text('الطلب غير موجود'), behavior: SnackBarBehavior.floating),
+            SnackBar(content: Text('الطلب غير موجود'.tr()), behavior: SnackBarBehavior.floating),
           );
           return;
         }
@@ -224,7 +226,7 @@ class GlobalSearchView extends StatelessWidget {
     } catch (e, logSt) {
       AppLogger.nonFatal('features/admin/presentation/views/global_search_view.dart', e, logSt, severity: LoggingSeverity.warning);
       messenger.showSnackBar(
-        SnackBar(content: Text('تعذر فتح التفاصيل: $e'), behavior: SnackBarBehavior.floating),
+        SnackBar(content: Text(uiTr('تعذر فتح التفاصيل: $e')), behavior: SnackBarBehavior.floating),
       );
     }
   }

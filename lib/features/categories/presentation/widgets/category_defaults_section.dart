@@ -2,6 +2,7 @@ import '../../../../common_imports.dart';
 import '../cubit/category_state.dart';
 import 'category_empty_box.dart';
 import 'category_section_header.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// سكشن الافتراضية (عرض فقط).
 class CategoryDefaultsSection extends StatelessWidget {
@@ -28,21 +29,21 @@ class CategoryDefaultsSection extends StatelessWidget {
         children: [
           CategorySectionHeader(
             icon: Icons.layers_rounded,
-            title: 'الافتراضية',
+            title: 'الافتراضية'.tr(),
             count: '${items.length}',
             gradient: const [AppTheme.slateGray, AppTheme.mutedGray],
           ),
           SizedBox(height: 4.h),
           Text(
-            'ثابتة حسب نوع نشاطك — للعرض فقط',
+            'ثابتة حسب نوع نشاطك — للعرض فقط'.tr(),
             style: TextStyle(fontSize: 11.sp, color: AppTheme.mutedGray),
           ),
           SizedBox(height: 12.h),
           if (items.isEmpty)
-            const CategoryEmptyBox(
+            CategoryEmptyBox(
               icon: Icons.search_off_rounded,
-              title: 'لا توجد نتائج',
-              subtitle: 'جرّب كلمة بحث مختلفة',
+              title: 'لا توجد نتائج'.tr(),
+              subtitle: 'جرّب كلمة بحث مختلفة'.tr(),
             )
           else
             Wrap(
@@ -65,7 +66,7 @@ class CategoryDefaultsSection extends StatelessWidget {
                         Icon(Icons.category_rounded, size: 12.sp, color: AppTheme.slateGray),
                         SizedBox(width: 6.w),
                         Text(
-                          cat,
+                          cat.tr(),
                           style: TextStyle(
                             fontSize: 11.5.sp,
                             fontWeight: FontWeight.w700,

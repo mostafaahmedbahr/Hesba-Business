@@ -6,6 +6,7 @@ import '../../../../core/utils/error_message.dart';
 import '../../data/repos/returns_repo.dart';
 import 'returns_list_state.dart';
 import 'package:hesba/core/services/app_logger.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// لوجيك قائمة المرتجعات (الـ View غبية — بتنادي بس).
 class ReturnsListCubit extends Cubit<ReturnsListState> {
@@ -13,7 +14,7 @@ class ReturnsListCubit extends Cubit<ReturnsListState> {
   StreamSubscription? _sub; // ستريم المرتجعات.
 
   ReturnsListCubit({required this._repo})
-      : super(const ReturnsListState());
+      : super(ReturnsListState());
 
   /// تجهيز القائمة: يجيب المحل + يشترك في المرتجعات live.
   Future<void> bootstrap() async {
@@ -36,7 +37,7 @@ class ReturnsListCubit extends Cubit<ReturnsListState> {
     if (shopId == null || shopId.isEmpty) {
       emit(state.copyWith(
         status: ReturnsListStatus.failure,
-        errorMessage: 'لم يتم العثور على المتجر',
+        errorMessage: 'لم يتم العثور على المتجر'.tr(),
       ));
       return;
     }

@@ -4,6 +4,7 @@ import 'package:hesba/core/widgets/loading_widget.dart';
 
 import '../../../../common_imports.dart';
 import '../cubit/reports_state.dart';
+import 'package:hesba/core/utils/dynamic_text.dart';
 
 /// هيدر التقارير (صافي + رصيد + حالة رابح/عجز).
 class ReportsHeader extends StatelessWidget {
@@ -42,9 +43,9 @@ class ReportsHeader extends StatelessWidget {
                     Container(width: 44.w, height: 44.w, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.16), borderRadius: BorderRadius.circular(12.r), border: Border.all(color: Colors.white.withValues(alpha: 0.22))), child: Icon(Icons.bar_chart_rounded, color: Colors.white, size: 22.sp)),
                     SizedBox(width: 12.w),
                     Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text('التقارير والتحليل', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: Colors.white)),
+                      Text('التقارير والتحليل'.tr(), style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: Colors.white)),
                       Text(
-                        loading ? 'جاري التحميل...' : '${state.period.label} • ${state.sales.length} عملية',
+                        loading ? 'جاري التحميل...'.tr() : uiTr('${state.period.label} • ${state.sales.length} عملية'),
                         style: TextStyle(fontSize: 11.sp, color: Colors.white.withValues(alpha: 0.85), fontWeight: FontWeight.w600),
                       ),
                     ])),
@@ -58,7 +59,7 @@ class ReportsHeader extends StatelessWidget {
                           child: Row(children: [
                             Icon(Icons.auto_graph_rounded, size: 13.sp, color: AppTheme.primaryColor),
                             SizedBox(width: 5.w),
-                            Text(balance >= 0 ? 'رابح' : 'خسارة', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: balance >= 0 ? AppTheme.successDark : AppTheme.danger)),
+                            Text(balance >= 0 ? 'رابح'.tr() : 'خسارة'.tr(), style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: balance >= 0 ? AppTheme.successDark : AppTheme.danger)),
                           ]),
                         ),
                       ),
@@ -68,13 +69,13 @@ class ReportsHeader extends StatelessWidget {
                     Expanded(
                       child: loading
                           ? const LoadingWidget(size: 16, compact: true)
-                          : _HeaderGlass(icon: Icons.trending_up_rounded, label: 'reportsNetSales'.tr(), value: '${fmtReport(state.netSales)} ج.م'),
+                          : _HeaderGlass(icon: Icons.trending_up_rounded, label: 'reportsNetSales'.tr(), value: uiTr('${fmtReport(state.netSales)} ج.م')),
                     ),
                     SizedBox(width: 10.w),
                     Expanded(
                       child: loading
                           ? const LoadingWidget(size: 16, compact: true)
-                          : _HeaderGlass(icon: Icons.account_balance_wallet_rounded, label: 'reportsNetProfit'.tr(), value: '${fmtReport(balance)} ج.م', danger: balance < 0),
+                          : _HeaderGlass(icon: Icons.account_balance_wallet_rounded, label: 'reportsNetProfit'.tr(), value: uiTr('${fmtReport(balance)} ج.م'), danger: balance < 0),
                     ),
                   ]),
                 ]),

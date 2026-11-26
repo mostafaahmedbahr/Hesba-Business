@@ -42,7 +42,7 @@ class ProductFormDateField extends StatelessWidget {
         '${picked.month.toString().padLeft(2, '0')}-'
         '${picked.day.toString().padLeft(2, '0')}';
     // تحديث قيمة الـ FormField نفسها، وإلا بقي داخليها قديماً
-    // وظهر خطأ "مطلوب" رغم اختيار التاريخ.
+    // وظهر خطأ "مطلوب".tr() رغم اختيار التاريخ.
     state.didChange(text);
     onChanged(text);
   }
