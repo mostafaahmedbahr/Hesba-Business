@@ -80,7 +80,6 @@ import 'package:hesba/features/settings/presentation/states/settings_state.dart'
 }
 
 /// تهيئة App Check بأمان.
-///
 /// play integrity في الإنتاج، debug provider في التطوير. التفعيل في Console
 /// خارجي — هنا نُجهّز العميل فقط بدون فرض القواعد (لا نكسر التطبيق).
 Future<void> _initAppCheck() async {
