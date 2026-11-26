@@ -502,6 +502,7 @@ class _EditStaffDialogState extends State<_EditStaffDialog> {
   }
 
   Widget _secondaryButton() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return SizedBox(
       height: 48.h,
       child: OutlinedButton(
@@ -509,13 +510,14 @@ class _EditStaffDialogState extends State<_EditStaffDialog> {
         style: OutlinedButton.styleFrom(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
-          side: const BorderSide(color: AppTheme.borderSoft),
+          side: BorderSide(
+              color: isDark ? AppTheme.darkBorder : AppTheme.borderSoft),
         ),
         child: Text('إلغاء',
             style: TextStyle(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w800,
-                color: AppTheme.slateDark)),
+                color: isDark ? AppTheme.darkTextSecondary : AppTheme.slateDark)),
       ),
     );
   }
@@ -604,7 +606,9 @@ class _AddStaffSheetState extends State<_AddStaffSheet> {
                   width: 42.w,
                   height: 4.h,
                   decoration: BoxDecoration(
-                    color: AppTheme.borderSoft,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppTheme.darkBorder
+                        : AppTheme.borderSoft,
                     borderRadius: BorderRadius.circular(4.r),
                   ),
                 ),
@@ -774,18 +778,25 @@ class _AddStaffSheetState extends State<_AddStaffSheet> {
     bool obscure = false,
     VoidCallback? onToggleObscure,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accent = isDark ? AppTheme.primaryLight : AppTheme.primaryColor;
     return TextFormField(
       controller: controller,
       obscureText: obscure,
       keyboardType: keyboardType,
       validator: validator,
       autovalidateMode: AutovalidateMode.onUserInteraction,
+      style: TextStyle(
+        fontSize: 13.sp,
+        fontWeight: FontWeight.w600,
+        color: isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
+      ),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: TextStyle(
           fontSize: 12.5.sp,
           fontWeight: FontWeight.w700,
-          color: AppTheme.primaryColor,
+          color: accent,
         ),
         prefixIcon: Padding(
           padding: EdgeInsets.fromLTRB(12.w, 12.h, 4.w, 12.h),
@@ -793,16 +804,16 @@ class _AddStaffSheetState extends State<_AddStaffSheet> {
             width: 32.w,
             height: 32.w,
             decoration: BoxDecoration(
-              color: AppTheme.primarySoft,
+              color: isDark ? AppTheme.darkSurfaceElevated : AppTheme.primarySoft,
               borderRadius: BorderRadius.circular(10.r),
             ),
-            child: Icon(icon, size: 17.sp, color: AppTheme.primaryColor),
+            child: Icon(icon, size: 17.sp, color: accent),
           ),
         ),
         suffixIcon: onToggleObscure != null
             ? IconButton(
                 onPressed: onToggleObscure,
-                color: AppTheme.primaryColor,
+                color: accent,
                 icon: Icon(
                   obscure
                       ? Icons.visibility_outlined
@@ -812,23 +823,26 @@ class _AddStaffSheetState extends State<_AddStaffSheet> {
               )
             : null,
         filled: true,
-        fillColor: AppTheme.slatePale,
+        fillColor: isDark ? AppTheme.darkSurfaceAlt : AppTheme.slatePale,
         contentPadding:
             EdgeInsets.symmetric(horizontal: 14.w, vertical: 16.h),
-        border: _fieldBorder(),
-        enabledBorder: _fieldBorder(),
-        focusedBorder:
-            _fieldBorder(color: AppTheme.primaryColor, width: 1.5),
-        errorBorder: _fieldBorder(color: AppTheme.danger),
-        focusedErrorBorder: _fieldBorder(color: AppTheme.danger, width: 1.5),
+        border: _fieldBorder(isDark),
+        enabledBorder: _fieldBorder(isDark),
+        focusedBorder: _fieldBorder(isDark, color: accent, width: 1.5),
+        errorBorder: _fieldBorder(isDark, color: AppTheme.danger),
+        focusedErrorBorder:
+            _fieldBorder(isDark, color: AppTheme.danger, width: 1.5),
       ),
     );
   }
 
-  OutlineInputBorder _fieldBorder({Color? color, double width = 1}) {
+  OutlineInputBorder _fieldBorder(bool isDark, {Color? color, double width = 1}) {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(14.r),
-      borderSide: BorderSide(color: color ?? AppTheme.borderSoft, width: width),
+      borderSide: BorderSide(
+        color: color ?? (isDark ? AppTheme.darkBorder : AppTheme.borderSoft),
+        width: width,
+      ),
     );
   }
 
@@ -859,14 +873,16 @@ class _PermissionHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accent = isDark ? AppTheme.mintLight : AppTheme.successDark;
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
-        color: AppTheme.successDark.withValues(alpha: 0.06),
+        color: accent.withValues(alpha: isDark ? 0.09 : 0.06),
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
-          color: AppTheme.successDark.withValues(alpha: 0.18),
+          color: accent.withValues(alpha: isDark ? 0.24 : 0.18),
         ),
       ),
       child: Column(
@@ -874,37 +890,39 @@ class _PermissionHint extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.verified_user_outlined,
-                  size: 17.sp, color: AppTheme.successDark),
+              Icon(Icons.verified_user_outlined, size: 17.sp, color: accent),
               SizedBox(width: 7.w),
               Text('صلاحيات محدودة',
                   style: TextStyle(
                       fontSize: 12.5.sp,
                       fontWeight: FontWeight.w900,
-                      color: AppTheme.successDark)),
+                      color: accent)),
             ],
           ),
           SizedBox(height: 8.h),
-          _hintLine('يستطيع: بيع، شراء، مرتجع، مصروف'),
+          _hintLine('يستطيع: بيع، شراء، مرتجع، مصروف', isDark),
           SizedBox(height: 4.h),
-          _hintLine('لا يطلع على التقارير أو الأرباح أو المنتجات'),
+          _hintLine('لا يطلع على التقارير أو الأرباح أو المنتجات', isDark),
         ],
       ),
     );
   }
 
-  Widget _hintLine(String text) {
+  Widget _hintLine(String text, bool isDark) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(Icons.check_rounded,
-            size: 13.sp, color: AppTheme.successDark),
+            size: 13.sp,
+            color: isDark ? AppTheme.mintLight : AppTheme.successDark),
         SizedBox(width: 5.w),
         Expanded(
           child: Text(text,
               style: TextStyle(
                   fontSize: 11.sp,
-                  color: AppTheme.textPrimary.withValues(alpha: 0.75))),
+                  color: isDark
+                      ? AppTheme.darkTextSecondary
+                      : AppTheme.textPrimary.withValues(alpha: 0.75))),
         ),
       ],
     );
