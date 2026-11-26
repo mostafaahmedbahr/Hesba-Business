@@ -41,11 +41,17 @@ class _SuppliersBody extends StatelessWidget {
     if (!await SubscriptionGate.ensureCanModify(context)) return;
     if (!context.mounted) return;
     HapticFeedback.lightImpact();
-    await Navigator.push(
+    final saved = await Navigator.push<SupplierModel>(
       context,
       MaterialPageRoute(builder: (_) => SupplierFormView(existing: supplier)),
     );
-    // القائمة ستريم فتعمل تحديث تلقائياً — لا حاجة لنتيجة الرجوع.
+    if (saved == null || !context.mounted) return;
+    AppToast.success(
+      context,
+      (supplier == null ? 'supplierAdded' : 'supplierUpdated').tr(),
+    );
+    // القائمة قراءة واحدة (مش ستريم) — نضيف المورد فوراً ونعمل refresh.
+    await context.read<SuppliersCubit>().applySavedSupplier(saved);
   }
 
   /// يفتح تفاصيل المورد.

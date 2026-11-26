@@ -743,6 +743,8 @@
   "supplierDeleteTitle": "حذف المورد؟",
   "supplierDeleteBody": "متأكد إنك عايز تحذف \"{0}\"؟ ده مش هيتراجع.",
   "supplierDeleted": "تم حذف المورد",
+  "supplierAdded": "تمت إضافة المورد بنجاح",
+  "supplierUpdated": "تم حفظ التعديلات",
   "supplierFormSectionMain": "بيانات المورد",
   "supplierFieldLabelName": "اسم المورد",
   "supplierFieldLabelPhone": "رقم الهاتف",

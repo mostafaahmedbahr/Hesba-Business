@@ -81,6 +81,24 @@ class SuppliersCubit extends Cubit<SuppliersState> {
   /// إعادة تحميل القائمة (سحب للتحديث).
   Future<void> refresh() => init();
 
+  /// يضع المورد المحفوظ في القائمة فوراً (قبل ما قراءة Firestore ترجع)
+  /// ثم يعمل تحديث خفيف — عشان يظهر في نفس لحظة الرجوع من الفورم.
+  Future<void> applySavedSupplier(SupplierModel supplier) async {
+    final next = List<SupplierModel>.from(state.suppliers);
+    final idx = next.indexWhere((s) => s.id == supplier.id);
+    if (idx >= 0) {
+      next[idx] = supplier;
+    } else {
+      next.insert(0, supplier);
+    }
+    emit(state.copyWith(
+      status: SuppliersStatus.success,
+      suppliers: next,
+      clearError: true,
+    ));
+    await refresh();
+  }
+
   /// حذف مورد — يفشل برسالة واضحة لو فيه منتجات مرتبطة.
   Future<bool> deleteSupplier(String supplierId) async {
     try {

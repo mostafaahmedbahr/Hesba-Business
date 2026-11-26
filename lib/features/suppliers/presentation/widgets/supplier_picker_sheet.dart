@@ -54,6 +54,7 @@ class _SheetBody extends StatelessWidget {
       MaterialPageRoute(builder: (_) => const SupplierFormView()),
     );
     if (created == null || !context.mounted) return;
+    AppToast.success(context, 'supplierAdded'.tr());
     Navigator.pop(context, SupplierPickResult(supplier: created));
   }
 

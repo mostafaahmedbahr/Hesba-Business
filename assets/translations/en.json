@@ -743,6 +743,8 @@
   "supplierDeleteTitle": "Delete supplier?",
   "supplierDeleteBody": "Are you sure you want to delete \"{0}\"? This cannot be undone.",
   "supplierDeleted": "Supplier deleted",
+  "supplierAdded": "Supplier added successfully",
+  "supplierUpdated": "Changes saved",
   "supplierFormSectionMain": "Supplier information",
   "supplierFieldLabelName": "Supplier name",
   "supplierFieldLabelPhone": "Phone number",

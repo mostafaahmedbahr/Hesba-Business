@@ -34,7 +34,9 @@ class _StaffManagementBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('الحسابات الفرعية'),
+        title: const Text('الحسابات الفرعية',style: TextStyle(
+          color: Colors.white
+        ),),
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         elevation: 0,
