@@ -54,15 +54,25 @@ class _SuppliersBody extends StatelessWidget {
     await context.read<SuppliersCubit>().applySavedSupplier(saved);
   }
 
-  /// يفتح تفاصيل المورد.
-  void _openDetails(BuildContext context, SupplierModel supplier) {
+  /// يفتح تفاصيل المورد، ولو اتعمل تعديل أو حذف نحدّث القائمة بعد الرجوع.
+  Future<void> _openDetails(BuildContext context, SupplierModel supplier) async {
     HapticFeedback.selectionClick();
-    Navigator.push(
+    final result = await Navigator.push<Object?>(
       context,
       MaterialPageRoute(
         builder: (_) => SupplierDetailsView(supplierId: supplier.id),
       ),
     );
+    if (!context.mounted) return;
+    final cubit = context.read<SuppliersCubit>();
+    if (result is SupplierModel) {
+      // تعديل: نحدّث الصف فوراً ثم refresh (الرسالة اتعرضت هنا).
+      AppToast.success(context, 'supplierUpdated'.tr());
+      await cubit.applySavedSupplier(result);
+    } else if (result is String) {
+      // حذف من التفاصيل: الرسالة اتعرضت هناك، نشيله فوراً ونعمل refresh.
+      await cubit.applyDeletedSupplier(result);
+    }
   }
 
   /// تأكيد ثم حذف.

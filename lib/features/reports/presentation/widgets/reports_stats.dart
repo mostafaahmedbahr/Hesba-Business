@@ -195,7 +195,7 @@ class ReportsProfitCard extends StatelessWidget {
                 Text(
                   'reportsProfitEstimatedBody'.tr(args: [
                     '${m.unknownCostLines}',
-                    '${(m.costCoverage * 100).toStringAsFixed(0)}%',
+                    (m.costCoverage * 100).toStringAsFixed(0),
                   ]),
                   style: TextStyle(fontSize: 10.5.sp, height: 1.4, color: const Color(0xFF92400E)),
                 ),

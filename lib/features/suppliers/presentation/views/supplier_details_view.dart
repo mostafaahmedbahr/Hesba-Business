@@ -44,6 +44,8 @@ class _SupplierDetailsBody extends StatelessWidget {
     );
     if (updated != null && context.mounted) {
       await context.read<SupplierDetailsCubit>().load(supplier.id);
+      // نرجّع المورد المحدّث لشاشة القائمة عشان تعمل refresh هناك.
+      if (context.mounted) Navigator.pop(context, updated);
     }
   }
 
@@ -63,7 +65,8 @@ class _SupplierDetailsBody extends StatelessWidget {
     if (!context.mounted) return;
     if (deleted) {
       AppToast.success(context, 'supplierDeleted'.tr());
-      Navigator.pop(context, true);
+      // نرجّع المعرّف لشاشة القائمة عشان تشيل المورد فوراً وتعمل refresh.
+      if (context.mounted) Navigator.pop(context, supplier.id);
     } else {
       // عادةً: المورد مرتبط بمنتجات ولا يمكن حذفه.
       AppToast.error(context, translateError(cubit.state.errorMessage));

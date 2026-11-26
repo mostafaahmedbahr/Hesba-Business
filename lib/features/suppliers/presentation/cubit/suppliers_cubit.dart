@@ -99,11 +99,21 @@ class SuppliersCubit extends Cubit<SuppliersState> {
     await refresh();
   }
 
+  /// شيل المورد المحذوف من القائمة فوراً ثم تحديث خفيف.
+  Future<void> applyDeletedSupplier(String supplierId) async {
+    emit(state.copyWith(
+      status: SuppliersStatus.success,
+      suppliers: state.suppliers.where((s) => s.id != supplierId).toList(),
+      clearError: true,
+    ));
+    await refresh();
+  }
+
   /// حذف مورد — يفشل برسالة واضحة لو فيه منتجات مرتبطة.
   Future<bool> deleteSupplier(String supplierId) async {
     try {
       await _repo.deleteSupplier(supplierId);
-      await init();
+      await applyDeletedSupplier(supplierId);
       emit(state.copyWith(clearError: true));
       return true;
     } catch (e, logSt) {
