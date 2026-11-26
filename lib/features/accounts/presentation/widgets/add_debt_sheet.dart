@@ -244,7 +244,15 @@ class _AddDebtSheetState extends State<_AddDebtSheet> {
                       focusNode: _phoneFocus,
                       keyboardType: TextInputType.phone,
                       textInputAction: TextInputAction.next,
-                      onChanged: (_) => setState(() {}),
+                      onChanged: (value) {
+                        setState(() {
+                          // تحقق فوري أثناء الكتابة — يظهر الخطأ بمجرد إدخال رقم غير صحيح
+                          // ويختفي فور اكتمال الرقم بالصيغة المصرية الصحيحة.
+                          _phoneError = value.trim().isEmpty
+                              ? null
+                              : Validators.egyptianPhone(value);
+                        });
+                      },
                       decoration: _inputDecoration(
                         hint: '01xxxxxxxxx',
                         icon: Icons.call_rounded,

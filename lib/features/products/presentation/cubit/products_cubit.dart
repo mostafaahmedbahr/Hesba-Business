@@ -54,7 +54,8 @@ class ProductsCubit extends Cubit<ProductsState> {
   Future<bool> addProduct(Product product) async {
     try {
       await _repo.addProduct(product);
-      AppEvents.instance.productAdded(_productData(product));
+      // الإشعار/Nقطة الجرس عند إضافة منتج ملغية — اللي يظهر للمستخدم هو
+      // رسالة النجاح (AppToast.success) بس في product_form_view.
       AppEvents.instance.productChanged();
       return true;
     } catch (e, logSt) {

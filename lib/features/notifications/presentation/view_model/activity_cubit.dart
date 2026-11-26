@@ -46,6 +46,16 @@ class ActivityCubit extends Cubit<ActivityState> {
 
     // أي حدث عام يتسجل تلقائيًا (اللوجيك في الـ repo) + إشعار نظام بنفس النص.
     _eventSub = AppEvents.instance.stream.listen((event) async {
+      // الإشعارات/النقاط ملغية لكل العمليات اللي ليها رسالة حفظ واضحة:
+      // المبيعات، المرتجعات، والمصروفات. الأحداث نفسها لسه بتوصل للوحة
+      // التحكم والتقارير عشان التحديث.
+      if (event.type == AppEventType.saleCreated ||
+          event.type == AppEventType.returnCreated ||
+          event.type == AppEventType.expenseCreated ||
+          event.type == AppEventType.expenseUpdated ||
+          event.type == AppEventType.expenseDeleted) {
+        return;
+      }
       ActivityMessage? msg;
       try {
         msg = await _repo.logAppEvent(event);
