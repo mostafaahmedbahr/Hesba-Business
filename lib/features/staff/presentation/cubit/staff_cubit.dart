@@ -101,7 +101,7 @@ class StaffCubit extends Cubit<StaffState> {
   String _mapError(String msg) {
     if (msg.contains('email-already-in-use')) return 'هذا البريد مستخدم بالفعل';
     if (msg.contains('invalid-email')) return 'البريد الإلكتروني غير صالح';
-    if (msg.contains('weak-password')) return 'كلمة المرور ضعيفة (6 أحرف على الأقل)';
+    if (msg.contains('weak-password')) return 'كلمة المرور غير كافية';
     if (msg.contains('network-request-failed')) return 'تحقق من اتصال الإنترنت';
     if (msg.contains('permission-denied')) return 'ليست لديك صلاحية لتنفيذ هذا الإجراء';
     return msg.replaceAll(RegExp(r'^Exception:\s*|^[A-Za-z]+\/?[A-Za-z]*:\s*'), '');

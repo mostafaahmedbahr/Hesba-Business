@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/toast.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/loading_widget.dart';
+import '../../../auth/presentation/widgets/register_widgets/password_strength_indicator.dart';
 import '../../data/models/staff_model.dart';
 import '../../data/repos/staff_repo.dart';
 import '../cubit/staff_cubit.dart';
@@ -247,32 +249,16 @@ class _StaffCard extends StatelessWidget {
   }
 
   Future<void> _edit(BuildContext context) async {
-    final name = TextEditingController(text: staff.name);
-    final phone = TextEditingController(text: staff.phone);
-    final ok = await showDialog<bool>(
+    final result = await showDialog<_EditStaffResult>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('تعديل بيانات الموظف'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(controller: name, decoration: const InputDecoration(labelText: 'الاسم')),
-            TextField(controller: phone, decoration: const InputDecoration(labelText: 'الهاتف')),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('إلغاء')),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('حفظ')),
-        ],
-      ),
+      builder: (ctx) => _EditStaffDialog(staff: staff),
     );
-    if (ok != true) return;
-    if (!context.mounted) return;
+    if (result == null || !context.mounted) return;
     try {
       await context.read<StaffCubit>().update(
             uid: staff.uid,
-            name: name.text.trim(),
-            phone: phone.text.trim(),
+            name: result.name,
+            phone: result.phone,
             isActive: staff.isActive,
           );
     } catch (logErr, logSt) { AppLogger.nonFatal('features/staff/presentation/views/staff_management_view.dart', logErr, logSt, severity: LoggingSeverity.warning); }
@@ -305,6 +291,267 @@ class _StaffCard extends StatelessWidget {
   }
 }
 
+/// القيم الراجعة من ديالوج تعديل بيانات الموظف بعد الحفظ.
+class _EditStaffResult {
+  final String name;
+  final String phone;
+  const _EditStaffResult({required this.name, required this.phone});
+}
+
+/// ديالوج تعديل بيانات الموظف بنفس طابع التصميم الـ premium المستخدم في الشاشة.
+class _EditStaffDialog extends StatefulWidget {
+  final StaffModel staff;
+  const _EditStaffDialog({required this.staff});
+
+  @override
+  State<_EditStaffDialog> createState() => _EditStaffDialogState();
+}
+
+class _EditStaffDialogState extends State<_EditStaffDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _name;
+  late final TextEditingController _phone;
+
+  @override
+  void initState() {
+    super.initState();
+    _name = TextEditingController(text: widget.staff.name);
+    _phone = TextEditingController(text: widget.staff.phone);
+  }
+
+  @override
+  void dispose() {
+    _name.dispose();
+    _phone.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    if (!_formKey.currentState!.validate()) return;
+    Navigator.pop(
+      context,
+      _EditStaffResult(name: _name.text.trim(), phone: _phone.text.trim()),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Dialog(
+      insetPadding: EdgeInsets.symmetric(horizontal: 20.w),
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26.r)),
+      backgroundColor: isDark ? AppTheme.darkSurface : Colors.white,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildHeader(),
+            Padding(
+              padding: EdgeInsets.all(20.w),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _field(
+                      controller: _name,
+                      label: 'اسم الموظف',
+                      icon: Icons.person_outline,
+                      isDark: isDark,
+                      validator: (v) => Validators.required(v, 'اكتب اسم الموظف'),
+                    ),
+                    SizedBox(height: 12.h),
+                    _field(
+                      controller: _phone,
+                      label: 'الهاتف (اختياري)',
+                      icon: Icons.phone_outlined,
+                      keyboardType: TextInputType.phone,
+                      isDark: isDark,
+                      validator: Validators.optionalEgyptianPhone,
+                    ),
+                    SizedBox(height: 20.h),
+                    Row(
+                      children: [
+                        Expanded(child: _secondaryButton()),
+                        SizedBox(width: 10.w),
+                        Expanded(flex: 2, child: _primaryButton()),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      padding: EdgeInsets.fromLTRB(20.w, 20.h, 14.w, 18.h),
+      decoration: BoxDecoration(gradient: AppTheme.primaryGradient),
+      child: Row(
+        children: [
+          Container(
+            width: 46.w,
+            height: 46.w,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(14.r),
+            ),
+            child: Icon(Icons.edit_rounded, color: Colors.white, size: 24.sp),
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'تعديل بيانات الموظف',
+                  style: TextStyle(
+                      fontSize: 17.sp,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white),
+                ),
+                SizedBox(height: 3.h),
+                Text(
+                  widget.staff.email,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                      fontSize: 11.5.sp,
+                      color: Colors.white.withValues(alpha: 0.85)),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: Icon(Icons.close_rounded, color: Colors.white, size: 20.sp),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _field({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    required bool isDark,
+    String? Function(String?)? validator,
+    TextInputType? keyboardType,
+  }) {
+    final accent = isDark ? AppTheme.primaryLight : AppTheme.primaryColor;
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      validator: validator,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      style: TextStyle(
+        fontSize: 13.5.sp,
+        fontWeight: FontWeight.w700,
+        color: isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
+      ),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(
+          fontSize: 12.5.sp,
+          fontWeight: FontWeight.w700,
+          color: accent,
+        ),
+        prefixIcon: Padding(
+          padding: EdgeInsets.fromLTRB(12.w, 12.h, 4.w, 12.h),
+          child: Container(
+            width: 32.w,
+            height: 32.w,
+            decoration: BoxDecoration(
+              color: isDark ? AppTheme.darkSurfaceElevated : AppTheme.primarySoft,
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+            child: Icon(icon, size: 17.sp, color: accent),
+          ),
+        ),
+        filled: true,
+        fillColor: isDark ? AppTheme.darkSurfaceAlt : AppTheme.slatePale,
+        contentPadding:
+            EdgeInsets.symmetric(horizontal: 14.w, vertical: 16.h),
+        border: _border(isDark),
+        enabledBorder: _border(isDark),
+        focusedBorder: _border(isDark, color: accent, width: 1.5),
+        errorBorder: _border(isDark, color: AppTheme.danger),
+        focusedErrorBorder: _border(isDark, color: AppTheme.danger, width: 1.5),
+      ),
+    );
+  }
+
+  OutlineInputBorder _border(bool isDark, {Color? color, double width = 1}) {
+    return OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14.r),
+      borderSide: BorderSide(
+        color: color ?? (isDark ? AppTheme.darkBorder : AppTheme.borderSoft),
+        width: width,
+      ),
+    );
+  }
+
+  Widget _secondaryButton() {
+    return SizedBox(
+      height: 48.h,
+      child: OutlinedButton(
+        onPressed: () => Navigator.pop(context),
+        style: OutlinedButton.styleFrom(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+          side: const BorderSide(color: AppTheme.borderSoft),
+        ),
+        child: Text('إلغاء',
+            style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w800,
+                color: AppTheme.slateDark)),
+      ),
+    );
+  }
+
+  Widget _primaryButton() {
+    return SizedBox(
+      height: 48.h,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: AppTheme.primaryGradient,
+          borderRadius: BorderRadius.circular(14.r),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: _save,
+            borderRadius: BorderRadius.circular(14.r),
+            child: Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.check_rounded, size: 18.sp, color: Colors.white),
+                  SizedBox(width: 8.w),
+                  Text('حفظ التعديلات',
+                      style: TextStyle(
+                          fontSize: 13.5.sp,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _AddStaffSheet extends StatefulWidget {
   const _AddStaffSheet();
 
@@ -318,6 +565,9 @@ class _AddStaffSheetState extends State<_AddStaffSheet> {
   final _email = TextEditingController();
   final _phone = TextEditingController();
   final _password = TextEditingController();
+  final _confirmPassword = TextEditingController();
+  bool _obscurePassword = true;
+  bool _obscureConfirm = true;
   bool _saving = false;
 
   @override
@@ -326,6 +576,7 @@ class _AddStaffSheetState extends State<_AddStaffSheet> {
     _email.dispose();
     _phone.dispose();
     _password.dispose();
+    _confirmPassword.dispose();
     super.dispose();
   }
 
@@ -428,12 +679,42 @@ class _AddStaffSheetState extends State<_AddStaffSheet> {
               SizedBox(height: 12.h),
               _field(
                 controller: _password,
-                label: 'كلمة المرور (6 أحرف على الأقل)',
+                label: 'ownerPassword'.tr(),
                 icon: Icons.lock_outline,
-                obscure: true,
-                validator: (v) => (v == null || v.length < 6)
-                    ? 'كلمة المرور ضعيفة'
-                    : null,
+                obscure: _obscurePassword,
+                onToggleObscure: () =>
+                    setState(() => _obscurePassword = !_obscurePassword),
+                validator: (v) {
+                  if (v == null || v.isEmpty) return 'ownerPasswordEmpty'.tr();
+                  if (!PasswordStrengthIndicator.isStrong(v)) {
+                    return 'ownerPasswordWeak'.tr();
+                  }
+                  return null;
+                },
+              ),
+              // نفس مؤشر القوة المعروض في شاشة إنشاء الحساب.
+              ListenableBuilder(
+                listenable: _password,
+                builder: (context, _) {
+                  if (_password.text.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  return PasswordStrengthIndicator(password: _password.text);
+                },
+              ),
+              SizedBox(height: 12.h),
+              _field(
+                controller: _confirmPassword,
+                label: 'ownerConfirmPassword'.tr(),
+                icon: Icons.lock_outline,
+                obscure: _obscureConfirm,
+                onToggleObscure: () =>
+                    setState(() => _obscureConfirm = !_obscureConfirm),
+                validator: (v) {
+                  if (v == null || v.isEmpty) return 'ownerConfirmEmpty'.tr();
+                  if (v != _password.text) return 'ownerPasswordMismatch'.tr();
+                  return null;
+                },
               ),
               SizedBox(height: 20.h),
               SizedBox(
@@ -489,6 +770,7 @@ class _AddStaffSheetState extends State<_AddStaffSheet> {
     String? Function(String?)? validator,
     TextInputType? keyboardType,
     bool obscure = false,
+    VoidCallback? onToggleObscure,
   }) {
     return TextFormField(
       controller: controller,
@@ -515,6 +797,18 @@ class _AddStaffSheetState extends State<_AddStaffSheet> {
             child: Icon(icon, size: 17.sp, color: AppTheme.primaryColor),
           ),
         ),
+        suffixIcon: onToggleObscure != null
+            ? IconButton(
+                onPressed: onToggleObscure,
+                color: AppTheme.primaryColor,
+                icon: Icon(
+                  obscure
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  size: 20.sp,
+                ),
+              )
+            : null,
         filled: true,
         fillColor: AppTheme.slatePale,
         contentPadding:
