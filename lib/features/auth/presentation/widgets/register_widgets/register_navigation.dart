@@ -57,22 +57,26 @@ class RegisterNavigation extends StatelessWidget {
         final isLoading = state.status == RegisterStatus.loading;
 
         return Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             if (!isFirstStep) ...[
               Expanded(
-                flex: 2,
+                flex: 1,
                 child: _buildButton(
                   label: 'registerBack'.tr(),
                   isOutlined: true,
+                  isLarge: false,
                   onPressed: isLoading ? null : cubit.previousStep,
                 ),
               ),
               SizedBox(width: 12.w),
             ],
             Expanded(
+              flex: 2,
               child: _buildButton(
                 label: isLastStep ? 'registerSubmit'.tr() : 'registerNext'.tr(),
                 isOutlined: false,
+                isLarge: true,
                 isLoading: isLoading,
                 suffixIcon: isLoading
                     ? null
@@ -80,7 +84,8 @@ class RegisterNavigation extends StatelessWidget {
                         isLastStep
                             ? Icons.check_circle_outline_rounded
                             : Icons.arrow_forward_rounded,
-                        size: 18.sp,
+                        size: 19.sp,
+                        color: Colors.white,
                       ),
                 onPressed: isLoading
                     ? null
@@ -96,16 +101,19 @@ class RegisterNavigation extends StatelessWidget {
   Widget _buildButton({
     required String label,
     required bool isOutlined,
+    bool isLarge = false,
     bool isLoading = false,
     Widget? suffixIcon,
     VoidCallback? onPressed,
   }) {
+    final double buttonHeight = isLarge ? 58.h : 46.h;
+    final double buttonFontSize = isLarge ? 15.sp : 12.5.sp;
     return SizedBox(
-      height: 54.h,
+      height: buttonHeight,
       child: isOutlined
           ? OutlinedButton.icon(
               onPressed: onPressed,
-              icon: Icon(Icons.arrow_back_rounded, size: 18.sp),
+              icon: Icon(Icons.arrow_back_rounded, size: 16.sp),
               label: Text(label),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppTheme.primaryColor,
@@ -116,7 +124,7 @@ class RegisterNavigation extends StatelessWidget {
                   borderRadius: BorderRadius.circular(15.r),
                 ),
                 textStyle: TextStyle(
-                  fontSize: 13.5.sp,
+                  fontSize: buttonFontSize,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -156,7 +164,7 @@ class RegisterNavigation extends StatelessWidget {
                         Text(
                           label,
                           style: TextStyle(
-                            fontSize: 14.sp,
+                            fontSize: buttonFontSize,
                             fontWeight: FontWeight.w900,
                             color: Colors.white,
                           ),
